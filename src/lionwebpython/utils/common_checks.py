@@ -1,5 +1,6 @@
 import re
 
+
 class CommonChecks:
     _ID_PATTERN = re.compile("^[a-zA-Z0-9_-]+$")
 
@@ -9,4 +10,3 @@ class CommonChecks:
             return False
         m = CommonChecks._ID_PATTERN.fullmatch(id)
         return m is not None
-

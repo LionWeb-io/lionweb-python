@@ -1,7 +1,8 @@
 from abc import ABC, abstractmethod
+from typing import Optional
+
 from lionwebpython.language.inamed import INamed
 from lionwebpython.language.namespace_provider import NamespaceProvider
-from typing import Optional
 
 
 class NamespacedEntity(INamed, ABC):
@@ -17,9 +18,13 @@ class NamespacedEntity(INamed, ABC):
         pass
 
     def qualified_name(self) -> str:
-        if self.get_container() is None:
-            raise ValueError("No container for " + self)
-        return self.get_container().namespace_qualifier() + "." + self.get_name()
+        container = self.get_container()
+        name = self.get_name()
+        if container is None:
+            raise ValueError("No container for " + str(self))
+        if name is None:
+            raise ValueError("No name for " + str(self))
+        return container.namespace_qualifier() + "." + name
 
     @abstractmethod
     def get_container(self) -> Optional[NamespaceProvider]:

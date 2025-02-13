@@ -13,3 +13,7 @@ jobs:
         python-version: 3.8
     - name: Test
       run: PYTHONPATH=src python -m unittest discover tests
+    - name: Linting
+      run: ruff check src/ tests/
+    - name: Checking types
+      run: mypy src/

@@ -1,5 +1,7 @@
 import unittest
+
 from lionwebpython.utils.common_checks import CommonChecks
+
 
 class TestIDsCheck(unittest.TestCase):
 
@@ -15,6 +17,7 @@ class TestIDsCheck(unittest.TestCase):
     def test_ids_with_accents_are_invalid(self):
         self.assertFalse(CommonChecks.is_valid_id("foò"))
         self.assertFalse(CommonChecks.is_valid_id("foó"))
+
 
 if __name__ == "__main__":
     unittest.main()
