@@ -12,4 +12,4 @@ jobs:
       with:
         python-version: 3.8
     - name: Test
-      run: make test_python
+      run: PYTHONPATH=src python -m unittest discover tests
