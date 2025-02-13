@@ -3,7 +3,8 @@ from enum import Enum
 
 class LionWebVersion(Enum):
     """A LionWeb Version. Note that the version is used to refer to the specifications but also to the
-       versions of LionCore and LionCore Builtins, as they should always be aligned."""
+    versions of LionCore and LionCore Builtins, as they should always be aligned."""
+
     V2023_1 = "2023.1"
     V2024_1 = "2024.1"
 

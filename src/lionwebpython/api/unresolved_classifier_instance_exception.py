@@ -6,4 +6,3 @@ class UnresolvedClassifierInstanceException(RuntimeError):
 
     def get_instance_id(self) -> str:
         return self._instance_id
-

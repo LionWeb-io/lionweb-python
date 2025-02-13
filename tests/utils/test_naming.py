@@ -1,6 +1,7 @@
 import unittest
-from lionwebpython.utils.naming import Naming
+
 from lionwebpython.utils.invalid_name import InvalidName
+from lionwebpython.utils.naming import Naming
 
 
 class TestNaming(unittest.TestCase):

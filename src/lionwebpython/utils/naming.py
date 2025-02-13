@@ -1,9 +1,12 @@
 import re
+
 from lionwebpython.utils.invalid_name import InvalidName
 
 
 class Naming:
-    QUALIFIED_NAME_PATTERN = re.compile(r"^[a-zA-Z][a-zA-Z0-9_]*(\.[a-zA-Z][a-zA-Z0-9_]*)*$")
+    QUALIFIED_NAME_PATTERN = re.compile(
+        r"^[a-zA-Z][a-zA-Z0-9_]*(\.[a-zA-Z][a-zA-Z0-9_]*)*$"
+    )
 
     @staticmethod
     def validate_qualified_name(qualified_name: str) -> None:
@@ -16,4 +19,3 @@ class Naming:
             raise ValueError("The name should not be null")
         if not re.fullmatch("[a-zA-Z][a-zA-Z0-9_]*", name) is not None:
             raise InvalidName("simple name", name)
-
