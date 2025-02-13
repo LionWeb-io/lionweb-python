@@ -3,10 +3,11 @@ from lionwebpython.utils.invalid_name import InvalidName
 
 
 class Naming:
+    QUALIFIED_NAME_PATTERN = re.compile(r"^[a-zA-Z][a-zA-Z0-9_]*(\.[a-zA-Z][a-zA-Z0-9_]*)*$")
 
     @staticmethod
     def validate_qualified_name(qualified_name: str) -> None:
-        if re.fullmatch("[a-zA-Z][a-zA-Z0-9_]*(\\.[a-zA-Z][a-zA-Z0-9_]*)*", qualified_name) is not None:
+        if Naming.QUALIFIED_NAME_PATTERN.fullmatch(qualified_name) is None:
             raise InvalidName("qualified name", qualified_name)
 
     @staticmethod
