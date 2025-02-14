@@ -95,13 +95,13 @@ class ClassifierInstanceUtils:
         if (
             language
             and language.get_name() == "LionCore_M3"
-            and entity.get_lion_web_version() == LionWebVersion.v2024_1
+            and entity.get_lion_web_version() == LionWebVersion.V2024_1
         ):
             return True
         elif (
             language
             and isinstance(language, LionCoreBuiltins)
-            and entity.get_lion_web_version() == LionWebVersion.v2024_1
+            and entity.get_lion_web_version() == LionWebVersion.V2024_1
         ):
             return True
         return False
