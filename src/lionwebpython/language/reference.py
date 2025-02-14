@@ -10,79 +10,39 @@ from lionwebpython.self.lioncore import LionCore
 class Reference(Link["Reference"]):
     @staticmethod
     def create_optional(
-        name: Optional[str] = None, type: Optional[Classifier] = None
+        lion_web_version: Optional[LionWebVersion] = LionWebVersion.current_version,
+        name: Optional[str] = None,
+        type: Optional[Classifier] = None,
+        id: Optional[str] = None,
     ) -> "Reference":
         reference = Reference(name=name)
         reference.set_optional(True)
         reference.set_multiple(False)
         reference.set_type(type)
-        return reference
-
-    @staticmethod
-    def create_optional_with_id(
-        lion_web_version: LionWebVersion,
-        name: Optional[str],
-        type: Optional[Classifier],
-        id: str,
-    ) -> "Reference":
-        if not lion_web_version:
-            raise ValueError("lionWebVersion should not be null")
-        if not id:
-            raise ValueError("id should not be null")
-        reference = Reference(lion_web_version=lion_web_version, name=name, id=id)
-        reference.set_optional(True)
-        reference.set_multiple(False)
-        reference.set_type(type)
+        reference.set_id(id)
         return reference
 
     @staticmethod
     def create_required(
-        name: Optional[str] = None, type: Optional[Classifier] = None
+        lion_web_version: LionWebVersion = LionWebVersion.current_version,
+        name: Optional[str] = None,
+        type: Optional[Classifier] = None,
+        id: Optional[str] = None,
     ) -> "Reference":
-        reference = Reference(name=name)
+        reference = Reference(lion_web_version=lion_web_version, name=name)
         reference.set_optional(False)
         reference.set_multiple(False)
         reference.set_type(type)
-        return reference
-
-    @staticmethod
-    def create_required_with_id(
-        lion_web_version: LionWebVersion,
-        name: Optional[str],
-        type: Optional[Classifier],
-        id: str,
-    ) -> "Reference":
-        if not lion_web_version:
-            raise ValueError("lionWebVersion should not be null")
-        if not id:
-            raise ValueError("id should not be null")
-        reference = Reference(lion_web_version=lion_web_version, name=name, id=id)
-        reference.set_optional(False)
-        reference.set_multiple(False)
-        reference.set_type(type)
+        reference.set_id(id)
         return reference
 
     @staticmethod
     def create_multiple(
-        name: Optional[str] = None, type: Optional[Classifier] = None
+        lion_web_version: LionWebVersion = LionWebVersion.current_version,
+        name: Optional[str] = None,
+        type: Optional[Classifier] = None,
+        id: Optional[str] = None,
     ) -> "Reference":
-        reference = Reference(name=name)
-        reference.set_optional(True)
-        reference.set_multiple(True)
-        reference.set_type(type)
-        return reference
-
-    @staticmethod
-    def create_multiple_with_id(
-        lion_web_version: LionWebVersion,
-        name: Optional[str],
-        type: Optional[Classifier],
-        id: str,
-    ) -> "Reference":
-        if not lion_web_version:
-            raise ValueError("lionWebVersion should not be null")
-        if not id:
-            raise ValueError("id should not be null")
         reference = Reference(lion_web_version=lion_web_version, name=name, id=id)
         reference.set_optional(True)
         reference.set_multiple(True)
