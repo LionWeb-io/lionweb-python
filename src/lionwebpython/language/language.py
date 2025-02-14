@@ -146,7 +146,7 @@ class Language(M3Node["Language"], NamespaceProvider, IKeyed["Language"]):
     def get_classifier(self) -> "Concept":
         from lionwebpython.self.lioncore import LionCore
 
-        return LionCore.get_language(self.get_lion_web_version())
+        return LionCore.get_language(self.get_lionweb_version())
 
     def __str__(self) -> str:
         return f"{super().__str__()}{{name={self.get_name()}}}"

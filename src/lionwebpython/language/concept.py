@@ -90,4 +90,4 @@ class Concept(Classifier["Concept"]):
     def get_classifier(self) -> "Concept":
         from lionwebpython.self.lioncore import LionCore
 
-        return LionCore.get_concept(self.get_lion_web_version())
+        return LionCore.get_concept(self.get_lionweb_version())

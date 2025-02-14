@@ -28,7 +28,7 @@ class LanguageEntity(M3Node[T], NamespacedEntity, IKeyed[T]):
         if language:
             if (
                 lion_web_version or LionWebVersion.current_version()
-            ) != language.get_lion_web_version():
+            ) != language.get_lionweb_version():
                 raise ValueError(
                     "The specified lionWebVersion is not the same as the LionWebVersion of the language"
                 )

@@ -85,4 +85,4 @@ class Containment(Link["Containment"]):
     def get_classifier(self) -> "Concept":
         from lionwebpython.self.lioncore import LionCore
 
-        return LionCore.get_containment(self.get_lion_web_version())
+        return LionCore.get_containment(self.get_lionweb_version())

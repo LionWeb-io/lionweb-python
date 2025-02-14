@@ -103,4 +103,4 @@ class Reference(Link["Reference"]):
     def get_classifier(self) -> "Concept":
         from lionwebpython.self.lioncore import LionCore
 
-        return LionCore.get_reference(self.get_lion_web_version())
+        return LionCore.get_reference(self.get_lionweb_version())

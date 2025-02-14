@@ -58,7 +58,7 @@ class EnumerationLiteral(M3Node, NamespacedEntity, IKeyed):
     def get_classifier(self) -> "Concept":
         from lionwebpython.self.lioncore import LionCore
 
-        return LionCore.get_enumeration_literal(self.get_lion_web_version())
+        return LionCore.get_enumeration_literal(self.get_lionweb_version())
 
     def get_key(self) -> str:
         return cast(str, self.get_property_value(property_name="key"))

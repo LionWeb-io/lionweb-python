@@ -33,8 +33,15 @@ class LionCoreBuiltins(Language):
         from lionwebpython.language.primitive_type import PrimitiveType
 
         string_type = PrimitiveType(lion_web_version, self, "String")
-        PrimitiveType(lion_web_version, self, "Boolean")
-        PrimitiveType(lion_web_version, self, "Integer")
+        boolean_type = PrimitiveType(lion_web_version, self, "Boolean")
+        integer_type = PrimitiveType(lion_web_version, self, "Integer")
+        self.add_element(string_type)
+        self.add_element(boolean_type)
+        self.add_element(integer_type)
+
+        if lion_web_version == LionWebVersion.V2023_1:
+            json_type = PrimitiveType(lion_web_version, self, "JSON")
+            self.add_element(json_type)
 
         from lionwebpython.lionweb_version import LionWebVersion
 

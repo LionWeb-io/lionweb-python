@@ -43,6 +43,20 @@ class LionCore:
         return cls._get_instance(lion_web_version).require_concept_by_name("Feature")
 
     @classmethod
+    def get_structured_data_type(
+        cls, lion_web_version: LionWebVersion = LionWebVersion.current_version()
+    ) -> Concept:
+        return cls._get_instance(lion_web_version).require_concept_by_name(
+            "StructuredDataType"
+        )
+
+    @classmethod
+    def get_field(
+        cls, lion_web_version: LionWebVersion = LionWebVersion.current_version()
+    ) -> Concept:
+        return cls._get_instance(lion_web_version).require_concept_by_name("Field")
+
+    @classmethod
     def get_annotation(
         cls, lion_web_version: LionWebVersion = LionWebVersion.current_version()
     ) -> Concept:

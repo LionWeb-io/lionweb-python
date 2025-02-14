@@ -20,4 +20,4 @@ class PrimitiveType(DataType):
             self.set_id(id)
 
     def get_classifier(self) -> Concept:
-        return LionCore.get_primitive_type(self.get_lion_web_version())
+        return LionCore.get_primitive_type(self.get_lionweb_version())

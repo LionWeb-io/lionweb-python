@@ -3,6 +3,8 @@ from typing import TYPE_CHECKING, Generic, List, Optional, TypeVar, cast
 
 from lionwebpython.language.ikeyed import IKeyed
 from lionwebpython.lionweb_version import LionWebVersion
+from lionwebpython.model.classifier_instance_utils import \
+    ClassifierInstanceUtils
 from lionwebpython.model.impl.abstract_classifier_instance import \
     AbstractClassifierInstance
 from lionwebpython.model.node import Node
@@ -81,12 +83,15 @@ class M3Node(Generic[T], Node, IKeyed[T], AbstractClassifierInstance, ABC):
         else:
             raise ValueError()
 
-    def get_children(self, containment: "Containment") -> List:
-        name = containment.get_name()
-        if name:
-            return self.containment_values.get(name, [])
+    def get_children(self, containment: Optional["Containment"] = None) -> List[Node]:
+        if containment:
+            name = containment.get_name()
+            if name:
+                return self.containment_values.get(name, [])
+            else:
+                raise ValueError()
         else:
-            raise ValueError()
+            return ClassifierInstanceUtils.get_children(self)
 
     def add_child(self, containment: "Containment", child: Node) -> None:
         name = containment.get_name()
@@ -172,5 +177,5 @@ class M3Node(Generic[T], Node, IKeyed[T], AbstractClassifierInstance, ABC):
     ) -> None:
         self.reference_values.setdefault(link_name, []).append(value)
 
-    def get_lion_web_version(self) -> LionWebVersion:
+    def get_lionweb_version(self) -> LionWebVersion:
         return self.lion_web_version

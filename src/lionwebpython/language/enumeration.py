@@ -34,4 +34,4 @@ class Enumeration(DataType, NamespaceProvider):
         raise NotImplementedError("Unsupported operation")
 
     def get_classifier(self) -> Concept:
-        return LionCore.get_enumeration(self.get_lion_web_version())
+        return LionCore.get_enumeration(self.get_lionweb_version())

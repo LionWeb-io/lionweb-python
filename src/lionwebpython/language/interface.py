@@ -58,7 +58,7 @@ class Interface(Classifier["Interface"]):
     def get_classifier(self) -> "Concept":
         from lionwebpython.self.lioncore import LionCore
 
-        return LionCore.get_interface(self.get_lion_web_version())
+        return LionCore.get_interface(self.get_lionweb_version())
 
     def direct_ancestors(self) -> List[Classifier]:
         return list(itertools.chain(self.get_extended_interfaces()))

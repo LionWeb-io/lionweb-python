@@ -18,7 +18,7 @@ class HasFeatureValues(ABC):
         pass
 
     @abstractmethod
-    def get_children(self, containment: "Containment") -> List:
+    def get_children(self, containment: Optional["Containment"] = None) -> List:
         pass
 
     @abstractmethod

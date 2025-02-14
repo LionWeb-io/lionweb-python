@@ -93,4 +93,4 @@ class Property(Feature["Property"]):
     def get_classifier(self) -> "Concept":
         from lionwebpython.self.lioncore import LionCore
 
-        return LionCore.get_property(self.get_lion_web_version())
+        return LionCore.get_property(self.get_lionweb_version())
