@@ -1,9 +1,18 @@
-from lionwebpython.model.classifier_instance import ClassifierInstance
+from abc import ABC, abstractmethod
+
+from lionwebpython.language import Annotation
+from lionwebpython.model import ClassifierInstance
 
 
-class AnnotationInstance(ClassifierInstance):
-    def get_annotation_definition(self):
-        raise ValueError("NOT YET TRANSLATED")
+class AnnotationInstance(ClassifierInstance, ABC):
+    """
+    While an AnnotationInstance implements ClassifierInstance, it is forbidden to hold any children,
+    as the Annotation should not have any containment link.
+    """
 
-    def set_annotated(self, annotated):
-        raise ValueError("NOT YET TRANSLATED")
+    @abstractmethod
+    def get_annotation_definition(self) -> Annotation:
+        pass
+
+    def get_classifier(self) -> Annotation:
+        return self.get_annotation_definition()

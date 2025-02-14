@@ -1,9 +1,11 @@
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional, Union, cast
 
 from lionwebpython.language.containment import Containment
 from lionwebpython.language.lioncore_builtins import LionCoreBuiltins
 from lionwebpython.language.reference import Reference
 from lionwebpython.model.classifier_instance import ClassifierInstance
+from lionwebpython.model.classifier_instance_utils import \
+    ClassifierInstanceUtils
 from lionwebpython.model.has_settable_parent import HasSettableParent
 from lionwebpython.model.impl.abstract_classifier_instance import \
     AbstractClassifierInstance
@@ -70,23 +72,41 @@ class DynamicClassifierInstance(AbstractClassifierInstance, ClassifierInstance):
 
     # Public methods for containments
 
-    def get_children(self, containment: Optional[Containment] = None) -> List[Node]:
+    def get_children(
+        self, containment: Union[Containment, str, None] = None
+    ) -> List[Node]:
         if containment is None:
-            raise ValueError("Containment should not be null")
-        if containment.get_key() is None:
+            return ClassifierInstanceUtils.get_children(self)
+        my_containment: Union[Containment, str]
+        if isinstance(containment, str):
+            tmp = self.get_classifier().get_containment_by_name(containment)
+            if tmp is None:
+                raise ValueError()
+            my_containment = tmp
+        else:
+            my_containment = containment
+        if my_containment.get_key() is None:
             raise ValueError("Containment.key should not be null")
-        if containment not in self.get_classifier().all_containments():
+        if my_containment not in self.get_classifier().all_containments():
             raise ValueError("Containment not belonging to this concept")
 
-        return self.containment_values.get(containment.get_key(), [])
+        return self.containment_values.get(my_containment.get_key(), [])
 
-    def add_child(self, containment: Containment, child: Node):
+    def add_child(self, containment: Union[Containment, str], child: Node):
         if containment is None or child is None:
             raise ValueError("Containment and child should not be null")
-        if containment.is_multiple():
-            self._add_containment(containment, child)
+        my_containment: Optional[Containment]
+        if isinstance(containment, str):
+            my_containment = cast(
+                Containment,
+                self.get_classifier().get_containment_by_name(cast(str, containment)),
+            )
         else:
-            self._set_containment_single_value(containment, child)
+            my_containment = cast(Containment, containment)
+        if my_containment.is_multiple():
+            self._add_containment(my_containment, child)
+        else:
+            self._set_containment_single_value(my_containment, child)
 
     def remove_child(self, **kwargs) -> None:
         node = kwargs["child"]
