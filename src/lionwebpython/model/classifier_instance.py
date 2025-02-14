@@ -30,7 +30,7 @@ class ClassifierInstance(HasFeatureValues, ABC):
         pass
 
     @abstractmethod
-    def get_parent(self) -> "ClassifierInstance":
+    def get_parent(self) -> Optional["ClassifierInstance"]:
         pass
 
     @staticmethod

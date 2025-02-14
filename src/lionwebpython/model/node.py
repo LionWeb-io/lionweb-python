@@ -28,7 +28,7 @@ class Node(ClassifierInstance, ABC):
         raise ValueError("NOT TRANSLATED YET")
 
     @abstractmethod
-    def get_parent(self) -> "Node":
+    def get_parent(self) -> Optional["Node"]:
         pass
 
     @abstractmethod

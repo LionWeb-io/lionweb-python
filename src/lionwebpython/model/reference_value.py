@@ -1,2 +1,3 @@
 class ReferenceValue:
-    pass
+    def get_referred(self):
+        raise ValueError("NOT YET TRANSLATED")
