@@ -20,7 +20,7 @@ class LionCore:
     def get_language_entity(
         cls, lion_web_version: LionWebVersion = LionWebVersion.current_version()
     ) -> Concept:
-        return cls._get_instance(lion_web_version).require_concept_by_name(
+        return cls.get_instance(lion_web_version).require_concept_by_name(
             "LanguageEntity"
         )
 
@@ -28,25 +28,25 @@ class LionCore:
     def get_link(
         cls, lion_web_version: LionWebVersion = LionWebVersion.current_version()
     ) -> Concept:
-        return cls._get_instance(lion_web_version).require_concept_by_name("Link")
+        return cls.get_instance(lion_web_version).require_concept_by_name("Link")
 
     @classmethod
     def get_classifier(
         cls, lion_web_version: LionWebVersion = LionWebVersion.current_version()
     ) -> Concept:
-        return cls._get_instance(lion_web_version).require_concept_by_name("Classifier")
+        return cls.get_instance(lion_web_version).require_concept_by_name("Classifier")
 
     @classmethod
     def get_feature(
         cls, lion_web_version: LionWebVersion = LionWebVersion.current_version()
     ) -> Concept:
-        return cls._get_instance(lion_web_version).require_concept_by_name("Feature")
+        return cls.get_instance(lion_web_version).require_concept_by_name("Feature")
 
     @classmethod
     def get_structured_data_type(
         cls, lion_web_version: LionWebVersion = LionWebVersion.current_version()
     ) -> Concept:
-        return cls._get_instance(lion_web_version).require_concept_by_name(
+        return cls.get_instance(lion_web_version).require_concept_by_name(
             "StructuredDataType"
         )
 
@@ -54,71 +54,67 @@ class LionCore:
     def get_field(
         cls, lion_web_version: LionWebVersion = LionWebVersion.current_version()
     ) -> Concept:
-        return cls._get_instance(lion_web_version).require_concept_by_name("Field")
+        return cls.get_instance(lion_web_version).require_concept_by_name("Field")
 
     @classmethod
     def get_annotation(
         cls, lion_web_version: LionWebVersion = LionWebVersion.current_version()
     ) -> Concept:
-        return cls._get_instance(lion_web_version).require_concept_by_name("Annotation")
+        return cls.get_instance(lion_web_version).require_concept_by_name("Annotation")
 
     @classmethod
     def get_concept(
         cls, lion_web_version: LionWebVersion = LionWebVersion.current_version()
     ) -> Concept:
-        return cls._get_instance(lion_web_version).require_concept_by_name("Concept")
+        return cls.get_instance(lion_web_version).require_concept_by_name("Concept")
 
     @classmethod
     def get_interface(
         cls, lion_web_version: LionWebVersion = LionWebVersion.current_version()
     ) -> Concept:
-        return cls._get_instance(lion_web_version).require_concept_by_name("Interface")
+        return cls.get_instance(lion_web_version).require_concept_by_name("Interface")
 
     @classmethod
     def get_containment(
         cls, lion_web_version: LionWebVersion = LionWebVersion.current_version()
     ) -> Concept:
-        return cls._get_instance(lion_web_version).require_concept_by_name(
-            "Containment"
-        )
+        return cls.get_instance(lion_web_version).require_concept_by_name("Containment")
 
     @classmethod
     def get_data_type(
         cls, lion_web_version: LionWebVersion = LionWebVersion.current_version()
     ) -> Concept:
-        return cls._get_instance(lion_web_version).require_concept_by_name("DataType")
+        return cls.get_instance(lion_web_version).require_concept_by_name("DataType")
 
     @classmethod
     def get_enumeration(
         cls, lion_web_version: LionWebVersion = LionWebVersion.current_version()
     ) -> Concept:
-        return cls._get_instance(lion_web_version).require_concept_by_name(
-            "Enumeration"
-        )
+        return cls.get_instance(lion_web_version).require_concept_by_name("Enumeration")
 
     @classmethod
     def get_language(
         cls, lion_web_version: LionWebVersion = LionWebVersion.current_version()
     ) -> Concept:
-        return cls._get_instance(lion_web_version).require_concept_by_name("Language")
+        return cls.get_instance(lion_web_version).require_concept_by_name("Language")
 
     @classmethod
     def get_reference(
         cls, lion_web_version: LionWebVersion = LionWebVersion.current_version()
     ) -> Concept:
-        return cls._get_instance(lion_web_version).require_concept_by_name("Reference")
+        return cls.get_instance(lion_web_version).require_concept_by_name("Reference")
 
     @classmethod
     def get_property(
         cls, lion_web_version: LionWebVersion = LionWebVersion.current_version()
     ) -> Concept:
-        return cls._get_instance(lion_web_version).require_concept_by_name("Property")
+        return cls.get_instance(lion_web_version).require_concept_by_name("Property")
 
     @classmethod
     def get_primitive_type(
         cls, lion_web_version: LionWebVersion = LionWebVersion.current_version()
     ):
-        return cls._get_instance(lion_web_version).require_concept_by_name(
+        return cls.get_instance(lion_web_version).require_concept_by_name(
             "PrimitiveType"
         )
 
@@ -126,12 +122,12 @@ class LionCore:
     def get_enumeration_literal(
         cls, lion_web_version: LionWebVersion = LionWebVersion.current_version()
     ):
-        return cls._get_instance(lion_web_version).require_concept_by_name(
+        return cls.get_instance(lion_web_version).require_concept_by_name(
             "EnumerationLiteral"
         )
 
     @classmethod
-    def _get_instance(
+    def get_instance(
         cls, lion_web_version: LionWebVersion = LionWebVersion.current_version()
     ) -> Language:
 
@@ -332,6 +328,35 @@ class LionCore:
 
             concepts["LanguageEntity"].set_abstract(True)
             concepts["LanguageEntity"].add_implemented_interface(interfaces["IKeyed"])
+
+            if lion_web_version != LionWebVersion.V2023_1:
+                concepts["StructuredDataType"] = Concept(
+                    lion_web_version=lion_web_version, name="StructuredDataType"
+                )
+                instance.add_element(concepts["StructuredDataType"])
+                concepts["Field"] = Concept(
+                    lion_web_version=lion_web_version, name="Field"
+                )
+                instance.add_element(concepts["Field"])
+
+                concepts["StructuredDataType"].add_feature(
+                    Containment.create_multiple(
+                        lion_web_version=lion_web_version,
+                        name="fields",
+                        type=concepts["Field"],
+                        id="-id-StructuredDataType-fields" + version_id_suffix,
+                    ).set_optional(False)
+                )
+
+                concepts["Field"].add_implemented_interface(interfaces["IKeyed"])
+                concepts["Field"].add_feature(
+                    Reference.create_required(
+                        lion_web_version=lion_web_version,
+                        name="type",
+                        type=concepts["DataType"],
+                        id="-id-Field-type" + version_id_suffix,
+                    )
+                )
 
             cls._check_ids(instance, version_id_suffix)
             cls._instances[lion_web_version] = instance
