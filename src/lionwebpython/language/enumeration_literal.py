@@ -1,21 +1,25 @@
-from typing import Optional, cast
+from typing import TYPE_CHECKING, Optional, cast
 
-from lionwebpython.language.concept import Concept
-from lionwebpython.language.enumeration import Enumeration
 from lionwebpython.language.ikeyed import IKeyed
 from lionwebpython.language.namespaced_entity import NamespacedEntity
-from lionwebpython.lionweb_version import LionWebVersion
 from lionwebpython.model.impl.m3node import M3Node
-from lionwebpython.self.lioncore import LionCore
 
 
 class EnumerationLiteral(M3Node, NamespacedEntity, IKeyed):
+    if TYPE_CHECKING:
+        from lionwebpython.language.concept import Concept
+        from lionwebpython.language.enumeration import Enumeration
+        from lionwebpython.lionweb_version import LionWebVersion
+        from lionwebpython.self.lioncore import LionCore
+
     def __init__(
         self,
         lion_web_version: Optional["LionWebVersion"] = None,
         enumeration: Optional["Enumeration"] = None,
         name: Optional[str] = None,
     ):
+        from lionwebpython.lionweb_version import LionWebVersion
+
         super().__init__(lion_web_version or LionWebVersion.current_version())
 
         if enumeration is not None:
@@ -34,6 +38,8 @@ class EnumerationLiteral(M3Node, NamespacedEntity, IKeyed):
 
     def get_enumeration(self) -> Optional["Enumeration"]:
         parent = self.get_parent()
+        from lionwebpython.language.enumeration import Enumeration
+
         if parent is None:
             return None
         elif isinstance(parent, Enumeration):
@@ -49,7 +55,9 @@ class EnumerationLiteral(M3Node, NamespacedEntity, IKeyed):
     def get_container(self) -> Optional["Enumeration"]:
         return self.get_enumeration()
 
-    def get_classifier(self) -> Concept:
+    def get_classifier(self) -> "Concept":
+        from lionwebpython.self.lioncore import LionCore
+
         return LionCore.get_enumeration_literal(self.get_lion_web_version())
 
     def get_key(self) -> str:
