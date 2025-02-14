@@ -102,7 +102,7 @@ class LionCore:
             concepts["Concept"].set_extended_concept(concepts["LanguageEntity"])
             concepts["Concept"].add_feature(
                 Property.create_required(
-                    lion_web_version,
+                    lion_web_version=lion_web_version,
                     name="abstract",
                     type=LionCoreBuiltins.get_boolean(lion_web_version),
                     id=f"-id-Concept-abstract{version_id_suffix}",
@@ -110,7 +110,7 @@ class LionCore:
             )
             concepts["Concept"].add_feature(
                 Property.create_required(
-                    lion_web_version,
+                    lion_web_version=lion_web_version,
                     name="partition",
                     type=LionCoreBuiltins.get_boolean(lion_web_version),
                     id=f"-id-Concept-partition{version_id_suffix}",
@@ -143,7 +143,9 @@ class LionCore:
             concepts["Enumeration"].set_extended_concept(concepts["DataType"])
             concepts["Enumeration"].add_feature(
                 Containment.create_multiple(
-                    lion_web_version, "literals", concepts["LanguageEntity"]
+                    lion_web_version=lion_web_version,
+                    name="literals",
+                    type=concepts["LanguageEntity"],
                 )
             )
 
