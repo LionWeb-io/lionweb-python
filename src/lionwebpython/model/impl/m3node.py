@@ -23,8 +23,12 @@ class M3Node(Generic[T], AbstractClassifierInstance, Node, IKeyed[T]):
         self.containment_values: dict[str, List[Node]] = {}
         self.reference_values: dict[str, List[ReferenceValue]] = {}
 
-    def set_id(self, id: str) -> "M3Node":
+    def set_id(self, id: Optional[str]) -> "M3Node":
         self.id = id
+        return self
+
+    def set_name(self, name: Optional[str]) -> "M3Node":
+        self.set_property_value(property_name="name", value=name)
         return self
 
     def set_parent(self, parent: Optional[ClassifierInstance]) -> "M3Node":
