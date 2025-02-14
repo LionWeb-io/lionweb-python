@@ -20,7 +20,7 @@ class LanguageEntity(M3Node[T], NamespacedEntity, IKeyed[T]):
         id: Optional[str] = None,
     ):
         if lion_web_version is None:
-            lion_web_version = LionWebVersion.current_version
+            lion_web_version = LionWebVersion.current_version()
 
         super().__init__(lion_web_version)
         self.set_name(name)
@@ -46,10 +46,12 @@ class LanguageEntity(M3Node[T], NamespacedEntity, IKeyed[T]):
         raise ValueError("The parent of this LanguageEntity is not a Language")
 
     def get_name(self) -> Optional[str]:
-        return cast(Optional[str], self.get_property_value(name="name", type=str))
+        return cast(
+            Optional[str], self.get_property_value(property_name="name", type=str)
+        )
 
     def set_name(self, name: Optional[str]) -> T:
-        self.set_property_value(name="name", value=name)
+        self.set_property_value(property_name="name", value=name)
         return cast(T, self)
 
     def get_container(self) -> Optional[NamespaceProvider]:
@@ -61,7 +63,7 @@ class LanguageEntity(M3Node[T], NamespacedEntity, IKeyed[T]):
         raise ValueError("The parent is not a NamespaceProvider")
 
     def get_key(self) -> str:
-        return cast(str, self.get_property_value(name="key", type=str))
+        return cast(str, self.get_property_value(property_name="key", type=str))
 
     def set_key(self, key: str) -> T:
         self.set_property_value(property_name="key", value=key)

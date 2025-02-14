@@ -4,7 +4,7 @@ from typing import Generic, TypeVar
 T = TypeVar("T", bound="IKeyed")
 
 
-class IKeyed(ABC, Generic[T]):
+class IKeyed(Generic[T], ABC):
     @abstractmethod
     def get_key(self) -> str:
         pass

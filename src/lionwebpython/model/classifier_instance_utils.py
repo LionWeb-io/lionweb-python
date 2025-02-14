@@ -3,12 +3,13 @@ from typing import List, Optional
 from lionwebpython.language.language_entity import LanguageEntity
 from lionwebpython.language.lioncore_builtins import LionCoreBuiltins
 from lionwebpython.lionweb_version import LionWebVersion
-from lionwebpython.model.classifier_instance import ClassifierInstance
 from lionwebpython.model.node import Node
-from lionwebpython.model.reference_value import ReferenceValue
 
 
 class ClassifierInstanceUtils:
+    from lionwebpython.model.classifier_instance import ClassifierInstance
+    from lionwebpython.model.reference_value import ReferenceValue
+
     @staticmethod
     def get_property_value_by_name(
         instance: ClassifierInstance, property_name: str
@@ -64,11 +65,15 @@ class ClassifierInstanceUtils:
     @staticmethod
     def reference_to(entity: LanguageEntity) -> ReferenceValue:
         language = entity.get_language()
+        from lionwebpython.model.reference_value import ReferenceValue
+
         if (
             language
             and language.get_name() == "LionCore_M3"
             and entity.get_lion_web_version() == LionWebVersion.V2024_1
         ):
+            from lionwebpython.model.reference_value import ReferenceValue
+
             return ReferenceValue(
                 entity, f"LIONCORE_AUTORESOLVE_PREFIX{entity.get_name()}"
             )

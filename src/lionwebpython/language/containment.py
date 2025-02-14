@@ -1,17 +1,18 @@
-from typing import Optional
+from typing import TYPE_CHECKING, Optional
 
-from lionwebpython.language.classifier import Classifier
-from lionwebpython.language.concept import Concept
 from lionwebpython.language.link import Link
-from lionwebpython.lionweb_version import LionWebVersion
-from lionwebpython.self.lioncore import LionCore
 
 
 class Containment(Link["Containment"]):
+    if TYPE_CHECKING:
+        from lionwebpython.language.classifier import Classifier
+        from lionwebpython.language.concept import Concept
+        from lionwebpython.lionweb_version import LionWebVersion
+
     @staticmethod
     def create_optional(
         name: Optional[str] = None,
-        type: Optional[Classifier] = None,
+        type: Optional["Classifier"] = None,
         id: Optional[str] = None,
         key: Optional[str] = None,
     ) -> "Containment":
@@ -27,7 +28,7 @@ class Containment(Link["Containment"]):
 
     @staticmethod
     def create_required(
-        name: Optional[str] = None, type: Optional[Classifier] = None
+        name: Optional[str] = None, type: Optional["Classifier"] = None
     ) -> "Containment":
         containment = Containment(name=name)
         containment.set_optional(False)
@@ -37,9 +38,9 @@ class Containment(Link["Containment"]):
 
     @staticmethod
     def create_multiple(
-        lion_web_version: Optional[LionWebVersion] = None,
+        lion_web_version: Optional["LionWebVersion"] = None,
         name: Optional[str] = None,
-        type: Optional[Classifier] = None,
+        type: Optional["Classifier"] = None,
         id: Optional[str] = None,
     ) -> "Containment":
         if lion_web_version is None:
@@ -55,7 +56,7 @@ class Containment(Link["Containment"]):
 
     @staticmethod
     def create_multiple_and_required(
-        name: Optional[str] = None, type: Optional[Classifier] = None
+        name: Optional[str] = None, type: Optional["Classifier"] = None
     ) -> "Containment":
         containment = Containment(name=name)
         containment.set_optional(False)
@@ -65,10 +66,10 @@ class Containment(Link["Containment"]):
 
     def __init__(
         self,
-        lion_web_version: Optional[LionWebVersion] = None,
+        lion_web_version: Optional["LionWebVersion"] = None,
         name: Optional[str] = None,
         id: Optional[str] = None,
-        container: Optional[Classifier] = None,
+        container: Optional["Classifier"] = None,
     ):
         if lion_web_version is not None and name is not None and id is not None:
             super().__init__(lion_web_version, name, id)
@@ -81,5 +82,7 @@ class Containment(Link["Containment"]):
         else:
             super().__init__()
 
-    def get_classifier(self) -> Concept:
+    def get_classifier(self) -> "Concept":
+        from lionwebpython.self.lioncore import LionCore
+
         return LionCore.get_containment(self.get_lion_web_version())

@@ -12,14 +12,14 @@ from lionwebpython.self.lioncore import LionCore
 class Enumeration(DataType, NamespaceProvider):
     def __init__(
         self,
-        lion_web_version: LionWebVersion = LionWebVersion.current_version,
+        lion_web_version: Optional["LionWebVersion"] = None,
         language: Optional[Language] = None,
         name: Optional[str] = None,
     ):
         if lion_web_version is not None:
-            super().__init__(lion_web_version)
+            super().__init__(lion_web_version=lion_web_version)
         else:
-            super().__init__(language, name)
+            super().__init__(language=language, name=name)
 
     def get_literals(self) -> List[EnumerationLiteral]:
         return self.get_containment_multiple_value("literals")

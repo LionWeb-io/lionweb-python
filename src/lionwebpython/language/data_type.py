@@ -15,7 +15,7 @@ class DataType(LanguageEntity[M3Node]):
         id: Optional[str] = None,
     ):
         if lion_web_version is None:
-            lion_web_version = LionWebVersion.current_version
+            lion_web_version = LionWebVersion.current_version()
 
         super().__init__(lion_web_version=lion_web_version)
         self.set_id(id)

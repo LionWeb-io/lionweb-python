@@ -12,11 +12,11 @@ from lionwebpython.self.lioncore import LionCore
 class EnumerationLiteral(M3Node, NamespacedEntity, IKeyed):
     def __init__(
         self,
-        lion_web_version: LionWebVersion = LionWebVersion.current_version,
+        lion_web_version: Optional["LionWebVersion"] = None,
         enumeration: Optional["Enumeration"] = None,
         name: Optional[str] = None,
     ):
-        super().__init__(lion_web_version)
+        super().__init__(lion_web_version or LionWebVersion.current_version())
 
         if enumeration is not None:
             enumeration.add_literal(self)

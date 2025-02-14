@@ -1,26 +1,30 @@
-from typing import Generic, List, Optional, TypeVar, cast
+from abc import ABC
+from typing import TYPE_CHECKING, Generic, List, Optional, TypeVar, cast
 
-from lionwebpython.language.containment import Containment
 from lionwebpython.language.ikeyed import IKeyed
-from lionwebpython.language.reference import Reference
 from lionwebpython.lionweb_version import LionWebVersion
-from lionwebpython.model.classifier_instance import ClassifierInstance
 from lionwebpython.model.impl.abstract_classifier_instance import \
     AbstractClassifierInstance
 from lionwebpython.model.node import Node
-from lionwebpython.model.reference_value import ReferenceValue
 
 T = TypeVar("T", bound="M3Node")
 
 
-class M3Node(Generic[T], AbstractClassifierInstance, Node, IKeyed[T]):
+class M3Node(Generic[T], Node, IKeyed[T], AbstractClassifierInstance, ABC):
+    if TYPE_CHECKING:
+        from lionwebpython.language.containment import Containment
+        from lionwebpython.language.reference import Reference
+        from lionwebpython.model.classifier_instance import ClassifierInstance
+        from lionwebpython.model.reference_value import ReferenceValue
 
     def __init__(self, lion_web_version: Optional[LionWebVersion] = None):
-        self.lion_web_version = lion_web_version or LionWebVersion.current_version
+        self.lion_web_version = lion_web_version or LionWebVersion.current_version()
         self.id: Optional[str] = None
         self.parent: Optional[Node] = None
         self.property_values: dict[str, Optional[object]] = {}
         self.containment_values: dict[str, List[Node]] = {}
+        from lionwebpython.model.reference_value import ReferenceValue
+
         self.reference_values: dict[str, List[ReferenceValue]] = {}
 
     def set_id(self, id: Optional[str]) -> T:
@@ -31,8 +35,8 @@ class M3Node(Generic[T], AbstractClassifierInstance, Node, IKeyed[T]):
         self.set_property_value(property_name="name", value=name)
         return self
 
-    def set_parent(self, parent: Optional[ClassifierInstance]) -> "M3Node":
-        if parent and parent is not Node:
+    def set_parent(self, parent: Optional["ClassifierInstance"]) -> "M3Node":
+        if parent and not isinstance(parent, Node):
             raise ValueError("Not supported")
         self.parent = cast(Optional[Node], parent)
         return self
@@ -44,32 +48,32 @@ class M3Node(Generic[T], AbstractClassifierInstance, Node, IKeyed[T]):
     def get_parent(self) -> Optional[Node]:
         return self.parent
 
-    def get_containment_feature(self) -> Containment:
+    def get_containment_feature(self) -> "Containment":
         raise NotImplementedError()
 
     def get_property_value(self, **kwargs) -> Optional[object]:
         property_name = kwargs.get("property_name")
-        if property_name and property_name is str:
+        if property_name and isinstance(property_name, str):
             return self.property_values.get(property_name)
         else:
             raise ValueError()
 
     def set_property_value(self, **kwargs) -> None:
         property_name = kwargs.get("property_name")
-        if property_name and property_name is str:
+        if property_name and isinstance(property_name, str):
             value = kwargs.get("value")
             self.property_values[property_name] = value
         else:
             raise ValueError()
 
-    def get_children(self, containment: Containment) -> List:
+    def get_children(self, containment: "Containment") -> List:
         name = containment.get_name()
         if name:
             return self.containment_values.get(name, [])
         else:
             raise ValueError()
 
-    def add_child(self, containment: Containment, child: Node) -> None:
+    def add_child(self, containment: "Containment", child: Node) -> None:
         name = containment.get_name()
         if name is None:
             raise ValueError()
@@ -81,21 +85,21 @@ class M3Node(Generic[T], AbstractClassifierInstance, Node, IKeyed[T]):
     def remove_child(self, **kwargs) -> None:
         raise NotImplementedError()
 
-    def get_reference_values(self, reference: Reference) -> List:
+    def get_reference_values(self, reference: "Reference") -> List:
         name = reference.get_name()
         if name is None:
             raise ValueError()
         return self.reference_values.get(name, [])
 
     def add_reference_value(
-        self, reference: Reference, reference_value: ReferenceValue
+        self, reference: "Reference", reference_value: "ReferenceValue"
     ) -> None:
         name = reference.get_name()
         if name is None:
             raise ValueError()
         self.reference_values.setdefault(name, []).append(reference_value)
 
-    def set_reference_values(self, reference: Reference, values: List) -> None:
+    def set_reference_values(self, reference: "Reference", values: List) -> None:
         name = reference.get_name()
         if name is None:
             raise ValueError()
@@ -120,7 +124,7 @@ class M3Node(Generic[T], AbstractClassifierInstance, Node, IKeyed[T]):
         if not values:
             return None
         if len(values) == 1:
-            return values[0]
+            return values[0].get_referred()
         raise ValueError("Multiple values found")
 
     def get_containment_multiple_value(self, link_name: str) -> List:
@@ -133,7 +137,7 @@ class M3Node(Generic[T], AbstractClassifierInstance, Node, IKeyed[T]):
         self.containment_values[link_name] = [value]
 
     def set_reference_single_value(
-        self, link_name: str, value: Optional[ReferenceValue]
+        self, link_name: str, value: Optional["ReferenceValue"]
     ) -> None:
         if value is None:
             self.reference_values[link_name] = []
@@ -147,7 +151,7 @@ class M3Node(Generic[T], AbstractClassifierInstance, Node, IKeyed[T]):
         return False
 
     def add_reference_multiple_value(
-        self, link_name: str, value: ReferenceValue
+        self, link_name: str, value: "ReferenceValue"
     ) -> None:
         self.reference_values.setdefault(link_name, []).append(value)
 

@@ -1,16 +1,14 @@
 from typing import List, Optional, cast
 
 from lionwebpython.language.classifier import Classifier
-from lionwebpython.language.feature import Feature
-from lionwebpython.language.interface import Interface
-from lionwebpython.language.language import Language
-from lionwebpython.lionweb_version import LionWebVersion
-from lionwebpython.model.classifier_instance_utils import \
-    ClassifierInstanceUtils
-from lionwebpython.self.lioncore import LionCore
 
 
 class Concept(Classifier["Concept"]):
+    from lionwebpython.language.feature import Feature
+    from lionwebpython.language.interface import Interface
+    from lionwebpython.language.language import Language
+    from lionwebpython.lionweb_version import LionWebVersion
+
     def __init__(
         self,
         lion_web_version: Optional[LionWebVersion] = None,
@@ -58,9 +56,14 @@ class Concept(Classifier["Concept"]):
         return cast(Optional["Concept"], self.get_reference_single_value("extends"))
 
     def get_implemented(self) -> List[Interface]:
+        from lionwebpython.language.interface import Interface
+
         return cast(List[Interface], self.get_reference_multiple_value("implements"))
 
     def add_implemented_interface(self, iface: Interface):
+        from lionwebpython.model.classifier_instance_utils import \
+            ClassifierInstanceUtils
+
         self.add_reference_multiple_value(
             "implements", ClassifierInstanceUtils.reference_to(iface)
         )
@@ -69,15 +72,22 @@ class Concept(Classifier["Concept"]):
         if extended is None:
             self.set_reference_single_value("extends", None)
         else:
+            from lionwebpython.model.classifier_instance_utils import \
+                ClassifierInstanceUtils
+
             self.set_reference_single_value(
                 "extends", ClassifierInstanceUtils.reference_to(extended)
             )
 
     def inherited_features(self) -> List[Feature]:
+        from lionwebpython.language.feature import Feature
+
         result: List[Feature] = []
         for ancestor in self.all_ancestors():
             self.combine_features(result, ancestor.get_features())
         return result
 
     def get_classifier(self) -> "Concept":
+        from lionwebpython.self.lioncore import LionCore
+
         return LionCore.get_concept(self.get_lion_web_version())

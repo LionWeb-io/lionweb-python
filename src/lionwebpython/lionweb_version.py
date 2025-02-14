@@ -8,7 +8,9 @@ class LionWebVersion(Enum):
     V2023_1 = "2023.1"
     V2024_1 = "2024.1"
 
-    current_version = V2024_1
+    @classmethod
+    def current_version(cls) -> "LionWebVersion":
+        return cls.V2024_1
 
     @classmethod
     def from_value(cls, version_string: str) -> "LionWebVersion":

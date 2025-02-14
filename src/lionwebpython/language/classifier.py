@@ -1,14 +1,8 @@
 from abc import abstractmethod
 from typing import List, Optional, Set, TypeVar
 
-from lionwebpython.language.containment import Containment
-from lionwebpython.language.feature import Feature
-from lionwebpython.language.language import Language
 from lionwebpython.language.language_entity import LanguageEntity
-from lionwebpython.language.link import Link
 from lionwebpython.language.namespace_provider import NamespaceProvider
-from lionwebpython.language.property import Property
-from lionwebpython.language.reference import Reference
 from lionwebpython.lionweb_version import LionWebVersion
 from lionwebpython.model.impl.m3node import M3Node
 from lionwebpython.serialization.data.metapointer import MetaPointer
@@ -17,6 +11,13 @@ T = TypeVar("T", bound=M3Node)
 
 
 class Classifier(LanguageEntity[T], NamespaceProvider):
+    from lionwebpython.language.containment import Containment
+    from lionwebpython.language.feature import Feature
+    from lionwebpython.language.language import Language
+    from lionwebpython.language.link import Link
+    from lionwebpython.language.property import Property
+    from lionwebpython.language.reference import Reference
+
     def __init__(
         self,
         lion_web_version: Optional[LionWebVersion] = None,
@@ -53,15 +54,23 @@ class Classifier(LanguageEntity[T], NamespaceProvider):
         pass
 
     def all_properties(self) -> List[Property]:
+        from lionwebpython.language.property import Property
+
         return [f for f in self.all_features() if isinstance(f, Property)]
 
     def all_containments(self) -> List[Containment]:
+        from lionwebpython.language.containment import Containment
+
         return [f for f in self.all_features() if isinstance(f, Containment)]
 
     def all_references(self) -> List[Reference]:
+        from lionwebpython.language.reference import Reference
+
         return [f for f in self.all_features() if isinstance(f, Reference)]
 
     def all_links(self) -> List[Link]:
+        from lionwebpython.language.link import Link
+
         return [f for f in self.all_features() if isinstance(f, Link)]
 
     def get_features(self) -> List[Feature]:
@@ -84,3 +93,48 @@ class Classifier(LanguageEntity[T], NamespaceProvider):
             if meta_pointer not in existing_metapointers:
                 existing_metapointers.add(meta_pointer)
                 features_a.append(f)
+
+    def get_property_by_name(self, property_name: str) -> Optional["Property"]:
+        if property_name is None:
+            raise ValueError("property_name should not be null")
+
+        from lionwebpython.language.property import Property
+
+        return next(
+            (
+                p
+                for p in self.all_features()
+                if isinstance(p, Property) and p.get_name() == property_name
+            ),
+            None,
+        )
+
+    def get_reference_by_name(self, reference_name: str) -> Optional["Reference"]:
+        if reference_name is None:
+            raise ValueError("reference_name should not be null")
+
+        from lionwebpython.language.reference import Reference
+
+        return next(
+            (
+                p
+                for p in self.all_features()
+                if isinstance(p, Reference) and p.get_name() == reference_name
+            ),
+            None,
+        )
+
+    def get_containment_by_name(self, containment_name: str) -> Optional["Containment"]:
+        if containment_name is None:
+            raise ValueError("containment_name should not be null")
+
+        from lionwebpython.language.containment import Containment
+
+        return next(
+            (
+                p
+                for p in self.all_features()
+                if isinstance(p, Containment) and p.get_name() == containment_name
+            ),
+            None,
+        )

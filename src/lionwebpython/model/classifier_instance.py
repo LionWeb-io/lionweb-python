@@ -1,26 +1,27 @@
 from abc import ABC, abstractmethod
-from typing import Generic, List, Optional, TypeVar
+from typing import TYPE_CHECKING, Generic, List, Optional, TypeVar
 
-from lionwebpython.language.annotation import Annotation
-from lionwebpython.language.classifier import Classifier
-from lionwebpython.model.annotation_instance import AnnotationInstance
 from lionwebpython.model.has_feature_values import HasFeatureValues
 
-T = TypeVar("T", bound=Classifier)
+T = TypeVar("T")
 
 
-class ClassifierInstance(HasFeatureValues, Generic[T], ABC):
+class ClassifierInstance(Generic[T], HasFeatureValues, ABC):
+    if TYPE_CHECKING:
+        from lionwebpython.language.annotation import Annotation
+        from lionwebpython.language.classifier import Classifier
+        from lionwebpython.model.annotation_instance import AnnotationInstance
 
     @abstractmethod
-    def get_annotations(self, annotation: Annotation) -> List:
+    def get_annotations(self, annotation: "Annotation") -> List:
         pass
 
     @abstractmethod
-    def add_annotation(self, instance: AnnotationInstance) -> None:
+    def add_annotation(self, instance: "AnnotationInstance") -> None:
         pass
 
     @abstractmethod
-    def remove_annotation(self, instance: AnnotationInstance) -> None:
+    def remove_annotation(self, instance: "AnnotationInstance") -> None:
         pass
 
     @abstractmethod
@@ -28,7 +29,7 @@ class ClassifierInstance(HasFeatureValues, Generic[T], ABC):
         pass
 
     @abstractmethod
-    def get_classifier(self) -> Classifier:
+    def get_classifier(self) -> "Classifier":
         pass
 
     @abstractmethod

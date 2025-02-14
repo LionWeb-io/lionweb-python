@@ -1,6 +1,5 @@
-from typing import Optional, TypeVar, cast
+from typing import TYPE_CHECKING, Optional, TypeVar, cast
 
-from lionwebpython.language.classifier import Classifier
 from lionwebpython.language.feature import Feature
 from lionwebpython.lionweb_version import LionWebVersion
 from lionwebpython.model.classifier_instance_utils import \
@@ -11,12 +10,15 @@ T = TypeVar("T", bound=M3Node)
 
 
 class Link(Feature[T]):
+    if TYPE_CHECKING:
+        from lionwebpython.language.classifier import Classifier
+
     def __init__(
         self,
         lion_web_version: Optional[LionWebVersion] = None,
         name: Optional[str] = None,
         id: Optional[str] = None,
-        container: Optional[Classifier] = None,
+        container: Optional["Classifier"] = None,
     ):
         (
             super().__init__(
@@ -39,10 +41,12 @@ class Link(Feature[T]):
         self.set_property_value(property_name="multiple", value=multiple)
         return self  # type: ignore
 
-    def get_type(self) -> Optional[Classifier]:
+    def get_type(self) -> Optional["Classifier"]:
+        from lionwebpython.language.classifier import Classifier
+
         return cast(Optional[Classifier], self.get_reference_single_value("type"))
 
-    def set_type(self, type: Optional[Classifier]) -> T:
+    def set_type(self, type: Optional["Classifier"]) -> T:
         if type is None:
             self.set_reference_single_value("type", None)
         else:

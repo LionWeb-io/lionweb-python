@@ -1,4 +1,4 @@
-from typing import Dict
+from typing import TYPE_CHECKING, Dict, List, cast
 
 from lionwebpython.language.concept import Concept
 from lionwebpython.language.containment import Containment
@@ -7,33 +7,62 @@ from lionwebpython.language.lioncore_builtins import LionCoreBuiltins
 from lionwebpython.language.property import Property
 from lionwebpython.language.reference import Reference
 from lionwebpython.lionweb_version import LionWebVersion
+from lionwebpython.model.impl.m3node import M3Node
 from lionwebpython.utils.id_utils import IdUtils
 
 
 class LionCore:
     _instances: Dict[LionWebVersion, Language] = {}
+    if TYPE_CHECKING:
+        from lionwebpython.model.impl.m3node import M3Node
+
+    @classmethod
+    def get_language_entity(
+        cls, lion_web_version: LionWebVersion = LionWebVersion.current_version()
+    ) -> Concept:
+        return cls._get_instance(lion_web_version).require_concept_by_name(
+            "LanguageEntity"
+        )
+
+    @classmethod
+    def get_link(
+        cls, lion_web_version: LionWebVersion = LionWebVersion.current_version()
+    ) -> Concept:
+        return cls._get_instance(lion_web_version).require_concept_by_name("Link")
+
+    @classmethod
+    def get_classifier(
+        cls, lion_web_version: LionWebVersion = LionWebVersion.current_version()
+    ) -> Concept:
+        return cls._get_instance(lion_web_version).require_concept_by_name("Classifier")
+
+    @classmethod
+    def get_feature(
+        cls, lion_web_version: LionWebVersion = LionWebVersion.current_version()
+    ) -> Concept:
+        return cls._get_instance(lion_web_version).require_concept_by_name("Feature")
 
     @classmethod
     def get_annotation(
-        cls, lion_web_version: LionWebVersion = LionWebVersion.current_version
+        cls, lion_web_version: LionWebVersion = LionWebVersion.current_version()
     ) -> Concept:
         return cls._get_instance(lion_web_version).require_concept_by_name("Annotation")
 
     @classmethod
     def get_concept(
-        cls, lion_web_version: LionWebVersion = LionWebVersion.current_version
+        cls, lion_web_version: LionWebVersion = LionWebVersion.current_version()
     ) -> Concept:
         return cls._get_instance(lion_web_version).require_concept_by_name("Concept")
 
     @classmethod
     def get_interface(
-        cls, lion_web_version: LionWebVersion = LionWebVersion.current_version
+        cls, lion_web_version: LionWebVersion = LionWebVersion.current_version()
     ) -> Concept:
         return cls._get_instance(lion_web_version).require_concept_by_name("Interface")
 
     @classmethod
     def get_containment(
-        cls, lion_web_version: LionWebVersion = LionWebVersion.current_version
+        cls, lion_web_version: LionWebVersion = LionWebVersion.current_version()
     ) -> Concept:
         return cls._get_instance(lion_web_version).require_concept_by_name(
             "Containment"
@@ -41,13 +70,13 @@ class LionCore:
 
     @classmethod
     def get_data_type(
-        cls, lion_web_version: LionWebVersion = LionWebVersion.current_version
+        cls, lion_web_version: LionWebVersion = LionWebVersion.current_version()
     ) -> Concept:
         return cls._get_instance(lion_web_version).require_concept_by_name("DataType")
 
     @classmethod
     def get_enumeration(
-        cls, lion_web_version: LionWebVersion = LionWebVersion.current_version
+        cls, lion_web_version: LionWebVersion = LionWebVersion.current_version()
     ) -> Concept:
         return cls._get_instance(lion_web_version).require_concept_by_name(
             "Enumeration"
@@ -55,25 +84,25 @@ class LionCore:
 
     @classmethod
     def get_language(
-        cls, lion_web_version: LionWebVersion = LionWebVersion.current_version
+        cls, lion_web_version: LionWebVersion = LionWebVersion.current_version()
     ) -> Concept:
         return cls._get_instance(lion_web_version).require_concept_by_name("Language")
 
     @classmethod
     def get_reference(
-        cls, lion_web_version: LionWebVersion = LionWebVersion.current_version
+        cls, lion_web_version: LionWebVersion = LionWebVersion.current_version()
     ) -> Concept:
         return cls._get_instance(lion_web_version).require_concept_by_name("Reference")
 
     @classmethod
     def get_property(
-        cls, lion_web_version: LionWebVersion = LionWebVersion.current_version
+        cls, lion_web_version: LionWebVersion = LionWebVersion.current_version()
     ) -> Concept:
         return cls._get_instance(lion_web_version).require_concept_by_name("Property")
 
     @classmethod
     def get_primitive_type(
-        cls, lion_web_version: LionWebVersion = LionWebVersion.current_version
+        cls, lion_web_version: LionWebVersion = LionWebVersion.current_version()
     ):
         return cls._get_instance(lion_web_version).require_concept_by_name(
             "PrimitiveType"
@@ -81,7 +110,7 @@ class LionCore:
 
     @classmethod
     def get_enumeration_literal(
-        cls, lion_web_version: LionWebVersion = LionWebVersion.current_version
+        cls, lion_web_version: LionWebVersion = LionWebVersion.current_version()
     ):
         return cls._get_instance(lion_web_version).require_concept_by_name(
             "EnumerationLiteral"
@@ -89,7 +118,7 @@ class LionCore:
 
     @classmethod
     def _get_instance(
-        cls, lion_web_version: LionWebVersion = LionWebVersion.current_version
+        cls, lion_web_version: LionWebVersion = LionWebVersion.current_version()
     ) -> Language:
 
         if lion_web_version not in cls._instances:
@@ -114,8 +143,26 @@ class LionCore:
                     "Interface",
                     "Containment",
                     "DataType",
+                    "Feature",
+                    "Link",
+                    "Property",
                     "Enumeration",
+                    "EnumerationLiteral",
                     "LanguageEntity",
+                    "Classifier",
+                    "Language",
+                    "PrimitiveType",
+                    "Reference",
+                ]
+            }
+            from lionwebpython.language.interface import Interface
+
+            interfaces = {
+                name: instance.add_element(
+                    Interface(lion_web_version=lion_web_version, name=name)
+                )
+                for name in [
+                    "IKeyed",
                 ]
             }
 
@@ -144,6 +191,14 @@ class LionCore:
                     id=f"-id-Concept-extends{version_id_suffix}",
                 )
             )
+            concepts["Concept"].add_feature(
+                Reference.create_multiple(
+                    lion_web_version=lion_web_version,
+                    name="implements",
+                    type=concepts["Interface"],
+                    id=f"-id-Concept-implements{version_id_suffix}",
+                )
+            )
 
             concepts["Interface"].set_extended_concept(concepts["LanguageEntity"])
             concepts["Interface"].add_feature(
@@ -165,10 +220,146 @@ class LionCore:
                 Containment.create_multiple(
                     lion_web_version=lion_web_version,
                     name="literals",
-                    type=concepts["LanguageEntity"],
+                    type=concepts["EnumerationLiteral"],
+                ).set_id("-id-Enumeration-literals" + version_id_suffix)
+            )
+
+            concepts["Feature"].set_abstract(True)
+            concepts["Feature"].add_implemented_interface(interfaces["IKeyed"])
+            concepts["Feature"].add_feature(
+                Property.create_required(
+                    lion_web_version=lion_web_version,
+                    name="optional",
+                    type=LionCoreBuiltins.get_boolean(lion_web_version),
+                    id="-id-Feature-optional" + version_id_suffix,
                 )
             )
 
+            concepts["Classifier"].set_abstract(True)
+            concepts["Classifier"].set_extended_concept(concepts["LanguageEntity"])
+            concepts["Classifier"].add_feature(
+                Containment.create_multiple(
+                    lion_web_version=lion_web_version,
+                    name="features",
+                    type=concepts["Feature"],
+                    id="-id-Classifier-features" + version_id_suffix,
+                )
+            )
+
+            concepts["Link"].set_abstract(True)
+            concepts["Link"].set_extended_concept(concepts["Feature"])
+            concepts["Link"].add_feature(
+                Property.create_required(
+                    lion_web_version,
+                    "multiple",
+                    LionCoreBuiltins.get_boolean(lion_web_version),
+                    "-id-Link-multiple" + version_id_suffix,
+                )
+            )
+            concepts["Link"].add_feature(
+                Reference.create_required(
+                    lion_web_version,
+                    "type",
+                    concepts["Classifier"],
+                    "-id-Link-type" + version_id_suffix,
+                )
+            )
+
+            concepts["Language"].set_partition(True)
+            concepts["Language"].add_implemented_interface(interfaces["IKeyed"])
+            concepts["Language"].add_feature(
+                Property.create_required(
+                    lion_web_version,
+                    "version",
+                    LionCoreBuiltins.get_string(lion_web_version),
+                    "-id-Language-version" + version_id_suffix,
+                )
+            )
+            concepts["Language"].add_feature(
+                Reference.create_multiple(
+                    lion_web_version=lion_web_version,
+                    name="dependsOn",
+                    type=concepts["Language"],
+                ).set_id("-id-Language-dependsOn" + version_id_suffix)
+            )
+            concepts["Language"].add_feature(
+                Containment.create_multiple(
+                    lion_web_version,
+                    "entities",
+                    concepts["LanguageEntity"],
+                    "-id-Language-entities" + version_id_suffix,
+                ).set_key("Language-entities")
+            )
+
+            interfaces["IKeyed"].add_extended_interface(
+                LionCoreBuiltins.get_inamed(lion_web_version)
+            )
+            interfaces["IKeyed"].add_feature(
+                Property.create_required(
+                    lion_web_version,
+                    "key",
+                    LionCoreBuiltins.get_string(lion_web_version),
+                ).set_id("-id-IKeyed-key" + version_id_suffix)
+            )
+
+            concepts["PrimitiveType"].set_extended_concept(concepts["DataType"])
+
+            concepts["Property"].set_extended_concept(concepts["Feature"])
+            concepts["Property"].add_feature(
+                Reference.create_required(
+                    lion_web_version,
+                    "type",
+                    concepts["DataType"],
+                    "-id-Property-type" + version_id_suffix,
+                ).set_key("Property-type")
+            )
+
+            concepts["Reference"].set_extended_concept(concepts["Link"])
+
+            cls._check_ids(instance, version_id_suffix)
             cls._instances[lion_web_version] = instance
 
         return cls._instances[lion_web_version]
+
+    @classmethod
+    def _check_ids(cls, node: "M3Node", version_id_suffix: str):
+        if node.get_id() is None:
+            from lionwebpython.language.namespaced_entity import \
+                NamespacedEntity
+
+            if isinstance(node, NamespacedEntity):
+                namespaced_entity = node
+                node.set_id(
+                    f"-id-{cast(str, namespaced_entity.get_name()).replace('.', '_')}{version_id_suffix}"
+                )
+                from lionwebpython.language.ikeyed import IKeyed
+
+                if isinstance(node, IKeyed) and node.get_key() is None:
+                    node.set_key(cast(str, namespaced_entity.get_name()))
+            else:
+                raise ValueError(f"Invalid node state: {node}")
+
+        from lionwebpython.language.classifier import Classifier
+
+        if isinstance(node, Classifier):
+            for feature in node.get_features():
+                if feature.get_key() is None:
+                    feature.set_key(f"{node.get_name()}-{feature.get_name()}")
+
+        # TODO: Update once get_children is implemented correctly
+        for child in cls._get_children_helper(node):
+            cls._check_ids(child, version_id_suffix)
+
+    @classmethod
+    def _get_children_helper(cls, node: "M3Node") -> List["M3Node"]:
+        from lionwebpython.language.classifier import Classifier
+        from lionwebpython.language.feature import Feature
+
+        if isinstance(node, Language):
+            return cast(List[M3Node], node.get_elements())
+        elif isinstance(node, Classifier):
+            return cast(List[M3Node], node.get_features())
+        elif isinstance(node, Feature):
+            return []
+        else:
+            raise NotImplementedError(f"Unsupported node type: {node}")

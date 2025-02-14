@@ -1,21 +1,25 @@
-from typing import List, Optional, cast
+from abc import ABC, abstractmethod
+from typing import TYPE_CHECKING, List, Optional, cast
 
-from lionwebpython.language.concept import Concept
-from lionwebpython.language.containment import Containment
+if TYPE_CHECKING:
+    from lionwebpython.language.concept import Concept
+    from lionwebpython.language.containment import Containment
+
 from lionwebpython.model.classifier_instance import ClassifierInstance
 
 
-class Node(ClassifierInstance[Concept]):
+class Node(ClassifierInstance["Concept"], ABC):
     """
     A node is an instance of a Concept. It contains all the values associated with that instance.
     """
 
+    @abstractmethod
     def get_id(self) -> Optional[str]:
         """
         Returns the Node ID.
         A valid Node ID should not be None, but this method can return None in case the Node is in an invalid state.
         """
-        raise NotImplementedError
+        pass
 
     def get_root(self) -> "Node":
         """
@@ -39,24 +43,27 @@ class Node(ClassifierInstance[Concept]):
         """
         return self.get_parent() is None
 
+    @abstractmethod
     def get_parent(self) -> Optional["Node"]:
         """
         Returns the parent of this node.
         """
-        raise NotImplementedError
+        pass
 
-    def get_classifier(self) -> Concept:
+    @abstractmethod
+    def get_classifier(self) -> "Concept":
         """
         Returns the concept of which this Node is an instance. The Concept should not be abstract.
         """
-        raise NotImplementedError
+        pass
 
-    def get_containment_feature(self) -> Optional[Containment]:
+    @abstractmethod
+    def get_containment_feature(self) -> Optional["Containment"]:
         """
         Returns the Containment feature used to hold this Node within its parent.
         This will be None only for root nodes or dangling nodes.
         """
-        raise NotImplementedError
+        pass
 
     def this_and_all_descendants(self) -> List["Node"]:
         """

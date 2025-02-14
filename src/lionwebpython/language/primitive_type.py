@@ -10,7 +10,7 @@ from lionwebpython.self.lioncore import LionCore
 class PrimitiveType(DataType):
     def __init__(
         self,
-        lion_web_version: LionWebVersion = LionWebVersion.current_version,
+        lion_web_version: LionWebVersion = LionWebVersion.current_version(),
         language: Optional[Language] = None,
         name: Optional[str] = None,
         id: Optional[str] = None,
