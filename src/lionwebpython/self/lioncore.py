@@ -9,3 +9,7 @@ class LionCore(Language):
     @classmethod
     def get_language(cls, param):
         raise ValueError("NOT YET TRANSLATED")
+
+    @classmethod
+    def get_concept(cls, param):
+        raise ValueError("NOT YET TRANSLATED")
