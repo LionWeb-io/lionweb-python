@@ -91,15 +91,16 @@ class ClassifierInstanceUtils:
 
     @staticmethod
     def is_builtin_element_language_entity(entity: LanguageEntity) -> bool:
+        language = entity.get_language()
         if (
-            entity.get_language()
-            and entity.get_language().get_name() == "LionCore_M3"
+            language
+            and language.get_name() == "LionCore_M3"
             and entity.get_lion_web_version() == LionWebVersion.v2024_1
         ):
             return True
         elif (
-            entity.get_language()
-            and isinstance(entity.get_language(), LionCoreBuiltins)
+            language
+            and isinstance(language, LionCoreBuiltins)
             and entity.get_lion_web_version() == LionWebVersion.v2024_1
         ):
             return True
