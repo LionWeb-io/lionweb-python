@@ -25,7 +25,9 @@ class Classifier(LanguageEntity[T], NamespaceProvider):
         name: Optional[str] = None,
         id: Optional[str] = None,
     ):
-        super().__init__(lion_web_version, language, name, id)
+        super().__init__(
+            lion_web_version=lion_web_version, language=language, name=name, id=id
+        )
 
     def get_feature_by_name(self, name: str) -> Optional[Feature]:
         return next((f for f in self.all_features() if f.get_name() == name), None)

@@ -13,6 +13,7 @@ T = TypeVar("T", bound="M3Node")
 class M3Node(Generic[T], Node, IKeyed[T], AbstractClassifierInstance, ABC):
     if TYPE_CHECKING:
         from lionwebpython.language.containment import Containment
+        from lionwebpython.language.property import Property
         from lionwebpython.language.reference import Reference
         from lionwebpython.model.classifier_instance import ClassifierInstance
         from lionwebpython.model.reference_value import ReferenceValue
@@ -52,17 +53,31 @@ class M3Node(Generic[T], Node, IKeyed[T], AbstractClassifierInstance, ABC):
         raise NotImplementedError()
 
     def get_property_value(self, **kwargs) -> Optional[object]:
+        property = kwargs.get("property")
         property_name = kwargs.get("property_name")
+        if property and property_name:
+            raise ValueError()
+        if not property and not property_name:
+            raise ValueError()
         if property_name and isinstance(property_name, str):
             return self.property_values.get(property_name)
+        from lionwebpython.language.property import Property
+
+        if property and isinstance(property, Property):
+            return self.property_values.get(property.get_name())
         else:
             raise ValueError()
 
     def set_property_value(self, **kwargs) -> None:
         property_name = kwargs.get("property_name")
+        property = kwargs.get("property")
+        value = kwargs.get("value")
+        from lionwebpython.language.property import Property
+
         if property_name and isinstance(property_name, str):
-            value = kwargs.get("value")
             self.property_values[property_name] = value
+        elif property and isinstance(property, Property):
+            self.property_values[property.get_name()] = value
         else:
             raise ValueError()
 
@@ -95,6 +110,8 @@ class M3Node(Generic[T], Node, IKeyed[T], AbstractClassifierInstance, ABC):
         self, reference: "Reference", reference_value: "ReferenceValue"
     ) -> None:
         name = reference.get_name()
+        if reference_value is None:
+            return
         if name is None:
             raise ValueError()
         self.reference_values.setdefault(name, []).append(reference_value)

@@ -166,7 +166,7 @@ class LionCore:
                 ]
             }
 
-            concepts["Concept"].set_extended_concept(concepts["LanguageEntity"])
+            concepts["Concept"].set_extended_concept(concepts["Classifier"])
             concepts["Concept"].add_feature(
                 Property.create_required(
                     lion_web_version=lion_web_version,
@@ -315,6 +315,9 @@ class LionCore:
             )
 
             concepts["Reference"].set_extended_concept(concepts["Link"])
+
+            concepts["LanguageEntity"].set_abstract(True)
+            concepts["LanguageEntity"].add_implemented_interface(interfaces["IKeyed"])
 
             cls._check_ids(instance, version_id_suffix)
             cls._instances[lion_web_version] = instance

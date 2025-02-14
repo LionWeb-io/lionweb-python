@@ -14,22 +14,21 @@ T = TypeVar("T", bound=M3Node)
 class LanguageEntity(M3Node[T], NamespacedEntity, IKeyed[T]):
     def __init__(
         self,
-        lion_web_version: Optional[LionWebVersion] = None,
+        lion_web_version: Optional["LionWebVersion"] = None,
         language: Optional[Language] = None,
         name: Optional[str] = None,
         id: Optional[str] = None,
     ):
-        if lion_web_version is None:
-            lion_web_version = LionWebVersion.current_version()
-
-        super().__init__(lion_web_version)
+        super().__init__(lion_web_version or LionWebVersion.current_version())
         self.set_name(name)
 
         if id:
             self.set_id(id)
 
         if language:
-            if lion_web_version != language.get_lion_web_version():
+            if (
+                lion_web_version or LionWebVersion.current_version()
+            ) != language.get_lion_web_version():
                 raise ValueError(
                     "The specified lionWebVersion is not the same as the LionWebVersion of the language"
                 )
