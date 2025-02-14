@@ -1,4 +1,4 @@
-from typing import Dict, Optional
+from typing import Dict, Optional, cast
 
 from lionwebpython.language.concept import Concept
 from lionwebpython.language.interface import Interface
@@ -69,30 +69,53 @@ class LionCoreBuiltins(Language):
     def get_string(
         cls, lion_web_version: Optional[LionWebVersion] = None
     ) -> PrimitiveType:
-        return cls.get_instance(lion_web_version).get_primitive_type_by_name("String")
+        return cast(
+            PrimitiveType,
+            cls.get_instance(lion_web_version).get_primitive_type_by_name("String"),
+        )
 
     @classmethod
     def get_integer(
         cls, lion_web_version: Optional[LionWebVersion] = None
     ) -> PrimitiveType:
-        return cls.get_instance(lion_web_version).get_primitive_type_by_name("Integer")
+        return cast(
+            PrimitiveType,
+            cls.get_instance(lion_web_version).get_primitive_type_by_name("Integer"),
+        )
 
     @classmethod
     def get_boolean(
-        cls, lion_web_version: Optional[LionWebVersion] = None
+        cls, lion_web_version: LionWebVersion = LionWebVersion.current_version
     ) -> PrimitiveType:
-        return cls.get_instance(lion_web_version).get_primitive_type_by_name("Boolean")
+        return cast(
+            PrimitiveType,
+            cls.get_instance(lion_web_version).get_primitive_type_by_name("Boolean"),
+        )
 
     @classmethod
-    def get_inamed(cls, lion_web_version: Optional[LionWebVersion] = None) -> Interface:
-        return cls.get_instance(lion_web_version).get_interface_by_name("INamed")
+    def get_inamed(
+        cls, lion_web_version: LionWebVersion = LionWebVersion.current_version
+    ) -> Interface:
+        return cast(
+            Interface,
+            cls.get_instance(lion_web_version).get_interface_by_name("INamed"),
+        )
 
     @classmethod
-    def get_node(cls, lion_web_version: Optional[LionWebVersion] = None) -> Concept:
-        return cls.get_instance(lion_web_version).get_concept_by_name("Node")
+    def get_node(
+        cls, lion_web_version: LionWebVersion = LionWebVersion.current_version
+    ) -> Concept:
+        return cast(
+            Concept, cls.get_instance(lion_web_version).get_concept_by_name("Node")
+        )
 
     @classmethod
-    def get_json(cls, lion_web_version: LionWebVersion) -> PrimitiveType:
+    def get_json(
+        cls, lion_web_version: LionWebVersion = LionWebVersion.current_version
+    ) -> PrimitiveType:
         if lion_web_version != LionWebVersion.V2023_1:
             raise ValueError("JSON was present only in v2023.1")
-        return cls.get_instance(lion_web_version).get_primitive_type_by_name("JSON")
+        return cast(
+            PrimitiveType,
+            cls.get_instance(lion_web_version).get_primitive_type_by_name("JSON"),
+        )
