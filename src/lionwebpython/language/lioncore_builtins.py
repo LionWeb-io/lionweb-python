@@ -15,14 +15,14 @@ class LionCoreBuiltins(Language):
     def __init__(self, lion_web_version: LionWebVersion):
         super().__init__(lion_web_version=lion_web_version, name="LionCore_builtins")
         version_id_suffix = (
-            f"-{IdUtils.clean_string(lion_web_version.version_string)}"
+            f"-{IdUtils.clean_string(lion_web_version.value)}"
             if lion_web_version != LionWebVersion.V2023_1
             else ""
         )
 
         self.set_id(f"LionCore-builtins{version_id_suffix}")
         self.set_key("LionCore-builtins")
-        self.set_version(lion_web_version.version_string)
+        self.set_version(lion_web_version.value)
 
         string_type = PrimitiveType(lion_web_version, self, "String")
         PrimitiveType(lion_web_version, self, "Boolean")
@@ -58,7 +58,7 @@ class LionCoreBuiltins(Language):
         cls, lion_web_version: Optional[LionWebVersion] = None
     ) -> "LionCoreBuiltins":
         if lion_web_version is None:
-            lion_web_version = LionWebVersion.current_version()
+            lion_web_version = LionWebVersion.current_version
 
         if lion_web_version not in cls._instances:
             cls._instances[lion_web_version] = LionCoreBuiltins(lion_web_version)

@@ -1,4 +1,4 @@
-from typing import Dict, Optional
+from typing import Dict
 
 from lionwebpython.language.concept import Concept
 from lionwebpython.language.containment import Containment
@@ -15,23 +15,25 @@ class LionCore:
 
     @classmethod
     def get_annotation(
-        cls, lion_web_version: Optional[LionWebVersion] = None
+        cls, lion_web_version: LionWebVersion = LionWebVersion.current_version
     ) -> Concept:
         return cls._get_instance(lion_web_version).require_concept_by_name("Annotation")
 
     @classmethod
-    def get_concept(cls, lion_web_version: Optional[LionWebVersion] = None) -> Concept:
+    def get_concept(
+        cls, lion_web_version: LionWebVersion = LionWebVersion.current_version
+    ) -> Concept:
         return cls._get_instance(lion_web_version).require_concept_by_name("Concept")
 
     @classmethod
     def get_interface(
-        cls, lion_web_version: Optional[LionWebVersion] = None
+        cls, lion_web_version: LionWebVersion = LionWebVersion.current_version
     ) -> Concept:
         return cls._get_instance(lion_web_version).require_concept_by_name("Interface")
 
     @classmethod
     def get_containment(
-        cls, lion_web_version: Optional[LionWebVersion] = None
+        cls, lion_web_version: LionWebVersion = LionWebVersion.current_version
     ) -> Concept:
         return cls._get_instance(lion_web_version).require_concept_by_name(
             "Containment"
@@ -39,38 +41,48 @@ class LionCore:
 
     @classmethod
     def get_data_type(
-        cls, lion_web_version: Optional[LionWebVersion] = None
+        cls, lion_web_version: LionWebVersion = LionWebVersion.current_version
     ) -> Concept:
         return cls._get_instance(lion_web_version).require_concept_by_name("DataType")
 
     @classmethod
     def get_enumeration(
-        cls, lion_web_version: Optional[LionWebVersion] = None
+        cls, lion_web_version: LionWebVersion = LionWebVersion.current_version
     ) -> Concept:
         return cls._get_instance(lion_web_version).require_concept_by_name(
             "Enumeration"
         )
 
     @classmethod
-    def get_language(cls, lion_web_version: Optional[LionWebVersion] = None) -> Concept:
+    def get_language(
+        cls, lion_web_version: LionWebVersion = LionWebVersion.current_version
+    ) -> Concept:
         return cls._get_instance(lion_web_version).require_concept_by_name("Language")
 
     @classmethod
     def get_reference(
-        cls, lion_web_version: Optional[LionWebVersion] = None
+        cls, lion_web_version: LionWebVersion = LionWebVersion.current_version
     ) -> Concept:
         return cls._get_instance(lion_web_version).require_concept_by_name("Reference")
 
     @classmethod
-    def get_property(cls, lion_web_version: Optional[LionWebVersion] = None) -> Concept:
+    def get_property(
+        cls, lion_web_version: LionWebVersion = LionWebVersion.current_version
+    ) -> Concept:
         return cls._get_instance(lion_web_version).require_concept_by_name("Property")
 
     @classmethod
+    def get_primitive_type(
+        cls, lion_web_version: LionWebVersion = LionWebVersion.current_version
+    ):
+        return cls._get_instance(lion_web_version).require_concept_by_name(
+            "PrimitiveType"
+        )
+
+    @classmethod
     def _get_instance(
-        cls, lion_web_version: Optional[LionWebVersion] = None
+        cls, lion_web_version: LionWebVersion = LionWebVersion.current_version
     ) -> Language:
-        if lion_web_version is None:
-            lion_web_version = LionWebVersion.current_version
 
         if lion_web_version not in cls._instances:
             version_id_suffix = (

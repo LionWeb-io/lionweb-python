@@ -1,5 +1,23 @@
+from typing import Optional
+
+from lionwebpython.language.concept import Concept
 from lionwebpython.language.data_type import DataType
+from lionwebpython.language.language import Language
+from lionwebpython.lionweb_version import LionWebVersion
+from lionwebpython.self.lioncore import LionCore
 
 
 class PrimitiveType(DataType):
-    pass
+    def __init__(
+        self,
+        lion_web_version: LionWebVersion = LionWebVersion.current_version,
+        language: Optional[Language] = None,
+        name: Optional[str] = None,
+        id: Optional[str] = None,
+    ):
+        super().__init__(lion_web_version, language, name)
+        if id:
+            self.set_id(id)
+
+    def get_classifier(self) -> Concept:
+        return LionCore.get_primitive_type(self.get_lion_web_version())
