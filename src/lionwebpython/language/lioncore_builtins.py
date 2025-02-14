@@ -1,0 +1,2 @@
+class LionCoreBuiltins:
+    pass
