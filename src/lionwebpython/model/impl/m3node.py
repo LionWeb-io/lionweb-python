@@ -111,7 +111,7 @@ class M3Node(Generic[T], AbstractClassifierInstance, Node, IKeyed[T]):
             return values[0]
         raise ValueError("Multiple values found")
 
-    def get_reference_single_value(self, link_name: str) -> Optional[ReferenceValue]:
+    def get_reference_single_value(self, link_name: str) -> Optional[object]:
         values = self.reference_values.get(link_name, [])
         if not values:
             return None
@@ -128,8 +128,13 @@ class M3Node(Generic[T], AbstractClassifierInstance, Node, IKeyed[T]):
     def set_containment_single_value(self, link_name: str, value: Node) -> None:
         self.containment_values[link_name] = [value]
 
-    def set_reference_single_value(self, link_name: str, value: ReferenceValue) -> None:
-        self.reference_values[link_name] = [value]
+    def set_reference_single_value(
+        self, link_name: str, value: Optional[ReferenceValue]
+    ) -> None:
+        if value is None:
+            self.reference_values[link_name] = []
+        else:
+            self.reference_values[link_name] = [value]
 
     def add_containment_multiple_value(self, link_name: str, value: Node) -> bool:
         if value not in self.containment_values.get(link_name, []):
