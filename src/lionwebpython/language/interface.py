@@ -25,7 +25,9 @@ class Interface(Classifier["Interface"]):
         from lionwebpython.lionweb_version import LionWebVersion
 
         super().__init__(
-            lion_web_version or LionWebVersion.current_version(), language, name
+            lion_web_version=lion_web_version or LionWebVersion.current_version(),
+            language=language,
+            name=name,
         )
         if id:
             self.set_id(id)
