@@ -80,6 +80,14 @@ class LionCore:
         )
 
     @classmethod
+    def get_enumeration_literal(
+        cls, lion_web_version: LionWebVersion = LionWebVersion.current_version
+    ):
+        return cls._get_instance(lion_web_version).require_concept_by_name(
+            "EnumerationLiteral"
+        )
+
+    @classmethod
     def _get_instance(
         cls, lion_web_version: LionWebVersion = LionWebVersion.current_version
     ) -> Language:

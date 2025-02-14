@@ -1,7 +1,60 @@
+from typing import Optional, cast
+
+from lionwebpython.language.concept import Concept
+from lionwebpython.language.enumeration import Enumeration
 from lionwebpython.language.ikeyed import IKeyed
 from lionwebpython.language.namespaced_entity import NamespacedEntity
+from lionwebpython.lionweb_version import LionWebVersion
 from lionwebpython.model.impl.m3node import M3Node
+from lionwebpython.self.lioncore import LionCore
 
 
 class EnumerationLiteral(M3Node, NamespacedEntity, IKeyed):
-    pass
+    def __init__(
+        self,
+        lion_web_version: LionWebVersion = LionWebVersion.current_version,
+        enumeration: Optional["Enumeration"] = None,
+        name: Optional[str] = None,
+    ):
+        super().__init__(lion_web_version)
+
+        if enumeration is not None:
+            enumeration.add_literal(self)
+            self.set_parent(enumeration)
+
+        if name is not None:
+            self.set_name(name)
+
+    def get_name(self) -> Optional[str]:
+        return cast(Optional[str], self.get_property_value(property_name="name"))
+
+    def set_name(self, name: Optional[str]) -> M3Node:
+        self.set_property_value(property_name="name", value=name)
+        return self
+
+    def get_enumeration(self) -> Optional["Enumeration"]:
+        parent = self.get_parent()
+        if parent is None:
+            return None
+        elif isinstance(parent, Enumeration):
+            return parent
+        else:
+            raise ValueError(
+                "The parent of this EnumerationLiteral is not an Enumeration"
+            )
+
+    def set_enumeration(self, enumeration: Optional["Enumeration"]) -> None:
+        self.set_parent(enumeration)
+
+    def get_container(self) -> Optional["Enumeration"]:
+        return self.get_enumeration()
+
+    def get_classifier(self) -> Concept:
+        return LionCore.get_enumeration_literal(self.get_lion_web_version())
+
+    def get_key(self) -> str:
+        return cast(str, self.get_property_value(property_name="key"))
+
+    def set_key(self, key: str) -> "EnumerationLiteral":
+        self.set_property_value(property_name="key", value=key)
+        return self
