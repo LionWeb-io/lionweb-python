@@ -86,3 +86,6 @@ class Containment(Link["Containment"]):
         from lionwebpython.self.lioncore import LionCore
 
         return LionCore.get_containment(self.get_lionweb_version())
+
+    def __str__(self):
+        return f"Containment[{self.id}]"
