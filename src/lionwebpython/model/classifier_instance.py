@@ -1,13 +1,15 @@
 from abc import ABC, abstractmethod
-from typing import Collection, List, Optional
+from typing import Collection, Generic, List, Optional, TypeVar
 
 from lionwebpython.language.annotation import Annotation
 from lionwebpython.language.classifier import Classifier
 from lionwebpython.model.annotation_instance import AnnotationInstance
 from lionwebpython.model.has_feature_values import HasFeatureValues
 
+T = TypeVar("T", bound=Classifier)
 
-class ClassifierInstance(HasFeatureValues, ABC):
+
+class ClassifierInstance(HasFeatureValues, Generic[T], ABC):
 
     @abstractmethod
     def get_annotations(self, annotation: Annotation) -> List:
