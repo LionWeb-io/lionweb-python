@@ -1,0 +1,2 @@
+class ReferenceValue:
+    pass
