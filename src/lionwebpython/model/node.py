@@ -34,7 +34,7 @@ class Node(ClassifierInstance["Concept"], ABC):
                 ancestors.append(curr)
                 curr = curr.get_parent()
             else:
-                raise ValueError("A circular hierarchy has been identified")
+                raise RuntimeError("A circular hierarchy has been identified")
         return ancestors[-1]
 
     def is_root(self) -> bool:

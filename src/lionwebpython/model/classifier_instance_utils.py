@@ -13,7 +13,7 @@ class ClassifierInstanceUtils:
     def get_property_value_by_name(
         instance: "ClassifierInstance", property_name: str
     ) -> Optional[object]:
-        property_ = instance.get_classifier().get_property_value(
+        property_ = instance.get_classifier().get_property_by_name(
             property_name=property_name
         )
         if property_ is None:
@@ -29,7 +29,7 @@ class ClassifierInstanceUtils:
         classifier = instance.get_classifier()
         if classifier is None:
             raise ValueError(f"Classifier should not be null for {instance}")
-        property_ = classifier.get_property_value(property_name=property_name)
+        property_ = classifier.get_property_by_name(property_name=property_name)
         if property_ is None:
             raise ValueError(
                 f"Concept {instance.get_classifier().qualified_name()} does not contain a property named {property_name}"

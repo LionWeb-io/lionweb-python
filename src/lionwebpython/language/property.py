@@ -1,6 +1,7 @@
 from typing import TYPE_CHECKING, Optional, cast
 
 from lionwebpython.language.feature import Feature
+from lionwebpython.lionweb_version import LionWebVersion
 
 
 class Property(Feature["Property"]):
@@ -18,12 +19,16 @@ class Property(Feature["Property"]):
     def create_optional(**kwargs) -> "Property":
         from lionwebpython.lionweb_version import LionWebVersion
 
-        lion_web_version: Optional[LionWebVersion] = kwargs["lion_web_version"]
+        lion_web_version: Optional[LionWebVersion] = LionWebVersion.current_version()
+        if "lionweb_version" in kwargs:
+            lion_web_version = kwargs["lionweb_version"]
         name: Optional[str] = kwargs["name"]
         from lionwebpython.language.data_type import DataType
 
         type: Optional[DataType] = kwargs["type"]
-        id: Optional[str] = kwargs["id"]
+        id = None
+        if "id" in kwargs:
+            id = kwargs["id"]
         if id is not None and not isinstance(id, str):
             raise ValueError("id should not be null")
         property_instance = (
