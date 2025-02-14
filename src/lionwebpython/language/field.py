@@ -4,13 +4,14 @@ from lionwebpython.language.concept import Concept
 from lionwebpython.language.data_type import DataType
 from lionwebpython.language.ikeyed import IKeyed
 from lionwebpython.language.namespace_provider import NamespaceProvider
+from lionwebpython.language.namespaced_entity import NamespacedEntity
 from lionwebpython.language.structured_data_type import StructuredDataType
 from lionwebpython.model.impl.m3node import M3Node
 from lionwebpython.model.reference_value import ReferenceValue
 from lionwebpython.self.lioncore import LionCore
 
 
-class Field(M3Node, NamespaceProvider, IKeyed):
+class Field(M3Node, NamespacedEntity, IKeyed):
     """
     Field of a StructuredDataType.
     """
