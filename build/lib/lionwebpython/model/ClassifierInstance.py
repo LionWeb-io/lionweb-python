@@ -1,10 +1,14 @@
 from abc import abstractmethod, ABC
 from typing import List, Optional, TypeVar, Generic
 
-from lionwebpython import ClassifierInstanceUtils, ProxyNode
-from lionwebpython.HasFeatureValues import HasFeatureValues
+from lionwebpython.language.annotation import Annotation
+from lionwebpython.language.classifier import Classifier
+from lionwebpython.model.annotation_instance import AnnotationInstance
+from lionwebpython.model.classifier_instance_utils import ClassifierInstanceUtils
+from lionwebpython.model.has_feature_values import HasFeatureValues
+from lionwebpython.model.impl.proxy_node import ProxyNode
 
-T = TypeVar('T', bound='Classifier')
+T = TypeVar('T', bound=Classifier)
 
 
 class ClassifierInstance(ABC, Generic[T], HasFeatureValues):
@@ -13,7 +17,7 @@ class ClassifierInstance(ABC, Generic[T], HasFeatureValues):
     """
 
     @abstractmethod
-    def get_annotations(self, annotation: Optional['Annotation'] = None) -> List['AnnotationInstance']:
+    def get_annotations(self, annotation: Optional[Annotation] = None) -> List[AnnotationInstance]:
         """
         Returns all the annotations associated with this ClassifierInstance.
         If an annotation type is specified, returns only instances of that type.
@@ -21,7 +25,7 @@ class ClassifierInstance(ABC, Generic[T], HasFeatureValues):
         pass
 
     @abstractmethod
-    def add_annotation(self, instance: 'AnnotationInstance'):
+    def add_annotation(self, instance: AnnotationInstance):
         """
         Adds an annotation instance to this ClassifierInstance.
 

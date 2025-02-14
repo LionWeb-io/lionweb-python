@@ -2,7 +2,6 @@ from abc import ABC, abstractmethod
 from typing import List, Optional
 
 from lionwebpython.language.containment import Containment
-from lionwebpython.language.property import Property
 from lionwebpython.language.reference import Reference
 from lionwebpython.model.node import Node
 from lionwebpython.model.reference_value import ReferenceValue
@@ -11,13 +10,11 @@ from lionwebpython.model.reference_value import ReferenceValue
 class HasFeatureValues(ABC):
 
     @abstractmethod
-    def get_property_value(
-        self, property: Property, default_value: object
-    ) -> Optional[object]:
+    def get_property_value(self, **kwargs) -> Optional[object]:
         pass
 
     @abstractmethod
-    def set_property_value(self, property: Property, value: object) -> None:
+    def set_property_value(self, **kwargs) -> None:
         pass
 
     @abstractmethod

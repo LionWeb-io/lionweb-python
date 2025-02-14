@@ -1,9 +1,10 @@
-from typing import List, Optional
+from typing import Generic, List, Optional, TypeVar
 
 from lionwebpython.language.containment import Containment
-from lionwebpython.language.property import Property
+from lionwebpython.language.ikeyed import IKeyed
 from lionwebpython.language.reference import Reference
 from lionwebpython.lionweb_version import LionWebVersion
+from lionwebpython.model.classifier_instance import ClassifierInstance
 from lionwebpython.model.impl.abstract_classifier_instance import \
     AbstractClassifierInstance
 from lionwebpython.model.node import Node
@@ -11,16 +12,18 @@ from lionwebpython.model.reference_value import ReferenceValue
 
 # STUB
 
+T = TypeVar("T", bound="M3Node")
 
-class M3Node(AbstractClassifierInstance, Node):
 
-    def __init__(self, lion_web_version: LionWebVersion):
+class M3Node(Generic[T], AbstractClassifierInstance, Node, IKeyed[T]):
+
+    def __init__(self, lion_web_version: Optional[LionWebVersion]):
         raise ValueError("NOT TRANSLATED YET")
 
     def set_id(self, id: str) -> "M3Node":
         raise ValueError("NOT TRANSLATED YET")
 
-    def set_parent(self, parent: Node) -> "M3Node":
+    def set_parent(self, parent: Optional[ClassifierInstance]) -> "M3Node":
         raise ValueError("NOT TRANSLATED YET")
 
     def get_root(self) -> Node:
@@ -32,12 +35,10 @@ class M3Node(AbstractClassifierInstance, Node):
     def get_containment_feature(self) -> Containment:
         raise ValueError("NOT TRANSLATED YET")
 
-    def get_property_value(
-        self, property: Property, default_value: object
-    ) -> Optional[object]:
+    def get_property_value(self, **kwargs) -> Optional[object]:
         raise ValueError("NOT TRANSLATED YET")
 
-    def set_property_value(self, property: Property, value: object) -> None:
+    def set_property_value(self, **kwargs) -> None:
         raise ValueError("NOT TRANSLATED YET")
 
     def get_children(self, containment: Containment) -> List:
