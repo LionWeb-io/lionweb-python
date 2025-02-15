@@ -1,12 +1,14 @@
 from typing import List
 
+from lionwebpython.serialization.data.metapointer import MetaPointer
+
 
 class SerializedContainmentValue:
-    def __init__(self, meta_pointer=None, value: List[str] = []):
+    def __init__(self, meta_pointer: MetaPointer, value: List[str]):
         self.meta_pointer = meta_pointer
         self.value = value if value is not None else []
 
-    def get_meta_pointer(self):
+    def get_meta_pointer(self) -> MetaPointer:
         return self.meta_pointer
 
     def set_meta_pointer(self, meta_pointer):

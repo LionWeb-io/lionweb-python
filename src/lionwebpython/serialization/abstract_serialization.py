@@ -3,7 +3,9 @@ from typing import List
 from lionwebpython.api.local_classifier_instance_resolver import \
     LocalClassifierInstanceResolver
 from lionwebpython.lionweb_version import LionWebVersion
+from lionwebpython.model import ClassifierInstance
 from lionwebpython.serialization.classifier_resolver import ClassifierResolver
+from lionwebpython.serialization.data.metapointer import MetaPointer
 from lionwebpython.serialization.data.serialized_chunk import SerializedChunk
 from lionwebpython.serialization.data.serialized_classifier_instance import \
     SerializedClassifierInstance
@@ -80,12 +82,8 @@ class AbstractSerialization:
         if language_key_version not in serialized_chunk.languages:
             serialized_chunk.languages.append(language_key_version)
 
-    def serialize_node(self, classifier_instance):
-        serialized_instance = SerializedClassifierInstance()
-        serialized_instance.id = classifier_instance.get_id()
-        serialized_instance.classifier = (
-            classifier_instance.get_classifier().get_meta_pointer()
-        )
+    def serialize_node(self, classifier_instance: ClassifierInstance) -> SerializedClassifierInstance:
+        serialized_instance = SerializedClassifierInstance(classifier_instance.get_id(), MetaPointer.from_language_entity(classifier_instance.get_classifier()))
         parent = classifier_instance.get_parent()
         serialized_instance.parent_node_id = parent.get_id() if parent else None
         serialized_instance.properties = {

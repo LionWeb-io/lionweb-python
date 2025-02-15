@@ -4,14 +4,14 @@ from lionwebpython.serialization.data.metapointer import MetaPointer
 
 
 class SerializedPropertyValue:
-    def __init__(self, meta_pointer: Optional[MetaPointer]=None, value: Optional[str] = None):
+    def __init__(self, meta_pointer: MetaPointer, value: Optional[str]):
         self.meta_pointer = meta_pointer
         self.value = value
 
-    def get_meta_pointer(self) -> Optional[MetaPointer]:
+    def get_meta_pointer(self) -> MetaPointer:
         return self.meta_pointer
 
-    def set_meta_pointer(self, meta_pointer: Optional[MetaPointer]):
+    def set_meta_pointer(self, meta_pointer: MetaPointer):
         self.meta_pointer = meta_pointer
 
     def get_value(self) -> Optional[str]:

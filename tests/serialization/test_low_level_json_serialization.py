@@ -10,6 +10,7 @@ from lionwebpython.serialization.data.metapointer import MetaPointer
 from lionwebpython.serialization.data.serialized_reference_value import SerializedReferenceValueEntry
 from lionwebpython.serialization.json_serialization import JsonSerialization
 from lionwebpython.serialization.low_level_json_serialization import LowLevelJsonSerialization
+from lionwebpython.serialization.serialized_json_comparison_utils import SerializedJsonComparisonUtils
 
 
 class LowLevelJsonSerializationTest(unittest.TestCase):
@@ -49,6 +50,7 @@ class LowLevelJsonSerializationTest(unittest.TestCase):
         ))
 
     def test_reserialize_library_language(self):
+        self.maxDiff = None
         self.assert_file_is_reserialized_correctly("./resources/serialization/library-language.json")
 
     def test_reserialize_bobs_library(self):
@@ -71,7 +73,7 @@ class LowLevelJsonSerializationTest(unittest.TestCase):
         hjs = JsonSerialization()
         hjs.enable_dynamic_nodes()
 
-        je = hjs.serialize_nodes_to_json_element(n1)
+        je = hjs.serialize_nodes_to_json_element([n1])
         deserialized_nodes = hjs.deserialize_to_nodes(je)
         self.assertEqual(1, len(deserialized_nodes))
         self.assert_instances_are_equal(n1, deserialized_nodes[0])
@@ -95,7 +97,7 @@ class LowLevelJsonSerializationTest(unittest.TestCase):
         serialized_chunk = json_serialization.deserialize_serialization_block(json_element)
         reserialized = json_serialization.serialize_to_json_element(serialized_chunk)
 
-        self.assertEqual(json_element, reserialized)
+        SerializedJsonComparisonUtils.assert_equivalent_lionweb_json(json_element, reserialized)
 
 if __name__ == '__main__':
     unittest.main()

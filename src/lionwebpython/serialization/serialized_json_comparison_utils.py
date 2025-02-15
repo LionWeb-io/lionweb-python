@@ -1,10 +1,12 @@
-from typing import List
+from typing import List, cast
+
+from lionwebpython.serialization.json_utils import JsonObject, JsonArray
 
 
 class SerializedJsonComparisonUtils:
 
     @staticmethod
-    def assert_equivalent_lionweb_json(expected: dict, actual: dict):
+    def assert_equivalent_lionweb_json(expected: JsonObject, actual: JsonObject):
         keys = {"serializationFormatVersion", "nodes", "languages"}
         if set(expected.keys()) != keys:
             raise RuntimeError(
@@ -19,13 +21,13 @@ class SerializedJsonComparisonUtils:
             actual.get("serializationFormatVersion"),
         )
         SerializedJsonComparisonUtils.assert_equivalent_lionweb_json_nodes(
-            expected.get("nodes", []), actual.get("nodes", [])
+            cast(JsonArray, expected.get("nodes")), cast(JsonArray, actual.get("nodes"))
         )
 
     @staticmethod
-    def assert_equivalent_lionweb_json_nodes(expected: List[dict], actual: List[dict]):
-        expected_elements = {e["id"]: e for e in expected}
-        actual_elements = {e["id"]: e for e in actual}
+    def assert_equivalent_lionweb_json_nodes(expected: JsonArray, actual: JsonArray):
+        expected_elements = {(cast(JsonObject, e))["id"]: e for e in expected}
+        actual_elements = {(cast(JsonObject, e))["id"]: e for e in actual}
 
         unexpected_ids = set(actual_elements.keys()) - set(expected_elements.keys())
         missing_ids = set(expected_elements.keys()) - set(actual_elements.keys())
@@ -40,8 +42,8 @@ class SerializedJsonComparisonUtils:
         )
 
         for node_id in expected_elements:
-            expected_node = expected_elements[node_id]
-            actual_node = actual_elements[node_id]
+            expected_node = cast(JsonObject, expected_elements[node_id])
+            actual_node = cast(JsonObject, actual_elements[node_id])
             SerializedJsonComparisonUtils.assert_equivalent_nodes(
                 expected_node, actual_node, f"Node {node_id}"
             )

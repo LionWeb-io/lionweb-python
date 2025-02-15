@@ -10,9 +10,9 @@ from lionwebpython.serialization.data.serialized_reference_value import \
 
 
 class SerializedClassifierInstance:
-    def __init__(self, instance_id: Optional[str] = None, classifier: Optional[MetaPointer]=None):
+    def __init__(self, instance_id: Optional[str], classifier: MetaPointer):
         self.id = instance_id
-        self.classifier: Optional[MetaPointer] = classifier
+        self.classifier: MetaPointer = classifier
         self.properties: List[SerializedPropertyValue] = []
         self.containments: List[SerializedContainmentValue] = []
         self.references: List[SerializedReferenceValue] = []
@@ -52,10 +52,10 @@ class SerializedClassifierInstance:
     def add_reference_value(self, reference_value: SerializedReferenceValue):
         self.references.append(reference_value)
 
-    def get_classifier(self) -> Optional[MetaPointer]:
+    def get_classifier(self) -> MetaPointer:
         return self.classifier
 
-    def set_classifier(self, classifier: Optional[MetaPointer]):
+    def set_classifier(self, classifier: MetaPointer):
         self.classifier = classifier
 
     def get_id(self) -> Optional[str]:

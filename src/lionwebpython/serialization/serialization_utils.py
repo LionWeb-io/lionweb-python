@@ -81,13 +81,13 @@ class SerializationUtils:
 
     @staticmethod
     def to_json_array_of_reference_values(
-        entries: List[Dict[str, str]],
+        entries: List[SerializedReferenceValueEntry],
     ) -> List[Dict[str, str | None]]:
         json_array = []
         for entry in entries:
             entry_json = {
-                "resolveInfo": entry.get("resolveInfo"),
-                "reference": entry.get("reference"),
+                "resolveInfo": entry.resolve_info,
+                "reference": entry.reference,
             }
             json_array.append(entry_json)
         return json_array

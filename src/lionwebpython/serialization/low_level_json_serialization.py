@@ -1,6 +1,7 @@
 import json
 from typing import List, cast
 
+from lionwebpython.serialization.data.metapointer import MetaPointer
 from lionwebpython.serialization.data.serialized_chunk import SerializedChunk
 from lionwebpython.serialization.data.serialized_classifier_instance import SerializedClassifierInstance
 from lionwebpython.serialization.data.serialized_containment_value import SerializedContainmentValue
@@ -24,18 +25,65 @@ class LowLevelJsonSerialization:
         else:
             raise ValueError(f"We expected a JSON object, we got instead: {json_element}")
 
-    @staticmethod
-    def serialize_to_json_element(serialized_chunk: SerializedChunk) -> dict:
+    def serialize_to_json_element(self, serialized_chunk: SerializedChunk) -> JsonObject:
+        serialized_nodes = []
+        for node in serialized_chunk.get_classifier_instances():
+            node_json = {
+                "id": node.get_id(),
+                "classifier": self._serialize_metapointer_to_json_element(node.get_classifier()),
+                "properties": [],
+                "containments": [],
+                "references": [],
+                "annotations": [annotation_id for annotation_id in node.get_annotations()],
+                "parent": node.get_parent_node_id()
+            }
+
+            for property_value in node.get_properties():
+                property_json = {
+                    "property": self._serialize_metapointer_to_json_element(property_value.get_meta_pointer()),
+                    "value": property_value.get_value()
+                }
+                node_json["properties"].append(property_json)
+
+            for children_value in node.get_containments():
+                children_json = {
+                    "containment": self._serialize_metapointer_to_json_element(children_value.get_meta_pointer()),
+                    "children": SerializationUtils.to_json_array(children_value.get_value())
+                }
+                node_json["containments"].append(children_json)
+
+            for reference_value in node.get_references():
+                reference_json = {
+                    "reference": self._serialize_metapointer_to_json_element(reference_value.get_meta_pointer()),
+                    "targets": SerializationUtils.to_json_array_of_reference_values(reference_value.get_value())
+                }
+                node_json["references"].append(reference_json)
+
+            serialized_nodes.append(node_json)
+
         return {
             "serializationFormatVersion": serialized_chunk.serialization_format_version,
-            "languages": serialized_chunk.languages,
-            "nodes": serialized_chunk.classifier_instances,
+            "languages": [self._serialize_language_to_json_element(lang) for lang in serialized_chunk.languages],
+            "nodes": serialized_nodes,
         }
 
-    @staticmethod
-    def serialize_to_json_string(serialized_chunk: SerializedChunk) -> str:
+    def _serialize_language_to_json_element(self, language_key_version: UsedLanguage) -> JsonObject:
+        json_object = {
+            "key": language_key_version.get_key(),
+            "version": language_key_version.get_version()
+        }
+        return cast(JsonObject, json_object)
+
+    def _serialize_metapointer_to_json_element(self, meta_pointer: MetaPointer) -> JsonObject:
+        return {
+            "language": meta_pointer.language,
+            "version": meta_pointer.version,
+            "key": meta_pointer.key
+        }
+
+    def serialize_to_json_string(self, serialized_chunk: SerializedChunk) -> str:
         return json.dumps(
-            LowLevelJsonSerialization.serialize_to_json_element(serialized_chunk),
+            self.serialize_to_json_element(serialized_chunk),
             indent=2,
         )
 
@@ -130,23 +178,26 @@ class LowLevelJsonSerialization:
         if not isinstance(json_element, dict):
             raise ValueError(f"Malformed JSON. Object expected but found {json_element}")
         try:
-            serialized_classifier_instance = SerializedClassifierInstance()
-            serialized_classifier_instance.set_classifier(
-                SerializationUtils.try_to_get_meta_pointer_property(json_element, "classifier")
+            mp = SerializationUtils.try_to_get_meta_pointer_property(json_element, "classifier")
+            if mp is None:
+                raise ValueError(f"MetaPointer not found in {json_element}")
+            serialized_classifier_instance = SerializedClassifierInstance(
+                SerializationUtils.try_to_get_string_property(json_element, "id"),
+                mp
             )
             serialized_classifier_instance.set_parent_node_id(
                 SerializationUtils.try_to_get_string_property(json_element, "parent")
-            )
-            serialized_classifier_instance.set_id(
-                SerializationUtils.try_to_get_string_property(json_element, "id")
             )
 
             properties = cast(JsonArray, json_element.get("properties", []))
             for property_entry in properties:
                 property_obj = cast(JsonObject, property_entry)
+                mp = SerializationUtils.try_to_get_meta_pointer_property(property_obj, "property")
+                if mp is None:
+                    raise ValueError(f"MetaPointer not found for property {property_obj}")
                 serialized_classifier_instance.add_property_value(
                     SerializedPropertyValue(
-                        SerializationUtils.try_to_get_meta_pointer_property(property_obj, "property"),
+                        mp,
                         SerializationUtils.try_to_get_string_property(property_obj, "value")
                     )
                 )
@@ -164,9 +215,12 @@ class LowLevelJsonSerialization:
                 ids = SerializationUtils.try_to_get_array_of_ids(containment_obj, "children")
                 if ids is None:
                     ids = []
+                mp = SerializationUtils.try_to_get_meta_pointer_property(containment_obj, "containment")
+                if mp is None:
+                    raise ValueError(f"MetaPointer not found in containment {containment_obj}")
                 serialized_classifier_instance.add_containment_value(
                     SerializedContainmentValue(
-                        SerializationUtils.try_to_get_meta_pointer_property(containment_obj, "containment"),
+                        mp,
                         ids
                     )
                 )
