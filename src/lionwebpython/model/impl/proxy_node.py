@@ -1,9 +1,19 @@
-class ProxyNode:
+from lionwebpython.model.annotation_instance import AnnotationInstance
+from lionwebpython.model.node import Node
+
+
+class ProxyNode(Node):
     """
     This is a basic ID holder adapted as a Node. It is used as a placeholder to indicate that we
     know which Node should be used in a particular point, but at this time we cannot/do not want to
     retrieve the data necessary to properly instantiate it.
     """
+
+    def add_annotation(self, instance: "AnnotationInstance") -> None:
+        raise self.CannotDoBecauseProxyException(self.id)
+
+    def remove_annotation(self, instance: "AnnotationInstance") -> None:
+        raise self.CannotDoBecauseProxyException(self.id)
 
     class CannotDoBecauseProxyException(Exception):
         def __init__(self, node_id: str):
