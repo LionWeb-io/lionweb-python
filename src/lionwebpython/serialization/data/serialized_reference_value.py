@@ -1,6 +1,8 @@
 from dataclasses import dataclass
 from typing import List, Optional
 
+from lionwebpython.serialization.data.metapointer import MetaPointer
+
 
 @dataclass
 class SerializedReferenceValueEntry:
@@ -33,7 +35,7 @@ class SerializedReferenceValue:
         self.meta_pointer = meta_pointer
         self.value = value[:] if value else []
 
-    def get_meta_pointer(self):
+    def get_meta_pointer(self) -> MetaPointer:
         return self.meta_pointer
 
     def set_meta_pointer(self, meta_pointer):

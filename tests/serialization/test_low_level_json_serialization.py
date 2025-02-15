@@ -2,9 +2,12 @@ import json
 import unittest
 
 from lionwebpython.language import Language, Annotation, Concept
+from lionwebpython.lionweb_version import LionWebVersion
 from lionwebpython.model.impl.dynamic_annotation_instance import DynamicAnnotationInstance
 from lionwebpython.model.impl.dynamic_node import DynamicNode
+from lionwebpython.self.lioncore import LionCore
 from lionwebpython.serialization.data.metapointer import MetaPointer
+from lionwebpython.serialization.data.serialized_reference_value import SerializedReferenceValueEntry
 from lionwebpython.serialization.json_serialization import JsonSerialization
 from lionwebpython.serialization.low_level_json_serialization import LowLevelJsonSerialization
 
@@ -37,8 +40,13 @@ class LowLevelJsonSerializationTest(unittest.TestCase):
 
         guided_book_writer = serialized_chunk.get_instance_by_id("library-GuideBookWriter")
         self.assertEqual("GuideBookWriter", guided_book_writer.get_property_value_by_key("LionCore-builtins-INamed-name"))
-        self.assertEqual([{"reference": "library-Writer", "info": "Writer"}], guided_book_writer.get_reference_values_by_key("Concept-extends"))
-        self.assertEqual(["library-GuideBookWriter-countries"], guided_book_writer.get_containment_values("Concept-features"))
+        self.assertEqual([SerializedReferenceValueEntry(reference="library-Writer", resolve_info="Writer")], guided_book_writer.get_reference_values_by_key("Concept-extends"))
+        self.assertEqual([SerializedReferenceValueEntry(reference="library-Writer", resolve_info="Writer")], guided_book_writer.get_reference_values(
+            MetaPointer.from_feature(LionCore.get_concept(LionWebVersion.V2023_1).get_reference_by_name("extends"))
+        ))
+        self.assertEqual(["library-GuideBookWriter-countries"], guided_book_writer.get_containment_values(
+            MetaPointer.from_feature(LionCore.get_concept(LionWebVersion.V2023_1).get_containment_by_name("features"))
+        ))
 
     def test_reserialize_library_language(self):
         self.assert_file_is_reserialized_correctly("./resources/serialization/library-language.json")

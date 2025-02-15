@@ -103,13 +103,19 @@ class SerializedClassifierInstance:
 
     def get_reference_values_by_key(self, reference_key: str) -> Optional[List[SerializedReferenceValueEntry]]:
         for rv in self.references:
-            if rv.get_meta_pointer().get_key() == reference_key:
+            if rv.get_meta_pointer().key == reference_key:
                 return rv.get_value()
         return None
 
     def get_reference_values(self, reference_meta_pointer) -> List:
         for rv in self.references:
             if reference_meta_pointer == rv.get_meta_pointer():
+                return rv.get_value()
+        return []
+
+    def get_containment_values_by_key(self, containment_key: str) -> List[str]:
+        for rv in self.containments:
+            if rv.get_meta_pointer().key == containment_key:
                 return rv.get_value()
         return []
 
