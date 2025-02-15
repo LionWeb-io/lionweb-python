@@ -14,10 +14,13 @@ class PrimitiveType(DataType):
         language: Optional[Language] = None,
         name: Optional[str] = None,
         id: Optional[str] = None,
+        key: Optional[str] = None,
     ):
         super().__init__(lion_web_version, language, name)
         if id:
             self.set_id(id)
+        if key:
+            self.set_key(key)
 
     def get_classifier(self) -> Concept:
         return LionCore.get_primitive_type(self.get_lionweb_version())

@@ -93,6 +93,9 @@ class LanguageValidator(Validator):
 
         for el in language.get_elements():
             result.check_for_error(el.get_name() is None, "Simple name not set", el)
+            result.check_for_error(
+                el.get_name() == "", "Simple name set to empty string", el
+            )
             result.check_for_error(el.get_language() is None, "Language not set", el)
             result.check_for_error(
                 el.get_language() is not None and el.get_language() != language,

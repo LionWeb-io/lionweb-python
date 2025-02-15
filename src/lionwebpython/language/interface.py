@@ -73,7 +73,8 @@ class Interface(Classifier["Interface"]):
         interfaces = set()
         to_avoid.add(self)
         for ei in self.get_extended_interfaces():
-            if ei not in to_avoid and ei not in interfaces:
+            if ei not in interfaces:
                 interfaces.add(ei)
+            if ei not in to_avoid:
                 interfaces.update(ei._all_extended_interfaces_helper(to_avoid))
         return interfaces
