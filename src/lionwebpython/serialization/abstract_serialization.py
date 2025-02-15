@@ -17,9 +17,9 @@ class AbstractSerialization:
     DEFAULT_SERIALIZATION_FORMAT = LionWebVersion.current_version()
 
     def __init__(
-        self, lion_web_version: LionWebVersion = LionWebVersion.current_version()
+        self, lionweb_version: LionWebVersion = LionWebVersion.current_version()
     ):
-        self.lion_web_version = lion_web_version
+        self.lion_web_version = lionweb_version
         self.classifier_resolver = ClassifierResolver()
         self.instantiator = Instantiator()
         self.primitive_values_serialization = PrimitiveValuesSerialization()

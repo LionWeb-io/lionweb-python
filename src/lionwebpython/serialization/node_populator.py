@@ -1,0 +1,114 @@
+from lionwebpython.language.lioncore_builtins import LionCoreBuiltins
+from lionwebpython.lionweb_version import LionWebVersion
+from lionwebpython.model.reference_value import ReferenceValue
+from lionwebpython.self.lioncore import LionCore
+from lionwebpython.serialization.deserialization_exception import \
+    DeserializationException
+from lionwebpython.serialization.unavailable_node_policy import \
+    UnavailableNodePolicy
+
+
+class NodePopulator:
+    def __init__(
+        self,
+        serialization,
+        classifier_instance_resolver,
+        deserialization_status,
+        auto_resolve_version=None,
+    ):
+        self.serialization = serialization
+        self.classifier_instance_resolver = classifier_instance_resolver
+        self.deserialization_status = deserialization_status
+        self.auto_resolve_map = {}
+
+        if auto_resolve_version is None:
+            auto_resolve_version = LionWebVersion.current_version()
+
+        lion_core_builtins = LionCoreBuiltins.get_instance(auto_resolve_version)
+        for element in lion_core_builtins.get_elements():
+            self.auto_resolve_map[f"LIONCOREBUILTINS::{element.name}"] = element
+
+        lion_core = LionCore.get_instance(auto_resolve_version)
+        for element in lion_core.get_elements():
+            self.auto_resolve_map[f"LIONCORE::{element.name}"] = element
+
+    def populate_classifier_instance(self, node, serialized_classifier_instance):
+        self.populate_containments(node, serialized_classifier_instance)
+        self.populate_node_references(node, serialized_classifier_instance)
+
+    def populate_containments(self, node, serialized_classifier_instance):
+        concept = node.classifier
+        for (
+            serialized_containment_value
+        ) in serialized_classifier_instance.get_containments():
+            containment = concept.get_containment_by_meta_pointer(
+                serialized_containment_value.meta_pointer
+            )
+            if containment is None:
+                raise ValueError(
+                    f"Unable to resolve containment {serialized_containment_value.meta_pointer} in concept {concept}"
+                )
+
+            if serialized_containment_value.value is None:
+                raise ValueError("The containment value should not be null")
+
+            deserialized_value = [
+                (
+                    self.classifier_instance_resolver.resolve_or_proxy(child_node_id)
+                    if self.serialization.get_unavailable_children_policy()
+                    == UnavailableNodePolicy.PROXY_NODES
+                    else self.classifier_instance_resolver.strictly_resolve(
+                        child_node_id
+                    )
+                )
+                for child_node_id in serialized_containment_value.value
+            ]
+
+            if deserialized_value != node.get_children(containment):
+                for child in deserialized_value:
+                    node.add_child(containment, child)
+
+    def populate_node_references(self, node, serialized_classifier_instance):
+        concept = node.classifier
+        for (
+            serialized_reference_value
+        ) in serialized_classifier_instance.get_references():
+            reference = concept.get_reference_by_meta_pointer(
+                serialized_reference_value.meta_pointer
+            )
+            if reference is None:
+                raise ValueError(
+                    f"Unable to resolve reference {serialized_reference_value.meta_pointer}. Concept {concept}. SerializedNode {serialized_classifier_instance}"
+                )
+
+            for entry in serialized_reference_value.value:
+                referred = (
+                    self.classifier_instance_resolver.resolve(entry.reference)
+                    if entry.reference
+                    else None
+                )
+
+                if referred is None and entry.reference:
+                    if (
+                        self.serialization.get_unavailable_reference_target_policy()
+                        == UnavailableNodePolicy.NULL_REFERENCES
+                    ):
+                        referred = None
+                    elif (
+                        self.serialization.get_unavailable_reference_target_policy()
+                        == UnavailableNodePolicy.PROXY_NODES
+                    ):
+                        referred = self.deserialization_status.resolve(entry.reference)
+                    elif (
+                        self.serialization.get_unavailable_reference_target_policy()
+                        == UnavailableNodePolicy.THROW_ERROR
+                    ):
+                        raise DeserializationException(
+                            f"Unable to resolve reference to {entry.reference} for feature {serialized_reference_value.meta_pointer}"
+                        )
+
+                if referred is None and entry.resolve_info:
+                    referred = self.auto_resolve_map.get(entry.resolve_info)
+
+                reference_value = ReferenceValue(referred, entry.resolve_info)
+                node.add_reference_value(reference, reference_value)
