@@ -1,3 +1,6 @@
+from typing import Optional
+
+from lionwebpython.language import Annotation
 from lionwebpython.model.annotation_instance import AnnotationInstance
 from lionwebpython.model.node import Node
 
@@ -57,7 +60,7 @@ class ProxyNode(Node):
     def get_classifier(self):
         raise self.CannotDoBecauseProxyException(self.id)
 
-    def get_annotations(self):
+    def get_annotations(self, annotation: Optional["Annotation"] = None):
         raise self.CannotDoBecauseProxyException(self.id)
 
     def get_containment_feature(self):

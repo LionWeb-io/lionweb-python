@@ -13,7 +13,7 @@ class ClassifierInstance(Generic[T], HasFeatureValues, ABC):
         from lionwebpython.model.annotation_instance import AnnotationInstance
 
     @abstractmethod
-    def get_annotations(self, annotation: "Annotation") -> List:
+    def get_annotations(self, annotation: Optional["Annotation"] = None) -> List:
         pass
 
     @abstractmethod
