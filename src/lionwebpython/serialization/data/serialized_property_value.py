@@ -1,21 +1,23 @@
 from typing import Optional
 
+from lionwebpython.serialization.data.metapointer import MetaPointer
+
 
 class SerializedPropertyValue:
-    def __init__(self, meta_pointer=None, value: Optional[str] = None):
+    def __init__(self, meta_pointer: Optional[MetaPointer]=None, value: Optional[str] = None):
         self.meta_pointer = meta_pointer
         self.value = value
 
-    def get_meta_pointer(self):
+    def get_meta_pointer(self) -> Optional[MetaPointer]:
         return self.meta_pointer
 
-    def set_meta_pointer(self, meta_pointer):
+    def set_meta_pointer(self, meta_pointer: Optional[MetaPointer]):
         self.meta_pointer = meta_pointer
 
-    def get_value(self):
+    def get_value(self) -> Optional[str]:
         return self.value
 
-    def set_value(self, value: str):
+    def set_value(self, value: Optional[str]):
         self.value = value
 
     def __str__(self):

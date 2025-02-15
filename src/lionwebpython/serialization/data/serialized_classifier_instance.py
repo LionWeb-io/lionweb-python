@@ -1,5 +1,6 @@
 from typing import List, Optional
 
+from lionwebpython.serialization.data.metapointer import MetaPointer
 from lionwebpython.serialization.data.serialized_containment_value import \
     SerializedContainmentValue
 from lionwebpython.serialization.data.serialized_property_value import \
@@ -9,9 +10,9 @@ from lionwebpython.serialization.data.serialized_reference_value import \
 
 
 class SerializedClassifierInstance:
-    def __init__(self, instance_id: Optional[str] = None, classifier=None):
+    def __init__(self, instance_id: Optional[str] = None, classifier: Optional[MetaPointer]=None):
         self.id = instance_id
-        self.classifier = classifier
+        self.classifier: Optional[MetaPointer] = classifier
         self.properties: List[SerializedPropertyValue] = []
         self.containments: List[SerializedContainmentValue] = []
         self.references: List[SerializedReferenceValue] = []
@@ -21,7 +22,7 @@ class SerializedClassifierInstance:
     def get_parent_node_id(self):
         return self.parent_node_id
 
-    def set_parent_node_id(self, parent_node_id: str):
+    def set_parent_node_id(self, parent_node_id: Optional[str]):
         self.parent_node_id = parent_node_id
 
     def get_containments(self):
@@ -42,25 +43,25 @@ class SerializedClassifierInstance:
     def get_properties(self):
         return list(self.properties)
 
-    def add_property_value(self, property_value):
+    def add_property_value(self, property_value: SerializedPropertyValue):
         self.properties.append(property_value)
 
-    def add_containment_value(self, containment_value):
+    def add_containment_value(self, containment_value: SerializedContainmentValue):
         self.containments.append(containment_value)
 
-    def add_reference_value(self, reference_value):
+    def add_reference_value(self, reference_value: SerializedReferenceValue):
         self.references.append(reference_value)
 
-    def get_classifier(self):
+    def get_classifier(self) -> Optional[MetaPointer]:
         return self.classifier
 
-    def set_classifier(self, classifier):
+    def set_classifier(self, classifier: Optional[MetaPointer]):
         self.classifier = classifier
 
-    def get_id(self):
+    def get_id(self) -> Optional[str]:
         return self.id
 
-    def set_id(self, instance_id: str):
+    def set_id(self, instance_id: Optional[str]):
         self.id = instance_id
 
     def set_property_value(self, property_meta_pointer, serialized_value):
@@ -88,8 +89,10 @@ class SerializedClassifierInstance:
 
     def get_property_value_by_key(self, property_key: str) -> Optional[str]:
         for pv in self.properties:
-            if pv.get_meta_pointer().get_key() == property_key:
-                return pv.get_value()
+            mp = pv.get_meta_pointer()
+            if mp:
+                if mp.key == property_key:
+                    return pv.get_value()
         return None
 
     def get_property_value(self, property_meta_pointer) -> Optional[str]:

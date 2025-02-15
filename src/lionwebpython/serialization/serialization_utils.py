@@ -1,5 +1,9 @@
 from typing import Dict, List, Optional
 
+from lionwebpython.serialization.data.metapointer import MetaPointer
+from lionwebpython.serialization.data.serialized_reference_value import SerializedReferenceValueEntry
+from lionwebpython.serialization.low_level_json_serialization import JsonObject
+
 
 class SerializationUtils:
     @staticmethod
@@ -20,25 +24,19 @@ class SerializationUtils:
         return None
 
     @staticmethod
-    def try_to_get_meta_pointer_property(json_object: Dict, property_name: str):
+    def try_to_get_meta_pointer_property(json_object: Dict, property_name: str) -> Optional[MetaPointer]:
         if property_name not in json_object:
             return None
         value = json_object.get(property_name)
         if isinstance(value, dict):
-            return {
-                "language": SerializationUtils.try_to_get_string_property(
-                    value, "language"
-                ),
-                "version": SerializationUtils.try_to_get_string_property(
-                    value, "version"
-                ),
-                "key": SerializationUtils.try_to_get_string_property(value, "key"),
-            }
+            return MetaPointer(language=SerializationUtils.try_to_get_string_property(value, "language"),
+                version= SerializationUtils.try_to_get_string_property(value, "version"),
+                key=SerializationUtils.try_to_get_string_property(value, "key"))
         return None
 
     @staticmethod
     def try_to_get_array_of_ids(
-        json_object: Dict, property_name: str
+        json_object: JsonObject, property_name: str
     ) -> Optional[List[str]]:
         if property_name not in json_object:
             return None
@@ -56,27 +54,26 @@ class SerializationUtils:
 
     @staticmethod
     def try_to_get_array_of_references_property(
-        json_object: Dict, property_name: str
-    ) -> Optional[List[Dict[str, str | None]]]:
+        json_object: JsonObject, property_name: str
+    ) -> List[SerializedReferenceValueEntry]:
         if property_name not in json_object:
-            return None
+            return []
         value = json_object.get(property_name)
         if isinstance(value, list):
-            entries = []
+            entries : List[SerializedReferenceValueEntry]= []
             for e in value:
                 if isinstance(e, dict):
                     entries.append(
-                        {
-                            "reference": SerializationUtils.try_to_get_string_property(
+                        SerializedReferenceValueEntry(
+                            reference= SerializationUtils.try_to_get_string_property(
                                 e, "reference"
                             ),
-                            "resolveInfo": SerializationUtils.try_to_get_string_property(
+                            resolve_info=SerializationUtils.try_to_get_string_property(
                                 e, "resolveInfo"
-                            ),
-                        }
+                            ))
                     )
             return entries
-        return None
+        return []
 
     @staticmethod
     def to_json_array(string_list: List[str]) -> List[str]:

@@ -3,9 +3,13 @@ from typing import List, Optional
 
 
 @dataclass
-class Entry:
+class SerializedReferenceValueEntry:
     resolve_info: Optional[str] = None
     reference: Optional[str] = None
+
+    def __init__(self, resolve_info: Optional[str], reference: Optional[str]):
+        self.resolve_info = resolve_info
+        self.reference = reference
 
     def __str__(self):
         return (
@@ -13,7 +17,7 @@ class Entry:
         )
 
     def __eq__(self, other):
-        if not isinstance(other, Entry):
+        if not isinstance(other, SerializedReferenceValueEntry):
             return False
         return (
             self.resolve_info == other.resolve_info
@@ -25,7 +29,7 @@ class Entry:
 
 
 class SerializedReferenceValue:
-    def __init__(self, meta_pointer=None, value: Optional[List[Entry]] = None):
+    def __init__(self, meta_pointer=None, value: Optional[List[SerializedReferenceValueEntry]] = None):
         self.meta_pointer = meta_pointer
         self.value = value[:] if value else []
 
@@ -35,14 +39,14 @@ class SerializedReferenceValue:
     def set_meta_pointer(self, meta_pointer):
         self.meta_pointer = meta_pointer
 
-    def get_value(self) -> List[Entry]:
+    def get_value(self) -> List[SerializedReferenceValueEntry]:
         return list(self.value)
 
-    def set_value(self, value: List[Entry]):
+    def set_value(self, value: List[SerializedReferenceValueEntry]):
         self.value.clear()
         self.value.extend(value)
 
-    def add_value(self, value: Entry):
+    def add_value(self, value: SerializedReferenceValueEntry):
         self.value.append(value)
 
     def __eq__(self, other):

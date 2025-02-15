@@ -8,6 +8,11 @@ class MetaPointer:
     version: Optional[str] = None
     key: Optional[str] = None
 
+    def __init__(self, language: Optional[str] = None, version: Optional[str] = None, key: Optional[str] = None):
+        self.language = language
+        self.version = version
+        self.key = key
+
     @staticmethod
     def from_feature(feature):
         return MetaPointer.from_keyed(feature, feature.get_declaring_language())

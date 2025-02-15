@@ -1,3 +1,5 @@
+from typing import List
+
 from lionwebpython.api.local_classifier_instance_resolver import \
     LocalClassifierInstanceResolver
 from lionwebpython.lionweb_version import LionWebVersion
@@ -5,6 +7,8 @@ from lionwebpython.serialization.classifier_resolver import ClassifierResolver
 from lionwebpython.serialization.data.serialized_chunk import SerializedChunk
 from lionwebpython.serialization.data.serialized_classifier_instance import \
     SerializedClassifierInstance
+from lionwebpython.serialization.deserialization_exception import DeserializationException
+from lionwebpython.serialization.deserialization_status import DeserializationStatus
 from lionwebpython.serialization.instantiator import Instantiator
 from lionwebpython.serialization.primitives_values_serialization import \
     PrimitiveValuesSerialization
@@ -169,3 +173,59 @@ class AbstractSerialization:
                     instance.set_parent(parent_instance)
 
         return list(deserialized_by_id.values())
+
+    def _validate_serialization_block(self, serialization_block: SerializedChunk) -> None:
+        if serialization_block is None:
+            raise ValueError("serialization_block should not be null")
+        if serialization_block.serialization_format_version is None:
+            raise ValueError("The serializationFormatVersion should not be null")
+        if serialization_block.serialization_format_version != self.lion_web_version.value:
+            raise ValueError(
+                f"Only serializationFormatVersion supported by this instance of Serialization is '{self.lion_web_version.value}' "
+                f"but we found '{serialization_block.serialization_format_version}'"
+            )
+
+    def _sort_leaves_first(self, original_list: List[SerializedClassifierInstance]) -> DeserializationStatus:
+        deserialization_status = DeserializationStatus(original_list, self.instance_resolver)
+
+        # We create the list going from the roots to their children and then reverse it
+        deserialization_status.put_nodes_with_null_ids_in_front()
+
+        if self.unavailable_parent_policy == UnavailableNodePolicy.NULL_REFERENCES:
+            known_ids = {ci.get_id() for ci in original_list}
+            for ci in original_list:
+                if ci.get_parent_node_id() not in known_ids:
+                    deserialization_status.place(ci)
+
+        elif self.unavailable_parent_policy == UnavailableNodePolicy.PROXY_NODES:
+            known_ids = {ci.get_id() for ci in original_list}
+            parent_ids = {n.get_parent_node_id() for n in original_list if n.get_parent_node_id() is not None}
+            unknown_parent_ids = parent_ids - known_ids
+            for ci in original_list:
+                if ci.get_parent_node_id() in unknown_parent_ids:
+                    deserialization_status.place(ci)
+            for id_ in unknown_parent_ids:
+                deserialization_status.create_proxy(id_)
+
+        # Place elements with no parent or already sorted parents
+        while deserialization_status.how_many_sorted() < len(original_list):
+            initial_length = deserialization_status.how_many_sorted()
+            for i in range(deserialization_status.how_many_to_sort()):
+                node = deserialization_status.get_node_to_sort(i)
+                if node.get_parent_node_id() is None or any(
+                    sn.get_id() == node.get_parent_node_id() for sn in deserialization_status.stream_sorted()
+                ):
+                    deserialization_status.place(node)
+
+            if initial_length == deserialization_status.how_many_sorted():
+                if deserialization_status.how_many_sorted() == 0:
+                    raise DeserializationException(
+                        f"No root found, we cannot deserialize this tree. Original list: {original_list}"
+                    )
+                else:
+                    raise DeserializationException(
+                        f"Something is not right: we are unable to complete sorting the list {original_list}. Probably there is a containment loop"
+                    )
+
+        deserialization_status.reverse()
+        return deserialization_status

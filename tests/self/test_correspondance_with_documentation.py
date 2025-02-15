@@ -28,7 +28,7 @@ class CorrespondenceWithDocumentationTest(unittest.TestCase):
         )
         response = requests.get(url)
         response.raise_for_status()
-        nodes = json_ser.deserialize_to_nodes(response.text)
+        nodes = json_ser.deserialize_string_to_nodes(response.text)
 
         deserialized_lioncore = nodes[0]
         comparison = ModelComparator().compare(deserialized_lioncore, LionCore.get_instance(LionWebVersion.V2023_1))
@@ -47,7 +47,7 @@ class CorrespondenceWithDocumentationTest(unittest.TestCase):
         )
         response = requests.get(url)
         response.raise_for_status()
-        nodes = json_ser.deserialize_to_nodes(response.text)
+        nodes = json_ser.deserialize_string_to_nodes(response.text)
 
         deserialized_lioncore = nodes[0]
         comparison = ModelComparator().compare(deserialized_lioncore, LionCore.get_instance(LionWebVersion.V2024_1))
@@ -66,7 +66,7 @@ class CorrespondenceWithDocumentationTest(unittest.TestCase):
         )
         response = requests.get(url)
         response.raise_for_status()
-        nodes = json_ser.deserialize_to_nodes(response.text)
+        nodes = json_ser.deserialize_string_to_nodes(response.text)
 
         deserialized_builtins = nodes[0]
         comparison = ModelComparator().compare(deserialized_builtins, LionCoreBuiltins.get_instance(LionWebVersion.V2023_1))
@@ -85,7 +85,7 @@ class CorrespondenceWithDocumentationTest(unittest.TestCase):
         )
         response = requests.get(url)
         response.raise_for_status()
-        nodes = json_ser.deserialize_to_nodes(response.text)
+        nodes = json_ser.deserialize_string_to_nodes(response.text)
 
         deserialized_builtins = nodes[0]
         comparison = ModelComparator().compare(deserialized_builtins, LionCoreBuiltins.get_instance(LionWebVersion.V2024_1))
