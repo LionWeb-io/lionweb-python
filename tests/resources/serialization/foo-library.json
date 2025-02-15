@@ -1,0 +1,25 @@
+{
+  "serializationFormatVersion": "2023.1",
+  "languages": [],
+  "nodes": [
+    {
+      "classifier": {"language":"library","version":"1","key":"library-Book"},
+      "id": "foo123",
+      "properties": [
+        {"property": {"language":"library","version":"1","key":"library-Book-title"}, "value": null},
+        {"property": {"language":"library","version":"1","key":"library-Book-pages"}, "value": null}
+      ],
+      "containments": [],
+      "references": [
+        {"reference": {"language":"library","version":"1","key":"library-Book-author"}, "targets": [
+          {
+            "reference": "-Arthur-Foozillus-id-",
+            "resolveInfo": null
+          }
+        ]
+      }],
+      "annotations": [],
+      "parent": null
+    }
+  ]
+}

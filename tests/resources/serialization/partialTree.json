@@ -1,0 +1,107 @@
+{
+  "serializationFormatVersion": "2023.1",
+  "languages": [
+    {
+      "key": "language-properties-key",
+      "version": "1"
+    },
+    {
+      "key": "LionCore-builtins",
+      "version": "2023.1"
+    }
+  ],
+  "nodes": [
+    {
+      "id": "node-id-rand--1470532511",
+      "classifier": {
+        "key": "properties-Property-key",
+        "version": "1",
+        "language": "language-properties-key"
+      },
+      "parent": "pf1",
+      "properties": [
+        {
+          "value": "Prop2",
+          "property": {
+            "key": "LionCore-builtins-INamed-name",
+            "version": "2023.1",
+            "language": "LionCore-builtins"
+          }
+        }
+      ],
+      "containments": [],
+      "references": [],
+      "annotations": []
+    },
+    {
+      "id": "node-id-rand-191263549",
+      "classifier": {
+        "key": "properties-Property-key",
+        "version": "1",
+        "language": "language-properties-key"
+      },
+      "parent": "pf1",
+      "properties": [
+        {
+          "value": "Prop3",
+          "property": {
+            "key": "LionCore-builtins-INamed-name",
+            "version": "2023.1",
+            "language": "LionCore-builtins"
+          }
+        }
+      ],
+      "containments": [],
+      "references": [],
+      "annotations": []
+    },
+    {
+      "id": "pf1",
+      "classifier": {
+        "key": "properties-PropertiesFile-key",
+        "version": "1",
+        "language": "language-properties-key"
+      },
+      "parent": "pp1",
+      "properties": [],
+      "containments": [
+        {
+          "children": [
+            "prop1",
+            "node-id-rand--1470532511",
+            "node-id-rand-191263549"
+          ],
+          "containment": {
+            "key": "properties-PropertiesFile-properties-key",
+            "version": "1",
+            "language": "language-properties-key"
+          }
+        }
+      ],
+      "references": [],
+      "annotations": []
+    },
+    {
+      "id": "prop1",
+      "classifier": {
+        "key": "properties-Property-key",
+        "version": "1",
+        "language": "language-properties-key"
+      },
+      "parent": "pf1",
+      "properties": [
+        {
+          "value": "Prop1",
+          "property": {
+            "key": "LionCore-builtins-INamed-name",
+            "version": "2023.1",
+            "language": "LionCore-builtins"
+          }
+        }
+      ],
+      "containments": [],
+      "references": [],
+      "annotations": []
+    }
+  ]
+}

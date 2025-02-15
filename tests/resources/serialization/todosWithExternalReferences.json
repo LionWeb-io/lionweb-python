@@ -1,0 +1,177 @@
+{
+  "serializationFormatVersion": "2023.1",
+  "languages": [
+    {
+      "key": "TodoLanguage",
+      "version": "1"
+    },
+    {
+      "key": "LionCore-builtins",
+      "version": "2023.1"
+    }
+  ],
+  "nodes": [
+    {
+      "id": "synthetic_my-wonderful-partition_projects_1",
+      "classifier": {
+        "key": "TodoLanguage_TodoProject",
+        "version": "1",
+        "language": "TodoLanguage"
+      },
+      "parent": null,
+      "properties": [
+        {
+          "value": "My other errands list",
+          "property": {
+            "key": "LionCore-builtins-INamed-name",
+            "version": "2023.1",
+            "language": "LionCore-builtins"
+          }
+        }
+      ],
+      "containments": [
+        {
+          "children": [
+            "synthetic_my-wonderful-partition_projects_1_todos_0",
+            "synthetic_my-wonderful-partition_projects_1_todos_1",
+            "synthetic_my-wonderful-partition_projects_1_todos_2"
+          ],
+          "containment": {
+            "key": "TodoLanguage_TodoProject_todos",
+            "version": "1",
+            "language": "TodoLanguage"
+          }
+        }
+      ],
+      "references": [],
+      "annotations": []
+    },
+    {
+      "id": "synthetic_my-wonderful-partition_projects_1_todos_0",
+      "classifier": {
+        "key": "TodoLanguage_Todo",
+        "version": "1",
+        "language": "TodoLanguage"
+      },
+      "parent": "synthetic_my-wonderful-partition_projects_1",
+      "properties": [
+        {
+          "value": "Buy diary",
+          "property": {
+            "key": "TodoLanguage_Todo_description",
+            "version": "1",
+            "language": "TodoLanguage"
+          }
+        },
+        {
+          "value": "BD",
+          "property": {
+            "key": "LionCore-builtins-INamed-name",
+            "version": "2023.1",
+            "language": "LionCore-builtins"
+          }
+        }
+      ],
+      "containments": [],
+      "references": [
+        {
+          "targets": [],
+          "reference": {
+            "key": "TodoLanguage_Todo_prerequisite",
+            "version": "1",
+            "language": "TodoLanguage"
+          }
+        }
+      ],
+      "annotations": []
+    },
+    {
+      "id": "synthetic_my-wonderful-partition_projects_1_todos_1",
+      "classifier": {
+        "key": "TodoLanguage_Todo",
+        "version": "1",
+        "language": "TodoLanguage"
+      },
+      "parent": "synthetic_my-wonderful-partition_projects_1",
+      "properties": [
+        {
+          "value": "Write in diary",
+          "property": {
+            "key": "TodoLanguage_Todo_description",
+            "version": "1",
+            "language": "TodoLanguage"
+          }
+        },
+        {
+          "value": "WD",
+          "property": {
+            "key": "LionCore-builtins-INamed-name",
+            "version": "2023.1",
+            "language": "LionCore-builtins"
+          }
+        }
+      ],
+      "containments": [],
+      "references": [
+        {
+          "targets": [
+            {
+              "reference": "synthetic_my-wonderful-partition_projects_1_todos_0",
+              "resolveInfo": "BD"
+            }
+          ],
+          "reference": {
+            "key": "TodoLanguage_Todo_prerequisite",
+            "version": "1",
+            "language": "TodoLanguage"
+          }
+        }
+      ],
+      "annotations": []
+    },
+    {
+      "id": "synthetic_my-wonderful-partition_projects_1_todos_2",
+      "classifier": {
+        "key": "TodoLanguage_Todo",
+        "version": "1",
+        "language": "TodoLanguage"
+      },
+      "parent": "synthetic_my-wonderful-partition_projects_1",
+      "properties": [
+        {
+          "value": "Produce more garbage",
+          "property": {
+            "key": "TodoLanguage_Todo_description",
+            "version": "1",
+            "language": "TodoLanguage"
+          }
+        },
+        {
+          "value": "garbage-in",
+          "property": {
+            "key": "LionCore-builtins-INamed-name",
+            "version": "2023.1",
+            "language": "LionCore-builtins"
+          }
+        }
+      ],
+      "containments": [],
+      "references": [
+        {
+          "targets": [
+            {
+              "reference": "synthetic_my-wonderful-partition_projects_0_todos_1",
+              "resolveInfo": "garbage-out"
+            }
+          ],
+          "reference": {
+            "key": "TodoLanguage_Todo_prerequisite",
+            "version": "1",
+            "language": "TodoLanguage"
+          }
+        }
+      ],
+      "annotations": []
+    }
+  ]
+}

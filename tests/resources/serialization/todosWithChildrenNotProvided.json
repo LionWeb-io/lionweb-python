@@ -1,0 +1,50 @@
+{
+  "serializationFormatVersion": "2023.1",
+  "languages": [
+    {
+      "key": "TodoLanguage",
+      "version": "1"
+    },
+    {
+      "key": "LionCore-builtins",
+      "version": "2023.1"
+    }
+  ],
+  "nodes": [
+    {
+      "id": "synthetic_my-wonderful-partition_projects_1",
+      "classifier": {
+        "key": "TodoLanguage_TodoProject",
+        "version": "1",
+        "language": "TodoLanguage"
+      },
+      "parent": null,
+      "properties": [
+        {
+          "value": "My other errands list",
+          "property": {
+            "key": "LionCore-builtins-INamed-name",
+            "version": "2023.1",
+            "language": "LionCore-builtins"
+          }
+        }
+      ],
+      "containments": [
+        {
+          "children": [
+            "synthetic_my-wonderful-partition_projects_1_todos_0",
+            "synthetic_my-wonderful-partition_projects_1_todos_1",
+            "synthetic_my-wonderful-partition_projects_1_todos_2"
+          ],
+          "containment": {
+            "key": "TodoLanguage_TodoProject_todos",
+            "version": "1",
+            "language": "TodoLanguage"
+          }
+        }
+      ],
+      "references": [],
+      "annotations": []
+    }
+  ]
+}

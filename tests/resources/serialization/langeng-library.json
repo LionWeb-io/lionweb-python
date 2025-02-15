@@ -1,0 +1,130 @@
+{
+  "serializationFormatVersion": "2023.1",
+  "languages": [],
+  "nodes": [
+    {
+      "id": "lib-1",
+      "classifier": {
+        "language": "library",
+        "version": "1",
+        "key": "library-Library"
+      },
+      "properties": [
+        {
+          "property": {
+            "language": "library",
+            "version": "1",
+            "key": "library-Library-name"
+          },
+          "value": "Language Engineering Library"
+        }
+      ],
+      "containments": [
+        {
+          "containment": {
+            "language": "library",
+            "version": "1",
+            "key": "library-Library-books"
+          },
+          "children": [
+            "de",
+            "bfd"
+          ]
+        }
+      ],
+      "references": [],
+      "annotations": [],
+      "parent": null
+    },
+    {
+      "id": "de",
+      "classifier": {
+        "language": "library",
+        "version": "1",
+        "key": "library-Book"
+      },
+      "properties": [
+        {
+          "property": {
+            "language": "library",
+            "version": "1",
+            "key": "library-Book-title"
+          },
+          "value": "DSL Engineering"
+        },
+        {
+          "property": {
+            "language": "library",
+            "version": "1",
+            "key": "library-Book-pages"
+          },
+          "value": "558"
+        }
+      ],
+      "containments": [],
+      "references": [
+        {
+          "reference": {
+            "language": "library",
+            "version": "1",
+            "key": "library-Book-author"
+          },
+          "targets": [
+            {
+              "resolveInfo": "Markus Völter",
+              "reference": "mv"
+            }
+          ]
+        }
+      ],
+      "annotations": [],
+      "parent": "lib-1"
+    },
+    {
+      "id": "bfd",
+      "classifier": {
+        "language": "library",
+        "version": "1",
+        "key": "library-Book"
+      },
+      "properties": [
+        {
+          "property": {
+            "language": "library",
+            "version": "1",
+            "key": "library-Book-title"
+          },
+          "value": "Business-Friendly DSLs"
+        },
+        {
+          "property": {
+            "language": "library",
+            "version": "1",
+            "key": "library-Book-pages"
+          },
+          "value": "517"
+        }
+      ],
+      "containments": [],
+      "references": [
+        {
+          "reference": {
+            "language": "library",
+            "version": "1",
+            "key": "library-Book-author"
+          },
+          "targets": [
+            {
+              "resolveInfo": "Meinte Boersma",
+              "reference": "mb"
+            }
+          ]
+        }
+      ],
+      "annotations": [],
+      "parent": "lib-1"
+    }
+  ]
+}
+
+
