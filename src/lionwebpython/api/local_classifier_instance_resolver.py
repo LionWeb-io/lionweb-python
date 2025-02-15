@@ -1,4 +1,8 @@
-class LocalClassifierInstanceResolver:
+from lionwebpython.api.classifier_instance_resolver import \
+    ClassifierInstanceResolver
+
+
+class LocalClassifierInstanceResolver(ClassifierInstanceResolver):
     def __init__(self, *instances):
         self.instances = {instance.get_id(): instance for instance in instances}
 
