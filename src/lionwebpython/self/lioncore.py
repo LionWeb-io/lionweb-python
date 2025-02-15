@@ -329,6 +329,32 @@ class LionCore:
             concepts["LanguageEntity"].set_abstract(True)
             concepts["LanguageEntity"].add_implemented_interface(interfaces["IKeyed"])
 
+            concepts["Annotation"].set_extended_concept(concepts["Classifier"])
+            concepts["Annotation"].add_feature(
+                Reference.create_optional(
+                    lion_web_version,
+                    "annotates",
+                    concepts["Classifier"],
+                    "-id-Annotation-annotates" + version_id_suffix,
+                )
+            )
+            concepts["Annotation"].add_feature(
+                Reference.create_optional(
+                    lion_web_version,
+                    "extends",
+                    concepts["Annotation"],
+                    "-id-Annotation-extends" + version_id_suffix,
+                )
+            )
+            concepts["Annotation"].add_feature(
+                Reference.create_multiple(
+                    lion_web_version,
+                    "implements",
+                    concepts["Interface"],
+                    "-id-Annotation-implements" + version_id_suffix,
+                )
+            )
+
             if lion_web_version != LionWebVersion.V2023_1:
                 concepts["StructuredDataType"] = Concept(
                     lion_web_version=lion_web_version, name="StructuredDataType"
