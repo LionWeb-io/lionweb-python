@@ -22,8 +22,8 @@ class LowLevelJsonSerializationTest(unittest.TestCase):
         lioncore = deserialized_instances[0]
         self.assertEqual(MetaPointer("LionCore-M3", "2023.1", "Language"), lioncore.classifier)
         self.assertEqual("-id-LionCore-M3", lioncore.id)
-        self.assertEqual("LionCore_M3", lioncore.get_property_value("LionCore-builtins-INamed-name"))
-        self.assertEqual(16, len(lioncore.children))
+        self.assertEqual("LionCore_M3", lioncore.get_property_value_by_key("LionCore-builtins-INamed-name"))
+        self.assertEqual(16, len(lioncore.get_children()))
         self.assertIsNone(lioncore.parent_node_id)
 
     def test_deserialize_library_language_to_serialized_nodes(self):
@@ -33,11 +33,11 @@ class LowLevelJsonSerializationTest(unittest.TestCase):
         json_serialization = LowLevelJsonSerialization()
         serialized_chunk = json_serialization.deserialize_serialization_block(json_element)
         book = serialized_chunk.get_instance_by_id("library-Book")
-        self.assertEqual("Book", book.get_property_value("LionCore-builtins-INamed-name"))
+        self.assertEqual("Book", book.get_property_value_by_key("LionCore-builtins-INamed-name"))
 
         guided_book_writer = serialized_chunk.get_instance_by_id("library-GuideBookWriter")
-        self.assertEqual("GuideBookWriter", guided_book_writer.get_property_value("LionCore-builtins-INamed-name"))
-        self.assertEqual([{"reference": "library-Writer", "info": "Writer"}], guided_book_writer.get_reference_values("Concept-extends"))
+        self.assertEqual("GuideBookWriter", guided_book_writer.get_property_value_by_key("LionCore-builtins-INamed-name"))
+        self.assertEqual([{"reference": "library-Writer", "info": "Writer"}], guided_book_writer.get_reference_values_by_key("Concept-extends"))
         self.assertEqual(["library-GuideBookWriter-countries"], guided_book_writer.get_containment_values("Concept-features"))
 
     def test_reserialize_library_language(self):
@@ -50,15 +50,15 @@ class LowLevelJsonSerializationTest(unittest.TestCase):
         self.assert_file_is_reserialized_correctly("./resources/serialization/langeng-library.json")
 
     def test_serialize_annotations(self):
-        l = Language("l", "l", "l", "1")
-        a1 = Annotation(l, "a1", "a1", "a1")
-        a2 = Annotation(l, "a2", "a2", "a2")
-        c = Concept(l, "c", "c", "c")
+        lang = Language("l", "l", "l", "1")
+        a1 = Annotation(language=lang, name="a1", id="a1", key="a1")
+        a2 = Annotation(language=lang, name="a2", id="a2", key="a2")
+        c = Concept(language=lang, name="c", id="c", key="c")
 
         n1 = DynamicNode("n1", c)
-        a1_1 = DynamicAnnotationInstance("a1_1", a1, n1)
-        a1_2 = DynamicAnnotationInstance("a1_2", a1, n1)
-        a2_3 = DynamicAnnotationInstance("a2_3", a2, n1)
+        DynamicAnnotationInstance("a1_1", a1, n1)
+        DynamicAnnotationInstance("a1_2", a1, n1)
+        DynamicAnnotationInstance("a2_3", a2, n1)
 
         hjs = JsonSerialization()
         hjs.enable_dynamic_nodes()
