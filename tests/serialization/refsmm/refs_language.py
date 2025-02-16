@@ -26,7 +26,9 @@ class RefsLanguage(Language):
         self.add_element(RefsLanguage.REF_NODE)
 
         RefsLanguage.CONTAINER_NODE.add_feature(
-            Containment.create_optional(name="contained", type=RefsLanguage.CONTAINER_NODE)
+            Containment.create_optional(
+                name="contained", type=RefsLanguage.CONTAINER_NODE
+            )
             .set_id("RefsMM_Container_contained")
             .set_key("RefsMM_Container_contained")
         )

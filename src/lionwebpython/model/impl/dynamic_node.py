@@ -56,7 +56,8 @@ class DynamicNode(DynamicClassifierInstance, Node, HasSettableParent):
             )
             and self.reference_values == other.reference_values
             and len(self.annotations) == len(other.annotations)
-            and {node.get_id() for node in self.annotations} == {node.get_id() for node in other.annotations}
+            and {node.get_id() for node in self.annotations}
+            == {node.get_id() for node in other.annotations}
         )
 
     @staticmethod

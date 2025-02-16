@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from typing import TYPE_CHECKING, Generic, List, Optional, TypeVar, Collection
+from typing import TYPE_CHECKING, Collection, Generic, List, Optional, TypeVar
 
 from lionwebpython.model.has_feature_values import HasFeatureValues
 
@@ -38,7 +38,9 @@ class ClassifierInstance(Generic[T], HasFeatureValues, ABC):
 
     @staticmethod
     def collect_self_and_descendants(
-        self: 'ClassifierInstance', include_annotations: bool, result: Collection["ClassifierInstance"]
+        self: "ClassifierInstance",
+        include_annotations: bool,
+        result: Collection["ClassifierInstance"],
     ):
         """
         Collects `self` and all its descendants into `result`.

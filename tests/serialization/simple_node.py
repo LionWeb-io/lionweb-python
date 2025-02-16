@@ -4,8 +4,10 @@ from typing import List, Optional
 from lionwebpython.language import Containment
 from lionwebpython.language.reference import Reference
 from lionwebpython.model.annotation_instance import AnnotationInstance
-from lionwebpython.model.classifier_instance_utils import ClassifierInstanceUtils
-from lionwebpython.model.impl.abstract_classifier_instance import AbstractClassifierInstance
+from lionwebpython.model.classifier_instance_utils import \
+    ClassifierInstanceUtils
+from lionwebpython.model.impl.abstract_classifier_instance import \
+    AbstractClassifierInstance
 from lionwebpython.model.node import Node
 from lionwebpython.model.reference_value import ReferenceValue
 
@@ -49,7 +51,7 @@ class SimpleNode(AbstractClassifierInstance, Node):
     def set_property_value(self, property, value):
         raise NotImplementedError()
 
-    def get_children(self, containment:Optional[Containment] = None):
+    def get_children(self, containment: Optional[Containment] = None):
         if containment is None:
             return ClassifierInstanceUtils.get_children(self)
         if containment not in self.get_classifier().all_containments():
@@ -70,7 +72,9 @@ class SimpleNode(AbstractClassifierInstance, Node):
             raise ValueError("Reference not belonging to this concept")
         return self.concrete_get_reference_values(reference)
 
-    def concrete_get_reference_values(self, reference: Reference) -> List["ReferenceValue"]:
+    def concrete_get_reference_values(
+        self, reference: Reference
+    ) -> List["ReferenceValue"]:
         raise NotImplementedError(f"Reference {reference} not yet supported")
 
     def add_reference_value(self, reference, referred_node: Optional["ReferenceValue"]):

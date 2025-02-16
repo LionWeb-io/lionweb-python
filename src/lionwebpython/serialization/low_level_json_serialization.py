@@ -225,7 +225,9 @@ class LowLevelJsonSerialization:
                         "Issue while deserializing classifier instances"
                     ) from e
                 except Exception as e:
-                    raise DeserializationException(f"Issue while deserializing {element}") from e
+                    raise DeserializationException(
+                        f"Issue while deserializing {element}"
+                    ) from e
         else:
             raise ValueError(f"We expected a list, we got instead: {nodes}")
 

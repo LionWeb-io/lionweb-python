@@ -17,7 +17,9 @@ class Concept(Classifier["Concept"]):
         id: Optional[str] = None,
         key: Optional[str] = None,
     ):
-        super().__init__(lion_web_version=lion_web_version, language=language, name=name, id=id)
+        super().__init__(
+            lion_web_version=lion_web_version, language=language, name=name, id=id
+        )
         self.set_abstract(False)
         self.set_partition(False)
         if key:

@@ -80,4 +80,6 @@ class Feature(M3Node[T], NamespacedEntity, IKeyed[T], Generic[T]):
 
             return cast(Language, container.get_container())
         else:
-            raise ValueError(f"Feature {self} is not a language. Its container is {container} and that is not in a language")
+            raise ValueError(
+                f"Feature {self} is not a language. Its container is {container} and that is not in a language"
+            )

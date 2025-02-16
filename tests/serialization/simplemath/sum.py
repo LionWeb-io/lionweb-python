@@ -47,9 +47,9 @@ class Sum(SimpleNode):
         return super().concrete_get_children(containment)
 
     def add_child(self, containment, child):
-        if containment.get_name() == 'left':
+        if containment.get_name() == "left":
             self.left = child
-        elif containment.get_name() == 'right':
+        elif containment.get_name() == "right":
             self.right = child
         else:
             raise ValueError()

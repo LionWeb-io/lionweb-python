@@ -3,7 +3,8 @@ from typing import Dict, List, Optional
 from lionwebpython.serialization.data.metapointer import MetaPointer
 from lionwebpython.serialization.data.serialized_reference_value import \
     SerializedReferenceValueEntry
-from lionwebpython.serialization.deserialization_exception import DeserializationException
+from lionwebpython.serialization.deserialization_exception import \
+    DeserializationException
 from lionwebpython.serialization.low_level_json_serialization import JsonObject
 
 

@@ -24,6 +24,7 @@ class EnumerationLiteral(M3Node, NamespacedEntity, IKeyed):
 
         if enumeration is not None:
             from lionwebpython.language.enumeration import Enumeration
+
             if not isinstance(enumeration, Enumeration):
                 raise ValueError()
             enumeration.add_literal(self)

@@ -66,17 +66,17 @@ class AbstractSerialization:
         self.builtins_reference_dangling = True
 
     def serialize_tree_to_serialization_block(self, root):
-        classifier_instances = set()
+        classifier_instances = []
         self.collect_self_and_descendants(root, True, classifier_instances)
         return self.serialize_nodes_to_serialization_block(classifier_instances)
 
     def collect_self_and_descendants(
-        self, instance, include_self=True, collection=None
+        self, instance: ClassifierInstance, include_self=True, collection=None
     ):
         if collection is None:
-            collection = set()
+            collection = []
         if include_self:
-            collection.add(instance)
+            collection.append(instance)
         for child in instance.get_children():
             self.collect_self_and_descendants(child, True, collection)
         return collection
@@ -89,38 +89,53 @@ class AbstractSerialization:
             if classifier_instance is None:
                 raise ValueError("nodes should not contain null values")
 
-            serialized_chunk.add_classifier_instance(self.serialize_node(classifier_instance))
+            serialized_chunk.add_classifier_instance(
+                self.serialize_node(classifier_instance)
+            )
 
             # Handle annotations
             for annotation_instance in classifier_instance.get_annotations():
                 if annotation_instance not in classifier_instances:
-                    serialized_chunk.add_classifier_instance(self.serialize_annotation_instance(annotation_instance))
-                    self._consider_language_during_serialization(serialized_chunk,
-                                                                 annotation_instance.get_classifier().get_language())
+                    serialized_chunk.add_classifier_instance(
+                        self.serialize_annotation_instance(annotation_instance)
+                    )
+                    self._consider_language_during_serialization(
+                        serialized_chunk,
+                        annotation_instance.get_classifier().get_language(),
+                    )
 
             # Validate classifier and its language
             classifier = classifier_instance.get_classifier()
             if classifier is None:
-                raise ValueError("A node should have a concept in order to be serialized")
+                raise ValueError(
+                    "A node should have a concept in order to be serialized"
+                )
 
             language = classifier.get_language()
             if language is None:
                 raise ValueError(
-                    f"A Concept should be part of a Language in order to be serialized. Concept {classifier} is not")
+                    f"A Concept should be part of a Language in order to be serialized. Concept {classifier} is not"
+                )
 
             self._consider_language_during_serialization(serialized_chunk, language)
 
             # Add all features' declaring languages
             for feature in classifier.all_features():
-                self._consider_language_during_serialization(serialized_chunk, feature.get_declaring_language())
+                self._consider_language_during_serialization(
+                    serialized_chunk, feature.get_declaring_language()
+                )
 
             # Add all properties' type languages
             for prop in classifier.all_properties():
-                self._consider_language_during_serialization(serialized_chunk, prop.get_type().get_language())
+                self._consider_language_during_serialization(
+                    serialized_chunk, prop.get_type().get_language()
+                )
 
             # Add all links' type languages
             for link in classifier.all_links():
-                self._consider_language_during_serialization(serialized_chunk, link.get_type().get_language())
+                self._consider_language_during_serialization(
+                    serialized_chunk, link.get_type().get_language()
+                )
 
         return serialized_chunk
 
@@ -315,7 +330,9 @@ class AbstractSerialization:
             serialized_to_instance_map[n] = instantiated
 
         if len(sorted_serialized_instances) != len(serialized_to_instance_map):
-            raise ValueError(f"We got {len(sorted_serialized_instances)} nodes to deserialize, but we deserialized {len(serialized_to_instance_map)}")
+            raise ValueError(
+                f"We got {len(sorted_serialized_instances)} nodes to deserialize, but we deserialized {len(serialized_to_instance_map)}"
+            )
 
         classifier_instance_resolver = CompositeClassifierInstanceResolver(
             MapBasedResolver(deserialized_by_id),

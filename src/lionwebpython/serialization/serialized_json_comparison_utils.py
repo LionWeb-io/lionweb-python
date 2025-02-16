@@ -1,4 +1,4 @@
-from typing import List, cast, Dict
+from typing import Dict, List, cast
 
 from lionwebpython.serialization.json_utils import JsonArray, JsonObject
 
@@ -29,17 +29,27 @@ class SerializedJsonComparisonUtils:
         )
 
     @staticmethod
-    def assert_equivalent_lionweb_json_languages(expected_languages: JsonArray, actual_languages: JsonArray) -> None:
+    def assert_equivalent_lionweb_json_languages(
+        expected_languages: JsonArray, actual_languages: JsonArray
+    ) -> None:
         if len(expected_languages) != len(actual_languages):
             raise AssertionError(
                 f"Expected {len(expected_languages)} languages, but found {len(actual_languages)}. Actual languages: {actual_languages}"
             )
 
-        expected_versions = {cast(Dict, lang)["key"]: cast(Dict, lang)["version"] for lang in expected_languages}
-        actual_versions = {cast(Dict, lang)["key"]: cast(Dict, lang)["version"] for lang in actual_languages}
+        expected_versions = {
+            cast(Dict, lang)["key"]: cast(Dict, lang)["version"]
+            for lang in expected_languages
+        }
+        actual_versions = {
+            cast(Dict, lang)["key"]: cast(Dict, lang)["version"]
+            for lang in actual_languages
+        }
 
         if expected_versions != actual_versions:
-            raise AssertionError(f"Used languages do not match: expected {expected_versions}, got {actual_versions}")
+            raise AssertionError(
+                f"Used languages do not match: expected {expected_versions}, got {actual_versions}"
+            )
 
     @staticmethod
     def assert_equivalent_lionweb_json_nodes(expected: JsonArray, actual: JsonArray):

@@ -75,10 +75,18 @@ class NodePopulator:
 
             deserialized_value = []
             for child_node_id in serialized_containment_value.value:
-                if self.serialization.unavailable_children_policy == 'PROXY_NODES':
-                    deserialized_value.append(self.classifier_instance_resolver.resolve_or_proxy(child_node_id))
+                if self.serialization.unavailable_children_policy == "PROXY_NODES":
+                    deserialized_value.append(
+                        self.classifier_instance_resolver.resolve_or_proxy(
+                            child_node_id
+                        )
+                    )
                 else:
-                    deserialized_value.append(self.classifier_instance_resolver.strictly_resolve(child_node_id))
+                    deserialized_value.append(
+                        self.classifier_instance_resolver.strictly_resolve(
+                            child_node_id
+                        )
+                    )
 
             if deserialized_value != node.get_children(containment):
                 for child in deserialized_value:
@@ -130,5 +138,7 @@ class NodePopulator:
                 if referred is None and entry.resolve_info:
                     referred = self.auto_resolve_map.get(entry.resolve_info)
 
-                reference_value = ReferenceValue(referred=referred, resolve_info=entry.resolve_info)
+                reference_value = ReferenceValue(
+                    referred=referred, resolve_info=entry.resolve_info
+                )
                 node.add_reference_value(reference, reference_value)

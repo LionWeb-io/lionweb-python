@@ -16,7 +16,9 @@ class Enumeration(DataType, NamespaceProvider):
         language: Optional[Language] = None,
         name: Optional[str] = None,
     ):
-        super().__init__(lion_web_version=lion_web_version, language=language, name=name)
+        super().__init__(
+            lion_web_version=lion_web_version, language=language, name=name
+        )
 
     def get_literals(self) -> List[EnumerationLiteral]:
         return self.get_containment_multiple_value("literals")

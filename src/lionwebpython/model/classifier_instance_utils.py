@@ -85,7 +85,8 @@ class ClassifierInstanceUtils:
             from lionwebpython.model.reference_value import ReferenceValue
 
             return ReferenceValue(
-                referred=entity, resolve_info=f"LIONCORE_AUTORESOLVE_PREFIX{entity.get_name()}"
+                referred=entity,
+                resolve_info=f"LIONCORE_AUTORESOLVE_PREFIX{entity.get_name()}",
             )
         elif (
             language
@@ -93,7 +94,8 @@ class ClassifierInstanceUtils:
             and entity.get_lionweb_version() == LionWebVersion.V2024_1
         ):
             return ReferenceValue(
-                referred=entity, resolve_info=f"LIONCOREBUILTINS_AUTORESOLVE_PREFIX{entity.get_name()}"
+                referred=entity,
+                resolve_info=f"LIONCOREBUILTINS_AUTORESOLVE_PREFIX{entity.get_name()}",
             )
         else:
             return ReferenceValue(referred=entity, resolve_info=entity.get_name())
@@ -127,7 +129,9 @@ class ClassifierInstanceUtils:
         return False
 
     @staticmethod
-    def get_reference_value_by_name(instance: 'ClassifierInstance', reference_name: str) -> List['ReferenceValue']:
+    def get_reference_value_by_name(
+        instance: "ClassifierInstance", reference_name: str
+    ) -> List["ReferenceValue"]:
         if instance is None:
             raise ValueError("_this should not be null")
         if reference_name is None:

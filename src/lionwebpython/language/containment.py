@@ -71,7 +71,9 @@ class Containment(Link["Containment"]):
         id: Optional[str] = None,
         container: Optional["Classifier"] = None,
     ):
-        super().__init__(lion_web_version=lion_web_version, name=name, id=id, container=container)
+        super().__init__(
+            lion_web_version=lion_web_version, name=name, id=id, container=container
+        )
 
     def get_classifier(self) -> "Concept":
         from lionwebpython.self.lioncore import LionCore
