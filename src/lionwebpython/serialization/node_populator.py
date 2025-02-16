@@ -3,8 +3,10 @@ from typing import TYPE_CHECKING
 from lionwebpython.api.classifier_instance_resolver import ClassifierInstanceResolver
 from lionwebpython.language.lioncore_builtins import LionCoreBuiltins
 from lionwebpython.lionweb_version import LionWebVersion
+from lionwebpython.model import ClassifierInstance
 from lionwebpython.model.reference_value import ReferenceValue
 from lionwebpython.self.lioncore import LionCore
+from lionwebpython.serialization.data.serialized_classifier_instance import SerializedClassifierInstance
 
 from lionwebpython.serialization.deserialization_exception import \
     DeserializationException
@@ -24,7 +26,9 @@ class NodePopulator:
         deserialization_status: DeserializationStatus,
         auto_resolve_version: LionWebVersion=LionWebVersion.current_version(),
     ):
-        self.serialization = serialization
+        from lionwebpython.serialization.abstract_serialization import AbstractSerialization
+
+        self.serialization : AbstractSerialization = serialization
         self.classifier_instance_resolver = classifier_instance_resolver
         self.deserialization_status = deserialization_status
         self.auto_resolve_map = {}
@@ -37,11 +41,11 @@ class NodePopulator:
         for element in lion_core.get_elements():
             self.auto_resolve_map[f"LIONCORE::{element.get_name()}"] = element
 
-    def populate_classifier_instance(self, node, serialized_classifier_instance):
+    def populate_classifier_instance(self, node: ClassifierInstance, serialized_classifier_instance: SerializedClassifierInstance) -> None:
         self.populate_containments(node, serialized_classifier_instance)
         self.populate_node_references(node, serialized_classifier_instance)
 
-    def populate_containments(self, node, serialized_classifier_instance):
+    def populate_containments(self, node: ClassifierInstance, serialized_classifier_instance: SerializedClassifierInstance) -> None:
         concept = node.get_classifier()
         for (
             serialized_containment_value
@@ -60,7 +64,7 @@ class NodePopulator:
             deserialized_value = [
                 (
                     self.classifier_instance_resolver.resolve_or_proxy(child_node_id)
-                    if self.serialization.get_unavailable_children_policy()
+                    if self.serialization.unavailable_children_policy
                     == UnavailableNodePolicy.PROXY_NODES
                     else self.classifier_instance_resolver.strictly_resolve(
                         child_node_id
@@ -73,7 +77,7 @@ class NodePopulator:
                 for child in deserialized_value:
                     node.add_child(containment, child)
 
-    def populate_node_references(self, node, serialized_classifier_instance):
+    def populate_node_references(self, node: ClassifierInstance, serialized_classifier_instance: SerializedClassifierInstance) -> None:
         concept = node.get_classifier()
         for (
             serialized_reference_value
@@ -95,17 +99,17 @@ class NodePopulator:
 
                 if referred is None and entry.reference:
                     if (
-                        self.serialization.get_unavailable_reference_target_policy()
+                        self.serialization.unavailable_reference_target_policy
                         == UnavailableNodePolicy.NULL_REFERENCES
                     ):
                         referred = None
                     elif (
-                        self.serialization.get_unavailable_reference_target_policy()
+                        self.serialization.unavailable_reference_target_policy
                         == UnavailableNodePolicy.PROXY_NODES
                     ):
                         referred = self.deserialization_status.resolve(entry.reference)
                     elif (
-                        self.serialization.get_unavailable_reference_target_policy()
+                        self.serialization.unavailable_reference_target_policy
                         == UnavailableNodePolicy.THROW_ERROR
                     ):
                         raise DeserializationException(

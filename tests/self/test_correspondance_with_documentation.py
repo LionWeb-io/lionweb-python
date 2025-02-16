@@ -4,7 +4,7 @@ import requests
 from lionwebpython.language.lioncore_builtins import LionCoreBuiltins
 from lionwebpython.lionweb_version import LionWebVersion
 from lionwebpython.self.lioncore import LionCore
-from lionwebpython.serialization.json_serialization import JsonSerialization
+from lionwebpython.serialization.serialization_provider import SerializationProvider
 from lionwebpython.utils.model_comparator import ModelComparator
 
 
@@ -19,7 +19,7 @@ class CorrespondenceWithDocumentationTest(unittest.TestCase):
     SPECIFICATION_LIONCOREBUILTINS_2024_1_PATH = "/2024.1/metametamodel/builtins.json"
 
     def test_lioncore_same_as_repo_2023_1(self):
-        json_ser = JsonSerialization(LionWebVersion.V2023_1)
+        json_ser = SerializationProvider.get_standard_json_serialization(LionWebVersion.V2023_1)
 
         url = (
             f"https://raw.githubusercontent.com/LionWeb-io/specification/"
@@ -38,7 +38,7 @@ class CorrespondenceWithDocumentationTest(unittest.TestCase):
         self.assertTrue(comparison.are_equivalent, comparison)
 
     def test_lioncore_same_as_repo_2024_1(self):
-        json_ser = JsonSerialization(LionWebVersion.V2024_1)
+        json_ser = SerializationProvider.get_standard_json_serialization(LionWebVersion.V2024_1)
 
         url = (
             f"https://raw.githubusercontent.com/LionWeb-io/specification/"
@@ -57,7 +57,7 @@ class CorrespondenceWithDocumentationTest(unittest.TestCase):
         self.assertTrue(comparison.are_equivalent, comparison)
 
     def test_builtins_same_as_repo_2023_1(self):
-        json_ser = JsonSerialization(LionWebVersion.V2023_1)
+        json_ser = SerializationProvider.get_standard_json_serialization(LionWebVersion.V2023_1)
 
         url = (
             f"https://raw.githubusercontent.com/LionWeb-io/specification/"
@@ -76,7 +76,7 @@ class CorrespondenceWithDocumentationTest(unittest.TestCase):
         self.assertTrue(comparison.are_equivalent, comparison)
 
     def test_builtins_same_as_repo_2024_1(self):
-        json_ser = JsonSerialization(LionWebVersion.V2024_1)
+        json_ser = SerializationProvider.get_standard_json_serialization(LionWebVersion.V2024_1)
 
         url = (
             f"https://raw.githubusercontent.com/LionWeb-io/specification/"

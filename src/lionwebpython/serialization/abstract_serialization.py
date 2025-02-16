@@ -372,7 +372,7 @@ class AbstractSerialization:
 
         # Ensure that properties values are set correctly
         for property, deserialized_value in properties_values.items():
-            if deserialized_value != classifier_instance.get_property_value(property):
-                classifier_instance.set_property_value(property, deserialized_value)
+            if deserialized_value != classifier_instance.get_property_value(property=property):
+                classifier_instance.set_property_value(property=property, value=deserialized_value)
 
         return classifier_instance

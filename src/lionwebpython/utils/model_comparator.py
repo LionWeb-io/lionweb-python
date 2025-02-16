@@ -4,6 +4,7 @@ from lionwebpython.language.classifier import Classifier
 from lionwebpython.model import ClassifierInstance
 from lionwebpython.model.annotation_instance import AnnotationInstance
 from lionwebpython.model.node import Node
+from lionwebpython.model.reference_value import ReferenceValue
 
 
 class ComparisonResult:
@@ -42,12 +43,12 @@ class ComparisonResult:
             f"{context} (id={node_id}): different number of referred for {reference_name}, a={children_a}, b={children_b}"
         )
 
-    def mark_different_referred_id(self, context:str, node_id:str, reference_name:str, index:int, referred_a:str, referred_b:str):
+    def mark_different_referred_id(self, context:str, node_id:str, reference_name:str, index:int, referred_a:str|None, referred_b:str|None):
         self.differences.append(
             f"{context} (id={node_id}): different referred id for {reference_name} index {index}, a={referred_a}, b={referred_b}"
         )
 
-    def mark_different_resolve_info(self, context:str, node_id:str, reference_name:str, index:int, resolve_info_a:str, resolve_info_b:str):
+    def mark_different_resolve_info(self, context:str, node_id:str, reference_name:str, index:int, resolve_info_a:str|None, resolve_info_b:str|None):
         self.differences.append(
             f"{context} (id={node_id}): different resolve info for {reference_name} index {index}, a={resolve_info_a}, b={resolve_info_b}"
         )
@@ -89,8 +90,12 @@ class ModelComparator:
                 comparison_result.mark_different_number_of_references(context, cast(str, node_a.get_id()), reference.qualified_name(), len(value_a), len(value_b))
             else:
                 for i, (ref_a, ref_b) in enumerate(zip(value_a, value_b)):
-                    if ref_a.referred_id != ref_b.referred_id:
-                        comparison_result.mark_different_referred_id(context, cast(str, node_a.get_id()), reference.qualified_name(), i, ref_a.referred_id, ref_b.referred_id)
+                    if not isinstance(ref_a, ReferenceValue):
+                        raise ValueError()
+                    if not isinstance(ref_b, ReferenceValue):
+                        raise ValueError()
+                    if ref_a.get_referred_id() != ref_b.get_referred_id():
+                        comparison_result.mark_different_referred_id(context, cast(str, node_a.get_id()), reference.qualified_name(), i, ref_a.get_referred_id(), ref_b.get_referred_id())
                     if ref_a.resolve_info != ref_b.resolve_info:
                         comparison_result.mark_different_resolve_info(context, cast(str, node_a.get_id()), reference.qualified_name(), i, ref_a.resolve_info, ref_b.resolve_info)
 

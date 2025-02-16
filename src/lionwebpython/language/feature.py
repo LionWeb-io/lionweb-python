@@ -21,6 +21,9 @@ class Feature(M3Node[T], NamespacedEntity, IKeyed[T], Generic[T]):
         container: Optional["Classifier"] = None,
         id: Optional[str] = None,
     ):
+        from lionwebpython.language.classifier import Classifier
+        if container and not isinstance(container, Classifier):
+            raise ValueError(f"Invalid parameter container received: {container}")
         if container and container.get_lionweb_version():
             lion_web_version = container.get_lionweb_version()
         else:

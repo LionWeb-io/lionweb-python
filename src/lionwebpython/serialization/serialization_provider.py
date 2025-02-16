@@ -29,7 +29,7 @@ class SerializationProvider:
         serialization.classifier_resolver.register_language(
             LionCore.get_instance(serialization.lion_web_version)
         )
-        serialization.instantiator.register_lion_core_custom_deserializers(
+        serialization.instantiator.register_lioncore_custom_deserializers(
             serialization.lion_web_version
         )
         serialization.primitive_values_serialization.register_lion_builtins_primitive_serializers_and_deserializers(

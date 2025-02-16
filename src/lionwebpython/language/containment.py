@@ -72,13 +72,15 @@ class Containment(Link["Containment"]):
         container: Optional["Classifier"] = None,
     ):
         if lion_web_version is not None and name is not None and id is not None:
-            super().__init__(lion_web_version, name, id)
+            super().__init__(lion_web_version=lion_web_version, name=name, id=id)
         elif lion_web_version is not None and name is not None:
-            super().__init__(lion_web_version, name, None)
+            super().__init__(lion_web_version=lion_web_version, name=name)
         elif name is not None and id is not None:
             super().__init__(name=name, id=id)
         elif name is not None:
             super().__init__(name=name, container=container)
+        elif lion_web_version is not None:
+            super().__init__(lion_web_version=lion_web_version)
         else:
             super().__init__()
 

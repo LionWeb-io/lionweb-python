@@ -210,7 +210,7 @@ class LionCore:
                 )
             )
 
-            concepts["Interface"].set_extended_concept(concepts["LanguageEntity"])
+            concepts["Interface"].set_extended_concept(concepts["Classifier"])
             concepts["Interface"].add_feature(
                 Reference.create_multiple(
                     lion_web_version=lion_web_version,
@@ -220,7 +220,7 @@ class LionCore:
                 )
             )
 
-            concepts["Containment"].set_extended_concept(concepts["LanguageEntity"])
+            concepts["Containment"].set_extended_concept(concepts["Link"])
 
             concepts["DataType"].set_extended_concept(concepts["LanguageEntity"])
             concepts["DataType"].set_abstract(True)
@@ -233,6 +233,8 @@ class LionCore:
                     type=concepts["EnumerationLiteral"],
                 ).set_id("-id-Enumeration-literals" + version_id_suffix)
             )
+
+            concepts["EnumerationLiteral"].add_implemented_interface(interfaces["IKeyed"])
 
             concepts["Feature"].set_abstract(True)
             concepts["Feature"].add_implemented_interface(interfaces["IKeyed"])
@@ -301,16 +303,8 @@ class LionCore:
                 ).set_key("Language-entities")
             )
 
-            interfaces["IKeyed"].add_extended_interface(
-                LionCoreBuiltins.get_inamed(lion_web_version)
-            )
-            interfaces["IKeyed"].add_feature(
-                Property.create_required(
-                    lion_web_version,
-                    "key",
-                    LionCoreBuiltins.get_string(lion_web_version),
-                ).set_id("-id-IKeyed-key" + version_id_suffix)
-            )
+            concepts["LanguageEntity"].set_abstract(True)
+            concepts["LanguageEntity"].add_implemented_interface(interfaces["IKeyed"])
 
             concepts["PrimitiveType"].set_extended_concept(concepts["DataType"])
 
@@ -326,8 +320,16 @@ class LionCore:
 
             concepts["Reference"].set_extended_concept(concepts["Link"])
 
-            concepts["LanguageEntity"].set_abstract(True)
-            concepts["LanguageEntity"].add_implemented_interface(interfaces["IKeyed"])
+            interfaces["IKeyed"].add_extended_interface(
+                LionCoreBuiltins.get_inamed(lion_web_version)
+            )
+            interfaces["IKeyed"].add_feature(
+                Property.create_required(
+                    lion_web_version,
+                    "key",
+                    LionCoreBuiltins.get_string(lion_web_version),
+                ).set_id("-id-IKeyed-key" + version_id_suffix)
+            )
 
             concepts["Annotation"].set_extended_concept(concepts["Classifier"])
             concepts["Annotation"].add_feature(
