@@ -17,9 +17,9 @@ class RefsLanguage(Language):
         self.version = "1"
 
         # We do not pass INSTANCE as it is still None at this point
-        RefsLanguage.CONTAINER_NODE = Concept(None, "Container", "RefsMM_Container")
+        RefsLanguage.CONTAINER_NODE = Concept(name="Container", id="RefsMM_Container")
         RefsLanguage.CONTAINER_NODE.key = "RefsMM_Container"
-        RefsLanguage.REF_NODE = Concept(None, "Ref", "RefsMM_Ref")
+        RefsLanguage.REF_NODE = Concept(name="Ref", id="RefsMM_Ref")
         RefsLanguage.REF_NODE.key = "RefsMM_Ref"
 
         self.add_element(RefsLanguage.CONTAINER_NODE)

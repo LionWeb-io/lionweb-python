@@ -19,6 +19,8 @@ class LanguageEntity(M3Node[T], NamespacedEntity, IKeyed[T]):
         name: Optional[str] = None,
         id: Optional[str] = None,
     ):
+        if language and not isinstance(language, Language):
+            raise ValueError()
         super().__init__(lion_web_version or LionWebVersion.current_version())
         self.set_name(name)
 

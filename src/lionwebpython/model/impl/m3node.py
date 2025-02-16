@@ -99,9 +99,9 @@ class M3Node(Generic[T], Node, IKeyed[T], AbstractClassifierInstance, ABC):
         if name is None:
             raise ValueError()
         if containment.is_multiple():
-            self.add_containment_multiple_value(containment.get_name(), child)
+            self.add_containment_multiple_value(name, child)
         else:
-            self.set_containment_single_value(containment.get_name(), child)
+            self.set_containment_single_value(name, child)
 
     def remove_child(self, **kwargs) -> None:
         raise NotImplementedError()
