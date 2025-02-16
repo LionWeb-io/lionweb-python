@@ -84,18 +84,47 @@ class AbstractSerialization:
     def serialize_nodes_to_serialization_block(self, classifier_instances):
         serialized_chunk = SerializedChunk()
         serialized_chunk.serialization_format_version = self.lion_web_version.value
-        for instance in classifier_instances:
-            serialized_chunk.classifier_instances.append(self.serialize_node(instance))
-            for annotation in instance.get_annotations():
-                serialized_chunk.classifier_instances.append(
-                    self.serialize_annotation_instance(annotation)
-                )
-            self.consider_language_during_serialization(
-                serialized_chunk, instance.get_classifier().get_language()
-            )
+
+        for classifier_instance in classifier_instances:
+            if classifier_instance is None:
+                raise ValueError("nodes should not contain null values")
+
+            serialized_chunk.add_classifier_instance(self.serialize_node(classifier_instance))
+
+            # Handle annotations
+            for annotation_instance in classifier_instance.get_annotations():
+                if annotation_instance not in classifier_instances:
+                    serialized_chunk.add_classifier_instance(self.serialize_annotation_instance(annotation_instance))
+                    self._consider_language_during_serialization(serialized_chunk,
+                                                                 annotation_instance.get_classifier().get_language())
+
+            # Validate classifier and its language
+            classifier = classifier_instance.get_classifier()
+            if classifier is None:
+                raise ValueError("A node should have a concept in order to be serialized")
+
+            language = classifier.get_language()
+            if language is None:
+                raise ValueError(
+                    f"A Concept should be part of a Language in order to be serialized. Concept {classifier} is not")
+
+            self._consider_language_during_serialization(serialized_chunk, language)
+
+            # Add all features' declaring languages
+            for feature in classifier.all_features():
+                self._consider_language_during_serialization(serialized_chunk, feature.get_declaring_language())
+
+            # Add all properties' type languages
+            for prop in classifier.all_properties():
+                self._consider_language_during_serialization(serialized_chunk, prop.get_type().get_language())
+
+            # Add all links' type languages
+            for link in classifier.all_links():
+                self._consider_language_during_serialization(serialized_chunk, link.get_type().get_language())
+
         return serialized_chunk
 
-    def consider_language_during_serialization(self, serialized_chunk, language):
+    def _consider_language_during_serialization(self, serialized_chunk, language):
         self.register_language(language)
         used_language = UsedLanguage(language.get_key(), language.get_version())
         if used_language not in serialized_chunk.languages:

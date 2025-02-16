@@ -1,6 +1,15 @@
 {
   "serializationFormatVersion": "2023.1",
-  "languages": [],
+  "languages": [
+    {
+      "key": "LionCore-builtins",
+      "version": "2023.1"
+    },
+    {
+      "key": "library",
+      "version": "1"
+    }
+  ],
   "nodes": [
     {
       "id": "bl",
