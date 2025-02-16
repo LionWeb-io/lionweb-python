@@ -505,8 +505,8 @@ class JsonSerializationTest(SerializationTest):
 
         deserialized_nodes = js.deserialize_json_to_nodes(je)
         self.assertEqual([n1, n2], deserialized_nodes)
-        self.assertEqual(EnumerationValueImpl(el1), deserialized_nodes[0].get_property_value(p))
-        self.assertEqual(EnumerationValueImpl(el2), deserialized_nodes[1].get_property_value(p))
+        self.assertEqual(EnumerationValueImpl(el1), deserialized_nodes[0].get_property_value(property=p))
+        self.assertEqual(EnumerationValueImpl(el2), deserialized_nodes[1].get_property_value(property=p))
 
     def test_deserialize_enumeration_literals_using_enum_instances(self):
         je = json.loads("""
@@ -573,8 +573,8 @@ class JsonSerializationTest(SerializationTest):
 
         deserialized_nodes = js.deserialize_json_to_nodes(je)
         self.assertEqual([n1, n2], deserialized_nodes)
-        self.assertEqual("el1", deserialized_nodes[0].get_property_value(p))
-        self.assertEqual("el2", deserialized_nodes[1].get_property_value(p))
+        self.assertEqual("el1", deserialized_nodes[0].get_property_value(property=p))
+        self.assertEqual("el2", deserialized_nodes[1].get_property_value(property=p))
 
     def test_serialization_of_language_versions_with_imports(self):
         my_language = Language()
@@ -587,7 +587,7 @@ class JsonSerializationTest(SerializationTest):
 
         my_instance = DynamicNode("instance-a", my_concept)
         json_ser = SerializationProvider.get_standard_json_serialization()
-        serialized_chunk = json_ser.serialize_nodes_to_serialization_block(my_instance)
+        serialized_chunk = json_ser.serialize_nodes_to_serialization_block([my_instance])
 
         self.assertEqual(1, len(serialized_chunk.get_classifier_instances()))
         serialized_classifier_instance = serialized_chunk.get_classifier_instances()[0]
@@ -610,7 +610,7 @@ class JsonSerializationTest(SerializationTest):
 
         hjs = SerializationProvider.get_standard_json_serialization()
         hjs.enable_dynamic_nodes()
-        serialized_chunk = hjs.serialize_nodes_to_serialization_block(n1)
+        serialized_chunk = hjs.serialize_nodes_to_serialization_block([n1])
 
         self.assertEqual(4, len(serialized_chunk.get_classifier_instances()))
         serialized_n1 = serialized_chunk.get_classifier_instances()[0]
@@ -680,7 +680,7 @@ class JsonSerializationTest(SerializationTest):
         ClassifierInstanceUtils.set_property_value_by_name(n1, "foo", "abc")
 
         hjs = SerializationProvider.get_standard_json_serialization()
-        serialized_chunk = hjs.serialize_nodes_to_serialization_block(n1)
+        serialized_chunk = hjs.serialize_nodes_to_serialization_block([n1])
 
         self.assertEqual(2, len(serialized_chunk.get_languages()))
         self.assertTrue(any(entry.get_key() == lang.get_key() and entry.get_version() == lang.get_version() for entry in serialized_chunk.get_languages()))
