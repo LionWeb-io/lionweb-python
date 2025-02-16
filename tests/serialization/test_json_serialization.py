@@ -119,13 +119,13 @@ class JsonSerializationTest(SerializationTest):
         with open(Path(__file__).parent.parent
             / "resources"
             / "properties-example" / "starlasu.lmm.json", "r") as file:
-            starlasu_nodes = json_serialization.deserialize_json_to_nodes(file)
+            starlasu_nodes = json_serialization.deserialize_json_to_nodes(json.load(file))
             starlasu = next(node for node in starlasu_nodes if isinstance(node, Language))
             json_serialization.instance_resolver.add_tree(starlasu)
 
         with open(Path(__file__).parent.parent
             / "resources" / "properties-example" / "properties.lmm.json", "r") as file:
-            properties_nodes = json_serialization.deserialize_json_to_nodes(file)
+            properties_nodes = json_serialization.deserialize_json_to_nodes(json.load(file))
             properties = next(node for node in properties_nodes if isinstance(node, Language))
 
         LanguageValidator.ensure_is_valid(starlasu)
@@ -165,7 +165,7 @@ class JsonSerializationTest(SerializationTest):
         sum1 = Sum(IntLiteral(1), IntLiteral(2))
         sum2 = Sum(IntLiteral(3), IntLiteral(4))
         js = SerializationProvider.get_standard_json_serialization()
-        serialized = js.serialize_trees_to_json_element(sum1, sum2)
+        serialized = js.serialize_trees_to_json_element([sum1, sum2])
 
         # Check languages and nodes count
         self.assertEqual(len(serialized["languages"]), 2)
@@ -173,7 +173,7 @@ class JsonSerializationTest(SerializationTest):
 
         self._prepare_deserialization_of_simple_math(js)
         deserialized = [
-            n for n in js.deserialize_to_nodes(serialized) if isinstance(n, Sum)
+            n for n in js.deserialize_json_to_nodes(serialized) if isinstance(n, Sum)
         ]
         self.assertEqual(deserialized, [sum1, sum2])
 

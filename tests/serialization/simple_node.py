@@ -4,10 +4,12 @@ from typing import List, Optional
 from lionwebpython.language import Containment
 from lionwebpython.model.annotation_instance import AnnotationInstance
 from lionwebpython.model.classifier_instance_utils import ClassifierInstanceUtils
+from lionwebpython.model.impl.abstract_classifier_instance import AbstractClassifierInstance
+from lionwebpython.model.node import Node
 from lionwebpython.model.reference_value import ReferenceValue
 
 
-class SimpleNode:
+class SimpleNode(AbstractClassifierInstance, Node):
     def __init__(self):
         self.id: Optional[str] = None
         self.parent: Optional["SimpleNode"] = None

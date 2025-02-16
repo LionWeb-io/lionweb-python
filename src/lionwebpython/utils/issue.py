@@ -36,5 +36,8 @@ class Issue:
     def __str__(self):
         return f"Issue(message='{self.message}', severity={self.severity}, subject={self.subject})"
 
+    def __repr__(self):
+        return f"Issue(message='{self.message}', severity={self.severity}, subject={self.subject})"
+
     def is_error(self) -> bool:
         return self.severity == IssueSeverity.ERROR
