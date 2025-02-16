@@ -224,6 +224,8 @@ class JsonSerializationTest(SerializationTest):
         # Expecting DeserializationException
         il1 = IntLiteral(1, "int_1")
         il2 = IntLiteral(2, None)
+        # Let's override it, as it gets a random id
+        il2.id = None
         sum1 = Sum(il1, il2, None)
 
         js = SerializationProvider.get_standard_json_serialization()
@@ -234,8 +236,8 @@ class JsonSerializationTest(SerializationTest):
             js.deserialize_json_to_nodes(serialized)
 
     def prepare_deserialization_of_refmm(self, js):
-        js.get_classifier_resolver().register_language(RefsLanguage.INSTANCE)
-        js.get_instantiator().register_custom_deserializer(
+        js.classifier_resolver.register_language(RefsLanguage.INSTANCE)
+        js.instantiator.register_custom_deserializer(
             RefsLanguage.CONTAINER_NODE.get_id(),
             lambda concept, serialized_node, deserialized_nodes_by_id, properties_values:
             ContainerNode(
@@ -243,7 +245,7 @@ class JsonSerializationTest(SerializationTest):
                 serialized_node.get_id()
             )
         )
-        js.get_instantiator().register_custom_deserializer(
+        js.instantiator.register_custom_deserializer(
             RefsLanguage.REF_NODE.get_id(),
             lambda concept, serialized_node, deserialized_nodes_by_id, properties_values:
             RefNode(serialized_node.get_id())
@@ -255,7 +257,7 @@ class JsonSerializationTest(SerializationTest):
         r1.set_referred(r2)
 
         js = SerializationProvider.get_standard_json_serialization()
-        serialized = js.serialize_nodes_to_json_element(r1)
+        serialized = js.serialize_nodes_to_json_element([r1])
         self.prepare_deserialization_of_refmm(js)
 
         with self.assertRaises(DeserializationException):

@@ -2,6 +2,7 @@ import random
 from typing import List, Optional
 
 from lionwebpython.language import Containment
+from lionwebpython.language.reference import Reference
 from lionwebpython.model.annotation_instance import AnnotationInstance
 from lionwebpython.model.classifier_instance_utils import ClassifierInstanceUtils
 from lionwebpython.model.impl.abstract_classifier_instance import AbstractClassifierInstance
@@ -64,12 +65,12 @@ class SimpleNode(AbstractClassifierInstance, Node):
     def remove_child(self, node):
         raise NotImplementedError()
 
-    def get_reference_values(self, reference) -> List["ReferenceValue"]:
+    def get_reference_values(self, reference: Reference) -> List["ReferenceValue"]:
         if reference not in self.get_classifier().all_references():
             raise ValueError("Reference not belonging to this concept")
         return self.concrete_get_reference_values(reference)
 
-    def concrete_get_reference_values(self, reference) -> List["ReferenceValue"]:
+    def concrete_get_reference_values(self, reference: Reference) -> List["ReferenceValue"]:
         raise NotImplementedError(f"Reference {reference} not yet supported")
 
     def add_reference_value(self, reference, referred_node: Optional["ReferenceValue"]):

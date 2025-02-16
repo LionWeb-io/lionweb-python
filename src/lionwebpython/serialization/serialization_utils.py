@@ -3,6 +3,7 @@ from typing import Dict, List, Optional
 from lionwebpython.serialization.data.metapointer import MetaPointer
 from lionwebpython.serialization.data.serialized_reference_value import \
     SerializedReferenceValueEntry
+from lionwebpython.serialization.deserialization_exception import DeserializationException
 from lionwebpython.serialization.low_level_json_serialization import JsonObject
 
 
@@ -52,7 +53,7 @@ class SerializationUtils:
             result = []
             for e in value:
                 if e is None:
-                    raise ValueError(
+                    raise DeserializationException(
                         "Unable to deserialize child identified by Null ID"
                     )
                 result.append(str(e))
