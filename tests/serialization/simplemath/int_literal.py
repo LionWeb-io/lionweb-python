@@ -33,6 +33,6 @@ class IntLiteral(SimpleNode):
         return f"IntLiteral{{value={self.value}}}"
 
     def concrete_get_property_value(self, property: Property):
-        if property.name == "value":
+        if property.get_name() == "value":
             return self.value
         return super().concrete_get_property_value(property)

@@ -1,10 +1,11 @@
 import json
 from pathlib import Path
-from typing import List
+from typing import List, Set
 
 from lionwebpython.language import Language
 from lionwebpython.lionweb_version import LionWebVersion
 from lionwebpython.model import ClassifierInstance
+from lionwebpython.model.impl.proxy_node import ProxyNode
 from lionwebpython.model.node import Node
 from lionwebpython.serialization.abstract_serialization import \
     AbstractSerialization
@@ -56,12 +57,28 @@ class JsonSerialization(AbstractSerialization):
     def serialize_trees_to_json_element(
         self, *roots: ClassifierInstance
     ) -> JsonElement:
-        # all_nodes = set()
-        # for root in roots:
-        #     nodes = self.collect_descendants(root)
-        #     all_nodes.update(nodes)
-        # return self.serialize_nodes_to_json_element(list(all_nodes))
-        raise ValueError("NOT YET TRANSLATED")
+        nodes_ids: Set[str] = set()
+        all_nodes: List[ClassifierInstance] = []
+
+        for root in roots:
+            classifier_instances : set[ClassifierInstance]= set()
+            ClassifierInstance.collect_self_and_descendants(root, True, classifier_instances)
+
+            for node in classifier_instances:
+                id = node.get_id()
+                if not id:
+                    raise ValueError()
+                # We support serialization of incorrect nodes, so we allow nodes without an ID
+                if id is not None:
+                    if id not in nodes_ids:
+                        all_nodes.append(node)
+                        nodes_ids.add(id)
+                else:
+                    all_nodes.append(node)
+
+        # Filter out ProxyNode instances before serialization
+        filtered_nodes = [node for node in all_nodes if not isinstance(node, ProxyNode)]
+        return self.serialize_nodes_to_json_element(filtered_nodes)
 
     def serialize_nodes_to_json_element(
         self, classifier_instances: List[ClassifierInstance]

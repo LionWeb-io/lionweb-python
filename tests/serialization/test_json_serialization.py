@@ -157,7 +157,7 @@ class JsonSerializationTest(SerializationTest):
     def test_deserialize_multiple_roots(self):
         sum1 = Sum(IntLiteral(1), IntLiteral(2))
         sum2 = Sum(IntLiteral(3), IntLiteral(4))
-        js = JsonSerialization.get_standard_json_serialization()
+        js = SerializationProvider.get_standard_json_serialization()
         serialized = js.serialize_trees_to_json_element(sum1, sum2)
 
         # Check languages and nodes count
@@ -614,7 +614,7 @@ class JsonSerializationTest(SerializationTest):
 
     def test_serialize_language(self):
         meta_lang = Language("metaLang", "metaLang", "metaLang", "1")
-        meta_ann = Annotation(meta_lang, "metaAnn", "metaAnn", "metaAnn")
+        meta_ann = Annotation(language=meta_lang, name="metaAnn", id="metaAnn", key="metaAnn")
 
         lang = Language("l", "l", "l", "1")
         Annotation(language=lang, name="a1", key="a1", id="a1")
@@ -623,7 +623,7 @@ class JsonSerializationTest(SerializationTest):
         ann = DynamicAnnotationInstance("metaAnn_1", meta_ann, c)
         c.add_annotation(ann)
 
-        hjs = JsonSerialization.get_standard_json_serialization()
+        hjs = SerializationProvider.get_standard_json_serialization()
         hjs.enable_dynamic_nodes()
         serialized_chunk = hjs.serialize_tree_to_serialization_block(lang)
 
@@ -643,11 +643,8 @@ class JsonSerializationTest(SerializationTest):
         self.assertEqual(ann, deserialized[4])
 
 
-
-
-
     def test_deserialize_partial_tree_with_null_policy(self):
-        json_serialization = SerializationProvider.get_standard_json_serialization(LionWebVersion.v2023_1)
+        json_serialization = SerializationProvider.get_standard_json_serialization(LionWebVersion.V2023_1)
         with open("./resources/serialization/propertiesLanguage.json", "r") as f:
             language_data = json.load(f)
 
@@ -657,7 +654,7 @@ class JsonSerializationTest(SerializationTest):
         with open("./resources/serialization/partialTree.json", "r") as f:
             tree_data = json.load(f)
 
-        json_serialization.set_unavailable_parent_policy(UnavailableNodePolicy.NULL_REFERENCES)
+        json_serialization.unavailable_parent_policy = UnavailableNodePolicy.NULL_REFERENCES
         nodes = json_serialization.deserialize_json_to_nodes(tree_data)
         self.assertEqual(len(nodes), 4)
 

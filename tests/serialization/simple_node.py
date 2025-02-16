@@ -1,7 +1,9 @@
 import random
 from typing import List, Optional
 
+from lionwebpython.language import Containment
 from lionwebpython.model.annotation_instance import AnnotationInstance
+from lionwebpython.model.classifier_instance_utils import ClassifierInstanceUtils
 from lionwebpython.model.reference_value import ReferenceValue
 
 
@@ -44,7 +46,9 @@ class SimpleNode:
     def set_property_value(self, property, value):
         raise NotImplementedError()
 
-    def get_children(self, containment):
+    def get_children(self, containment:Optional[Containment] = None):
+        if containment is None:
+            return ClassifierInstanceUtils.get_children(self)
         if containment not in self.get_classifier().all_containments():
             raise ValueError("Containment not belonging to this concept")
         return self.concrete_get_children(containment)

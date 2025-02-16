@@ -40,8 +40,8 @@ class Sum(SimpleNode):
         return f"Sum{{left={self.left}, right={self.right}}}"
 
     def concrete_get_children(self, containment: Containment) -> List[Node]:
-        if containment.name == "left":
+        if containment.get_name() == "left":
             return [self.left]
-        elif containment.name == "right":
+        elif containment.get_name() == "right":
             return [self.right]
         return super().concrete_get_children(containment)
