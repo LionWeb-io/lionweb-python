@@ -5,8 +5,8 @@ from lionwebpython.serialization.data.serialized_containment_value import \
     SerializedContainmentValue
 from lionwebpython.serialization.data.serialized_property_value import \
     SerializedPropertyValue
-from lionwebpython.serialization.data.serialized_reference_value import \
-    SerializedReferenceValue, SerializedReferenceValueEntry
+from lionwebpython.serialization.data.serialized_reference_value import (
+    SerializedReferenceValue, SerializedReferenceValueEntry)
 
 
 class SerializedClassifierInstance:
@@ -101,7 +101,9 @@ class SerializedClassifierInstance:
                 return pv.get_value()
         return None
 
-    def get_reference_values_by_key(self, reference_key: str) -> Optional[List[SerializedReferenceValueEntry]]:
+    def get_reference_values_by_key(
+        self, reference_key: str
+    ) -> Optional[List[SerializedReferenceValueEntry]]:
         for rv in self.references:
             if rv.get_meta_pointer().key == reference_key:
                 return rv.get_value()

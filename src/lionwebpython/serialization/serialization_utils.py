@@ -1,7 +1,8 @@
 from typing import Dict, List, Optional
 
 from lionwebpython.serialization.data.metapointer import MetaPointer
-from lionwebpython.serialization.data.serialized_reference_value import SerializedReferenceValueEntry
+from lionwebpython.serialization.data.serialized_reference_value import \
+    SerializedReferenceValueEntry
 from lionwebpython.serialization.low_level_json_serialization import JsonObject
 
 
@@ -24,14 +25,20 @@ class SerializationUtils:
         return None
 
     @staticmethod
-    def try_to_get_meta_pointer_property(json_object: Dict, property_name: str) -> Optional[MetaPointer]:
+    def try_to_get_meta_pointer_property(
+        json_object: Dict, property_name: str
+    ) -> Optional[MetaPointer]:
         if property_name not in json_object:
             return None
         value = json_object.get(property_name)
         if isinstance(value, dict):
-            return MetaPointer(language=SerializationUtils.try_to_get_string_property(value, "language"),
-                version= SerializationUtils.try_to_get_string_property(value, "version"),
-                key=SerializationUtils.try_to_get_string_property(value, "key"))
+            return MetaPointer(
+                language=SerializationUtils.try_to_get_string_property(
+                    value, "language"
+                ),
+                version=SerializationUtils.try_to_get_string_property(value, "version"),
+                key=SerializationUtils.try_to_get_string_property(value, "key"),
+            )
         return None
 
     @staticmethod
@@ -60,17 +67,18 @@ class SerializationUtils:
             return []
         value = json_object.get(property_name)
         if isinstance(value, list):
-            entries : List[SerializedReferenceValueEntry]= []
+            entries: List[SerializedReferenceValueEntry] = []
             for e in value:
                 if isinstance(e, dict):
                     entries.append(
                         SerializedReferenceValueEntry(
-                            reference= SerializationUtils.try_to_get_string_property(
+                            reference=SerializationUtils.try_to_get_string_property(
                                 e, "reference"
                             ),
                             resolve_info=SerializationUtils.try_to_get_string_property(
                                 e, "resolveInfo"
-                            ))
+                            ),
+                        )
                     )
             return entries
         return []

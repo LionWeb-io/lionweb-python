@@ -24,10 +24,11 @@ class AbstractClassifierInstance(Generic[T], ClassifierInstance[T], ABC):
 
     # Public methods for annotations
 
-    def get_annotations(self, annotation: Optional["Annotation"] = None
+    def get_annotations(
+        self, annotation: Optional["Annotation"] = None
     ) -> List["AnnotationInstance"]:
         if annotation is None:
-            return list(self.annotations)
+            return self.annotations
         return [
             a for a in self.annotations if a.get_annotation_definition() == annotation
         ]

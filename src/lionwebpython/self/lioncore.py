@@ -234,7 +234,9 @@ class LionCore:
                 ).set_id("-id-Enumeration-literals" + version_id_suffix)
             )
 
-            concepts["EnumerationLiteral"].add_implemented_interface(interfaces["IKeyed"])
+            concepts["EnumerationLiteral"].add_implemented_interface(
+                interfaces["IKeyed"]
+            )
 
             concepts["Feature"].set_abstract(True)
             concepts["Feature"].add_implemented_interface(interfaces["IKeyed"])

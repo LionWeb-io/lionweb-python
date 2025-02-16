@@ -141,20 +141,38 @@ class Classifier(LanguageEntity[T], NamespaceProvider):
             None,
         )
 
-    def get_property_by_meta_pointer(self, meta_pointer: MetaPointer) -> Optional[Property]:
+    def get_property_by_meta_pointer(
+        self, meta_pointer: MetaPointer
+    ) -> Optional[Property]:
         return next(
-            (p for p in self.all_properties() if MetaPointer.from_feature(p) == meta_pointer),
-            None
+            (
+                p
+                for p in self.all_properties()
+                if MetaPointer.from_feature(p) == meta_pointer
+            ),
+            None,
         )
 
-    def get_containment_by_meta_pointer(self, meta_pointer: MetaPointer) -> Optional[Containment]:
+    def get_containment_by_meta_pointer(
+        self, meta_pointer: MetaPointer
+    ) -> Optional[Containment]:
         return next(
-            (c for c in self.all_containments() if MetaPointer.from_feature(c) == meta_pointer),
-            None
+            (
+                c
+                for c in self.all_containments()
+                if MetaPointer.from_feature(c) == meta_pointer
+            ),
+            None,
         )
 
-    def get_reference_by_meta_pointer(self, meta_pointer: MetaPointer) -> Optional[Reference]:
+    def get_reference_by_meta_pointer(
+        self, meta_pointer: MetaPointer
+    ) -> Optional[Reference]:
         return next(
-            (r for r in self.all_references() if MetaPointer.from_feature(r) == meta_pointer),
-            None
+            (
+                r
+                for r in self.all_references()
+                if MetaPointer.from_feature(r) == meta_pointer
+            ),
+            None,
         )

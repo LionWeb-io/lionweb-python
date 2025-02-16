@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from typing import Optional, TYPE_CHECKING
+from typing import TYPE_CHECKING, Optional
 
 
 @dataclass
@@ -12,17 +12,22 @@ class MetaPointer:
     version: Optional[str] = None
     key: Optional[str] = None
 
-    def __init__(self, language: Optional[str] = None, version: Optional[str] = None, key: Optional[str] = None):
+    def __init__(
+        self,
+        language: Optional[str] = None,
+        version: Optional[str] = None,
+        key: Optional[str] = None,
+    ):
         self.language = language
         self.version = version
         self.key = key
 
     @staticmethod
-    def from_feature(feature) -> 'MetaPointer':
+    def from_feature(feature) -> "MetaPointer":
         return MetaPointer.from_keyed(feature, feature.get_declaring_language())
 
     @staticmethod
-    def from_language_entity(language_entity) -> 'MetaPointer':
+    def from_language_entity(language_entity) -> "MetaPointer":
         meta_pointer = MetaPointer()
         meta_pointer.key = language_entity.get_key()
         if language_entity.get_language():
@@ -32,7 +37,7 @@ class MetaPointer:
         return meta_pointer
 
     @staticmethod
-    def from_keyed(element_with_key: 'IKeyed', language: 'Language') -> 'MetaPointer':
+    def from_keyed(element_with_key: "IKeyed", language: "Language") -> "MetaPointer":
         meta_pointer = MetaPointer()
         meta_pointer.key = element_with_key.get_key()
         if language:

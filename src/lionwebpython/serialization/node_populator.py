@@ -1,34 +1,38 @@
 from typing import TYPE_CHECKING
 
-from lionwebpython.api.classifier_instance_resolver import ClassifierInstanceResolver
+from lionwebpython.api.classifier_instance_resolver import \
+    ClassifierInstanceResolver
 from lionwebpython.language.lioncore_builtins import LionCoreBuiltins
 from lionwebpython.lionweb_version import LionWebVersion
 from lionwebpython.model import ClassifierInstance
 from lionwebpython.model.reference_value import ReferenceValue
 from lionwebpython.self.lioncore import LionCore
-from lionwebpython.serialization.data.serialized_classifier_instance import SerializedClassifierInstance
-
+from lionwebpython.serialization.data.serialized_classifier_instance import \
+    SerializedClassifierInstance
 from lionwebpython.serialization.deserialization_exception import \
     DeserializationException
-from lionwebpython.serialization.deserialization_status import DeserializationStatus
+from lionwebpython.serialization.deserialization_status import \
+    DeserializationStatus
 from lionwebpython.serialization.unavailable_node_policy import \
     UnavailableNodePolicy
 
 
 class NodePopulator:
     if TYPE_CHECKING:
-        from lionwebpython.serialization.abstract_serialization import AbstractSerialization
+        from lionwebpython.serialization.abstract_serialization import \
+            AbstractSerialization
 
     def __init__(
         self,
-        serialization: 'AbstractSerialization',
+        serialization: "AbstractSerialization",
         classifier_instance_resolver: ClassifierInstanceResolver,
         deserialization_status: DeserializationStatus,
-        auto_resolve_version: LionWebVersion=LionWebVersion.current_version(),
+        auto_resolve_version: LionWebVersion = LionWebVersion.current_version(),
     ):
-        from lionwebpython.serialization.abstract_serialization import AbstractSerialization
+        from lionwebpython.serialization.abstract_serialization import \
+            AbstractSerialization
 
-        self.serialization : AbstractSerialization = serialization
+        self.serialization: AbstractSerialization = serialization
         self.classifier_instance_resolver = classifier_instance_resolver
         self.deserialization_status = deserialization_status
         self.auto_resolve_map = {}
@@ -41,11 +45,19 @@ class NodePopulator:
         for element in lion_core.get_elements():
             self.auto_resolve_map[f"LIONCORE::{element.get_name()}"] = element
 
-    def populate_classifier_instance(self, node: ClassifierInstance, serialized_classifier_instance: SerializedClassifierInstance) -> None:
+    def populate_classifier_instance(
+        self,
+        node: ClassifierInstance,
+        serialized_classifier_instance: SerializedClassifierInstance,
+    ) -> None:
         self.populate_containments(node, serialized_classifier_instance)
         self.populate_node_references(node, serialized_classifier_instance)
 
-    def populate_containments(self, node: ClassifierInstance, serialized_classifier_instance: SerializedClassifierInstance) -> None:
+    def populate_containments(
+        self,
+        node: ClassifierInstance,
+        serialized_classifier_instance: SerializedClassifierInstance,
+    ) -> None:
         concept = node.get_classifier()
         for (
             serialized_containment_value
@@ -77,7 +89,11 @@ class NodePopulator:
                 for child in deserialized_value:
                     node.add_child(containment, child)
 
-    def populate_node_references(self, node: ClassifierInstance, serialized_classifier_instance: SerializedClassifierInstance) -> None:
+    def populate_node_references(
+        self,
+        node: ClassifierInstance,
+        serialized_classifier_instance: SerializedClassifierInstance,
+    ) -> None:
         concept = node.get_classifier()
         for (
             serialized_reference_value

@@ -8,7 +8,8 @@ from lionwebpython.model import ClassifierInstance
 from lionwebpython.model.node import Node
 from lionwebpython.serialization.abstract_serialization import \
     AbstractSerialization
-from lionwebpython.serialization.low_level_json_serialization import LowLevelJsonSerialization, JsonElement
+from lionwebpython.serialization.low_level_json_serialization import (
+    JsonElement, LowLevelJsonSerialization)
 
 
 class JsonSerialization(AbstractSerialization):
@@ -45,12 +46,16 @@ class JsonSerialization(AbstractSerialization):
     #     # return languages[0]
     #     raise ValueError("NOT YET TRANSLATED")
 
-    def serialize_tree_to_json_element(self, classifier_instance: ClassifierInstance) -> JsonElement:
+    def serialize_tree_to_json_element(
+        self, classifier_instance: ClassifierInstance
+    ) -> JsonElement:
         # instances = self.collect_descendants(classifier_instance)
         # return self.serialize_nodes_to_json_element(instances)
         raise ValueError("NOT YET TRANSLATED")
 
-    def serialize_trees_to_json_element(self, *roots: ClassifierInstance) -> JsonElement:
+    def serialize_trees_to_json_element(
+        self, *roots: ClassifierInstance
+    ) -> JsonElement:
         # all_nodes = set()
         # for root in roots:
         #     nodes = self.collect_descendants(root)
@@ -58,23 +63,33 @@ class JsonSerialization(AbstractSerialization):
         # return self.serialize_nodes_to_json_element(list(all_nodes))
         raise ValueError("NOT YET TRANSLATED")
 
-    def serialize_nodes_to_json_element(self, classifier_instances: List[ClassifierInstance]) -> JsonElement:
+    def serialize_nodes_to_json_element(
+        self, classifier_instances: List[ClassifierInstance]
+    ) -> JsonElement:
         serialization_block = self.serialize_nodes_to_serialization_block(
             classifier_instances
         )
-        return LowLevelJsonSerialization().serialize_to_json_element(serialization_block)
+        return LowLevelJsonSerialization().serialize_to_json_element(
+            serialization_block
+        )
 
-    def serialize_tree_to_json_string(self, classifier_instance: ClassifierInstance) -> str:
+    def serialize_tree_to_json_string(
+        self, classifier_instance: ClassifierInstance
+    ) -> str:
         return json.dumps(
             self.serialize_tree_to_json_element(classifier_instance), indent=2
         )
 
-    def serialize_trees_to_json_string(self, *classifier_instances: ClassifierInstance) -> str:
+    def serialize_trees_to_json_string(
+        self, *classifier_instances: ClassifierInstance
+    ) -> str:
         return json.dumps(
             self.serialize_trees_to_json_element(*classifier_instances), indent=2
         )
 
-    def serialize_nodes_to_json_string(self, classifier_instances: List[ClassifierInstance]) -> str:
+    def serialize_nodes_to_json_string(
+        self, classifier_instances: List[ClassifierInstance]
+    ) -> str:
         return json.dumps(
             self.serialize_nodes_to_json_element(classifier_instances), indent=2
         )
@@ -120,7 +135,11 @@ class JsonSerialization(AbstractSerialization):
         raise ValueError("TO BE TRANSLATED")
 
     def deserialize_json_to_nodes(self, json_element: JsonElement) -> List[Node]:
-        return [ci for ci in self.deserialize_to_classifier_instances(json_element) if isinstance(ci, Node)]
+        return [
+            ci
+            for ci in self.deserialize_to_classifier_instances(json_element)
+            if isinstance(ci, Node)
+        ]
 
     def deserialize_string_to_nodes(self, json_str: str) -> List[Node]:
         return self.deserialize_json_to_nodes(json.loads(json_str))
@@ -148,6 +167,8 @@ class JsonSerialization(AbstractSerialization):
     #         content = response.read().decode("utf-8")
     #     return self.deserialize_to_nodes(content)
     def deserialize_to_classifier_instances(self, json_element: JsonElement):
-        serialization_block = LowLevelJsonSerialization().deserialize_serialization_block(json_element)
+        serialization_block = (
+            LowLevelJsonSerialization().deserialize_serialization_block(json_element)
+        )
         self._validate_serialization_block(serialization_block)
         return self.deserialize_serialization_block(serialization_block)

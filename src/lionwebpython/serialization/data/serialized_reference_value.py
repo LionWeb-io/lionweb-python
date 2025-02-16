@@ -31,7 +31,11 @@ class SerializedReferenceValueEntry:
 
 
 class SerializedReferenceValue:
-    def __init__(self, meta_pointer=None, value: Optional[List[SerializedReferenceValueEntry]] = None):
+    def __init__(
+        self,
+        meta_pointer=None,
+        value: Optional[List[SerializedReferenceValueEntry]] = None,
+    ):
         self.meta_pointer = meta_pointer
         self.value = value[:] if value else []
 

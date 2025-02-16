@@ -21,6 +21,7 @@ class M3Node(Generic[T], Node, IKeyed[T], AbstractClassifierInstance, ABC):
         from lionwebpython.model.reference_value import ReferenceValue
 
     def __init__(self, lion_web_version: Optional[LionWebVersion] = None):
+        AbstractClassifierInstance.__init__(self)
         self.lion_web_version = lion_web_version or LionWebVersion.current_version()
         self.id: Optional[str] = None
         self.parent: Optional[Node] = None

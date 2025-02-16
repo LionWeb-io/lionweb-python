@@ -1,7 +1,8 @@
 from dataclasses import dataclass, field
 from typing import Dict, List
 
-from lionwebpython.serialization.data.serialized_classifier_instance import SerializedClassifierInstance
+from lionwebpython.serialization.data.serialized_classifier_instance import \
+    SerializedClassifierInstance
 from lionwebpython.serialization.data.used_language import UsedLanguage
 
 
@@ -9,8 +10,12 @@ from lionwebpython.serialization.data.used_language import UsedLanguage
 class SerializedChunk:
     serialization_format_version: str = ""
     languages: List[UsedLanguage] = field(default_factory=list)
-    classifier_instances: List[SerializedClassifierInstance] = field(default_factory=list)
-    classifier_instances_by_id: Dict[str, SerializedClassifierInstance] = field(default_factory=dict)
+    classifier_instances: List[SerializedClassifierInstance] = field(
+        default_factory=list
+    )
+    classifier_instances_by_id: Dict[str, SerializedClassifierInstance] = field(
+        default_factory=dict
+    )
 
     def set_serialization_format_version(self, value: str):
         self.serialization_format_version = value

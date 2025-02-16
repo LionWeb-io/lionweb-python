@@ -1,10 +1,12 @@
 import unittest
+
 import requests
 
 from lionwebpython.language.lioncore_builtins import LionCoreBuiltins
 from lionwebpython.lionweb_version import LionWebVersion
 from lionwebpython.self.lioncore import LionCore
-from lionwebpython.serialization.serialization_provider import SerializationProvider
+from lionwebpython.serialization.serialization_provider import \
+    SerializationProvider
 from lionwebpython.utils.model_comparator import ModelComparator
 
 
@@ -19,7 +21,9 @@ class CorrespondenceWithDocumentationTest(unittest.TestCase):
     SPECIFICATION_LIONCOREBUILTINS_2024_1_PATH = "/2024.1/metametamodel/builtins.json"
 
     def test_lioncore_same_as_repo_2023_1(self):
-        json_ser = SerializationProvider.get_standard_json_serialization(LionWebVersion.V2023_1)
+        json_ser = SerializationProvider.get_standard_json_serialization(
+            LionWebVersion.V2023_1
+        )
 
         url = (
             f"https://raw.githubusercontent.com/LionWeb-io/specification/"
@@ -31,14 +35,18 @@ class CorrespondenceWithDocumentationTest(unittest.TestCase):
         nodes = json_ser.deserialize_string_to_nodes(response.text)
 
         deserialized_lioncore = nodes[0]
-        comparison = ModelComparator().compare(deserialized_lioncore, LionCore.get_instance(LionWebVersion.V2023_1))
+        comparison = ModelComparator().compare(
+            deserialized_lioncore, LionCore.get_instance(LionWebVersion.V2023_1)
+        )
         print(f"Differences: {len(comparison.differences)}")
         for diff in comparison.differences:
             print(f" - {diff}")
         self.assertTrue(comparison.are_equivalent, comparison)
 
     def test_lioncore_same_as_repo_2024_1(self):
-        json_ser = SerializationProvider.get_standard_json_serialization(LionWebVersion.V2024_1)
+        json_ser = SerializationProvider.get_standard_json_serialization(
+            LionWebVersion.V2024_1
+        )
 
         url = (
             f"https://raw.githubusercontent.com/LionWeb-io/specification/"
@@ -50,14 +58,18 @@ class CorrespondenceWithDocumentationTest(unittest.TestCase):
         nodes = json_ser.deserialize_string_to_nodes(response.text)
 
         deserialized_lioncore = nodes[0]
-        comparison = ModelComparator().compare(deserialized_lioncore, LionCore.get_instance(LionWebVersion.V2024_1))
+        comparison = ModelComparator().compare(
+            deserialized_lioncore, LionCore.get_instance(LionWebVersion.V2024_1)
+        )
         print(f"Differences: {len(comparison.differences)}")
         for diff in comparison.differences:
             print(f" - {diff}")
         self.assertTrue(comparison.are_equivalent, comparison)
 
     def test_builtins_same_as_repo_2023_1(self):
-        json_ser = SerializationProvider.get_standard_json_serialization(LionWebVersion.V2023_1)
+        json_ser = SerializationProvider.get_standard_json_serialization(
+            LionWebVersion.V2023_1
+        )
 
         url = (
             f"https://raw.githubusercontent.com/LionWeb-io/specification/"
@@ -69,14 +81,18 @@ class CorrespondenceWithDocumentationTest(unittest.TestCase):
         nodes = json_ser.deserialize_string_to_nodes(response.text)
 
         deserialized_builtins = nodes[0]
-        comparison = ModelComparator().compare(deserialized_builtins, LionCoreBuiltins.get_instance(LionWebVersion.V2023_1))
+        comparison = ModelComparator().compare(
+            deserialized_builtins, LionCoreBuiltins.get_instance(LionWebVersion.V2023_1)
+        )
         print(f"Differences: {len(comparison.differences)}")
         for diff in comparison.differences:
             print(f" - {diff}")
         self.assertTrue(comparison.are_equivalent, comparison)
 
     def test_builtins_same_as_repo_2024_1(self):
-        json_ser = SerializationProvider.get_standard_json_serialization(LionWebVersion.V2024_1)
+        json_ser = SerializationProvider.get_standard_json_serialization(
+            LionWebVersion.V2024_1
+        )
 
         url = (
             f"https://raw.githubusercontent.com/LionWeb-io/specification/"
@@ -88,12 +104,14 @@ class CorrespondenceWithDocumentationTest(unittest.TestCase):
         nodes = json_ser.deserialize_string_to_nodes(response.text)
 
         deserialized_builtins = nodes[0]
-        comparison = ModelComparator().compare(deserialized_builtins, LionCoreBuiltins.get_instance(LionWebVersion.V2024_1))
+        comparison = ModelComparator().compare(
+            deserialized_builtins, LionCoreBuiltins.get_instance(LionWebVersion.V2024_1)
+        )
         print(f"Differences: {len(comparison.differences)}")
         for diff in comparison.differences:
             print(f" - {diff}")
         self.assertTrue(comparison.are_equivalent, comparison)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

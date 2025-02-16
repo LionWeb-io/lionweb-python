@@ -1,6 +1,6 @@
 from typing import List, cast
 
-from lionwebpython.serialization.json_utils import JsonObject, JsonArray
+from lionwebpython.serialization.json_utils import JsonArray, JsonObject
 
 
 class SerializedJsonComparisonUtils:

@@ -1,21 +1,26 @@
-from typing import Optional, List
+from typing import List, Optional
 
-from lionwebpython.api.classifier_instance_resolver import ClassifierInstanceResolver
+from lionwebpython.api.classifier_instance_resolver import \
+    ClassifierInstanceResolver
 from lionwebpython.api.composite_classifier_instance_resolver import \
     CompositeClassifierInstanceResolver
 from lionwebpython.api.local_classifier_instance_resolver import \
     LocalClassifierInstanceResolver
 from lionwebpython.model.impl.proxy_node import ProxyNode
 from lionwebpython.model.node import Node
-from lionwebpython.serialization.data.serialized_classifier_instance import SerializedClassifierInstance
+from lionwebpython.serialization.data.serialized_classifier_instance import \
+    SerializedClassifierInstance
 
 
 class DeserializationStatus:
-    def __init__(self, original_list: List[SerializedClassifierInstance],
-                 outside_instances_resolver: ClassifierInstanceResolver):
-        self.sorted_list : List[SerializedClassifierInstance] = []
+    def __init__(
+        self,
+        original_list: List[SerializedClassifierInstance],
+        outside_instances_resolver: ClassifierInstanceResolver,
+    ):
+        self.sorted_list: List[SerializedClassifierInstance] = []
         self.nodes_to_sort = list(original_list)
-        self.proxies : List[ProxyNode]= []
+        self.proxies: List[ProxyNode] = []
         self.proxies_instance_resolver = LocalClassifierInstanceResolver()
         self.global_instance_resolver = CompositeClassifierInstanceResolver(
             outside_instances_resolver, self.proxies_instance_resolver

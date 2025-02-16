@@ -1,6 +1,6 @@
 import json
 from enum import Enum
-from typing import Type, Dict, cast
+from typing import Dict, Type, cast
 
 from lionwebpython.language.enumeration import Enumeration
 from lionwebpython.language.lioncore_builtins import LionCoreBuiltins
@@ -20,8 +20,8 @@ class PrimitiveValuesSerialization:
         self.enumerations_by_id = {}
         self.structures_data_types_by_id = {}
         self.dynamic_nodes_enabled = False
-        self.primitive_deserializers : Dict[str, object]= {}
-        self.primitive_serializers : Dict[str, object] = {}
+        self.primitive_deserializers: Dict[str, object] = {}
+        self.primitive_serializers: Dict[str, object] = {}
 
     def register_language(self, language):
         for element in language.get_elements():
@@ -161,18 +161,36 @@ class PrimitiveValuesSerialization:
 
         return deserializer
 
-    def register_lion_builtins_primitive_serializers_and_deserializers(self, lion_web_version: LionWebVersion) -> None:
+    def register_lion_builtins_primitive_serializers_and_deserializers(
+        self, lion_web_version: LionWebVersion
+    ) -> None:
         if lion_web_version is None:
             raise ValueError("lion_web_version should not be null")
 
-        self.primitive_deserializers[cast(str, LionCoreBuiltins.get_boolean(lion_web_version).get_id())] = lambda s, r: None if not r and s is None else s.lower() == "true"
-        self.primitive_deserializers[cast(str, LionCoreBuiltins.get_string(lion_web_version).get_id())] = lambda s, r: s
+        self.primitive_deserializers[
+            cast(str, LionCoreBuiltins.get_boolean(lion_web_version).get_id())
+        ] = lambda s, r: (None if not r and s is None else s.lower() == "true")
+        self.primitive_deserializers[
+            cast(str, LionCoreBuiltins.get_string(lion_web_version).get_id())
+        ] = lambda s, r: s
         if lion_web_version == LionWebVersion.V2023_1:
-            self.primitive_deserializers[cast(str, LionCoreBuiltins.get_json(lion_web_version).get_id())] = lambda s, r: None if s is None else json.loads(s)
-        self.primitive_deserializers[cast(str, LionCoreBuiltins.get_integer(lion_web_version).get_id())] = lambda s, r: None if s is None else int(s)
+            self.primitive_deserializers[
+                cast(str, LionCoreBuiltins.get_json(lion_web_version).get_id())
+            ] = lambda s, r: (None if s is None else json.loads(s))
+        self.primitive_deserializers[
+            cast(str, LionCoreBuiltins.get_integer(lion_web_version).get_id())
+        ] = lambda s, r: (None if s is None else int(s))
 
-        self.primitive_serializers[cast(str, LionCoreBuiltins.get_boolean(lion_web_version).get_id())] = lambda v: str(v)
+        self.primitive_serializers[
+            cast(str, LionCoreBuiltins.get_boolean(lion_web_version).get_id())
+        ] = lambda v: str(v)
         if lion_web_version == LionWebVersion.V2023_1:
-            self.primitive_serializers[cast(str, LionCoreBuiltins.get_json(lion_web_version).get_id())] = lambda v: json.dumps(v)
-        self.primitive_serializers[cast(str, LionCoreBuiltins.get_string(lion_web_version).get_id())] = lambda v: v
-        self.primitive_serializers[cast(str, LionCoreBuiltins.get_integer(lion_web_version).get_id())] = lambda v: str(v)
+            self.primitive_serializers[
+                cast(str, LionCoreBuiltins.get_json(lion_web_version).get_id())
+            ] = lambda v: json.dumps(v)
+        self.primitive_serializers[
+            cast(str, LionCoreBuiltins.get_string(lion_web_version).get_id())
+        ] = lambda v: v
+        self.primitive_serializers[
+            cast(str, LionCoreBuiltins.get_integer(lion_web_version).get_id())
+        ] = lambda v: str(v)

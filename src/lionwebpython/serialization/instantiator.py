@@ -72,13 +72,17 @@ class Instantiator:
         self.custom_deserializers.update(
             {
                 LionCore.get_language(lion_web_version)
-                .get_id(): lambda c, s, d, p: Language(lion_web_version=lion_web_version)
+                .get_id(): lambda c, s, d, p: Language(
+                    lion_web_version=lion_web_version
+                )
                 .set_id(s.get_id()),
                 LionCore.get_concept(lion_web_version)
                 .get_id(): lambda c, s, d, p: Concept(lion_web_version=lion_web_version)
                 .set_id(s.get_id()),
                 LionCore.get_interface(lion_web_version)
-                .get_id(): lambda c, s, d, p: Interface(lion_web_version=lion_web_version)
+                .get_id(): lambda c, s, d, p: Interface(
+                    lion_web_version=lion_web_version
+                )
                 .set_id(s.get_id()),
                 LionCore.get_property(
                     lion_web_version
@@ -101,19 +105,23 @@ class Instantiator:
                     lion_web_version=lion_web_version, id=s.get_id()
                 ),
                 LionCore.get_enumeration(lion_web_version)
-                .get_id(): lambda c, s, d, p: Enumeration(lion_web_version=lion_web_version)
+                .get_id(): lambda c, s, d, p: Enumeration(
+                    lion_web_version=lion_web_version
+                )
                 .set_id(s.get_id()),
                 LionCore.get_enumeration_literal(lion_web_version)
-                .get_id(): lambda c, s, d, p: EnumerationLiteral(lion_web_version=lion_web_version)
+                .get_id(): lambda c, s, d, p: EnumerationLiteral(
+                    lion_web_version=lion_web_version
+                )
                 .set_id(s.get_id()),
                 LionCore.get_annotation(lion_web_version)
-                .get_id(): lambda c, s, d, p: Annotation(lion_web_version=lion_web_version)
+                .get_id(): lambda c, s, d, p: Annotation(
+                    lion_web_version=lion_web_version
+                )
                 .set_id(s.get_id()),
                 LionCore.get_structured_data_type().get_id(): lambda c, s, d, p: StructuredDataType(
                     id=s.get_id()
                 ),
-                LionCore.get_field().get_id(): lambda c, s, d, p: Field(
-                    id=s.get_id()
-                ),
+                LionCore.get_field().get_id(): lambda c, s, d, p: Field(id=s.get_id()),
             }
         )
