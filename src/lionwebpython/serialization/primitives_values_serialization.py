@@ -142,7 +142,7 @@ class PrimitiveValuesSerialization:
 
     @staticmethod
     def serializer_for(enum_class: Type, enumeration):
-        def serializer(value):
+        def serializer(value:Enum):
             literal_name = value.name
             for literal in enumeration.get_literals():
                 if literal.get_name() == literal_name:
@@ -152,14 +152,21 @@ class PrimitiveValuesSerialization:
         return serializer
 
     @staticmethod
-    def deserializer_for(enum_class: Type, enumeration):
-        def deserializer(serialized_value):
+    def deserializer_for(enum_class: type[Enum], enumeration):
+        def deserializer(serialized_value:str, required: bool):
             for literal in enumeration.get_literals():
                 if literal.get_key() == serialized_value:
                     return enum_class[literal.get_name()]
             raise ValueError(f"Cannot deserialize value {serialized_value}")
 
         return deserializer
+
+    def register_enum_class(self, enum_class: type, enumeration: Enumeration) -> None:
+        id = enumeration.get_id()
+        if id is None:
+            raise ValueError()
+        self.primitive_serializers[id] = PrimitiveValuesSerialization.serializer_for(enum_class, enumeration)
+        self.primitive_deserializers[id] = PrimitiveValuesSerialization.deserializer_for(enum_class, enumeration)
 
     def register_lion_builtins_primitive_serializers_and_deserializers(
         self, lion_web_version: LionWebVersion

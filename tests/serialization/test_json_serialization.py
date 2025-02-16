@@ -35,6 +35,10 @@ from serialization.simplemath.simple_math_language import SimpleMathLanguage
 from serialization.simplemath.sum import Sum
 
 
+class MyEnum(Enum):
+    el1 = "el1"
+    el2 = "el2"
+
 class JsonSerializationTest(SerializationTest):
 
     def test_serialize_reference_without_resolve_info(self):
@@ -370,10 +374,6 @@ class JsonSerializationTest(SerializationTest):
 
         self.assertEqual(je, expected_json)
 
-    class MyEnum(Enum):
-        el1 = "el1"
-        el2 = "el2"
-
     def test_serialization_of_enum_literal_using_enum_instances(self):
         mm = Language("my.language")
         mm.set_id("mm_id")
@@ -561,20 +561,20 @@ class JsonSerializationTest(SerializationTest):
         c.add_feature(p)
 
         n1 = DynamicNode("node1", c)
-        n1.set_property_value(property=p, value="el1")
+        n1.set_property_value(property=p, value=MyEnum.el1)
 
         n2 = DynamicNode("node2", c)
-        n2.set_property_value(property=p, value="el2")
+        n2.set_property_value(property=p, value=MyEnum.el2)
 
         js = SerializationProvider.get_standard_json_serialization()
-        js.primitive_values_serialization.register_enum_class(str, e)
+        js.primitive_values_serialization.register_enum_class(MyEnum, e)
         js.register_language(mm)
-        js.get_instantiator().enable_dynamic_nodes()
+        js.instantiator.enable_dynamic_nodes()
 
         deserialized_nodes = js.deserialize_json_to_nodes(je)
         self.assertEqual([n1, n2], deserialized_nodes)
-        self.assertEqual("el1", deserialized_nodes[0].get_property_value(property=p))
-        self.assertEqual("el2", deserialized_nodes[1].get_property_value(property=p))
+        self.assertEqual(MyEnum.el1, deserialized_nodes[0].get_property_value(property=p))
+        self.assertEqual(MyEnum.el2, deserialized_nodes[1].get_property_value(property=p))
 
     def test_serialization_of_language_versions_with_imports(self):
         my_language = Language()
