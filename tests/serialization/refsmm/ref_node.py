@@ -47,7 +47,7 @@ class RefNode(SimpleNode):
     def concrete_add_reference_value(
         self, reference: Reference, referred_node: Optional[ReferenceValue]
     ):
-        if reference.name == "referred":
+        if reference.get_name() == "referred":
             self.referred = referred_node.referred if referred_node else None
         else:
             super().concrete_add_reference_value(reference, referred_node)

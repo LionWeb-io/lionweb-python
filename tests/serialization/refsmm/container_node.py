@@ -24,11 +24,13 @@ class ContainerNode(SimpleNode):
         return RefsLanguage.CONTAINER_NODE
 
     def concrete_get_children(self, containment: Containment) -> List[Node]:
-        if containment.name == "contained":
+        if containment.get_name() == "contained":
             return [self.contained] if self.contained else []
         return super().concrete_get_children(containment)
 
     def __eq__(self, other):
+        if self is other:
+            return True
         if not isinstance(other, ContainerNode):
             return False
         return self.contained == other.contained

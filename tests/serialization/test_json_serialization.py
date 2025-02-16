@@ -292,7 +292,7 @@ class JsonSerializationTest(SerializationTest):
         self.assertEqual(ClassifierInstanceUtils.get_children(c2), [c1])
 
         js = SerializationProvider.get_standard_json_serialization()
-        serialized = js.serialize_nodes_to_json_element(c1, c2)
+        serialized = js.serialize_nodes_to_json_element([c1, c2])
         self.prepare_deserialization_of_refmm(js)
 
         with self.assertRaises(DeserializationException):
