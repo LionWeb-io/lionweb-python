@@ -125,3 +125,24 @@ class ClassifierInstanceUtils:
         ):
             return True
         return False
+
+    @staticmethod
+    def get_reference_value_by_name(instance: 'ClassifierInstance', reference_name: str) -> List['ReferenceValue']:
+        if instance is None:
+            raise ValueError("_this should not be null")
+        if reference_name is None:
+            raise ValueError("referenceName should not be null")
+
+        classifier = instance.get_classifier()
+        if classifier is None:
+            raise ValueError(
+                f"Concept should not be null for {instance} (class {type(instance).__name__})"
+            )
+
+        reference = classifier.get_reference_by_name(reference_name)
+        if reference is None:
+            raise ValueError(
+                f"Concept {classifier.qualified_name()} does not contain a property named {reference_name}"
+            )
+
+        return instance.get_reference_values(reference)
