@@ -23,6 +23,9 @@ class EnumerationLiteral(M3Node, NamespacedEntity, IKeyed):
         super().__init__(lion_web_version or LionWebVersion.current_version())
 
         if enumeration is not None:
+            from lionwebpython.language.enumeration import Enumeration
+            if not isinstance(enumeration, Enumeration):
+                raise ValueError()
             enumeration.add_literal(self)
             self.set_parent(enumeration)
 

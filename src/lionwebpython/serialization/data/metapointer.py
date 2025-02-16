@@ -30,10 +30,11 @@ class MetaPointer:
     def from_language_entity(language_entity: 'LanguageEntity') -> "MetaPointer":
         meta_pointer = MetaPointer()
         meta_pointer.key = language_entity.get_key()
-        if language_entity.get_language():
-            meta_pointer.language = language_entity.get_language().get_key()
-            if language_entity.get_language().get_version():
-                meta_pointer.version = language_entity.get_language().get_version()
+        language = language_entity.get_language()
+        if language:
+            meta_pointer.language =language.get_key()
+            if language.get_version():
+                meta_pointer.version = language.get_version()
         return meta_pointer
 
     @staticmethod

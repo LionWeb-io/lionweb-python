@@ -38,7 +38,7 @@ class RefNode(SimpleNode):
     def concrete_get_reference_values(
         self, reference: Reference
     ) -> List[ReferenceValue]:
-        if reference.name == "referred":
+        if reference.get_name() == "referred":
             if self.referred is None:
                 return []
             return [ReferenceValue(self.referred, "")]
