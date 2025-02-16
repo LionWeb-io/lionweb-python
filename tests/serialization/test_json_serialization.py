@@ -604,9 +604,9 @@ class JsonSerializationTest(SerializationTest):
         c = Concept(language=lang, name="c", id="c", key="c")
 
         n1 = DynamicNode("n1", c)
-        DynamicAnnotationInstance("a1_1", a1, n1)
-        DynamicAnnotationInstance("a1_2", a1, n1)
-        DynamicAnnotationInstance("a2_3", a2, n1)
+        DynamicAnnotationInstance(id="a1_1", annotation=a1, annotated=n1)
+        DynamicAnnotationInstance(id="a1_2", annotation=a1, annotated=n1)
+        DynamicAnnotationInstance(id="a2_3", annotation=a2, annotated=n1)
 
         hjs = SerializationProvider.get_standard_json_serialization()
         hjs.enable_dynamic_nodes()
