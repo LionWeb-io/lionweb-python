@@ -51,18 +51,24 @@ class Instantiator:
         properties_values,
     ):
         if classifier.get_id() in self.custom_deserializers:
-            return self.custom_deserializers[classifier.get_id()](
+            res = self.custom_deserializers[classifier.get_id()](
                 classifier,
                 serialized_instance,
                 deserialized_instances_by_id,
                 properties_values,
             )
-        return self.default_node_deserializer(
+            if isinstance(res, Exception):
+                raise res
+            return res
+        res = self.default_node_deserializer(
             classifier,
             serialized_instance,
             deserialized_instances_by_id,
             properties_values,
         )
+        if isinstance(res, Exception):
+            raise res
+        return res
 
     def register_custom_deserializer(self, classifier_id, deserializer):
         self.custom_deserializers[classifier_id] = deserializer

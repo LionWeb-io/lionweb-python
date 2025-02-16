@@ -496,6 +496,8 @@ class AbstractSerialization:
             deserialized_by_id,
             properties_values,
         )
+        if not isinstance(classifier_instance, ClassifierInstance):
+            raise ValueError()
 
         # Ensure that properties values are set correctly
         for property, deserialized_value in properties_values.items():
