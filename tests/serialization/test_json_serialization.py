@@ -402,10 +402,10 @@ class JsonSerializationTest(SerializationTest):
         c.add_feature(p)
 
         n1 = DynamicNode("node1", c)
-        n1.set_property_value(property=p, value=self.MyEnum.el1)
+        n1.set_property_value(property=p, value=MyEnum.el1)
 
         n2 = DynamicNode("node2", c)
-        n2.set_property_value(property=p, value=self.MyEnum.el2)
+        n2.set_property_value(property=p, value=MyEnum.el2)
 
         js = SerializationProvider.get_standard_json_serialization()
         js.register_language(mm)
