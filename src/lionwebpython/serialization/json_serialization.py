@@ -61,7 +61,7 @@ class JsonSerialization(AbstractSerialization):
         all_nodes: List[ClassifierInstance] = []
 
         for root in roots:
-            classifier_instances : set[ClassifierInstance]= set()
+            classifier_instances : List[ClassifierInstance]= list()
             ClassifierInstance.collect_self_and_descendants(root, True, classifier_instances)
 
             for node in classifier_instances:
