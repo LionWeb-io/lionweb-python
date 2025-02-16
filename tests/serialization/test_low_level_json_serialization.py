@@ -11,9 +11,10 @@ from lionwebpython.serialization.data.serialized_reference_value import Serializ
 from lionwebpython.serialization.json_serialization import JsonSerialization
 from lionwebpython.serialization.low_level_json_serialization import LowLevelJsonSerialization
 from lionwebpython.serialization.serialized_json_comparison_utils import SerializedJsonComparisonUtils
+from serialization.serialization_test import SerializationTest
 
 
-class LowLevelJsonSerializationTest(unittest.TestCase):
+class LowLevelJsonSerializationTest(SerializationTest):
 
     def test_deserialize_lioncore_to_serialized_nodes(self):
         with open("./resources/serialization/lioncore.json", "r") as file:
@@ -74,7 +75,7 @@ class LowLevelJsonSerializationTest(unittest.TestCase):
         hjs.enable_dynamic_nodes()
 
         je = hjs.serialize_nodes_to_json_element([n1])
-        deserialized_nodes = hjs.deserialize_to_nodes(je)
+        deserialized_nodes = hjs.deserialize_json_to_nodes(je)
         self.assertEqual(1, len(deserialized_nodes))
         self.assert_instances_are_equal(n1, deserialized_nodes[0])
 

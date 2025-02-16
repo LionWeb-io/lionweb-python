@@ -19,6 +19,7 @@ class DynamicClassifierInstance(AbstractClassifierInstance, ClassifierInstance):
     """
 
     def __init__(self):
+        AbstractClassifierInstance.__init__(self)
         self.id: Optional[str] = None
         self.property_values: Dict[str, Any] = {}
         self.containment_values: Dict[str, List[Node]] = {}

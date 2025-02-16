@@ -1,9 +1,13 @@
 from dataclasses import dataclass
-from typing import Optional
+from typing import Optional, TYPE_CHECKING
 
 
 @dataclass
 class MetaPointer:
+    if TYPE_CHECKING:
+        from lionwebpython.language import Language
+        from lionwebpython.language.ikeyed import IKeyed
+
     language: Optional[str] = None
     version: Optional[str] = None
     key: Optional[str] = None
@@ -14,11 +18,11 @@ class MetaPointer:
         self.key = key
 
     @staticmethod
-    def from_feature(feature):
+    def from_feature(feature) -> 'MetaPointer':
         return MetaPointer.from_keyed(feature, feature.get_declaring_language())
 
     @staticmethod
-    def from_language_entity(language_entity):
+    def from_language_entity(language_entity) -> 'MetaPointer':
         meta_pointer = MetaPointer()
         meta_pointer.key = language_entity.get_key()
         if language_entity.get_language():
@@ -28,7 +32,7 @@ class MetaPointer:
         return meta_pointer
 
     @staticmethod
-    def from_keyed(element_with_key, language):
+    def from_keyed(element_with_key: 'IKeyed', language: 'Language') -> 'MetaPointer':
         meta_pointer = MetaPointer()
         meta_pointer.key = element_with_key.get_key()
         if language:

@@ -124,7 +124,7 @@ class LowLevelJsonSerialization:
             raise ValueError("serializationFormatVersion not specified")
         serialization_format_version = top_level.get("serializationFormatVersion")
         if not isinstance(serialization_format_version, str):
-            raise ValueError("serializationFormatVersion should be a string")
+            raise ValueError(f"serializationFormatVersion should be a string instead it is {serialization_format_version}")
         serialized_chunk.serialization_format_version = serialization_format_version
 
     @staticmethod

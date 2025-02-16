@@ -2,13 +2,21 @@ from typing import List
 
 from lionwebpython.api.local_classifier_instance_resolver import \
     LocalClassifierInstanceResolver
+from lionwebpython.language.data_type import DataType
 from lionwebpython.lionweb_version import LionWebVersion
 from lionwebpython.model import ClassifierInstance
+from lionwebpython.model.annotation_instance import AnnotationInstance
+from lionwebpython.model.classifier_instance_utils import ClassifierInstanceUtils
 from lionwebpython.serialization.classifier_resolver import ClassifierResolver
 from lionwebpython.serialization.data.metapointer import MetaPointer
 from lionwebpython.serialization.data.serialized_chunk import SerializedChunk
 from lionwebpython.serialization.data.serialized_classifier_instance import \
     SerializedClassifierInstance
+from lionwebpython.serialization.data.serialized_containment_value import SerializedContainmentValue
+from lionwebpython.serialization.data.serialized_property_value import SerializedPropertyValue
+from lionwebpython.serialization.data.serialized_reference_value import SerializedReferenceValue, \
+    SerializedReferenceValueEntry
+from lionwebpython.serialization.data.used_language import UsedLanguage
 from lionwebpython.serialization.deserialization_exception import DeserializationException
 from lionwebpython.serialization.deserialization_status import DeserializationStatus
 from lionwebpython.serialization.instantiator import Instantiator
@@ -64,7 +72,7 @@ class AbstractSerialization:
 
     def serialize_nodes_to_serialization_block(self, classifier_instances):
         serialized_chunk = SerializedChunk()
-        serialized_chunk.serialization_format_version = self.lion_web_version
+        serialized_chunk.serialization_format_version = self.lion_web_version.value
         for instance in classifier_instances:
             serialized_chunk.classifier_instances.append(self.serialize_node(instance))
             for annotation in instance.get_annotations():
@@ -78,64 +86,113 @@ class AbstractSerialization:
 
     def consider_language_during_serialization(self, serialized_chunk, language):
         self.register_language(language)
-        language_key_version = f"{language.get_key()}:{language.get_version()}"
-        if language_key_version not in serialized_chunk.languages:
-            serialized_chunk.languages.append(language_key_version)
+        used_language = UsedLanguage(language.get_key(), language.get_version())
+        if used_language not in serialized_chunk.languages:
+            serialized_chunk.languages.append(used_language)
 
     def serialize_node(self, classifier_instance: ClassifierInstance) -> SerializedClassifierInstance:
         serialized_instance = SerializedClassifierInstance(classifier_instance.get_id(), MetaPointer.from_language_entity(classifier_instance.get_classifier()))
         parent = classifier_instance.get_parent()
         serialized_instance.parent_node_id = parent.get_id() if parent else None
-        serialized_instance.properties = {
-            prop.get_key(): self.serialize_property_value(
-                prop.get_type(), classifier_instance.get_property_value(prop)
-            )
-            for prop in classifier_instance.get_classifier().get_all_properties()
-        }
-        serialized_instance.children = {
-            containment.get_key(): [
-                child.get_id()
-                for child in classifier_instance.get_children(containment)
-            ]
-            for containment in classifier_instance.get_classifier().get_all_containments()
-        }
-        serialized_instance.references = {
-            reference.get_key(): [
-                (
-                    rv.get_referred().get_id() if rv.get_referred() else None,
-                    rv.get_resolve_info(),
-                )
-                for rv in classifier_instance.get_reference_values(reference)
-            ]
-            for reference in classifier_instance.get_classifier().get_all_references()
-        }
-        serialized_instance.annotations = [
-            annotation.get_id() for annotation in classifier_instance.get_annotations()
-        ]
+        self._serialize_properties(classifier_instance, serialized_instance)
+        self._serialize_containments(classifier_instance, serialized_instance)
+        self._serialize_references(classifier_instance, serialized_instance)
+        self._serialize_annotations(classifier_instance, serialized_instance)
         return serialized_instance
 
-    def serialize_annotation_instance(self, annotation_instance):
-        serialized_instance = SerializedClassifierInstance()
-        serialized_instance.id = annotation_instance.get_id()
-        serialized_instance.parent_node_id = annotation_instance.get_parent().get_id()
-        serialized_instance.classifier = (
-            annotation_instance.get_annotation_definition().get_meta_pointer()
-        )
-        serialized_instance.properties = {
-            prop.get_key(): self.serialize_property_value(
-                prop.get_type(), annotation_instance.get_property_value(prop)
-            )
-            for prop in annotation_instance.get_annotation_definition().get_all_properties()
-        }
-        serialized_instance.annotations = [
-            annotation.get_id() for annotation in annotation_instance.get_annotations()
-        ]
-        return serialized_instance
+    def serialize_annotation_instance(self, annotation_instance: AnnotationInstance) -> SerializedClassifierInstance:
+        if annotation_instance is None:
+            raise ValueError("AnnotationInstance should not be null")
 
-    def serialize_property_value(self, data_type, value):
+        serialized_classifier_instance = SerializedClassifierInstance(annotation_instance.get_id(), MetaPointer.from_language_entity(
+            annotation_instance.get_annotation_definition()))
+        parent = annotation_instance.get_parent()
+        serialized_classifier_instance.parent_node_id = parent.get_id() if parent else None
+        self._serialize_properties(annotation_instance, serialized_classifier_instance)
+        self._serialize_containments(annotation_instance, serialized_classifier_instance)
+        self._serialize_references(annotation_instance, serialized_classifier_instance)
+        self._serialize_annotations(annotation_instance, serialized_classifier_instance)
+
+        return serialized_classifier_instance
+
+    def _serialize_properties(self, classifier_instance: ClassifierInstance,
+                              serialized_classifier_instance: SerializedClassifierInstance) -> None:
+        for property in classifier_instance.get_classifier().all_properties():
+            c = property.get_container()
+            if c is None:
+                raise ValueError()
+            language = c.get_language()
+            if language is None:
+                raise ValueError()
+            mp = MetaPointer.from_keyed(property, language)
+            dt = property.get_type()
+            if dt is None:
+                raise ValueError()
+            property_value = SerializedPropertyValue(mp , self._serialize_property_value(
+                    dt, classifier_instance.get_property_value(property=property)
+                ))
+            serialized_classifier_instance.add_property_value(property_value)
+
+    def _serialize_property_value(self, data_type: DataType, value: object):
+        if data_type is None:
+            raise ValueError("Cannot serialize property when the dataType is null")
+        if data_type.get_id() is None:
+            raise ValueError("Cannot serialize property when the dataType.ID is null")
         if value is None:
             return None
         return self.primitive_values_serialization.serialize(data_type.get_id(), value)
+
+    def _serialize_containments(self, classifier_instance: ClassifierInstance,
+                                serialized_classifier_instance: SerializedClassifierInstance) -> None:
+        if classifier_instance is None:
+            raise ValueError("ClassifierInstance should not be null")
+
+        for containment in classifier_instance.get_classifier().all_containments():
+            container = containment.get_container()
+            if container is None:
+                raise ValueError()
+            language = container.get_language()
+            if language is None:
+                raise ValueError()
+            containment_value = SerializedContainmentValue(
+                MetaPointer.from_keyed(containment, language),
+                [child.get_id() for child in classifier_instance.get_children(containment)])
+            serialized_classifier_instance.add_containment_value(containment_value)
+
+    def _serialize_references(self, classifier_instance: ClassifierInstance,
+                              serialized_classifier_instance: SerializedClassifierInstance) -> None:
+        if classifier_instance is None:
+            raise ValueError("ClassifierInstance should not be null")
+
+        for reference in classifier_instance.get_classifier().all_references():
+            reference_value = SerializedReferenceValue()
+            classifier = reference.get_container()
+            if classifier is None:
+                raise ValueError()
+            language = classifier.get_language()
+            if language is None:
+                raise ValueError()
+            reference_value.meta_pointer = MetaPointer.from_keyed(reference, language)
+            reference_value.value = [
+                SerializedReferenceValueEntry(
+                    None if (
+                            self.builtins_reference_dangling and
+                            ClassifierInstanceUtils.is_builtin_element(rv.get_referred())
+                    ) else (rv.get_referred().get_id() if rv.get_referred() else None),
+                    rv.get_resolve_info()
+                )
+                for rv in classifier_instance.get_reference_values(reference)
+            ]
+            serialized_classifier_instance.add_reference_value(reference_value)
+
+    def _serialize_annotations(self, classifier_instance: ClassifierInstance,
+                              serialized_classifier_instance: SerializedClassifierInstance) -> None:
+        if classifier_instance is None:
+            raise ValueError("ClassifierInstance should not be null")
+
+        serialized_classifier_instance.annotations = [
+            annotation.get_id() for annotation in classifier_instance.get_annotations()
+        ]
 
     def deserialize_serialization_block(self, serialized_chunk):
         serialized_instances = serialized_chunk.classifier_instances
@@ -227,3 +284,4 @@ class AbstractSerialization:
 
         deserialization_status.reverse()
         return deserialization_status
+

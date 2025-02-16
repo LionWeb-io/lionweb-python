@@ -62,7 +62,7 @@ class JsonSerialization(AbstractSerialization):
         serialization_block = self.serialize_nodes_to_serialization_block(
             classifier_instances
         )
-        return json.dumps(serialization_block, indent=2)
+        return LowLevelJsonSerialization().serialize_to_json_element(serialization_block)
 
     def serialize_tree_to_json_string(self, classifier_instance: ClassifierInstance) -> str:
         return json.dumps(
