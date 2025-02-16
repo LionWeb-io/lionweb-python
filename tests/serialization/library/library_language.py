@@ -20,6 +20,7 @@ class LibraryLanguage:
         file_path = os.path.join(
             os.path.dirname(__file__),
             "..",
+            "..",
             "resources",
             "serialization",
             "library-language.json",
@@ -47,7 +48,7 @@ class LibraryLanguage:
         )
 
         for feature in LibraryLanguage.LIBRARY.all_features():
-            if feature.key is None:
+            if feature.get_key() is None:
                 raise ValueError(
                     f"Feature {feature} in {feature.container} should not have a null key"
                 )

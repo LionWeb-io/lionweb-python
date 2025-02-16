@@ -259,7 +259,8 @@ class AbstractSerialization:
         if lion_web_version is None:
             raise ValueError("lion_web_version should not be null")
 
-        # Sort leaves first
+        # We want to deserialize the nodes starting from the leaves. This is useful because in certain
+        # cases we may want to use the children as constructor parameters of the parent
         deserialization_status = self._sort_leaves_first(
             serialized_classifier_instances
         )
@@ -285,7 +286,7 @@ class AbstractSerialization:
             serialized_to_instance_map[n] = instantiated
 
         if len(sorted_serialized_instances) != len(serialized_to_instance_map):
-            raise ValueError("Mismatch in number of nodes to deserialize")
+            raise ValueError(f"We got {len(sorted_serialized_instances)} nodes to deserialize, but we deserialized {len(serialized_to_instance_map)}")
 
         classifier_instance_resolver = CompositeClassifierInstanceResolver(
             MapBasedResolver(deserialized_by_id),

@@ -99,9 +99,9 @@ class M3Node(Generic[T], Node, IKeyed[T], AbstractClassifierInstance, ABC):
         if name is None:
             raise ValueError()
         if containment.is_multiple():
-            self.containment_values.setdefault(name, []).append(child)
+            self.add_containment_multiple_value(containment.get_name(), child)
         else:
-            self.containment_values[name] = [child]
+            self.set_containment_single_value(containment.get_name(), child)
 
     def remove_child(self, **kwargs) -> None:
         raise NotImplementedError()
@@ -168,10 +168,22 @@ class M3Node(Generic[T], Node, IKeyed[T], AbstractClassifierInstance, ABC):
             self.reference_values[link_name] = [value]
 
     def add_containment_multiple_value(self, link_name: str, value: Node) -> bool:
-        if value not in self.containment_values.get(link_name, []):
-            self.containment_values.setdefault(link_name, []).append(value)
-            return True
-        return False
+        """
+        Adding a null value or a value already contained does not produce any change.
+
+        Returns:
+            bool: True if the addition produced a change, False otherwise.
+        """
+        if value is None:
+            return False
+        if value in self.get_containment_multiple_value(link_name):
+            return False
+        cast(M3Node, value).set_parent(self)
+        if link_name in self.containment_values:
+            self.containment_values[link_name].append(value)
+        else:
+            self.containment_values[link_name] = [value]
+        return True
 
     def add_reference_multiple_value(
         self, link_name: str, value: "ReferenceValue"
