@@ -55,7 +55,7 @@ class JsonSerialization(AbstractSerialization):
         raise ValueError("NOT YET TRANSLATED")
 
     def serialize_trees_to_json_element(
-        self, *roots: ClassifierInstance
+        self, roots: List[ClassifierInstance]
     ) -> JsonElement:
         nodes_ids: Set[str] = set()
         all_nodes: List[ClassifierInstance] = []
@@ -98,10 +98,10 @@ class JsonSerialization(AbstractSerialization):
         )
 
     def serialize_trees_to_json_string(
-        self, *classifier_instances: ClassifierInstance
+        self, classifier_instances: List[ClassifierInstance]
     ) -> str:
         return json.dumps(
-            self.serialize_trees_to_json_element(*classifier_instances), indent=2
+            self.serialize_trees_to_json_element(classifier_instances), indent=2
         )
 
     def serialize_nodes_to_json_string(

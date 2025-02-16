@@ -15,7 +15,7 @@ class Writer(DynamicNode):
 
     def set_name(self, name: str):
         property = self.get_classifier().get_property_by_name("name")
-        self.set_property_value(property, name)
+        self.set_property_value(property=property, value=name)
 
     def get_name(self) -> str:
         return ClassifierInstanceUtils.get_property_value_by_name(self, "name")

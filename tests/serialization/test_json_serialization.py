@@ -62,9 +62,9 @@ class JsonSerializationTest(SerializationTest):
         explorer_book = Book("eb", "Explorer Book", jack_london)
         bobs_library.add_book(explorer_book)
 
-        json_serialization = SerializationProvider.get_standard_json_serialization(LionWebVersion.v2023_1)
-        json_serialization.get_primitive_values_serialization().register_serializer("string_id", str)
-        json_serialization.get_primitive_values_serialization().register_serializer("int_id", str)
+        json_serialization = SerializationProvider.get_standard_json_serialization(LionWebVersion.V2023_1)
+        json_serialization.primitive_values_serialization.register_serializer("string_id", str)
+        json_serialization.primitive_values_serialization.register_serializer("int_id", str)
 
         serialized = json_serialization.serialize_trees_to_json_element([bobs_library, jack_london])
         with open(Path(__file__).parent.parent
@@ -83,11 +83,11 @@ class JsonSerializationTest(SerializationTest):
         bobs_library.add_book(explorer_book)
 
         # The library MM is not using standard primitive types but its own, so we need to specify how to serialize
-        json_serialization = JsonSerialization.get_standard_json_serialization(LionWebVersion.V2023_1)
-        json_serialization.get_primitive_values_serialization().register_serializer(
+        json_serialization = SerializationProvider.get_standard_json_serialization(LionWebVersion.V2023_1)
+        json_serialization.primitive_values_serialization.register_serializer(
             "INhBvWyXvxwNsePuX0rdNGB_J9hi85cTb1Q0APXCyJ0", lambda value: value
         )
-        json_serialization.get_primitive_values_serialization().register_serializer(
+        json_serialization.primitive_values_serialization.register_serializer(
             "gVp8_QSmXE2k4pd-sQZgjYMoW95SLLaVIH4yMYqqbt4", lambda value: str(value)
         )
 
@@ -95,29 +95,36 @@ class JsonSerializationTest(SerializationTest):
             [bobs_library, jack_london, explorer_book]
         )
 
-        with open("./resources/serialization/bobslibrary.json", "r") as file:
+        with open(Path(__file__).parent.parent
+            / "resources"
+            / "serialization" / "bobslibrary.json", "r") as file:
             json_read = json.load(file)
 
         SerializedJsonComparisonUtils.assert_equivalent_lionweb_json(json_read, json_serialized)
 
     def test_deserialize_language_with_enumerations(self):
-        with open("./resources/serialization/TestLang-language.json", "r") as f:
+        with open(Path(__file__).parent.parent
+            / "resources"
+            / "serialization" / "TestLang-language.json", "r") as f:
             json_element = json.load(f)
 
-        json_serialization = SerializationProvider.get_standard_json_serialization(LionWebVersion.v2023_1)
+        json_serialization = SerializationProvider.get_standard_json_serialization(LionWebVersion.V2023_1)
         deserialized_nodes = json_serialization.deserialize_json_to_nodes(json_element)
 
         test_enum = next(n for n in deserialized_nodes if n.get_id() == "MDhjYWFkNzUtODI0Ni00NDI3LWJiNGQtODQ0NGI2YzVjNzI5LzI1ODUzNzgxNjU5NzMyMDQ1ODI")
         self.assertEqual(test_enum.get_name(), "TestEnumeration1")
 
     def test_deserialize_language_with_dependencies(self):
-        json_serialization = JsonSerialization.get_standard_json_serialization(LionWebVersion.V2023_1)
-        with open("./properties-example/starlasu.lmm.json", "r") as file:
+        json_serialization = SerializationProvider.get_standard_json_serialization(LionWebVersion.V2023_1)
+        with open(Path(__file__).parent.parent
+            / "resources"
+            / "properties-example" / "starlasu.lmm.json", "r") as file:
             starlasu_nodes = json_serialization.deserialize_json_to_nodes(file)
             starlasu = next(node for node in starlasu_nodes if isinstance(node, Language))
             json_serialization.instance_resolver.add_tree(starlasu)
 
-        with open("./properties-example/properties.lmm.json", "r") as file:
+        with open(Path(__file__).parent.parent
+            / "resources" / "properties-example" / "properties.lmm.json", "r") as file:
             properties_nodes = json_serialization.deserialize_json_to_nodes(file)
             properties = next(node for node in properties_nodes if isinstance(node, Language))
 
@@ -175,7 +182,7 @@ class JsonSerializationTest(SerializationTest):
         il2 = IntLiteral(2, None)
         il3 = IntLiteral(3, None)
         il4 = IntLiteral(4, None)
-        js = JsonSerialization.get_standard_json_serialization()
+        js = SerializationProvider.get_standard_json_serialization()
         serialized = js.serialize_trees_to_json_element(il1, il2, il3, il4)
 
         self._prepare_deserialization_of_simple_math(js)
@@ -189,7 +196,7 @@ class JsonSerializationTest(SerializationTest):
         il3 = IntLiteral(3, "int_3")
         il4 = IntLiteral(4, "int_4")
         sum2 = Sum(il3, il4, None)
-        js = JsonSerialization.get_standard_json_serialization()
+        js = SerializationProvider.get_standard_json_serialization()
 
         serialized = js.serialize_trees_to_json_element(sum1, sum2)
         self._prepare_deserialization_of_simple_math(js)
@@ -206,7 +213,7 @@ class JsonSerializationTest(SerializationTest):
         il4 = IntLiteral(4, "int_4")
         sum2 = Sum(il3, il4, None)
 
-        js = JsonSerialization.get_standard_json_serialization()
+        js = SerializationProvider.get_standard_json_serialization()
         serialized = js.serialize_nodes_to_json_element(il4, il1, sum1, il2, sum2, il3)
         self._prepare_deserialization_of_simple_math(js)
         deserialized = js.deserialize_to_nodes(serialized)
@@ -219,7 +226,7 @@ class JsonSerializationTest(SerializationTest):
         il2 = IntLiteral(2, None)
         sum1 = Sum(il1, il2, None)
 
-        js = JsonSerialization.get_standard_json_serialization()
+        js = SerializationProvider.get_standard_json_serialization()
         serialized = js.serialize_nodes_to_json_element(sum1, il1, il2)
         self._prepare_deserialization_of_simple_math(js)
 
@@ -247,7 +254,7 @@ class JsonSerializationTest(SerializationTest):
         r2 = RefNode()
         r1.set_referred(r2)
 
-        js = JsonSerialization.get_standard_json_serialization()
+        js = SerializationProvider.get_standard_json_serialization()
         serialized = js.serialize_nodes_to_json_element(r1)
         self.prepare_deserialization_of_refmm(js)
 
@@ -262,7 +269,7 @@ class JsonSerializationTest(SerializationTest):
         r2.set_referred(r3)
         r3.set_referred(r1)
 
-        js = JsonSerialization.get_standard_json_serialization()
+        js = SerializationProvider.get_standard_json_serialization()
         serialized = js.serialize_nodes_to_json_element(r1, r2, r3)
         self.prepare_deserialization_of_refmm(js)
         deserialized = js.deserialize_to_nodes(serialized)
@@ -282,7 +289,7 @@ class JsonSerializationTest(SerializationTest):
         self.assertEqual(ClassifierInstanceUtils.get_children(c1), [c2])
         self.assertEqual(ClassifierInstanceUtils.get_children(c2), [c1])
 
-        js = JsonSerialization.get_standard_json_serialization()
+        js = SerializationProvider.get_standard_json_serialization()
         serialized = js.serialize_nodes_to_json_element(c1, c2)
         self.prepare_deserialization_of_refmm(js)
 
@@ -290,9 +297,10 @@ class JsonSerializationTest(SerializationTest):
             js.deserialize_to_nodes(serialized)
 
     def test_deserialize_tree_without_root(self):
-        js = JsonSerialization.get_standard_json_serialization(LionWebVersion.v2023_1)
+        js = SerializationProvider.get_standard_json_serialization(LionWebVersion.V2023_1)
         with self.assertRaises(DeserializationException):
-            js.deserialize_to_nodes(open("/mpsMeetup-issue10/example1.json"))
+            js.deserialize_to_nodes(open(Path(__file__).parent.parent
+            / "resources" / "mpsMeetup-issue10" / "example1.json"))
 
     def test_serialization_of_enum_literal_using_enumeration_value_instances(self):
         mm = Language("my.language")
@@ -327,7 +335,7 @@ class JsonSerializationTest(SerializationTest):
         n2 = DynamicNode("node2", c)
         n2.set_property_value(p, EnumerationValueImpl(el2))
 
-        js = JsonSerialization.get_standard_json_serialization()
+        js = SerializationProvider.get_standard_json_serialization()
         js.register_language(mm)
 
         je = js.serialize_nodes_to_json_element(n1, n2)
@@ -397,7 +405,7 @@ class JsonSerializationTest(SerializationTest):
         n2 = DynamicNode("node2", c)
         n2.set_property_value(p, self.MyEnum.el2)
 
-        js = JsonSerialization.get_standard_json_serialization()
+        js = SerializationProvider.get_standard_json_serialization()
         js.register_language(mm)
 
         je = js.serialize_nodes_to_json_element(n1, n2)
@@ -488,10 +496,10 @@ class JsonSerializationTest(SerializationTest):
         n2 = DynamicNode("node2", c)
         n2.set_property_value(p, EnumerationValueImpl(el2))
 
-        js = JsonSerialization.get_standard_json_serialization()
+        js = SerializationProvider.get_standard_json_serialization()
         js.register_language(mm)
         js.get_instantiator().enable_dynamic_nodes()
-        js.get_primitive_values_serialization().enable_dynamic_nodes()
+        js.primitive_values_serialization.enable_dynamic_nodes()
 
         deserialized_nodes = js.deserialize_to_nodes(je)
         self.assertEqual([n1, n2], deserialized_nodes)
@@ -556,8 +564,8 @@ class JsonSerializationTest(SerializationTest):
         n2 = DynamicNode("node2", c)
         n2.set_property_value(p, "el2")
 
-        js = JsonSerialization.get_standard_json_serialization()
-        js.get_primitive_values_serialization().register_enum_class(str, e)
+        js = SerializationProvider.get_standard_json_serialization()
+        js.primitive_values_serialization.register_enum_class(str, e)
         js.register_language(mm)
         js.get_instantiator().enable_dynamic_nodes()
 
@@ -576,7 +584,7 @@ class JsonSerializationTest(SerializationTest):
         my_language.add_element(my_concept)
 
         my_instance = DynamicNode("instance-a", my_concept)
-        json_ser = JsonSerialization.get_standard_json_serialization()
+        json_ser = SerializationProvider.get_standard_json_serialization()
         serialized_chunk = json_ser.serialize_nodes_to_serialization_block(my_instance)
 
         self.assertEqual(1, len(serialized_chunk.get_classifier_instances()))
@@ -598,7 +606,7 @@ class JsonSerializationTest(SerializationTest):
         DynamicAnnotationInstance("a1_2", a1, n1)
         DynamicAnnotationInstance("a2_3", a2, n1)
 
-        hjs = JsonSerialization.get_standard_json_serialization()
+        hjs = SerializationProvider.get_standard_json_serialization()
         hjs.enable_dynamic_nodes()
         serialized_chunk = hjs.serialize_nodes_to_serialization_block(n1)
 
@@ -645,13 +653,15 @@ class JsonSerializationTest(SerializationTest):
 
     def test_deserialize_partial_tree_with_null_policy(self):
         json_serialization = SerializationProvider.get_standard_json_serialization(LionWebVersion.V2023_1)
-        with open("./resources/serialization/propertiesLanguage.json", "r") as f:
+        with open(Path(__file__).parent.parent
+            / "resources" / "serialization" / "propertiesLanguage.json", "r") as f:
             language_data = json.load(f)
 
         properties_language = json_serialization.deserialize_json_to_nodes(language_data)[0]
         json_serialization.register_language(properties_language)
 
-        with open("./resources/serialization/partialTree.json", "r") as f:
+        with open(Path(__file__).parent.parent
+            / "resources" / "serialization" / "partialTree.json", "r") as f:
             tree_data = json.load(f)
 
         json_serialization.unavailable_parent_policy = UnavailableNodePolicy.NULL_REFERENCES
@@ -667,7 +677,7 @@ class JsonSerializationTest(SerializationTest):
         n1 = DynamicNode("n1", c)
         ClassifierInstanceUtils.set_property_value_by_name(n1, "foo", "abc")
 
-        hjs = JsonSerialization.get_standard_json_serialization()
+        hjs = SerializationProvider.get_standard_json_serialization()
         serialized_chunk = hjs.serialize_nodes_to_serialization_block(n1)
 
         self.assertEqual(2, len(serialized_chunk.get_languages()))
@@ -675,22 +685,26 @@ class JsonSerializationTest(SerializationTest):
         self.assertTrue(any(entry.get_key() == LionCoreBuiltins.get_instance().get_key() and entry.get_version() == LionCoreBuiltins.get_instance().get_version() for entry in serialized_chunk.get_languages()))
 
     def test_deserialize_partial_tree_fails_by_default(self):
-        js = JsonSerialization.get_standard_json_serialization(LionWebVersion.v2023_1)
-        language_is = open("/serialization/propertiesLanguage.json", "r")
+        js = SerializationProvider.get_standard_json_serialization(LionWebVersion.V2023_1)
+        language_is = open(Path(__file__).parent.parent
+            / "resources" / "serialization" / "propertiesLanguage.json", "r")
         properties_language = js.deserialize_to_nodes(language_is)[0]
         js.register_language(properties_language)
-        is_ = open("/serialization/partialTree.json", "r")
+        is_ = open(Path(__file__).parent.parent
+            / "resources"/ "serialization" / "partialTree.json", "r")
 
         js.enable_dynamic_nodes()
         with self.assertRaises(DeserializationException):
             js.deserialize_to_nodes(is_)
 
     def test_deserialize_partial_tree_succeeds_with_null_references_policy(self):
-        js = JsonSerialization.get_standard_json_serialization(LionWebVersion.v2023_1)
-        language_is = open("/serialization/propertiesLanguage.json", "r")
+        js = SerializationProvider.get_standard_json_serialization(LionWebVersion.V2023_1)
+        language_is = open(Path(__file__).parent.parent
+            / "resources" / "serialization" / "propertiesLanguage.json", "r")
         properties_language = js.deserialize_to_nodes(language_is)[0]
         js.register_language(properties_language)
-        is_ = open("/serialization/partialTree.json", "r")
+        is_ = open(Path(__file__).parent.parent
+            / "resources" / "serialization" / "partialTree.json", "r")
 
         js.enable_dynamic_nodes()
         js.set_unavailable_parent_policy(UnavailableNodePolicy.NULL_REFERENCES)
@@ -698,11 +712,13 @@ class JsonSerializationTest(SerializationTest):
         self.assertEqual(4, len(nodes))
 
     def test_deserialize_partial_tree_succeeds_with_proxy_nodes_policy(self):
-        js = JsonSerialization.get_standard_json_serialization(LionWebVersion.v2023_1)
-        language_is = open("/serialization/propertiesLanguage.json", "r")
+        js = SerializationProvider.get_standard_json_serialization(LionWebVersion.V2023_1)
+        language_is = open(Path(__file__).parent.parent
+            / "resources" / "serialization"/ "propertiesLanguage.json", "r")
         properties_language = js.deserialize_to_nodes(language_is)[0]
         js.register_language(properties_language)
-        is_ = open("/serialization/partialTree.json", "r")
+        is_ = open(Path(__file__).parent.parent
+            / "resources" / "serialization" / "partialTree.json", "r")
 
         js.enable_dynamic_nodes()
         js.set_unavailable_parent_policy(UnavailableNodePolicy.PROXY_NODES)
@@ -719,11 +735,13 @@ class JsonSerializationTest(SerializationTest):
         self.assertTrue(all(not isinstance(n, ProxyNode) for n in nodes if n != pp1))
 
     def test_deserialize_tree_with_external_references_throw_error_policy(self):
-        js = JsonSerialization.get_standard_json_serialization(LionWebVersion.v2023_1)
-        language_is = open("/serialization/todosLanguage.json", "r")
+        js = SerializationProvider.get_standard_json_serialization(LionWebVersion.V2023_1)
+        language_is = open(Path(__file__).parent.parent
+            / "resources" / "serialization" / "todosLanguage.json", "r")
         todos_language = js.deserialize_to_nodes(language_is)[0]
         js.register_language(todos_language)
-        is_ = open("/serialization/todosWithExternalReferences.json", "r")
+        is_ = open(Path(__file__).parent.parent
+            / "resources" / "serialization" / "todosWithExternalReferences.json", "r")
 
         js.enable_dynamic_nodes()
         js.set_unavailable_parent_policy(UnavailableNodePolicy.NULL_REFERENCES)
@@ -733,11 +751,13 @@ class JsonSerializationTest(SerializationTest):
             js.deserialize_to_nodes(is_)
 
     def test_deserialize_tree_with_external_references_proxy_nodes_policy(self):
-        js = JsonSerialization.get_standard_json_serialization(LionWebVersion.v2023_1)
-        language_is = open("/serialization/todosLanguage.json", "r")
+        js = SerializationProvider.get_standard_json_serialization(LionWebVersion.V2023_1)
+        language_is = open(Path(__file__).parent.parent
+            / "resources" / "serialization" / "todosLanguage.json", "r")
         todos_language = js.deserialize_to_nodes(language_is)[0]
         js.register_language(todos_language)
-        is_ = open("/serialization/todosWithExternalReferences.json", "r")
+        is_ = open(Path(__file__).parent.parent
+            / "resources" / "serialization" / "todosWithExternalReferences.json", "r")
 
         js.enable_dynamic_nodes()
         js.set_unavailable_parent_policy(UnavailableNodePolicy.NULL_REFERENCES)
@@ -752,11 +772,13 @@ class JsonSerializationTest(SerializationTest):
         self.assertIsInstance(pr1td0, DynamicNode)
 
     def test_deserialize_tree_with_external_references_null_policy(self):
-        js = JsonSerialization.get_standard_json_serialization(LionWebVersion.v2023_1)
-        language_is = open("/serialization/todosLanguage.json", "r")
+        js = SerializationProvider.get_standard_json_serialization(LionWebVersion.V2023_1)
+        language_is = open(Path(__file__).parent.parent
+            / "resources" /"serialization" / "todosLanguage.json", "r")
         todos_language = js.deserialize_to_nodes(language_is)[0]
         js.register_language(todos_language)
-        is_ = open("/serialization/todosWithExternalReferences.json", "r")
+        is_ = open(Path(__file__).parent.parent
+            / "resources" / "serialization" / "todosWithExternalReferences.json", "r")
 
         js.enable_dynamic_nodes()
         js.set_unavailable_parent_policy(UnavailableNodePolicy.NULL_REFERENCES)
@@ -765,8 +787,9 @@ class JsonSerializationTest(SerializationTest):
         self.assertEqual(4, len(nodes))
 
     def test_deserialize_trees_with_children_not_provided(self):
-        js = JsonSerialization.get_standard_json_serialization(LionWebVersion.v2023_1)
-        language_is = open("/serialization/todosLanguage.json", "r")
+        js = SerializationProvider.get_standard_json_serialization(LionWebVersion.V2023_1)
+        language_is = open(Path(__file__).parent.parent
+            / "resources" /"serialization"/ "todosLanguage.json", "r")
         todos_language = js.deserialize_to_nodes(language_is)[0]
         js.register_language(todos_language)
 
@@ -775,12 +798,14 @@ class JsonSerializationTest(SerializationTest):
         js.set_unavailable_reference_target_policy(UnavailableNodePolicy.NULL_REFERENCES)
 
         with self.assertRaises(UnresolvedClassifierInstanceException):
-            is_ = open("/serialization/todosWithChildrenNotProvided.json", "r")
+            is_ = open(Path(__file__).parent.parent
+            / "resources"/ "serialization"/ "todosWithChildrenNotProvided.json", "r")
             js.deserialize_to_nodes(is_)
 
     def test_deserialize_multiple_references_to_proxied_node(self):
-        js = JsonSerialization.get_standard_json_serialization(LionWebVersion.v2023_1)
-        language_is = open("/serialization/todosLanguage.json", "r")
+        js = SerializationProvider.get_standard_json_serialization(LionWebVersion.V2023_1)
+        language_is = open(Path(__file__).parent.parent
+            / "resources"/ "serialization" / "todosLanguage.json", "r")
         todos_language = js.deserialize_to_nodes(language_is)[0]
         js.register_language(todos_language)
 
@@ -788,7 +813,8 @@ class JsonSerializationTest(SerializationTest):
         js.set_unavailable_children_policy(UnavailableNodePolicy.PROXY_NODES)
         js.set_unavailable_parent_policy(UnavailableNodePolicy.PROXY_NODES)
         js.set_unavailable_reference_target_policy(UnavailableNodePolicy.PROXY_NODES)
-        is_ = open("/serialization/todosWithMultipleProxies.json", "r")
+        is_ = open(Path(__file__).parent.parent
+            / "resources" / "serialization" / "todosWithMultipleProxies.json", "r")
         nodes = js.deserialize_to_nodes(is_)
 
         self.assertEqual(5, len(nodes))

@@ -43,7 +43,9 @@ class ClassifierInstance(Generic[T], HasFeatureValues, ABC):
         """
         Collects `self` and all its descendants into `result`.
         """
-        if isinstance(result, List):
+        if not isinstance(self, ClassifierInstance):
+            raise ValueError()
+        if isinstance(result, list):
             result.append(self)
         elif isinstance(result, set):
             result.add(self)

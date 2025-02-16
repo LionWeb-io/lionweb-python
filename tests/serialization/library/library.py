@@ -22,4 +22,4 @@ class Library(DynamicNode):
 
     def set_name(self, name: str):
         property_ = self.get_classifier().get_property_by_name("name")
-        self.set_property_value(property_, name)
+        self.set_property_value(property=property_, value=name)

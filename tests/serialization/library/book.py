@@ -19,11 +19,11 @@ class Book(DynamicNode):
 
     def set_title(self, title: str):
         property_ = self.get_classifier().get_property_by_name("title")
-        self.set_property_value(property_, title)
+        self.set_property_value(property=property_, value=title)
 
     def set_pages(self, pages: int) -> "Book":
         property_ = self.get_classifier().get_property_by_name("pages")
-        self.set_property_value(property_, pages)
+        self.set_property_value(property=property_, value=pages)
         return self
 
     def get_title(self) -> str:

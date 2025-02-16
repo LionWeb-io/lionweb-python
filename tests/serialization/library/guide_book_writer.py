@@ -11,7 +11,7 @@ class GuideBookWriter(Writer):
 
     def set_countries(self, countries: str):
         property_ = self.get_classifier().get_property_by_name("countries")
-        self.set_property_value(property_, countries)
+        self.set_property_value(property=property_, value=countries)
 
     def get_classifier(self) -> Concept:
         from serialization.library.library_language import LibraryLanguage
