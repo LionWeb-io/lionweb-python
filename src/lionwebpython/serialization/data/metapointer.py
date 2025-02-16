@@ -5,7 +5,7 @@ from typing import TYPE_CHECKING, Optional
 @dataclass
 class MetaPointer:
     if TYPE_CHECKING:
-        from lionwebpython.language import Language
+        from lionwebpython.language import Language, Feature, LanguageEntity
         from lionwebpython.language.ikeyed import IKeyed
 
     language: Optional[str] = None
@@ -23,11 +23,11 @@ class MetaPointer:
         self.key = key
 
     @staticmethod
-    def from_feature(feature) -> "MetaPointer":
+    def from_feature(feature: 'Feature') -> "MetaPointer":
         return MetaPointer.from_keyed(feature, feature.get_declaring_language())
 
     @staticmethod
-    def from_language_entity(language_entity) -> "MetaPointer":
+    def from_language_entity(language_entity: 'LanguageEntity') -> "MetaPointer":
         meta_pointer = MetaPointer()
         meta_pointer.key = language_entity.get_key()
         if language_entity.get_language():

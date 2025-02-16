@@ -12,18 +12,18 @@ class SimpleMathLanguage(Language):
 
     def __init__(self):
         super().__init__()
-        self.id = "SimpleMath"
-        self.key = "SimpleMath"
-        self.name = "SimpleMath"
-        self.version = "1"
+        self.set_id("SimpleMath")
+        self.set_key("SimpleMath")
+        self.set_name("SimpleMath")
+        self.set_version("1")
 
         # Initialize concepts
         self.__class__.INT_LITERAL = Concept(
             name="IntLiteral", id="SimpleMath_IntLiteral"
         )
-        self.__class__.INT_LITERAL.key = "SimpleMath_IntLiteral"
+        self.__class__.INT_LITERAL.set_key("SimpleMath_IntLiteral")
         self.__class__.SUM = Concept(name="Sum", id="SimpleMath_Sum")
-        self.__class__.SUM.key = "SimpleMath_Sum"
+        self.__class__.SUM.set_key("SimpleMath_Sum")
 
         self.add_element(self.__class__.INT_LITERAL)
         self.add_element(self.__class__.SUM)

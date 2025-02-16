@@ -4,3 +4,5 @@ from .containment import Containment as Containment
 from .interface import Interface as Interface
 from .language import Language as Language
 from .property import Property as Property
+from .language_entity import LanguageEntity as LanguageEntity
+from .feature import Feature as Feature

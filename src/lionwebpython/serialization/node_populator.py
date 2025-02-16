@@ -73,17 +73,12 @@ class NodePopulator:
             if serialized_containment_value.value is None:
                 raise ValueError("The containment value should not be null")
 
-            deserialized_value = [
-                (
-                    self.classifier_instance_resolver.resolve_or_proxy(child_node_id)
-                    if self.serialization.unavailable_children_policy
-                    == UnavailableNodePolicy.PROXY_NODES
-                    else self.classifier_instance_resolver.strictly_resolve(
-                        child_node_id
-                    )
-                )
-                for child_node_id in serialized_containment_value.value
-            ]
+            deserialized_value = []
+            for child_node_id in serialized_containment_value.value:
+                if self.serialization.unavailable_children_policy == 'PROXY_NODES':
+                    deserialized_value.append(self.classifier_instance_resolver.resolve_or_proxy(child_node_id))
+                else:
+                    deserialized_value.append(self.classifier_instance_resolver.strictly_resolve(child_node_id))
 
             if deserialized_value != node.get_children(containment):
                 for child in deserialized_value:
