@@ -40,7 +40,7 @@ class JsonSerializationTest(SerializationTest):
     def test_serialize_reference_without_resolve_info(self):
         book = DynamicNode("foo123", LibraryLanguage.BOOK)
         writer = DynamicNode("-Arthur-Foozillus-id-", LibraryLanguage.WRITER)
-        book.add_reference_value(LibraryLanguage.BOOK.get_reference_by_name("author"), ReferenceValue(writer, None))
+        book.add_reference_value(LibraryLanguage.BOOK.get_reference_by_name("author"), ReferenceValue(referred=writer, resolve_info=None))
 
         json_serialization = SerializationProvider.get_standard_json_serialization(LionWebVersion.V2023_1)
         json_serialization.primitive_values_serialization.register_serializer("string_id", str)
@@ -795,7 +795,7 @@ class JsonSerializationTest(SerializationTest):
         todo0 = nodes[0]
         self.assertEqual(ProxyNode("synthetic_my-wonderful-partition_projects_1"), todo0.get_parent())
         prerequisite_todo0 = ClassifierInstanceUtils.get_reference_value_by_name(todo0, "prerequisite")
-        self.assertEqual([ReferenceValue(ProxyNode("external-1"), None)], prerequisite_todo0)
+        self.assertEqual([ReferenceValue(referred=ProxyNode("external-1"), resolve_info=None)], prerequisite_todo0)
 
 
 if __name__ == '__main__':

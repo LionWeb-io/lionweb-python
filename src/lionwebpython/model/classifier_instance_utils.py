@@ -85,7 +85,7 @@ class ClassifierInstanceUtils:
             from lionwebpython.model.reference_value import ReferenceValue
 
             return ReferenceValue(
-                entity, f"LIONCORE_AUTORESOLVE_PREFIX{entity.get_name()}"
+                referred=entity, resolve_info=f"LIONCORE_AUTORESOLVE_PREFIX{entity.get_name()}"
             )
         elif (
             language
@@ -93,10 +93,10 @@ class ClassifierInstanceUtils:
             and entity.get_lionweb_version() == LionWebVersion.V2024_1
         ):
             return ReferenceValue(
-                entity, f"LIONCOREBUILTINS_AUTORESOLVE_PREFIX{entity.get_name()}"
+                referred=entity, resolve_info=f"LIONCOREBUILTINS_AUTORESOLVE_PREFIX{entity.get_name()}"
             )
         else:
-            return ReferenceValue(entity, entity.get_name())
+            return ReferenceValue(referred=entity, resolve_info=entity.get_name())
 
     @staticmethod
     def is_builtin_element(entity: "Node") -> bool:

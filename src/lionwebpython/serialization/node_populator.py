@@ -135,5 +135,5 @@ class NodePopulator:
                 if referred is None and entry.resolve_info:
                     referred = self.auto_resolve_map.get(entry.resolve_info)
 
-                reference_value = ReferenceValue(referred, entry.resolve_info)
+                reference_value = ReferenceValue(referred=referred, resolve_info=entry.resolve_info)
                 node.add_reference_value(reference, reference_value)

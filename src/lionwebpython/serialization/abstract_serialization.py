@@ -246,7 +246,7 @@ class AbstractSerialization:
             reference_value.meta_pointer = MetaPointer.from_keyed(reference, language)
             reference_value.value = [
                 SerializedReferenceValueEntry(
-                    (
+                    reference=(
                         None
                         if (
                             self.builtins_reference_dangling
@@ -256,7 +256,7 @@ class AbstractSerialization:
                         )
                         else (rv.get_referred().get_id() if rv.get_referred() else None)
                     ),
-                    rv.get_resolve_info(),
+                    resolve_info=rv.get_resolve_info(),
                 )
                 for rv in classifier_instance.get_reference_values(reference)
             ]
