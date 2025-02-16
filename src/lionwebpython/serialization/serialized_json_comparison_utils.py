@@ -20,6 +20,11 @@ class SerializedJsonComparisonUtils:
             expected.get("serializationFormatVersion"),
             actual.get("serializationFormatVersion"),
         )
+        SerializedJsonComparisonUtils.assert_equals(
+            "languages",
+            expected.get("languages"),
+            actual.get("languages"),
+        )
         SerializedJsonComparisonUtils.assert_equivalent_lionweb_json_nodes(
             cast(JsonArray, expected.get("nodes")), cast(JsonArray, actual.get("nodes"))
         )
