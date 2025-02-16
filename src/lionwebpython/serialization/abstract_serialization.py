@@ -1,5 +1,6 @@
-from typing import List
+from typing import List, Dict
 
+from lionwebpython.api.composite_classifier_instance_resolver import CompositeClassifierInstanceResolver
 from lionwebpython.api.local_classifier_instance_resolver import \
     LocalClassifierInstanceResolver
 from lionwebpython.language.data_type import DataType
@@ -7,6 +8,8 @@ from lionwebpython.lionweb_version import LionWebVersion
 from lionwebpython.model import ClassifierInstance
 from lionwebpython.model.annotation_instance import AnnotationInstance
 from lionwebpython.model.classifier_instance_utils import ClassifierInstanceUtils
+from lionwebpython.model.has_settable_parent import HasSettableParent
+from lionwebpython.model.impl.proxy_node import ProxyNode
 from lionwebpython.serialization.classifier_resolver import ClassifierResolver
 from lionwebpython.serialization.data.metapointer import MetaPointer
 from lionwebpython.serialization.data.serialized_chunk import SerializedChunk
@@ -20,6 +23,8 @@ from lionwebpython.serialization.data.used_language import UsedLanguage
 from lionwebpython.serialization.deserialization_exception import DeserializationException
 from lionwebpython.serialization.deserialization_status import DeserializationStatus
 from lionwebpython.serialization.instantiator import Instantiator
+from lionwebpython.serialization.map_based_resolver import MapBasedResolver
+from lionwebpython.serialization.node_populator import NodePopulator
 from lionwebpython.serialization.primitives_values_serialization import \
     PrimitiveValuesSerialization
 from lionwebpython.serialization.unavailable_node_policy import \
@@ -194,40 +199,76 @@ class AbstractSerialization:
             annotation.get_id() for annotation in classifier_instance.get_annotations()
         ]
 
-    def deserialize_serialization_block(self, serialized_chunk):
+    def deserialize_serialization_block(self, serialized_chunk: SerializedChunk):
         serialized_instances = serialized_chunk.classifier_instances
-        return self.deserialize_classifier_instances(
+        return self._deserialize_classifier_instances(
             self.lion_web_version, serialized_instances
         )
 
-    def deserialize_classifier_instances(self, lion_web_version, serialized_instances):
-        deserialized_by_id = {}
-        for serialized_instance in serialized_instances:
-            classifier = self.classifier_resolver.resolve_classifier(
-                serialized_instance.classifier
-            )
-            properties_values = {
-                prop_key: self.primitive_values_serialization.deserialize(
-                    classifier.get_property_by_key(prop_key).get_type(),
-                    serialized_instance.properties[prop_key],
-                    classifier.get_property_by_key(prop_key).is_required(),
-                )
-                for prop_key in serialized_instance.properties
-            }
-            instance = self.instantiator.instantiate(
-                classifier, serialized_instance, deserialized_by_id, properties_values
-            )
-            deserialized_by_id[serialized_instance.id] = instance
+    def _deserialize_classifier_instances(self, lion_web_version: LionWebVersion,
+                                         serialized_classifier_instances: List[SerializedClassifierInstance]) -> (
+            List)[ClassifierInstance]:
+        if lion_web_version is None:
+            raise ValueError("lion_web_version should not be null")
 
-        for serialized_instance in serialized_instances:
-            instance = deserialized_by_id[serialized_instance.id]
-            parent_id = serialized_instance.parent_node_id
-            if parent_id:
-                parent_instance = deserialized_by_id.get(parent_id)
-                if parent_instance and hasattr(instance, "set_parent"):
-                    instance.set_parent(parent_instance)
+        # Sort leaves first
+        deserialization_status = self._sort_leaves_first(serialized_classifier_instances)
+        sorted_serialized_instances = deserialization_status.sorted_list
 
-        return list(deserialized_by_id.values())
+        if len(sorted_serialized_instances) != len(serialized_classifier_instances):
+            raise ValueError("Mismatch in number of nodes to deserialize")
+
+        deserialized_by_id: Dict[str, ClassifierInstance] = {}
+        serialized_to_instance_map = {}
+
+        for n in sorted_serialized_instances:
+            instantiated = self._instantiate_from_serialized(lion_web_version, n, deserialized_by_id)
+            if n.id and n.id in deserialized_by_id:
+                raise ValueError(f"Duplicate ID found: {n.id}")
+            deserialized_by_id[n.id] = instantiated
+            serialized_to_instance_map[n] = instantiated
+
+        if len(sorted_serialized_instances) != len(serialized_to_instance_map):
+            raise ValueError("Mismatch in number of nodes to deserialize")
+
+        classifier_instance_resolver = CompositeClassifierInstanceResolver(
+            MapBasedResolver(deserialized_by_id),
+            deserialization_status.get_proxies_instance_resolver(),
+            self.instance_resolver
+        )
+
+        node_populator = NodePopulator(
+            self, classifier_instance_resolver, deserialization_status, lion_web_version
+        )
+
+        for node in serialized_classifier_instances:
+            classifier_instance = serialized_to_instance_map[node]
+            node_populator.populate_classifier_instance(classifier_instance, node)
+
+            parent_node_id = node.parent_node_id
+            parent = classifier_instance_resolver.resolve(parent_node_id) if parent_node_id else None
+            if isinstance(parent, ProxyNode) and self.unavailable_parent_policy == UnavailableNodePolicy.PROXY_NODES:
+                if isinstance(classifier_instance, HasSettableParent):
+                    classifier_instance.set_parent(parent)
+                else:
+                    raise NotImplementedError(
+                        f"Cannot set parent for {classifier_instance}"
+                    )
+
+            if isinstance(classifier_instance, AnnotationInstance):
+                if node is None:
+                    raise ValueError("Dangling annotation instance found (annotated node is null)")
+                parent_node_id = node.parent_node_id
+                parent_instance = deserialized_by_id.get(parent_node_id) if parent_node_id else None
+                if parent_instance:
+                    parent_instance.add_annotation(classifier_instance)
+                else:
+                    raise ValueError(f"Cannot resolve annotated node {classifier_instance.get_parent()}")
+
+        nodes_with_original_sorting = [serialized_to_instance_map[sn] for sn in serialized_classifier_instances]
+        nodes_with_original_sorting.extend(deserialization_status.proxies)
+
+        return nodes_with_original_sorting
 
     def _validate_serialization_block(self, serialization_block: SerializedChunk) -> None:
         if serialization_block is None:
@@ -285,3 +326,41 @@ class AbstractSerialization:
         deserialization_status.reverse()
         return deserialization_status
 
+    def _instantiate_from_serialized(self, lion_web_version: LionWebVersion,
+                                     serialized_classifier_instance: SerializedClassifierInstance,
+                                     deserialized_by_id: Dict[str, ClassifierInstance]) -> ClassifierInstance:
+        if lion_web_version is None:
+            raise ValueError("lionWebVersion should not be null")
+
+        serialized_classifier = serialized_classifier_instance.get_classifier()
+        if serialized_classifier is None:
+            raise RuntimeError(f"No metaPointer available for {serialized_classifier_instance}")
+
+        classifier = self.classifier_resolver.resolve_classifier(serialized_classifier)
+
+        # Prepare properties values for instantiator
+        properties_values = {}
+        for serialized_property_value in serialized_classifier_instance.get_properties():
+            property = classifier.get_property_by_meta_pointer(serialized_property_value.meta_pointer)
+            if property is None:
+                available_properties = [MetaPointer.from_feature(p) for p in classifier.all_properties()]
+                raise RuntimeError(
+                    f"Property with metaPointer {serialized_property_value.meta_pointer} not found in classifier {classifier}. Available properties: {available_properties}"
+                )
+            if property.get_type() is None:
+                raise RuntimeError("Property type should not be null")
+            deserialized_value = self.primitive_values_serialization.deserialize(
+                property.get_type(), serialized_property_value.value, property.is_required()
+            )
+            properties_values[property] = deserialized_value
+
+        classifier_instance = self.instantiator.instantiate(
+            classifier, serialized_classifier_instance, deserialized_by_id, properties_values
+        )
+
+        # Ensure that properties values are set correctly
+        for property, deserialized_value in properties_values.items():
+            if deserialized_value != classifier_instance.get_property_value(property):
+                classifier_instance.set_property_value(property, deserialized_value)
+
+        return classifier_instance
