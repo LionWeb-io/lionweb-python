@@ -223,9 +223,13 @@ class AbstractSerialization:
 
         for n in sorted_serialized_instances:
             instantiated = self._instantiate_from_serialized(lion_web_version, n, deserialized_by_id)
-            if n.id and n.id in deserialized_by_id:
-                raise ValueError(f"Duplicate ID found: {n.id}")
-            deserialized_by_id[n.id] = instantiated
+            id = n.id
+            if id and id in deserialized_by_id:
+                raise ValueError(f"Duplicate ID found: {id}")
+            if id is None:
+                raise ValueError()
+
+            deserialized_by_id[id] = instantiated
             serialized_to_instance_map[n] = instantiated
 
         if len(sorted_serialized_instances) != len(serialized_to_instance_map):
@@ -282,6 +286,10 @@ class AbstractSerialization:
             )
 
     def _sort_leaves_first(self, original_list: List[SerializedClassifierInstance]) -> DeserializationStatus:
+        """
+        This method returned a sorted version of the original list, so that leaves nodes comes first,
+        or in other words that a parent never precedes its children.
+        """
         deserialization_status = DeserializationStatus(original_list, self.instance_resolver)
 
         # We create the list going from the roots to their children and then reverse it
@@ -306,12 +314,16 @@ class AbstractSerialization:
         # Place elements with no parent or already sorted parents
         while deserialization_status.how_many_sorted() < len(original_list):
             initial_length = deserialization_status.how_many_sorted()
-            for i in range(deserialization_status.how_many_to_sort()):
+
+            i=0
+            while i < deserialization_status.how_many_to_sort():
                 node = deserialization_status.get_node_to_sort(i)
                 if node.get_parent_node_id() is None or any(
                     sn.get_id() == node.get_parent_node_id() for sn in deserialization_status.stream_sorted()
                 ):
                     deserialization_status.place(node)
+                    i -= 1
+                i += 1
 
             if initial_length == deserialization_status.how_many_sorted():
                 if deserialization_status.how_many_sorted() == 0:

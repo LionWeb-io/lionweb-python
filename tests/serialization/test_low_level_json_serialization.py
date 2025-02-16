@@ -1,5 +1,6 @@
 import json
 import unittest
+from pathlib import Path
 
 from lionwebpython.language import Language, Annotation, Concept
 from lionwebpython.lionweb_version import LionWebVersion
@@ -17,7 +18,7 @@ from serialization.serialization_test import SerializationTest
 class LowLevelJsonSerializationTest(SerializationTest):
 
     def test_deserialize_lioncore_to_serialized_nodes(self):
-        with open("./resources/serialization/lioncore.json", "r") as file:
+        with open(Path(__file__).parent.parent / "resources" / "serialization" / "lioncore.json", "r") as file:
             json_element = json.load(file)
 
         json_serialization = LowLevelJsonSerialization()
@@ -32,7 +33,7 @@ class LowLevelJsonSerializationTest(SerializationTest):
         self.assertIsNone(lioncore.parent_node_id)
 
     def test_deserialize_library_language_to_serialized_nodes(self):
-        with open("./resources/serialization/library-language.json", "r") as file:
+        with open(Path(__file__).parent.parent / "resources" / "serialization" / "library-language.json", "r") as file:
             json_element = json.load(file)
 
         json_serialization = LowLevelJsonSerialization()
@@ -52,13 +53,13 @@ class LowLevelJsonSerializationTest(SerializationTest):
 
     def test_reserialize_library_language(self):
         self.maxDiff = None
-        self.assert_file_is_reserialized_correctly("./resources/serialization/library-language.json")
+        self.assert_file_is_reserialized_correctly(Path(__file__).parent.parent / "resources" / "serialization" / "library-language.json")
 
     def test_reserialize_bobs_library(self):
-        self.assert_file_is_reserialized_correctly("./resources/serialization/bobslibrary.json")
+        self.assert_file_is_reserialized_correctly(Path(__file__).parent.parent / "resources" / "serialization" / "bobslibrary.json")
 
     def test_reserialize_language_engineering_library(self):
-        self.assert_file_is_reserialized_correctly("./resources/serialization/langeng-library.json")
+        self.assert_file_is_reserialized_correctly(Path(__file__).parent.parent / "resources" / "serialization" / "langeng-library.json")
 
     def test_serialize_annotations(self):
         lang = Language("l", "l", "l", "1")
@@ -90,7 +91,7 @@ class LowLevelJsonSerializationTest(SerializationTest):
         with self.assertRaises(Exception):
             lljs.deserialize_serialization_block(json.loads(json_str))
 
-    def assert_file_is_reserialized_correctly(self, file_path: str):
+    def assert_file_is_reserialized_correctly(self, file_path: str | Path):
         with open(file_path, "r") as file:
             json_element = json.load(file)
 

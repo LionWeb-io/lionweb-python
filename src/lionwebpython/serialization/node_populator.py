@@ -1,43 +1,48 @@
+from typing import TYPE_CHECKING
+
+from lionwebpython.api.classifier_instance_resolver import ClassifierInstanceResolver
 from lionwebpython.language.lioncore_builtins import LionCoreBuiltins
 from lionwebpython.lionweb_version import LionWebVersion
 from lionwebpython.model.reference_value import ReferenceValue
 from lionwebpython.self.lioncore import LionCore
+
 from lionwebpython.serialization.deserialization_exception import \
     DeserializationException
+from lionwebpython.serialization.deserialization_status import DeserializationStatus
 from lionwebpython.serialization.unavailable_node_policy import \
     UnavailableNodePolicy
 
 
 class NodePopulator:
+    if TYPE_CHECKING:
+        from lionwebpython.serialization.abstract_serialization import AbstractSerialization
+
     def __init__(
         self,
-        serialization,
-        classifier_instance_resolver,
-        deserialization_status,
-        auto_resolve_version=None,
+        serialization: 'AbstractSerialization',
+        classifier_instance_resolver: ClassifierInstanceResolver,
+        deserialization_status: DeserializationStatus,
+        auto_resolve_version: LionWebVersion=LionWebVersion.current_version(),
     ):
         self.serialization = serialization
         self.classifier_instance_resolver = classifier_instance_resolver
         self.deserialization_status = deserialization_status
         self.auto_resolve_map = {}
 
-        if auto_resolve_version is None:
-            auto_resolve_version = LionWebVersion.current_version()
-
         lion_core_builtins = LionCoreBuiltins.get_instance(auto_resolve_version)
         for element in lion_core_builtins.get_elements():
-            self.auto_resolve_map[f"LIONCOREBUILTINS::{element.name}"] = element
+            self.auto_resolve_map[f"LIONCOREBUILTINS::{element.get_name()}"] = element
 
         lion_core = LionCore.get_instance(auto_resolve_version)
         for element in lion_core.get_elements():
-            self.auto_resolve_map[f"LIONCORE::{element.name}"] = element
+            self.auto_resolve_map[f"LIONCORE::{element.get_name()}"] = element
 
     def populate_classifier_instance(self, node, serialized_classifier_instance):
         self.populate_containments(node, serialized_classifier_instance)
         self.populate_node_references(node, serialized_classifier_instance)
 
     def populate_containments(self, node, serialized_classifier_instance):
-        concept = node.classifier
+        concept = node.get_classifier()
         for (
             serialized_containment_value
         ) in serialized_classifier_instance.get_containments():
@@ -69,7 +74,7 @@ class NodePopulator:
                     node.add_child(containment, child)
 
     def populate_node_references(self, node, serialized_classifier_instance):
-        concept = node.classifier
+        concept = node.get_classifier()
         for (
             serialized_reference_value
         ) in serialized_classifier_instance.get_references():
