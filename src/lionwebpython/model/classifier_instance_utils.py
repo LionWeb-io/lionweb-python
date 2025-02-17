@@ -1,5 +1,7 @@
 from typing import TYPE_CHECKING, List, Optional
 
+from lionwebpython.model.reference_value import ReferenceValue
+
 
 class ClassifierInstanceUtils:
     if TYPE_CHECKING:
@@ -150,3 +152,24 @@ class ClassifierInstanceUtils:
             )
 
         return instance.get_reference_values(reference)
+
+    @staticmethod
+    def get_only_reference_value_by_reference_name(
+        instance, reference_name: str
+    ) -> Optional["ReferenceValue"]:
+        if instance is None:
+            raise ValueError("_this should not be null")
+        if reference_name is None:
+            raise ValueError("referenceName should not be null")
+
+        reference_values: List["ReferenceValue"] = (
+            ClassifierInstanceUtils.get_reference_value_by_name(
+                instance, reference_name
+            )
+        )
+        if len(reference_values) > 1:
+            raise RuntimeError("More than one reference value found")
+        elif len(reference_values) == 0:
+            return None
+        else:
+            return reference_values[0]
