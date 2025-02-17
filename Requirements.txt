@@ -10,7 +10,6 @@ identify==2.6.7
 idna==3.10
 iniconfig==2.0.0
 isort==6.0.0
-lionweb-python @ file:///Users/ftomassetti/repos/lionweb-python
 mypy==1.15.0
 mypy-extensions==1.0.0
 nodeenv==1.9.1
