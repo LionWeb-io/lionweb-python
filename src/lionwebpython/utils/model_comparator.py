@@ -1,4 +1,4 @@
-from typing import cast
+from typing import Optional, cast
 
 from lionwebpython.language.classifier import Classifier
 from lionwebpython.model import ClassifierInstance
@@ -74,8 +74,8 @@ class ComparisonResult:
         node_id: str,
         reference_name: str,
         index: int,
-        referred_a: str | None,
-        referred_b: str | None,
+        referred_a: Optional[str],
+        referred_b: Optional[str],
     ):
         self.differences.append(
             f"{context} (id={node_id}): different referred id for {reference_name} index {index}, a={referred_a}, b={referred_b}"
@@ -87,8 +87,8 @@ class ComparisonResult:
         node_id: str,
         reference_name: str,
         index: int,
-        resolve_info_a: str | None,
-        resolve_info_b: str | None,
+        resolve_info_a: Optional[str],
+        resolve_info_b: Optional[str],
     ):
         self.differences.append(
             f"{context} (id={node_id}): different resolve info for {reference_name} index {index}, a={resolve_info_a}, b={resolve_info_b}"

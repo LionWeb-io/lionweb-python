@@ -1,6 +1,7 @@
 import json
 import unittest
 from pathlib import Path
+from typing import Union
 
 from serialization.serialization_test import SerializationTest
 
@@ -166,7 +167,7 @@ class LowLevelJsonSerializationTest(SerializationTest):
         with self.assertRaises(Exception):
             lljs.deserialize_serialization_block(json.loads(json_str))
 
-    def assert_file_is_reserialized_correctly(self, file_path: str | Path):
+    def assert_file_is_reserialized_correctly(self, file_path: Union[str, Path]):
         with open(file_path, "r") as file:
             json_element = json.load(file)
 

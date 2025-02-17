@@ -1,4 +1,4 @@
-from typing import Dict, List, Optional
+from typing import Dict, List, Optional, Union
 
 from lionwebpython.serialization.data.metapointer import MetaPointer
 from lionwebpython.serialization.data.serialized_reference_value import \
@@ -92,7 +92,7 @@ class SerializationUtils:
     @staticmethod
     def to_json_array_of_reference_values(
         entries: List[SerializedReferenceValueEntry],
-    ) -> List[Dict[str, str | None]]:
+    ) -> List[Dict[str, Union[str, None]]]:
         json_array = []
         for entry in entries:
             entry_json = {
