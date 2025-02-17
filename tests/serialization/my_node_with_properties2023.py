@@ -20,7 +20,7 @@ class MyNodeWithProperties2023(DynamicNode):
         .set_version("1")
     )
 
-    CONCEPT = (
+    CONCEPT: Concept = (
         Concept(lion_web_version=LionWebVersion.V2023_1)
         .set_id("concept-MyNodeWithProperties")
         .set_key("concept-MyNodeWithProperties")

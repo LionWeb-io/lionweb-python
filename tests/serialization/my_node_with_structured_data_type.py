@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import Optional, cast
 
 from lionwebpython.language import Concept, Language, Property
 from lionwebpython.language.field import Field
@@ -45,13 +45,18 @@ class MyNodeWithStructuredDataType(DynamicNode):
         super().__init__(id, MyNodeWithStructuredDataType.CONCEPT)
 
     def get_point(self) -> Optional[StructuredDataType]:
-        return self.get_property_value("point")
+        return cast(
+            Optional[StructuredDataType], self.get_property_value(property_name="point")
+        )
 
-    def set_point(self, point: StructuredDataType):
-        self.set_property_value("point", point)
+    def set_point(self, point: StructuredDataType) -> None:
+        self.set_property_value(property_name="point", value=point)
 
     def get_address(self) -> Optional[StructuredDataType]:
-        return self.get_property_value("address")
+        return cast(
+            Optional[StructuredDataType],
+            self.get_property_value(property_name="address"),
+        )
 
-    def set_address(self, address: StructuredDataType):
-        self.set_property_value("address", address)
+    def set_address(self, address: StructuredDataType) -> None:
+        self.set_property_value(property_name="address", value=address)
