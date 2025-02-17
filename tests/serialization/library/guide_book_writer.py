@@ -5,9 +5,7 @@ from lionwebpython.language.concept import Concept
 
 class GuideBookWriter(Writer):
     def __init__(self, id: str, name: str):
-        from serialization.library.library_language import LibraryLanguage
-
-        super().__init__(id, name, LibraryLanguage.GUIDE_BOOK_WRITER)
+        super().__init__(id, name)
 
     def set_countries(self, countries: str):
         property_ = self.get_classifier().get_property_by_name("countries")

@@ -9,11 +9,11 @@ from lionwebpython.serialization.serialization_provider import \
 
 
 class LibraryLanguage:
-    LIBRARY_MM: Language = None
-    LIBRARY: "Concept" = None
-    BOOK: "Concept" = None
-    WRITER: "Concept" = None
-    GUIDE_BOOK_WRITER: "Concept" = None
+    LIBRARY_MM: Language
+    LIBRARY: "Concept"
+    BOOK: "Concept"
+    WRITER: "Concept"
+    GUIDE_BOOK_WRITER: "Concept"
 
     @staticmethod
     def initialize():
