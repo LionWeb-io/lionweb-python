@@ -12,6 +12,8 @@ class SerializationProvider:
     ):
         if lion_web_version is None:
             lion_web_version = LionWebVersion.current_version
+        if not isinstance(lion_web_version, LionWebVersion):
+            raise ValueError()
         serialization = JsonSerialization(lion_web_version)
         SerializationProvider.standard_initialization(serialization)
         return serialization

@@ -194,7 +194,7 @@ class PrimitiveValuesSerialization:
 
         self.primitive_serializers[
             cast(str, LionCoreBuiltins.get_boolean(lion_web_version).get_id())
-        ] = lambda v: str(v)
+        ] = lambda v: str(v).lower()
         if lion_web_version == LionWebVersion.V2023_1:
             self.primitive_serializers[
                 cast(str, LionCoreBuiltins.get_json(lion_web_version).get_id())

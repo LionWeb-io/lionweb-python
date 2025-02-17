@@ -33,6 +33,8 @@ class SerializationTest(unittest.TestCase):
     def concept_by_id(self, nodes: List["Node"], node_id: str) -> "Concept":
         """Retrieve a Concept by ID."""
         for node in nodes:
+            if not isinstance(node, Node):
+                raise ValueError(f"A Node instance was expected, but we got {node}")
             if node.get_id() == node_id:
                 return node
         raise ValueError(f"No Concept found with ID: {node_id}")
