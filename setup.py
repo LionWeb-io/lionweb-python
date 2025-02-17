@@ -1,10 +1,20 @@
-from setuptools import setup
+from setuptools import setup, find_packages
 
 setup(
     name="lionweb-python",
     version="0.1.0",
-    package_dir={"": "src/main/python"},
+    author="Federico Tomassetti",
+    author_email="info@lionweb.io",
+    description="Python Bindings for LionWeb",
+    long_description=open("README.md").read(),
+    long_description_content_type="text/markdown",
+    url="https://github.com/LionWeb-io/lionweb-python",
+    packages=find_packages(),
     install_requires=[],
-    extras_require={"dev": ["flake8"]},
-    scripts=[]
+    python_requires=">=3.9",
+    classifiers=[
+        "Development Status :: 4 - Beta",
+        "Programming Language :: Python :: 3",
+        "License :: OSI Approved :: Apache Software License",
+    ],
 )

@@ -17,3 +17,11 @@ mypy src/
 black src/ tests/
 isort src/ tests/
 ```
+
+## Release process
+
+```
+pip install setuptools wheel twine
+python setup.py sdist bdist_wheel
+twine upload dist/* 
+```
