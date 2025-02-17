@@ -53,6 +53,7 @@ class AbstractSerialization:
         self.unavailable_children_policy = UnavailableNodePolicy.THROW_ERROR
         self.unavailable_reference_target_policy = UnavailableNodePolicy.THROW_ERROR
         self.builtins_reference_dangling = False
+        self.keep_null_properties = False
 
     def enable_dynamic_nodes(self):
         self.instantiator.enable_dynamic_nodes()
@@ -201,13 +202,15 @@ class AbstractSerialization:
             dt = property.get_type()
             if dt is None:
                 raise ValueError()
-            property_value = SerializedPropertyValue(
-                mp,
-                self._serialize_property_value(
-                    dt, classifier_instance.get_property_value(property=property)
-                ),
-            )
-            serialized_classifier_instance.add_property_value(property_value)
+            property_value = classifier_instance.get_property_value(property=property)
+            if property_value is not None or self.keep_null_properties:
+                serialized_property_value = SerializedPropertyValue(
+                    mp,
+                    self._serialize_property_value(dt, property_value),
+                )
+                serialized_classifier_instance.add_property_value(
+                    serialized_property_value
+                )
 
     def _serialize_property_value(self, data_type: DataType, value: object):
         if data_type is None:

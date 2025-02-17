@@ -1,4 +1,3 @@
-import json
 from typing import Optional
 
 from lionwebpython.language.concept import Concept
@@ -80,7 +79,7 @@ class MyNodeWithProperties2023(DynamicNode):
 
     def get_p4(self) -> Optional[dict]:
         p4_value = ClassifierInstanceUtils.get_property_value_by_name(self, "p4")
-        return json.loads(p4_value) if isinstance(p4_value, str) else p4_value
+        return p4_value
 
     def set_p1(self, value: bool):
         ClassifierInstanceUtils.set_property_value_by_name(self, "p1", value)
@@ -92,6 +91,4 @@ class MyNodeWithProperties2023(DynamicNode):
         ClassifierInstanceUtils.set_property_value_by_name(self, "p3", value)
 
     def set_p4(self, value: dict):
-        ClassifierInstanceUtils.set_property_value_by_name(
-            self, "p4", json.dumps(value)
-        )
+        ClassifierInstanceUtils.set_property_value_by_name(self, "p4", value)

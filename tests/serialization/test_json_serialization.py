@@ -62,6 +62,7 @@ class JsonSerializationTest(SerializationTest):
         json_serialization = SerializationProvider.get_standard_json_serialization(
             LionWebVersion.V2023_1
         )
+        json_serialization.keep_null_properties = True
         json_serialization.primitive_values_serialization.register_serializer(
             "string_id", str
         )
@@ -93,6 +94,7 @@ class JsonSerializationTest(SerializationTest):
         json_serialization = SerializationProvider.get_standard_json_serialization(
             LionWebVersion.V2023_1
         )
+        json_serialization.keep_null_properties = True
         json_serialization.primitive_values_serialization.register_serializer(
             "string_id", str
         )
@@ -127,6 +129,7 @@ class JsonSerializationTest(SerializationTest):
         json_serialization = SerializationProvider.get_standard_json_serialization(
             LionWebVersion.V2023_1
         )
+        json_serialization.keep_null_properties = True
         json_serialization.primitive_values_serialization.register_serializer(
             "INhBvWyXvxwNsePuX0rdNGB_J9hi85cTb1Q0APXCyJ0", lambda value: value
         )
@@ -706,6 +709,7 @@ class JsonSerializationTest(SerializationTest):
 
         my_instance = DynamicNode("instance-a", my_concept)
         json_ser = SerializationProvider.get_standard_json_serialization()
+        json_ser.keep_null_properties = True
         serialized_chunk = json_ser.serialize_nodes_to_serialization_block(
             [my_instance]
         )

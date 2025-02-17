@@ -1,4 +1,4 @@
-from typing import Callable, Dict
+from typing import TYPE_CHECKING, Callable, Dict
 
 from lionwebpython.language import (Annotation, Concept, Containment,
                                     Interface, Language, Property)
@@ -12,6 +12,9 @@ from lionwebpython.model.impl.dynamic_annotation_instance import \
     DynamicAnnotationInstance
 from lionwebpython.model.impl.dynamic_node import DynamicNode
 from lionwebpython.self.lioncore import LionCore
+
+if TYPE_CHECKING:
+    from lionwebpython.model.node import Node
 
 
 class Instantiator:
@@ -49,7 +52,7 @@ class Instantiator:
         serialized_instance,
         deserialized_instances_by_id,
         properties_values,
-    ):
+    ) -> "Node":
         if classifier.get_id() in self.custom_deserializers:
             res = self.custom_deserializers[classifier.get_id()](
                 classifier,

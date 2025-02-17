@@ -48,6 +48,8 @@ class JsonSerialization(AbstractSerialization):
     def serialize_nodes_to_json_element(
         self, classifier_instances: List[ClassifierInstance]
     ) -> JsonElement:
+        if isinstance(classifier_instances, ClassifierInstance):
+            classifier_instances = [classifier_instances]
         serialization_block = self.serialize_nodes_to_serialization_block(
             classifier_instances
         )
