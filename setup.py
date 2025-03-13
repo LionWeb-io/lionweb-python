@@ -12,6 +12,7 @@ setup(
     packages=find_packages(),
     install_requires=[],
     python_requires=">=3.9",
+    package_dir={"": "src"},
     classifiers=[
         "Development Status :: 4 - Beta",
         "Programming Language :: Python :: 3",

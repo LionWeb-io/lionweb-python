@@ -20,6 +20,13 @@ black src/ tests/
 isort src/ tests/
 ```
 
+## Build locally
+
+```
+pip install build
+python -m build
+```
+
 ## Release process
 
 ```
