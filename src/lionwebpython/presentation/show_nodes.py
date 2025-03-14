@@ -35,7 +35,7 @@ def _html_for_node(node: Node, role: str = 'root') -> str:
 
     html += f"<div class='node'>"
     html += f"<p class='role' style='background-color:{role_color}'>{role}</p>"
-    html += f"<p class='type' style='background-color:{classifier_color}'>{node.get_classifier().qualified_name()}</p>"
+    html += f"<p class='type' style='background-color:{classifier_color}'>{node.get_classifier().get_name()}</p>"
     html += "<div class='content'>"
     html += f"<p class='nodeid'>{node.get_id()}</p>"
     for property in node.get_classifier().all_properties():
