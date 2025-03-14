@@ -36,15 +36,16 @@ def _html_for_node(node: Node, role: str = 'root') -> str:
     html += f"<div class='node'>"
     html += f"<p class='role' style='background-color:{role_color}'>{role}</p>"
     html += f"<p class='type' style='background-color:{classifier_color}'>{node.get_classifier().get_name()}</p>"
-    html += "<div class='content'>"
-    html += f"<p class='nodeid'>{node.get_id()}</p>"
+    html += "<div class='content'>\n"
+    html += f"<p class='nodeid'>{node.get_id()}</p>\n"
+    html += """<p class="properties">\n"""
     for property in node.get_classifier().all_properties():
-        html += "<p class='property'>"
-        html += f"<span class='propertyname'>{property.get_name()}</span> = <span class='propertyvalue'>{node.get_property_value(property=property)}</span><br/>"
-        html += "</p>"
-    html += "</div>"
-    html += "</div>"
-    html += "<ul>"
+        html += f"<span class='propertyname'>{property.get_name()}</span><span class='equals'>&mapsto;</span>\n"
+        html += f"<span class='propertyvalue'>{node.get_property_value(property=property)}</span><br/>\n"
+    html += "</p>\n"
+    html += "</div>\n" # close content
+    html += "</div>\n" # close node
+    html += "<ul>\n"
     for containment in node.get_classifier().all_containments():
         for child in node.get_children(containment=containment):
             html += _html_for_node(child, containment.get_name())
@@ -121,12 +122,16 @@ def display_node(node: Node):
             font-size: 12pt;
             margin:3px 3px;
         }
-        p.property {
+        p.properties {
             font-size: 9pt;
             font-weight: 200;
             color: black;
             text-align:left;
             margin:3px 3px;
+            display: inline-grid;
+            grid-template-columns: auto 10px auto 1px;
+            gap: 3px; 
+            align-items: center;
         }
         span.propertyname {
             text-decoration: underlined;
@@ -158,6 +163,13 @@ def display_node(node: Node):
             height: 12px;
             font-size: 14px;
             transition: transform 0.2s ease;
+        }
+        
+        .leaf {
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            font-size: 14px;
         }
 
         /* Expanded state */
