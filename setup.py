@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 
 setup(
     name="lionweb-python",
-    version="0.1.0",
+    version="0.1.1",
     author="Federico Tomassetti",
     author_email="info@lionweb.io",
     description="Python Bindings for LionWeb",

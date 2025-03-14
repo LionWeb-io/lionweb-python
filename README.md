@@ -29,8 +29,13 @@ python -m build
 
 ## Release process
 
+* Update version in pyproject.toml and setup.py
+* Create tag: `git tag -a v0.1.1 -m "Version 0.1.1"`
+* Release on Pypi:
+
 ```
 pip install setuptools wheel twine
 python setup.py sdist bdist_wheel
 twine upload dist/* 
 ```
+* Push tag
