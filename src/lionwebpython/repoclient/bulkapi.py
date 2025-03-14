@@ -50,29 +50,8 @@ class RepoClient:
         # Check response
         if response.status_code == 200:
             data = response.json()
-            print(data)
             nodes = SerializationProvider.get_standard_json_serialization(self._lionweb_version).deserialize_json_to_nodes(data['chunk'])
             return nodes
         else:
             raise ValueError("Error:", response.status_code, response.text)
 
-# client = RepoClient(lionweb_version=LionWebVersion.V2023_1, repository_name="alt")
-# path = '/Users/ftomassetti/repos/lionweb-java/core/src/test/resources/properties-example/starlasu-corrected.lmm.json'
-# with open(path, "r", encoding="utf-8") as file:
-#     content = file.read()
-# nodes = SerializationProvider.get_standard_json_serialization(LionWebVersion.V2023_1).deserialize_string_to_nodes(content)
-# for n in nodes:
-#     print(f"node {n.get_id()}")
-#     for p in n.get_classifier().all_properties():
-#         print(f" - {p.get_name()}={n.get_property_value(property=p)}")
-# root = nodes[0]
-# simplified_root = DynamicNode(root.id, root.get_classifier())
-# client.create_partitions([simplified_root])
-# print("PARTITION CREATED")
-# client.store(nodes)
-# print("STORED")
-# nodes = client.retrieve(["com-strumenta-StarLasu"])
-# for n in nodes:
-#     print(f"node {n.get_id()}")
-#     for p in n.get_classifier().all_properties():
-#         print(f" - {p.get_name()}={n.get_property_value(property=p)}")
