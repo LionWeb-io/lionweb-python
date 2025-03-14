@@ -50,6 +50,7 @@ class Property(Feature["Property"]):
         name: Optional[str] = None,
         type: Optional["DataType"] = None,
         id: Optional[str] = None,
+        key: Optional[str] = None,
     ) -> "Property":
         if id is not None and not isinstance(id, str):
             raise ValueError("id should not be null")
@@ -58,6 +59,7 @@ class Property(Feature["Property"]):
             if lion_web_version
             else Property(name=name, id=id)
         )
+        property_instance.set_key(key)
         property_instance.set_optional(False)
         property_instance.set_type(type)
         return property_instance
@@ -91,6 +93,11 @@ class Property(Feature["Property"]):
         return self
 
     def __str__(self) -> str:
+        from lionwebpython.language.debug_utils import DebugUtils
+
+        return f"{super().__str__()}{{qualifiedName={DebugUtils.qualified_name(self)}, type={self.get_type()}}}"
+
+    def __repr__(self):
         from lionwebpython.language.debug_utils import DebugUtils
 
         return f"{super().__str__()}{{qualifiedName={DebugUtils.qualified_name(self)}, type={self.get_type()}}}"
