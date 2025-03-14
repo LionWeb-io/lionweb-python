@@ -59,7 +59,8 @@ class Property(Feature["Property"]):
             if lion_web_version
             else Property(name=name, id=id)
         )
-        property_instance.set_key(key)
+        if key is not None:
+            property_instance.set_key(key)
         property_instance.set_optional(False)
         property_instance.set_type(type)
         return property_instance

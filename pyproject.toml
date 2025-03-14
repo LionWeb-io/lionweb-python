@@ -16,3 +16,6 @@ readme = "README.md"
 authors = [{ name = "Federico Tomassetti", email = "federico@strumenta.com" }]
 license = { file = "LICENSE.txt" }
 requires-python = ">=3.8"
+dependencies = [
+    "requests"
+]
