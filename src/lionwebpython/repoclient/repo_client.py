@@ -65,6 +65,20 @@ class RepoClient:
         if response.status_code != 200:
             raise ValueError("Error:", response.status_code, response.text)
 
+    def delete_partitions(self, node_ids: List[int]):
+        if len(node_ids) == 0:
+            return
+
+        url = f"{self._repo_url}/bulk/deletePartitions"
+        headers = {"Content-Type": "application/json"}
+        query_params = {
+            "repository": self._repository_name,
+            "clientId": self._client_id,
+        }
+        response = requests.post(url, params=query_params, json=node_ids, headers=headers)
+        if response.status_code != 200:
+            raise ValueError("Error:", response.status_code, response.text)
+
     def store(self, nodes: List["ClassifierInstance"]):
         url = f"{self._repo_url}/bulk/store"
         headers = {"Content-Type": "application/json"}
