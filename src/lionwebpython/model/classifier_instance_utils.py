@@ -1,6 +1,7 @@
 from typing import TYPE_CHECKING, List, Optional
 
 from lionwebpython.model.reference_value import ReferenceValue
+from lionwebpython.utils.autoresolve import Autoresolve
 
 
 class ClassifierInstanceUtils:
@@ -88,7 +89,7 @@ class ClassifierInstanceUtils:
 
             return ReferenceValue(
                 referred=entity,
-                resolve_info=f"LIONCORE_AUTORESOLVE_PREFIX{entity.get_name()}",
+                resolve_info=f"{Autoresolve.LIONCORE_AUTORESOLVE_PREFIX}{entity.get_name()}",
             )
         elif (
             language
@@ -97,7 +98,7 @@ class ClassifierInstanceUtils:
         ):
             return ReferenceValue(
                 referred=entity,
-                resolve_info=f"LIONCOREBUILTINS_AUTORESOLVE_PREFIX{entity.get_name()}",
+                resolve_info=f"{Autoresolve.LIONCOREBUILTINS_AUTORESOLVE_PREFIX}{entity.get_name()}",
             )
         else:
             return ReferenceValue(referred=entity, resolve_info=entity.get_name())
