@@ -1,16 +1,16 @@
 import json
 import unittest
 
-from .my_node_with_properties import MyNodeWithProperties
-from .my_node_with_properties2023 import MyNodeWithProperties2023
-from .serialization_test import SerializationTest
-
 from lionwebpython.lionweb_version import LionWebVersion
 from lionwebpython.serialization.json_utils import JsonArray
 from lionwebpython.serialization.serialization_provider import \
     SerializationProvider
 from lionwebpython.serialization.serialized_json_comparison_utils import \
     SerializedJsonComparisonUtils
+
+from .my_node_with_properties import MyNodeWithProperties
+from .my_node_with_properties2023 import MyNodeWithProperties2023
+from .serialization_test import SerializationTest
 
 
 class TestSerializationOfPrimitiveValues(SerializationTest):

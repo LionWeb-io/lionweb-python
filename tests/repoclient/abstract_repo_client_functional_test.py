@@ -2,12 +2,11 @@ import os
 import time
 import unittest
 
-import pytest
 import requests
-from testcontainers.core.network import Network
-from testcontainers.postgres import PostgresContainer
 from testcontainers.core.container import DockerContainer
+from testcontainers.core.network import Network
 from testcontainers.core.waiting_utils import wait_for_logs
+from testcontainers.postgres import PostgresContainer
 
 # Constants
 DB_IMAGE = "postgres:16.1"
@@ -18,18 +17,21 @@ DB_NAME = "lionweb_test"
 MODEL_REPO_PORT = 7101
 DB_CONTAINER_PORT = 7100
 
-class AbstractRepoClientFunctionalTest:
+
+class AbstractRepoClientFunctionalTest(unittest.TestCase):
     """Base class for integration tests with PostgreSQL and Model Repository."""
 
-    @pytest.fixture(scope="session", autouse=True)
-    def setup(cls):
+    @classmethod
+    def setUpClass(cls):
         """Sets up the PostgreSQL container and the Model Repository service."""
 
-        network = Network()
+        cls.network = Network()
 
         # Start PostgreSQL
-        cls.db = PostgresContainer(DB_IMAGE, username=DB_USER, password=DB_PASSWORD, dbname=DB_NAME)
-        cls.db.with_network(network)
+        cls.db = PostgresContainer(
+            DB_IMAGE, username=DB_USER, password=DB_PASSWORD, dbname=DB_NAME
+        )
+        cls.db.with_network(cls.network)
         cls.db.with_network_aliases("mypgdb")
         cls.db.with_exposed_ports(DB_CONTAINER_PORT)  # Expose the correct port
         cls.db.with_bind_ports(5432, DB_CONTAINER_PORT)
@@ -63,7 +65,7 @@ class AbstractRepoClientFunctionalTest:
         cls.wait_for_model_repo()
 
     @classmethod
-    def teardown_class(cls):
+    def tearDownClass(cls):
         """Cleanup the containers after tests."""
         cls.model_repo.stop()
         cls.db.stop()
@@ -87,7 +89,7 @@ class AbstractRepoClientFunctionalTest:
         """Dummy comparison function (replace with real comparison logic)."""
         assert a == b, f"Differences between {a} and {b}"
 
+
 import requests
 
 MODEL_REPO_URL = f"http://localhost:{os.getenv('MODEL_REPO_PORT')}"
-

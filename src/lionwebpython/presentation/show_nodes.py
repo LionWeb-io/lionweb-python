@@ -1,7 +1,9 @@
 import hashlib
 
-from IPython.display import display, HTML
+from IPython.display import HTML, display
+
 from lionwebpython.model.node import Node
+
 
 def _generate_color_for_text(text: str) -> str:
     """Generate a consistent background color for a given text (e.g., node type)."""
@@ -23,7 +25,8 @@ def _generate_color_for_text(text: str) -> str:
     lighter_hex_color = f"#{r:02X}{g:02X}{b:02X}"
     return lighter_hex_color
 
-def _html_for_node(node: Node, role: str = 'root') -> str:
+
+def _html_for_node(node: Node, role: str = "root") -> str:
     role_color = _generate_color_for_text(role)
     classifier_color = _generate_color_for_text(node.get_classifier().qualified_name())
 
@@ -43,8 +46,8 @@ def _html_for_node(node: Node, role: str = 'root') -> str:
         html += f"<span class='propertyname'>{property.get_name()}</span><span class='equals'>&mapsto;</span>\n"
         html += f"<span class='propertyvalue'>{node.get_property_value(property=property)}</span><br/>\n"
     html += "</p>\n"
-    html += "</div>\n" # close content
-    html += "</div>\n" # close node
+    html += "</div>\n"  # close content
+    html += "</div>\n"  # close node
     html += "<ul>\n"
     for containment in node.get_classifier().all_containments():
         for child in node.get_children(containment=containment):
@@ -52,6 +55,7 @@ def _html_for_node(node: Node, role: str = 'root') -> str:
     html += "</ul>"
     html += "</li>"
     return html
+
 
 def display_node(node: Node):
     html_code = """
@@ -217,6 +221,7 @@ def display_node(node: Node):
             }
         }
     </script>
-    """.replace("NODE_DATA", _html_for_node(node))
+    """.replace(
+        "NODE_DATA", _html_for_node(node)
+    )
     display(HTML(html_code))
-

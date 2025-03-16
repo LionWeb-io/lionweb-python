@@ -1,10 +1,10 @@
 from typing import List, Optional
 
-from ...serialization.simple_node import SimpleNode
-
 from lionwebpython.language.concept import Concept
 from lionwebpython.language.reference import Reference
 from lionwebpython.model.reference_value import ReferenceValue
+
+from ...serialization.simple_node import SimpleNode
 
 
 class RefNode(SimpleNode):

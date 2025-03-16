@@ -2,7 +2,9 @@ import requests
 
 from lionwebpython.lionweb_version import LionWebVersion
 from lionwebpython.repoclient.repo_client import RepoClient
-from .abstract_repo_client_functional_test import AbstractRepoClientFunctionalTest
+
+from .abstract_repo_client_functional_test import \
+    AbstractRepoClientFunctionalTest
 
 
 class RepositoriesCRUD(AbstractRepoClientFunctionalTest):
@@ -14,6 +16,7 @@ class RepositoriesCRUD(AbstractRepoClientFunctionalTest):
         response = requests.get(f"{model_repo_url}/api/data")
         assert response.status_code == 200
         assert "result" in response.json()
+
     #
     #
     # def test_post_data(self):

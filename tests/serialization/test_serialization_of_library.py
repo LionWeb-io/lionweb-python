@@ -2,11 +2,6 @@ import json
 import unittest
 from pathlib import Path
 
-from .library.book import Book
-from .library.library import Library
-from .library.writer import Writer
-from .serialization_test import SerializationTest
-
 from lionwebpython.language import Concept, Property
 from lionwebpython.lionweb_version import LionWebVersion
 from lionwebpython.model.classifier_instance_utils import \
@@ -16,6 +11,11 @@ from lionwebpython.serialization.serialization_provider import \
     SerializationProvider
 from lionwebpython.serialization.serialized_json_comparison_utils import \
     SerializedJsonComparisonUtils
+
+from .library.book import Book
+from .library.library import Library
+from .library.writer import Writer
+from .serialization_test import SerializationTest
 
 
 class SerializationOfLibraryTest(SerializationTest):

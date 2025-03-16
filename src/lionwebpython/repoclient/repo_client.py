@@ -75,7 +75,9 @@ class RepoClient:
             "repository": self._repository_name,
             "clientId": self._client_id,
         }
-        response = requests.post(url, params=query_params, json=node_ids, headers=headers)
+        response = requests.post(
+            url, params=query_params, json=node_ids, headers=headers
+        )
         if response.status_code != 200:
             raise ValueError("Error:", response.status_code, response.text)
 

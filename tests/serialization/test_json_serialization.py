@@ -3,18 +3,6 @@ import unittest
 from enum import Enum
 from pathlib import Path
 
-from .library.book import Book
-from .library.guide_book_writer import GuideBookWriter
-from .library.library import Library
-from .library.library_language import LibraryLanguage
-from .refsmm.container_node import ContainerNode
-from .refsmm.ref_node import RefNode
-from .refsmm.refs_language import RefsLanguage
-from .serialization_test import SerializationTest
-from .simplemath.int_literal import IntLiteral
-from .simplemath.simple_math_language import SimpleMathLanguage
-from .simplemath.sum import Sum
-
 from lionwebpython.api.unresolved_classifier_instance_exception import \
     UnresolvedClassifierInstanceException
 from lionwebpython.language import Annotation, Concept, Language, Property
@@ -42,6 +30,18 @@ from lionwebpython.serialization.serialized_json_comparison_utils import \
 from lionwebpython.serialization.unavailable_node_policy import \
     UnavailableNodePolicy
 from lionwebpython.utils.language_validator import LanguageValidator
+
+from .library.book import Book
+from .library.guide_book_writer import GuideBookWriter
+from .library.library import Library
+from .library.library_language import LibraryLanguage
+from .refsmm.container_node import ContainerNode
+from .refsmm.ref_node import RefNode
+from .refsmm.refs_language import RefsLanguage
+from .serialization_test import SerializationTest
+from .simplemath.int_literal import IntLiteral
+from .simplemath.simple_math_language import SimpleMathLanguage
+from .simplemath.sum import Sum
 
 
 class MyEnum(Enum):
