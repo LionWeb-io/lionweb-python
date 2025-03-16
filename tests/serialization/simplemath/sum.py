@@ -1,11 +1,11 @@
 from typing import List
 
+from serialization.simple_node import SimpleNode
+from serialization.simplemath.int_literal import IntLiteral
+
 from lionwebpython.language.concept import Concept
 from lionwebpython.language.containment import Containment
 from lionwebpython.model.node import Node
-
-from serialization.simple_node import SimpleNode
-from serialization.simplemath.int_literal import IntLiteral
 
 
 class Sum(SimpleNode):

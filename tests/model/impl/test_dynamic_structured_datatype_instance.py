@@ -1,10 +1,10 @@
 import unittest
 
-from lionwebpython.model.impl.dynamic_structured_datype_instance import \
-    DynamicStructuredDataTypeInstance
-
 from serialization.my_node_with_structured_data_type import \
     MyNodeWithStructuredDataType
+
+from lionwebpython.model.impl.dynamic_structured_datype_instance import \
+    DynamicStructuredDataTypeInstance
 
 
 class TestDynamicStructuredDataTypeInstance(unittest.TestCase):

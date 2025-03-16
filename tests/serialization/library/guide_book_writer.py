@@ -1,6 +1,6 @@
-from lionwebpython.language.concept import Concept
-
 from serialization.library.writer import Writer
+
+from lionwebpython.language.concept import Concept
 
 
 class GuideBookWriter(Writer):

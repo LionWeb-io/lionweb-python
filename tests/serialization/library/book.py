@@ -1,10 +1,10 @@
+from serialization.library.writer import Writer
+
 from lionwebpython.language.concept import Concept
 from lionwebpython.model.classifier_instance_utils import \
     ClassifierInstanceUtils
 from lionwebpython.model.impl.dynamic_node import DynamicNode
 from lionwebpython.model.reference_value import ReferenceValue
-
-from serialization.library.writer import Writer
 
 
 class Book(DynamicNode):

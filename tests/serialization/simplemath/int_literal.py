@@ -1,9 +1,9 @@
 from typing import Optional
 
+from serialization.simple_node import SimpleNode
+
 from lionwebpython.language.concept import Concept
 from lionwebpython.language.property import Property
-
-from serialization.simple_node import SimpleNode
 
 
 class IntLiteral(SimpleNode):

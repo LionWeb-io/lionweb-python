@@ -3,6 +3,8 @@ import unittest
 from pathlib import Path
 from typing import Union
 
+from serialization.serialization_test import SerializationTest
+
 from lionwebpython.language import Annotation, Concept, Language
 from lionwebpython.lionweb_version import LionWebVersion
 from lionwebpython.model.impl.dynamic_annotation_instance import \
@@ -17,8 +19,6 @@ from lionwebpython.serialization.low_level_json_serialization import \
     LowLevelJsonSerialization
 from lionwebpython.serialization.serialized_json_comparison_utils import \
     SerializedJsonComparisonUtils
-
-from serialization.serialization_test import SerializationTest
 
 
 class LowLevelJsonSerializationTest(SerializationTest):

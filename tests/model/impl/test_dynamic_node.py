@@ -1,5 +1,8 @@
 import unittest
 
+from serialization.my_node_with_properties import MyNodeWithProperties
+from serialization.my_node_with_properties2023 import MyNodeWithProperties2023
+
 from lionwebpython.language.concept import Concept
 from lionwebpython.language.containment import Containment
 from lionwebpython.language.language import Language
@@ -8,10 +11,6 @@ from lionwebpython.language.property import Property
 from lionwebpython.model.classifier_instance_utils import \
     ClassifierInstanceUtils
 from lionwebpython.model.impl.dynamic_node import DynamicNode
-
-from serialization.my_node_with_properties import MyNodeWithProperties
-from serialization.my_node_with_properties2023 import \
-    MyNodeWithProperties2023
 
 
 class DynamicNodeTest(unittest.TestCase):
