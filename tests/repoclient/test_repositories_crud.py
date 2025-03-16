@@ -44,7 +44,9 @@ class RepositoriesCRUD(AbstractRepoClientFunctionalTest):
             repos,
         )
         repo_client.delete_repository('default')
+        repos = repo_client.list_repositories()
         self.assertEqual([],repos)
+
         # All tests should go back to the initial situation
         repo_client.create_repository(RepositoryConfiguration(name='default', lionweb_version=LionWebVersion.V2023_1, history=False))
 
@@ -59,9 +61,10 @@ class RepositoriesCRUD(AbstractRepoClientFunctionalTest):
         repo_client.create_repository(RepositoryConfiguration(name='b', lionweb_version=LionWebVersion.V2023_1, history=True))
         repo_client.create_repository(RepositoryConfiguration(name='c', lionweb_version=LionWebVersion.V2024_1, history=False))
         repo_client.create_repository(RepositoryConfiguration(name='d', lionweb_version=LionWebVersion.V2024_1, history=True))
+        repos = repo_client.list_repositories()
         self.assertEqual(
             [
-                RepositoryConfiguration('default', LionWebVersion.V2023_1, False),
+                RepositoryConfiguration(name='default', lionweb_version=LionWebVersion.V2023_1, history=False),
                 RepositoryConfiguration(
                     name="a",
                     lionweb_version=LionWebVersion.V2023_1,

@@ -13,6 +13,8 @@ jobs:
         python-version: 3.9.21
     - name: Install deps
       run: pip install -r requirements.txt
+    - name: Prepare for tests
+      run: sh prepare_for_tests.sh
     - name: Test
       run: PYTHONPATH=src python -m unittest discover tests
     - name: Linting
