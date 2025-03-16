@@ -49,6 +49,26 @@ class RepoClient:
             for r in response.json()["repositories"]
         ]
 
+    def create_repository(self, repository_configuration: RepositoryConfiguration):
+        url = f"{self._repo_url}/createRepository"
+        headers = {"Content-Type": "application/json"}
+        query_params = {"clientId": self._client_id,
+                        "repository": repository_configuration.name,
+                        "lionWebVersion": repository_configuration.lionweb_version.value,
+                        "history": str(repository_configuration.history).lower()}
+        response = requests.post(url, params=query_params, headers=headers)
+        if response.status_code != 200:
+            raise ValueError("Error:", response.status_code, response.text)
+
+    def delete_repository(self, repository_name: str):
+        url = f"{self._repo_url}/deleteRepository"
+        headers = {"Content-Type": "application/json"}
+        query_params = {"clientId": self._client_id,
+                        "repository": repository_name}
+        response = requests.post(url, params=query_params, headers=headers)
+        if response.status_code != 200:
+            raise ValueError("Error:", response.status_code, response.text)
+
     def list_partitions(self):
         url = f"{self._repo_url}/bulk/listPartitions"
         headers = {"Content-Type": "application/json"}
