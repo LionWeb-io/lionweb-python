@@ -9,8 +9,8 @@ from lionwebpython.model.classifier_instance_utils import \
     ClassifierInstanceUtils
 from lionwebpython.model.impl.dynamic_node import DynamicNode
 
-from ...serialization.my_node_with_properties import MyNodeWithProperties
-from ...serialization.my_node_with_properties2023 import \
+from serialization.my_node_with_properties import MyNodeWithProperties
+from serialization.my_node_with_properties2023 import \
     MyNodeWithProperties2023
 
 

@@ -4,7 +4,7 @@ from lionwebpython.language.concept import Concept
 from lionwebpython.language.containment import Containment
 from lionwebpython.model.node import Node
 
-from ...serialization.simple_node import SimpleNode
+from serialization.simple_node import SimpleNode
 
 
 class ContainerNode(SimpleNode):

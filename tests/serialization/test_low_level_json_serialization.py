@@ -18,7 +18,7 @@ from lionwebpython.serialization.low_level_json_serialization import \
 from lionwebpython.serialization.serialized_json_comparison_utils import \
     SerializedJsonComparisonUtils
 
-from ..serialization.serialization_test import SerializationTest
+from serialization.serialization_test import SerializationTest
 
 
 class LowLevelJsonSerializationTest(SerializationTest):

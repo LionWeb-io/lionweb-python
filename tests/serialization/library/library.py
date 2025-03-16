@@ -1,7 +1,7 @@
 from lionwebpython.language.concept import Concept
 from lionwebpython.model.impl.dynamic_node import DynamicNode
 
-from ...serialization.library.book import Book
+from serialization.library.book import Book
 
 
 class Library(DynamicNode):

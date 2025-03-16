@@ -4,8 +4,8 @@ from lionwebpython.language.concept import Concept
 from lionwebpython.language.containment import Containment
 from lionwebpython.model.node import Node
 
-from ...serialization.simple_node import SimpleNode
-from ...serialization.simplemath.int_literal import IntLiteral
+from serialization.simple_node import SimpleNode
+from serialization.simplemath.int_literal import IntLiteral
 
 
 class Sum(SimpleNode):
@@ -19,7 +19,7 @@ class Sum(SimpleNode):
             self.assign_random_id()
 
     def get_classifier(self) -> Concept:
-        from ...serialization.simplemath.simple_math_language import \
+        from serialization.simplemath.simple_math_language import \
             SimpleMathLanguage
 
         return SimpleMathLanguage.SUM

@@ -43,5 +43,6 @@ twine upload dist/*
 ## Tests
 
 ```
-sh prepare_for_tests.sh
+sh prepare_for_tests.sh # to be run just once
+PYTHONPATH=src python -m unittest discover tests
 ```

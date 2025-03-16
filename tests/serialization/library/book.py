@@ -4,7 +4,7 @@ from lionwebpython.model.classifier_instance_utils import \
 from lionwebpython.model.impl.dynamic_node import DynamicNode
 from lionwebpython.model.reference_value import ReferenceValue
 
-from ...serialization.library.writer import Writer
+from serialization.library.writer import Writer
 
 
 class Book(DynamicNode):
