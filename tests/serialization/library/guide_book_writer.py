@@ -1,4 +1,4 @@
-from serialization.library.writer import Writer
+from ...serialization.library.writer import Writer
 
 from lionwebpython.language.concept import Concept
 

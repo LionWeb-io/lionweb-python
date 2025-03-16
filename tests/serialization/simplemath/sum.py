@@ -1,7 +1,7 @@
 from typing import List
 
-from serialization.simple_node import SimpleNode
-from serialization.simplemath.int_literal import IntLiteral
+from ...serialization.simple_node import SimpleNode
+from ...serialization.simplemath.int_literal import IntLiteral
 
 from lionwebpython.language.concept import Concept
 from lionwebpython.language.containment import Containment
@@ -19,7 +19,7 @@ class Sum(SimpleNode):
             self.assign_random_id()
 
     def get_classifier(self) -> Concept:
-        from serialization.simplemath.simple_math_language import \
+        from ...serialization.simplemath.simple_math_language import \
             SimpleMathLanguage
 
         return SimpleMathLanguage.SUM

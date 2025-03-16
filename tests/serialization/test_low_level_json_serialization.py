@@ -3,7 +3,7 @@ import unittest
 from pathlib import Path
 from typing import Union
 
-from serialization.serialization_test import SerializationTest
+from ..serialization.serialization_test import SerializationTest
 
 from lionwebpython.language import Annotation, Concept, Language
 from lionwebpython.lionweb_version import LionWebVersion

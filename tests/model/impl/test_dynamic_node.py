@@ -1,7 +1,7 @@
 import unittest
 
-from serialization.my_node_with_properties import MyNodeWithProperties
-from serialization.my_node_with_properties2023 import MyNodeWithProperties2023
+from ...serialization.my_node_with_properties import MyNodeWithProperties
+from ...serialization.my_node_with_properties2023 import MyNodeWithProperties2023
 
 from lionwebpython.language.concept import Concept
 from lionwebpython.language.containment import Containment

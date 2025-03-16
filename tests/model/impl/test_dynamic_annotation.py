@@ -1,6 +1,6 @@
 import unittest
 
-from serialization.my_annotation import MyAnnotation
+from ...serialization.my_annotation import MyAnnotation
 
 from lionwebpython.model.classifier_instance_utils import \
     ClassifierInstanceUtils

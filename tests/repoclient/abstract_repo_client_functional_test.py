@@ -15,59 +15,61 @@ REPO_IMAGE = "your-node-repo-image:latest"  # Replace with your Node.js image
 DB_USER = "postgres"
 DB_PASSWORD = "lionweb"
 DB_NAME = "lionweb_test"
-MODEL_REPO_PORT = 3005
-DB_CONTAINER_PORT = 5432
+MODEL_REPO_PORT = 7101
+DB_CONTAINER_PORT = 7100
 
 class AbstractRepoClientFunctionalTest:
     """Base class for integration tests with PostgreSQL and Model Repository."""
 
     @pytest.fixture(scope="session", autouse=True)
-    def setup(self):
+    def setup(cls):
         """Sets up the PostgreSQL container and the Model Repository service."""
 
         network = Network()
 
         # Start PostgreSQL
-        self.db = PostgresContainer(DB_IMAGE, username=DB_USER, password=DB_PASSWORD, dbname=DB_NAME)
-        self.db.with_network(network)
-        self.db.with_network_aliases("mypgdb")
-        self.db.with_exposed_ports(DB_CONTAINER_PORT)
-        self.db.start()
+        cls.db = PostgresContainer(DB_IMAGE, username=DB_USER, password=DB_PASSWORD, dbname=DB_NAME)
+        cls.db.with_network(network)
+        cls.db.with_network_aliases("mypgdb")
+        cls.db.with_exposed_ports(DB_CONTAINER_PORT)  # Expose the correct port
+        cls.db.with_bind_ports(5432, DB_CONTAINER_PORT)
+        cls.db.start()
 
         # Get database connection details
-        db_host = self.db.get_container_host_ip()
-        db_port = self.db.get_exposed_port()
+        db_host = cls.db.get_container_host_ip()
+        db_port = cls.db.get_exposed_port()
 
         # Start Model Repository
-        self.model_repo = DockerContainer(REPO_IMAGE)
-        self.model_repo.with_env("PGHOST", db_host)
-        self.model_repo.with_env("PGPORT", str(db_port))
-        self.model_repo.with_env("PGUSER", DB_USER)
-        self.model_repo.with_env("PGPASSWORD", DB_PASSWORD)
-        self.model_repo.with_env("PGDB", DB_NAME)
-        self.model_repo.with_env("LIONWEB_VERSION", "1.0")  # Replace with actual version
-        self.model_repo.with_exposed_ports(MODEL_REPO_PORT)
+        cls.model_repo = DockerContainer(REPO_IMAGE)
+        cls.model_repo.with_env("PGHOST", db_host)
+        cls.model_repo.with_env("PGPORT", str(db_port))
+        cls.model_repo.with_env("PGUSER", DB_USER)
+        cls.model_repo.with_env("PGPASSWORD", DB_PASSWORD)
+        cls.model_repo.with_env("PGDB", DB_NAME)
+        cls.model_repo.with_env("LIONWEB_VERSION", "1.0")  # Replace with actual version
+        cls.model_repo.with_exposed_ports(MODEL_REPO_PORT)
 
         # Wait until the model repository is ready
-        wait_for_logs(self.model_repo, "Server started", timeout=30)
-        self.model_repo.start()
+        wait_for_logs(cls.model_repo, "Server started", timeout=30)
+        cls.model_repo.start()
 
         # Get mapped port
-        self.model_repo_port = self.model_repo.get_exposed_port(MODEL_REPO_PORT)
+        cls.model_repo_port = cls.model_repo.get_exposed_port(MODEL_REPO_PORT)
 
         # Expose port for tests
-        os.environ["MODEL_REPO_PORT"] = str(self.model_repo_port)
+        os.environ["MODEL_REPO_PORT"] = str(cls.model_repo_port)
 
         # Wait for the server to be ready
-        self.wait_for_model_repo()
+        cls.wait_for_model_repo()
 
-        yield  # Run tests
+    @classmethod
+    def teardown_class(cls):
+        """Cleanup the containers after tests."""
+        cls.model_repo.stop()
+        cls.db.stop()
 
-        # Cleanup
-        self.model_repo.stop()
-        self.db.stop()
-
-    def wait_for_model_repo(self):
+    @classmethod
+    def wait_for_model_repo(cls):
         """Waits for the model repository API to be available."""
         url = f"http://localhost:{self.model_repo_port}/health"
         for _ in range(10):  # Try for ~50 seconds
@@ -89,18 +91,3 @@ import requests
 
 MODEL_REPO_URL = f"http://localhost:{os.getenv('MODEL_REPO_PORT')}"
 
-class MyTest(AbstractRepoClientFunctionalTest, unittest.TestCase):
-
-    def test_get_data(self):
-        """Test retrieving data from the model repository."""
-        response = requests.get(f"{MODEL_REPO_URL}/api/data")
-        assert response.status_code == 200
-        assert "result" in response.json()
-
-
-    def test_post_data(self):
-        """Test sending data to the model repository."""
-        payload = {"name": "TestItem"}
-        response = requests.post(f"{MODEL_REPO_URL}/api/data", json=payload)
-        assert response.status_code == 201
-        assert response.json()["name"] == "TestItem"

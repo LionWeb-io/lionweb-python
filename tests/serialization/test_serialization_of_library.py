@@ -2,10 +2,10 @@ import json
 import unittest
 from pathlib import Path
 
-from serialization.library.book import Book
-from serialization.library.library import Library
-from serialization.library.writer import Writer
-from serialization.serialization_test import SerializationTest
+from .library.book import Book
+from .library.library import Library
+from .library.writer import Writer
+from .serialization_test import SerializationTest
 
 from lionwebpython.language import Concept, Property
 from lionwebpython.lionweb_version import LionWebVersion
