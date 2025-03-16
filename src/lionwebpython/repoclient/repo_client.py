@@ -52,10 +52,12 @@ class RepoClient:
     def create_repository(self, repository_configuration: RepositoryConfiguration):
         url = f"{self._repo_url}/createRepository"
         headers = {"Content-Type": "application/json"}
-        query_params = {"clientId": self._client_id,
-                        "repository": repository_configuration.name,
-                        "lionWebVersion": repository_configuration.lionweb_version.value,
-                        "history": str(repository_configuration.history).lower()}
+        query_params = {
+            "clientId": self._client_id,
+            "repository": repository_configuration.name,
+            "lionWebVersion": repository_configuration.lionweb_version.value,
+            "history": str(repository_configuration.history).lower(),
+        }
         response = requests.post(url, params=query_params, headers=headers)
         if response.status_code != 200:
             raise ValueError("Error:", response.status_code, response.text)
@@ -63,8 +65,7 @@ class RepoClient:
     def delete_repository(self, repository_name: str):
         url = f"{self._repo_url}/deleteRepository"
         headers = {"Content-Type": "application/json"}
-        query_params = {"clientId": self._client_id,
-                        "repository": repository_name}
+        query_params = {"clientId": self._client_id, "repository": repository_name}
         response = requests.post(url, params=query_params, headers=headers)
         if response.status_code != 200:
             raise ValueError("Error:", response.status_code, response.text)
@@ -99,7 +100,7 @@ class RepoClient:
         if response.status_code != 200:
             raise ValueError("Error:", response.status_code, response.text)
 
-    def delete_partitions(self, node_ids: List[int]):
+    def delete_partitions(self, node_ids: List[str]):
         if len(node_ids) == 0:
             return
 
@@ -129,7 +130,7 @@ class RepoClient:
         if response.status_code != 200:
             raise ValueError("Error:", response.status_code, response.text)
 
-    def retrieve(self, ids: List[str], depth_limit=None):
+    def retrieve(self, ids: List[str], depth_limit=Optional[int]):
         url = f"{self._repo_url}/bulk/retrieve"
         headers = {"Content-Type": "application/json"}
         query_params = {
