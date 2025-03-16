@@ -46,7 +46,7 @@ class RepositoriesCRUD(AbstractRepoClientFunctionalTest):
         repo_client.delete_repository('default')
         self.assertEqual([],repos)
         # All tests should go back to the initial situation
-        repo_client.create_repository(RepositoryConfiguration('default', LionWebVersion.V2023_1, False))
+        repo_client.create_repository(RepositoryConfiguration(name='default', lionweb_version=LionWebVersion.V2023_1, history=False))
 
     def test_create_repository(self):
         model_repo_url = f"http://localhost:{os.getenv('MODEL_REPO_PORT')}"
@@ -54,11 +54,11 @@ class RepositoriesCRUD(AbstractRepoClientFunctionalTest):
             lionweb_version=LionWebVersion.V2023_1, repo_url=model_repo_url
         )
         repos = repo_client.list_repositories()
-        self.assertEqual([RepositoryConfiguration('default', LionWebVersion.V2023_1, False)], repos)
-        repo_client.create_repository(RepositoryConfiguration('a', LionWebVersion.V2023_1, False))
-        repo_client.create_repository(RepositoryConfiguration('b', LionWebVersion.V2023_1, True))
-        repo_client.create_repository(RepositoryConfiguration('c', LionWebVersion.V2024_1, False))
-        repo_client.create_repository(RepositoryConfiguration('d', LionWebVersion.V2024_1, True))
+        self.assertEqual([RepositoryConfiguration(name='default', lionweb_version=LionWebVersion.V2023_1, history=False)], repos)
+        repo_client.create_repository(RepositoryConfiguration(name='a', lionweb_version=LionWebVersion.V2023_1, history=False))
+        repo_client.create_repository(RepositoryConfiguration(name='b', lionweb_version=LionWebVersion.V2023_1, history=True))
+        repo_client.create_repository(RepositoryConfiguration(name='c', lionweb_version=LionWebVersion.V2024_1, history=False))
+        repo_client.create_repository(RepositoryConfiguration(name='d', lionweb_version=LionWebVersion.V2024_1, history=True))
         self.assertEqual(
             [
                 RepositoryConfiguration('default', LionWebVersion.V2023_1, False),
