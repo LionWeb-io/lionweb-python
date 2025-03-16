@@ -26,6 +26,7 @@ class AbstractRepoClientFunctionalTest(unittest.TestCase):
         """Sets up the PostgreSQL container and the Model Repository service."""
 
         cls.network = Network()
+        cls.network.create()
 
         # Start PostgreSQL
         cls.db = PostgresContainer(
@@ -39,7 +40,7 @@ class AbstractRepoClientFunctionalTest(unittest.TestCase):
 
         # Get database connection details
         db_host = cls.db.get_container_host_ip()
-        db_port = cls.db.get_exposed_port()
+        db_port = cls.db.get_exposed_port(5432)
 
         # Start Model Repository
         cls.model_repo = DockerContainer(REPO_IMAGE)
@@ -52,8 +53,8 @@ class AbstractRepoClientFunctionalTest(unittest.TestCase):
         cls.model_repo.with_exposed_ports(MODEL_REPO_PORT)
 
         # Wait until the model repository is ready
-        wait_for_logs(cls.model_repo, "Server started", timeout=30)
         cls.model_repo.start()
+        wait_for_logs(cls.model_repo, "Server started", timeout=30)
 
         # Get mapped port
         cls.model_repo_port = cls.model_repo.get_exposed_port(MODEL_REPO_PORT)
