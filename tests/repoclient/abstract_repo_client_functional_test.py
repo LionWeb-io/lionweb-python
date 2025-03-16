@@ -6,7 +6,6 @@ from threading import Thread
 import requests
 from testcontainers.core.container import DockerContainer
 from testcontainers.core.network import Network
-from testcontainers.core.waiting_utils import wait_for_logs
 from testcontainers.postgres import PostgresContainer
 
 # Constants
@@ -71,11 +70,12 @@ class AbstractRepoClientFunctionalTest(unittest.TestCase):
         cls._wait_for_model_repo()
         print("Model repo is up: let's start testing")
 
-
         # Expose port for tests
         os.environ["MODEL_REPO_PORT"] = str(cls.model_repo_port)
         # Debugging Output
-        print(f"[DEBUG] Model Repository should be reachable at: http://localhost:{cls.model_repo_port}")
+        print(
+            f"[DEBUG] Model Repository should be reachable at: http://localhost:{cls.model_repo_port}"
+        )
         print(f"[DEBUG] Environment MODEL_REPO_PORT = {os.getenv('MODEL_REPO_PORT')}")
         time.sleep(2)
 
@@ -107,11 +107,18 @@ class AbstractRepoClientFunctionalTest(unittest.TestCase):
 
         for attempt in range(max_attempts):
             try:
-                print(f"[DEBUG] Checking Model Repo readiness (attempt {attempt + 1}/{max_attempts}) at {url}...")
+                print(
+                    f"[DEBUG] Checking Model Repo readiness (attempt {attempt + 1}/{max_attempts}) at {url}..."
+                )
                 response = requests.get(url, timeout=5)
 
-                if response.status_code in [200, 404]:  # Accepts 404 as it confirms a response
-                    print(f"[DEBUG] Model Repo is READY! Status: {response.status_code}")
+                if response.status_code in [
+                    200,
+                    404,
+                ]:  # Accepts 404 as it confirms a response
+                    print(
+                        f"[DEBUG] Model Repo is READY! Status: {response.status_code}"
+                    )
                     return
 
             except requests.ConnectionError:
@@ -134,13 +141,13 @@ class AbstractRepoClientFunctionalTest(unittest.TestCase):
                 print(f"[MODEL_REPO] Detected '{expected_log}', Model Repo is ready!")
                 return
             time.sleep(1)
-        raise RuntimeError(f"[MODEL_REPO] '{expected_log}' not found in logs after {timeout} seconds!")
+        raise RuntimeError(
+            f"[MODEL_REPO] '{expected_log}' not found in logs after {timeout} seconds!"
+        )
 
     def assert_lw_trees_are_equal(self, a, b):
         """Dummy comparison function (replace with real comparison logic)."""
         assert a == b, f"Differences between {a} and {b}"
 
-
-import requests
 
 MODEL_REPO_URL = f"http://localhost:{os.getenv('MODEL_REPO_PORT')}"

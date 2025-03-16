@@ -1,4 +1,5 @@
 import hashlib
+from typing import cast
 
 from IPython.display import HTML, display
 
@@ -32,11 +33,11 @@ def _html_for_node(node: Node, role: str = "root") -> str:
 
     html = ""
     if len(node.get_children()) == 0:
-        html += f"""<li><span class='leaf'>🌿</span>"""
+        html += """<li><span class='leaf'>🌿</span>"""
     else:
-        html += f"""<li onclick="toggleNode(event)"><span class="arrow">▶</span>"""
+        html += """<li onclick="toggleNode(event)"><span class="arrow">▶</span>"""
 
-    html += f"<div class='node'>"
+    html += "<div class='node'>"
     html += f"<p class='role' style='background-color:{role_color}'>{role}</p>"
     html += f"<p class='type' style='background-color:{classifier_color}'>{node.get_classifier().get_name()}</p>"
     html += "<div class='content'>\n"
@@ -51,7 +52,7 @@ def _html_for_node(node: Node, role: str = "root") -> str:
     html += "<ul>\n"
     for containment in node.get_classifier().all_containments():
         for child in node.get_children(containment=containment):
-            html += _html_for_node(child, containment.get_name())
+            html += _html_for_node(child, cast(str, containment.get_name()))
     html += "</ul>"
     html += "</li>"
     return html
