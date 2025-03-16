@@ -39,3 +39,9 @@ python setup.py sdist bdist_wheel
 twine upload dist/* 
 ```
 * Push tag
+
+## Tests
+
+```
+sh prepare_for_tests.sh
+```

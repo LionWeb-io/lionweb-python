@@ -1,4 +1,4 @@
-from typing import List, Optional
+from typing import List, Optional, TypedDict
 
 import requests
 
@@ -7,6 +7,12 @@ from lionwebpython.model import ClassifierInstance
 from lionwebpython.model.node import Node
 from lionwebpython.serialization.serialization_provider import \
     SerializationProvider
+from pydantic import BaseModel
+
+class RepositoryConfiguration(BaseModel):
+    name: str
+    lionweb_version: LionWebVersion
+    history: bool
 
 
 class RepoClient:
@@ -33,7 +39,9 @@ class RepoClient:
         response = requests.post(url, params=query_params, headers=headers)
         if response.status_code != 200:
             raise ValueError("Error:", response.status_code, response.text)
-        return response.json()["repositories"]
+        return [RepositoryConfiguration(
+            name=r['name'], lionweb_version=LionWebVersion.from_value(r['lionweb_version']),
+            history=r['history']) for r in response.json()["repositories"]]
 
     def list_partitions(self):
         url = f"{self._repo_url}/bulk/listPartitions"

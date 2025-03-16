@@ -1,0 +1,36 @@
+{
+	"server": {
+		"serverPort": 3005,
+		"expectedToken": null,
+		"bodyLimit": "500mb"
+	},
+	"startup": {
+		"createDatabase": "always",
+		"createRepositories": [
+			{
+				"name": "default",
+				"create": "if-not-exists",
+				"history": false,
+				"lionWebVersion": "2023.1"
+			}
+		]
+	},
+	"logging": {
+		"request": "info",
+		"database": "silent",
+		"express": "silent"
+	},
+	"postgres": {
+		"database": {
+			"host": "pgdb_for_lwpython_tests",
+			"user": "postgres",
+			"db": "lionweb_test",
+			"password": "lionweb",
+			"port": "5432"
+		},
+		"certificates": {
+			"rootcert": null,
+			"rootcertcontent": null
+		}
+	}
+}

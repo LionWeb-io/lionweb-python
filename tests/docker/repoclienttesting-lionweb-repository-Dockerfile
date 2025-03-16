@@ -1,0 +1,14 @@
+FROM nikolaik/python-nodejs:python3.12-nodejs22
+ARG lionwebRepositoryCommitId=xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+RUN mkdir lionweb-repository
+WORKDIR lionweb-repository
+RUN git init
+RUN git fetch --depth 1 https://github.com/LionWeb-io/lionweb-repository.git ${lionwebRepositoryCommitId}
+RUN git checkout FETCH_HEAD
+ADD config-gen.py packages/server
+RUN npm install
+RUN npm run build
+RUN echo "cd packages/server" >> run.sh
+RUN echo "python config-gen.py" >> run.sh
+RUN echo "npm run dev" >> run.sh
+CMD ["sh", "run.sh"]
