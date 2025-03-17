@@ -12,4 +12,4 @@ git push origin main --tags
 python -m build
 
 # Upload to PyPI
-twine upload --repository custom-pypi --non-interactive dist/*
+twine upload --repository custom-pypi --config-file ~/.pypirc  --non-interactive dist/*
