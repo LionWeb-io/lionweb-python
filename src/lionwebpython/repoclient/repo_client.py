@@ -33,6 +33,20 @@ class RepoClient:
     def set_repository_name(self, repository_name):
         self._repository_name = repository_name
 
+    #####################################################
+    # DB Admin APIs                                     #
+    #####################################################
+
+    def create_database(self):
+        url = f"{self._repo_url}/createDatabase"
+        headers = {"Content-Type": "application/json"}
+        query_params = {
+            "clientId": self._client_id,
+        }
+        response = requests.post(url, params=query_params, headers=headers)
+        if response.status_code != 200:
+            raise ValueError("Error:", response.status_code, response.text)
+
     def list_repositories(self):
         url = f"{self._repo_url}/listRepositories"
         headers = {"Content-Type": "application/json"}
@@ -69,6 +83,10 @@ class RepoClient:
         response = requests.post(url, params=query_params, headers=headers)
         if response.status_code != 200:
             raise ValueError("Error:", response.status_code, response.text)
+
+    #####################################################
+    # Bulk APIs                                         #
+    #####################################################
 
     def list_partitions(self):
         url = f"{self._repo_url}/bulk/listPartitions"
@@ -116,6 +134,20 @@ class RepoClient:
         if response.status_code != 200:
             raise ValueError("Error:", response.status_code, response.text)
 
+    def ids(self, count: Optional[int] = None) -> List[str]:
+        url = f"{self._repo_url}/bulk/ids"
+        headers = {"Content-Type": "application/json"}
+        query_params = {
+            "repository": self._repository_name,
+            "clientId": self._client_id,
+        }
+        if count:
+            query_params['count'] = count
+        response = requests.post(url, params=query_params, headers=headers)
+        if response.status_code != 200:
+            raise ValueError("Error:", response.status_code, response.text)
+        return response.json()['ids']
+
     def store(self, nodes: List["ClassifierInstance"]):
         url = f"{self._repo_url}/bulk/store"
         headers = {"Content-Type": "application/json"}
@@ -149,3 +181,33 @@ class RepoClient:
             return nodes
         else:
             raise ValueError("Error:", response.status_code, response.text)
+
+    #####################################################
+    # Inspection APIs                                   #
+    #####################################################
+
+    def nodes_by_classifier(self):
+        url = f"{self._repo_url}/inspection/nodesByClassifier"
+        headers = {"Content-Type": "application/json"}
+        query_params = {
+            "repository": self._repository_name,
+            "clientId": self._client_id,
+        }
+        response = requests.post(url, params=query_params, headers=headers)
+        if response.status_code != 200:
+            raise ValueError("Error:", response.status_code, response.text)
+        # return an array of language, classifier, ids, size
+        return response.json()
+
+    def nodes_by_language(self):
+        url = f"{self._repo_url}/inspection/nodesByLanguage"
+        headers = {"Content-Type": "application/json"}
+        query_params = {
+            "repository": self._repository_name,
+            "clientId": self._client_id,
+        }
+        response = requests.post(url, params=query_params, headers=headers)
+        if response.status_code != 200:
+            raise ValueError("Error:", response.status_code, response.text)
+        # return an array of language, ids, size
+        return response.json()
