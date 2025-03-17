@@ -1,6 +1,9 @@
 [build-system]
-requires = ["setuptools", "wheel"]
-build-backend = "setuptools.build_meta"
+requires = ["setuptools", "wheel", "hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.version]
+path = "src/lionwebpython/__init__.py"
 
 [tool.setuptools.packages.find]
 where = ["src"]
@@ -10,7 +13,6 @@ package-dir = {"" = "src"}
 
 [project]
 name = "lionweb-python"
-version = "0.1.1"
 description = "A Python package for working with LionWeb"
 readme = "README.md"
 authors = [{ name = "Federico Tomassetti", email = "federico@strumenta.com" }]
