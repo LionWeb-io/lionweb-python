@@ -12,4 +12,4 @@ git push origin main --tags
 python -m build
 
 # Upload to PyPI
-twine upload --repository-url https://upload.pypi.org/legacy/ --non-interactive dist/*
+twine upload --repository custom-pypi --non-interactive dist/*
