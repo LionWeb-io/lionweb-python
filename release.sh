@@ -8,6 +8,8 @@ bump2version patch  # Change to minor or major if needed
 # Push changes
 git push origin main --tags
 
+rm -Rf dist
+
 # Build the package
 python -m build
 
