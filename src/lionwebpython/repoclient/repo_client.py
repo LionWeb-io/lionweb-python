@@ -193,7 +193,7 @@ class RepoClient:
             "repository": self._repository_name,
             "clientId": self._client_id,
         }
-        response = requests.post(url, params=query_params, headers=headers)
+        response = requests.get(url, params=query_params, headers=headers)
         if response.status_code != 200:
             raise ValueError("Error:", response.status_code, response.text)
         # return an array of language, classifier, ids, size
@@ -206,7 +206,7 @@ class RepoClient:
             "repository": self._repository_name,
             "clientId": self._client_id,
         }
-        response = requests.post(url, params=query_params, headers=headers)
+        response = requests.get(url, params=query_params, headers=headers)
         if response.status_code != 200:
             raise ValueError("Error:", response.status_code, response.text)
         # return an array of language, ids, size
