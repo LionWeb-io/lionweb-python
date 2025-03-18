@@ -6,7 +6,7 @@ set -e  # Stop on errors
 bump2version patch  # Change to minor or major if needed
 
 # Push changes
-git push origin main --tags
+git push origin --tags
 
 rm -Rf dist
 
