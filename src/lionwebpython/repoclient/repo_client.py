@@ -3,6 +3,7 @@ from typing import List, Optional
 import requests
 from pydantic import BaseModel
 
+from lionwebpython.serialization.json_serialization import JsonSerialization
 from lionwebpython.lionweb_version import LionWebVersion
 from lionwebpython.model import ClassifierInstance
 from lionwebpython.model.node import Node
@@ -24,11 +25,18 @@ class RepoClient:
         repo_url="http://localhost:3005",
         client_id="lwpython",
         repository_name: Optional[str] = "default",
+        serialization: Optional[JsonSerialization] = None
     ):
         self._lionweb_version = lionweb_version
         self._repo_url = repo_url
         self._client_id = client_id
         self._repository_name = repository_name
+        self._serialization = serialization
+        if self._serialization is None:
+            self._serialization = SerializationProvider.get_standard_json_serialization(self._lionweb_version)
+
+    def serialization(self) -> JsonSerialization:
+        return self._serialization
 
     def set_repository_name(self, repository_name):
         self._repository_name = repository_name
@@ -155,9 +163,7 @@ class RepoClient:
             "repository": self._repository_name,
             "clientId": self._client_id,
         }
-        data = SerializationProvider.get_standard_json_serialization(
-            self._lionweb_version
-        ).serialize_trees_to_json_element(nodes)
+        data = self._serialization.serialize_trees_to_json_element(nodes)
         response = requests.post(url, params=query_params, json=data, headers=headers)
         if response.status_code != 200:
             raise ValueError("Error:", response.status_code, response.text)
@@ -175,9 +181,7 @@ class RepoClient:
         # Check response
         if response.status_code == 200:
             data = response.json()
-            nodes = SerializationProvider.get_standard_json_serialization(
-                self._lionweb_version
-            ).deserialize_json_to_nodes(data["chunk"])
+            nodes = self._serialization.deserialize_json_to_nodes(data["chunk"])
             return nodes
         else:
             raise ValueError("Error:", response.status_code, response.text)
