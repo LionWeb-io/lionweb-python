@@ -119,9 +119,7 @@ class RepoClient:
             "repository": self._repository_name,
             "clientId": self._client_id,
         }
-        data = SerializationProvider.get_standard_json_serialization(
-            self._lionweb_version
-        ).serialize_trees_to_json_element(nodes)
+        data = self._serialization.serialize_trees_to_json_element(nodes)
         response = requests.post(url, params=query_params, json=data, headers=headers)
         if response.status_code != 200:
             raise ValueError("Error:", response.status_code, response.text)
