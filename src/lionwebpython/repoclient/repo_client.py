@@ -184,6 +184,13 @@ class RepoClient:
         else:
             raise ValueError("Error:", response.status_code, response.text)
 
+    def retrieve_partition(self, id: str, depth_limit=Optional[int]):
+        res = self.retrieve([id], depth_limit=depth_limit)
+        roots = [n for n in res if res.get_parent() is None]
+        if len(roots) != 1:
+            raise ValueError()
+        return roots[0]
+
     #####################################################
     # Inspection APIs                                   #
     #####################################################
