@@ -9,6 +9,7 @@ from lionwebpython.model import ClassifierInstance
 from lionwebpython.model.node import Node
 from lionwebpython.serialization.serialization_provider import \
     SerializationProvider
+from lionwebpython.serialization.unavailable_node_policy import UnavailableNodePolicy
 
 
 class RepositoryConfiguration(BaseModel):
@@ -25,7 +26,8 @@ class RepoClient:
         repo_url="http://localhost:3005",
         client_id="lwpython",
         repository_name: Optional[str] = "default",
-        serialization: Optional[JsonSerialization] = None
+        serialization: Optional[JsonSerialization] = None,
+        unavailable_parent_policy: UnavailableNodePolicy = UnavailableNodePolicy.PROXY_NODES
     ):
         self._lionweb_version = lionweb_version
         self._repo_url = repo_url
@@ -34,6 +36,7 @@ class RepoClient:
         self._serialization = serialization
         if self._serialization is None:
             self._serialization = SerializationProvider.get_standard_json_serialization(self._lionweb_version)
+        self._serialization.unavailable_parent_policy = unavailable_parent_policy
 
     def serialization(self) -> JsonSerialization:
         return self._serialization
@@ -167,29 +170,28 @@ class RepoClient:
             raise ValueError("Error:", response.status_code, response.text)
 
     def retrieve(self, ids: List[str], depth_limit=Optional[int]):
+        data = self._retrieve_raw(ids, depth_limit=depth_limit)
+        nodes = self._serialization.deserialize_json_to_nodes(data["chunk"])
+        return nodes
+
+    def _retrieve_raw(self, ids: List[str], depth_limit=Optional[int]):
         url = f"{self._repo_url}/bulk/retrieve"
         headers = {"Content-Type": "application/json"}
         query_params = {
             "repository": self._repository_name,
             "clientId": self._client_id,
         }
+        if depth_limit is not None:
+            query_params['depthLimit'] = depth_limit
         response = requests.post(
             url, params=query_params, json={"ids": ids}, headers=headers
         )
         # Check response
         if response.status_code == 200:
             data = response.json()
-            nodes = self._serialization.deserialize_json_to_nodes(data["chunk"])
-            return nodes
+            return data
         else:
             raise ValueError("Error:", response.status_code, response.text)
-
-    def retrieve_partition(self, id: str, depth_limit=Optional[int]):
-        res = self.retrieve([id], depth_limit=depth_limit)
-        roots = [n for n in res if res.get_parent() is None]
-        if len(roots) != 1:
-            raise ValueError()
-        return roots[0]
 
     #####################################################
     # Inspection APIs                                   #
@@ -220,3 +222,57 @@ class RepoClient:
             raise ValueError("Error:", response.status_code, response.text)
         # return an array of language, ids, size
         return response.json()
+
+    #####################################################
+    # Convenience methods                               #
+    #####################################################
+
+    def retrieve_partition(self, id: str, depth_limit=Optional[int]):
+        res = self.retrieve([id], depth_limit=depth_limit)
+        roots = [n for n in res if res.get_parent() is None]
+        if len(roots) != 1:
+            raise ValueError()
+        return roots[0]
+
+    def retrieve_node(self, id: str, depth_limit=Optional[int]):
+        from lionwebpython.model.impl.proxy_node import ProxyNode
+
+        retrieved_nodes = self.retrieve([id], depth_limit=depth_limit)
+        if not retrieved_nodes:
+            raise ValueError(f"Node id {id} not found")
+        roots = [n for n in retrieved_nodes if
+                 not isinstance(n, ProxyNode) and (n.get_parent() is None or isinstance(n.get_parent(), ProxyNode))]
+        if len(roots) != 1:
+            raise ValueError(f"Expected one root, but found {len(roots)}")
+        return roots[0]
+
+    def get_ancestors_ids(self, node_id: str) -> List[str]:
+        """
+        Retrieve the list of ancestor node IDs for a given node ID.
+        """
+        result = []
+        current_node_id = node_id
+
+        while current_node_id:
+            current_node_id = self.get_parent_id(current_node_id)
+            if current_node_id:
+                result.append(current_node_id)
+
+        return result
+
+    def containing_partition_id(self, node_id: str) -> str:
+        ancestors = self.get_ancestors_ids(node_id)
+        if len(ancestors) == 0:
+            return node_id
+        else:
+            return ancestors[-1]
+
+    def get_parent_id(self, node_id: str) -> Optional[str]:
+        """
+        Retrieve the parent node ID of a given node ID.
+        """
+        nodes = self._retrieve_raw([node_id], depth_limit=0)['chunk']['nodes']
+        if len(nodes) != 1:
+            raise ValueError()
+        node = nodes[0]
+        return node['parent']
