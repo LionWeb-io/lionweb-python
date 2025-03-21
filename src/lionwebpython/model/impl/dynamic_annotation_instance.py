@@ -65,5 +65,5 @@ class DynamicAnnotationInstance(DynamicClassifierInstance, AnnotationInstance):
         return hash((self.id, self.annotation, self.annotated))
 
     def __str__(self):
-        annotated_desc = self.annotated.get_id() if self.annotated else None
+        annotated_desc = self.annotated.id if self.annotated else None
         return f"DynamicAnnotationInstance{{annotation={self.annotation}, annotated={annotated_desc}}}"

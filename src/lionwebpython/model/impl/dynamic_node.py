@@ -59,8 +59,8 @@ class DynamicNode(DynamicClassifierInstance, Node, HasSettableParent):
             )
             and self.reference_values == other.reference_values
             and len(self.annotations) == len(other.annotations)
-            and {node.get_id() for node in self.annotations}
-            == {node.get_id() for node in other.annotations}
+            and {node.id for node in self.annotations}
+            == {node.id for node in other.annotations}
         )
 
     @staticmethod
@@ -84,8 +84,8 @@ class DynamicNode(DynamicClassifierInstance, Node, HasSettableParent):
     def _shallow_node_equality(node1: Optional[Node], node2: Optional[Node]) -> bool:
         if node1 is None and node2 is None:
             return True
-        if node1 is not None and node2 is not None and node1.get_id() is not None:
-            return node1.get_id() == node2.get_id()
+        if node1 is not None and node2 is not None and node1.id is not None:
+            return node1.id == node2.id
         return node1 == node2
 
     def __hash__(self):
@@ -98,11 +98,11 @@ class DynamicNode(DynamicClassifierInstance, Node, HasSettableParent):
             qualified_name = "<cannot be calculated>"
 
         return (
-            f"DynamicNode{{ id='{self.id}', parent='{self.parent.get_id() if self.parent else 'null'}', "
+            f"DynamicNode{{ id='{self.id}', parent='{self.parent.id if self.parent else 'null'}', "
             f"concept='{qualified_name}', propertyValues={self.property_values}, "
             f"containmentValues={{"
             + ", ".join(
-                f"{k}=[{', '.join(c.get_id() for c in v)}]"
+                f"{k}=[{', '.join(c.id for c in v)}]"
                 for k, v in self.containment_values.items()
             )
             + "}, referenceValues={"

@@ -30,7 +30,7 @@ class JsonSerialization(AbstractSerialization):
             )
 
             for node in classifier_instances:
-                id = node.get_id()
+                id = node.id
                 if not id:
                     raise ValueError()
                 # We support serialization of incorrect nodes, so we allow nodes without an ID

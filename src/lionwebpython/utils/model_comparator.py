@@ -130,7 +130,7 @@ class ModelComparator:
             if value_a != value_b:
                 comparison_result.mark_different_property_value(
                     context,
-                    cast(str, node_a.get_id()),
+                    cast(str, node_a.id),
                     property.qualified_name(),
                     value_a,
                     value_b,
@@ -150,7 +150,7 @@ class ModelComparator:
             if len(value_a) != len(value_b):
                 comparison_result.mark_different_number_of_references(
                     context,
-                    cast(str, node_a.get_id()),
+                    cast(str, node_a.id),
                     reference.qualified_name(),
                     len(value_a),
                     len(value_b),
@@ -164,7 +164,7 @@ class ModelComparator:
                     if ref_a.get_referred_id() != ref_b.get_referred_id():
                         comparison_result.mark_different_referred_id(
                             context,
-                            cast(str, node_a.get_id()),
+                            cast(str, node_a.id),
                             reference.qualified_name(),
                             i,
                             ref_a.get_referred_id(),
@@ -173,7 +173,7 @@ class ModelComparator:
                     if ref_a.resolve_info != ref_b.resolve_info:
                         comparison_result.mark_different_resolve_info(
                             context,
-                            cast(str, node_a.get_id()),
+                            cast(str, node_a.id),
                             reference.qualified_name(),
                             i,
                             ref_a.resolve_info,
@@ -194,7 +194,7 @@ class ModelComparator:
             if len(value_a) != len(value_b):
                 comparison_result.mark_different_number_of_children(
                     context,
-                    cast(str, node_a.get_id()),
+                    cast(str, node_a.id),
                     containment.qualified_name(),
                     len(value_a),
                     len(value_b),
@@ -233,12 +233,12 @@ class ModelComparator:
         comparison_result: ComparisonResult,
         context: str,
     ):
-        if node_a.get_id() != node_b.get_id():
+        if node_a.id != node_b.id:
             comparison_result.mark_different_ids(
-                context, cast(str, node_a.get_id()), cast(str, node_b.get_id())
+                context, cast(str, node_a.id), cast(str, node_b.id)
             )
         else:
-            if node_a.get_classifier().get_id() == node_b.get_classifier().get_id():
+            if node_a.get_classifier().id == node_b.get_classifier().id:
                 concept = node_a.get_classifier()
                 self._compare_properties(
                     concept, node_a, node_b, comparison_result, context
@@ -255,9 +255,9 @@ class ModelComparator:
             else:
                 comparison_result.mark_different_concept(
                     context,
-                    cast(str, node_a.get_id()),
-                    cast(str, node_a.get_classifier().get_id()),
-                    cast(str, node_b.get_classifier().get_id()),
+                    cast(str, node_a.id),
+                    cast(str, node_a.get_classifier().id),
+                    cast(str, node_b.get_classifier().id),
                 )
 
     def _compare_annotation_instances(
@@ -267,22 +267,22 @@ class ModelComparator:
         comparison_result: ComparisonResult,
         context: str,
     ):
-        if node_a.get_id() != node_b.get_id():
+        if node_a.id != node_b.id:
             comparison_result.mark_different_ids(
-                context, cast(str, node_a.get_id()), cast(str, node_b.get_id())
+                context, cast(str, node_a.id), cast(str, node_b.id)
             )
         else:
             if (
-                node_a.get_annotation_definition().get_id()
-                == node_b.get_annotation_definition().get_id()
+                node_a.get_annotation_definition().id
+                == node_b.get_annotation_definition().id
             ):
                 concept = node_a.get_annotation_definition()
                 if (
-                    cast(Node, node_a.get_parent()).get_id()
-                    != cast(Node, node_b.get_parent()).get_id()
+                    cast(Node, node_a.get_parent()).id
+                    != cast(Node, node_b.get_parent()).id
                 ):
                     comparison_result.mark_different_annotated(
-                        context, cast(str, node_a.get_id()), cast(str, node_b.get_id())
+                        context, cast(str, node_a.id), cast(str, node_b.id)
                     )
 
                 self._compare_properties(
@@ -300,7 +300,7 @@ class ModelComparator:
             else:
                 comparison_result.mark_different_concept(
                     context,
-                    cast(str, node_a.get_id()),
-                    cast(str, node_a.get_classifier().get_id()),
-                    cast(str, node_b.get_classifier().get_id()),
+                    cast(str, node_a.id),
+                    cast(str, node_a.get_classifier().id),
+                    cast(str, node_b.get_classifier().id),
                 )
