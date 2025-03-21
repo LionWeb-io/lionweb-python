@@ -8,180 +8,180 @@ class BuiltinIDsAndKeysTest(unittest.TestCase):
 
     def test_M3ElementsHasExpectedIDsIn2023_1(self):
         self.assertEqual(
-            "-id-Concept", LionCore.get_concept(LionWebVersion.V2023_1).get_id()
+            "-id-Concept", LionCore.get_concept(LionWebVersion.V2023_1).id
         )
         self.assertEqual(
             "-id-Concept-abstract",
             LionCore.get_concept(LionWebVersion.V2023_1)
             .get_property_by_name("abstract")
-            .get_id(),
+            .id,
         )
         self.assertEqual(
             "-id-Concept-extends",
             LionCore.get_concept(LionWebVersion.V2023_1)
             .get_reference_by_name("extends")
-            .get_id(),
+            .id,
         )
         self.assertEqual(
             "-id-Concept-implements",
             LionCore.get_concept(LionWebVersion.V2023_1)
             .get_reference_by_name("implements")
-            .get_id(),
+            .id,
         )
 
         self.assertEqual(
-            "-id-Interface", LionCore.get_interface(LionWebVersion.V2023_1).get_id()
+            "-id-Interface", LionCore.get_interface(LionWebVersion.V2023_1).id
         )
         self.assertEqual(
             "-id-Interface-extends",
             LionCore.get_interface(LionWebVersion.V2023_1)
             .get_reference_by_name("extends")
-            .get_id(),
+            .id,
         )
 
         self.assertEqual(
-            "-id-Containment", LionCore.get_containment(LionWebVersion.V2023_1).get_id()
+            "-id-Containment", LionCore.get_containment(LionWebVersion.V2023_1).id
         )
         self.assertEqual(
-            "-id-DataType", LionCore.get_data_type(LionWebVersion.V2023_1).get_id()
+            "-id-DataType", LionCore.get_data_type(LionWebVersion.V2023_1).id
         )
         self.assertEqual(
-            "-id-Enumeration", LionCore.get_enumeration(LionWebVersion.V2023_1).get_id()
+            "-id-Enumeration", LionCore.get_enumeration(LionWebVersion.V2023_1).id
         )
 
         self.assertEqual(
             "-id-Enumeration-literals",
             LionCore.get_enumeration(LionWebVersion.V2023_1)
             .get_containment_by_name("literals")
-            .get_id(),
+            .id,
         )
 
         self.assertEqual(
             "-id-EnumerationLiteral",
-            LionCore.get_enumeration_literal(LionWebVersion.V2023_1).get_id(),
+            LionCore.get_enumeration_literal(LionWebVersion.V2023_1).id,
         )
         self.assertEqual(
-            "-id-Feature", LionCore.get_feature(LionWebVersion.V2023_1).get_id()
+            "-id-Feature", LionCore.get_feature(LionWebVersion.V2023_1).id
         )
 
         self.assertEqual(
             "-id-Feature-optional",
             LionCore.get_feature(LionWebVersion.V2023_1)
             .get_property_by_name("optional")
-            .get_id(),
+            .id,
         )
 
         self.assertEqual(
-            "-id-Classifier", LionCore.get_classifier(LionWebVersion.V2023_1).get_id()
+            "-id-Classifier", LionCore.get_classifier(LionWebVersion.V2023_1).id
         )
 
         self.assertEqual(
             "-id-Classifier-features",
             LionCore.get_classifier(LionWebVersion.V2023_1)
             .get_containment_by_name("features")
-            .get_id(),
+            .id,
         )
 
-        self.assertEqual("-id-Link", LionCore.get_link(LionWebVersion.V2023_1).get_id())
+        self.assertEqual("-id-Link", LionCore.get_link(LionWebVersion.V2023_1).id)
         self.assertEqual(
             "-id-Link-multiple",
             LionCore.get_link(LionWebVersion.V2023_1)
             .get_property_by_name("multiple")
-            .get_id(),
+            .id,
         )
         self.assertEqual(
             "-id-Link-type",
             LionCore.get_link(LionWebVersion.V2023_1)
             .get_reference_by_name("type")
-            .get_id(),
+            .id,
         )
 
         self.assertEqual(
-            "-id-Language", LionCore.get_language(LionWebVersion.V2023_1).get_id()
+            "-id-Language", LionCore.get_language(LionWebVersion.V2023_1).id
         )
         self.assertEqual(
             "LionCore-builtins-INamed-name",
             LionCore.get_language(LionWebVersion.V2023_1)
             .get_property_by_name("name")
-            .get_id(),
+            .id,
         )
         self.assertEqual(
             "-id-IKeyed-key",
             LionCore.get_language(LionWebVersion.V2023_1)
             .get_property_by_name("key")
-            .get_id(),
+            .id,
         )
         self.assertEqual(
             "-id-Language-dependsOn",
             LionCore.get_language(LionWebVersion.V2023_1)
             .get_reference_by_name("dependsOn")
-            .get_id(),
+            .id,
         )
         self.assertEqual(
             "-id-Language-entities",
             LionCore.get_language(LionWebVersion.V2023_1)
             .get_containment_by_name("entities")
-            .get_id(),
+            .id,
         )
 
     def test_M3ElementsHasExpectedIDsIn2024_1(self):
         self.assertEqual(
-            "-id-Concept-2024-1", LionCore.get_concept(LionWebVersion.V2024_1).get_id()
+            "-id-Concept-2024-1", LionCore.get_concept(LionWebVersion.V2024_1).id
         )
         self.assertEqual(
             "-id-Concept-abstract-2024-1",
             LionCore.get_concept(LionWebVersion.V2024_1)
             .get_property_by_name("abstract")
-            .get_id(),
+            .id,
         )
 
         self.assertEqual(
             "-id-Concept-extends-2024-1",
             LionCore.get_concept(LionWebVersion.V2024_1)
             .get_reference_by_name("extends")
-            .get_id(),
+            .id,
         )
 
         self.assertEqual(
             "-id-Interface-2024-1",
-            LionCore.get_interface(LionWebVersion.V2024_1).get_id(),
+            LionCore.get_interface(LionWebVersion.V2024_1).id,
         )
 
         self.assertEqual(
             "-id-Containment-2024-1",
-            LionCore.get_containment(LionWebVersion.V2024_1).get_id(),
+            LionCore.get_containment(LionWebVersion.V2024_1).id,
         )
 
         self.assertEqual(
             "-id-DataType-2024-1",
-            LionCore.get_data_type(LionWebVersion.V2024_1).get_id(),
+            LionCore.get_data_type(LionWebVersion.V2024_1).id,
         )
 
         self.assertEqual(
             "-id-Enumeration-2024-1",
-            LionCore.get_enumeration(LionWebVersion.V2024_1).get_id(),
+            LionCore.get_enumeration(LionWebVersion.V2024_1).id,
         )
         self.assertEqual(
             "-id-Enumeration-literals-2024-1",
             LionCore.get_enumeration(LionWebVersion.V2024_1)
             .get_containment_by_name("literals")
-            .get_id(),
+            .id,
         )
 
         self.assertEqual(
             "-id-EnumerationLiteral-2024-1",
-            LionCore.get_enumeration_literal(LionWebVersion.V2024_1).get_id(),
+            LionCore.get_enumeration_literal(LionWebVersion.V2024_1).id,
         )
 
         self.assertEqual(
-            "-id-Feature-2024-1", LionCore.get_feature(LionWebVersion.V2024_1).get_id()
+            "-id-Feature-2024-1", LionCore.get_feature(LionWebVersion.V2024_1).id
         )
 
         self.assertEqual(
             "-id-Feature-optional-2024-1",
             LionCore.get_feature(LionWebVersion.V2024_1)
             .get_property_by_name("optional")
-            .get_id(),
+            .id,
         )
 
     def test_M3ElementsHasExpectedKeys(self):

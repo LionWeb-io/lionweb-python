@@ -17,33 +17,33 @@ class LionCoreBuiltinsTest(unittest.TestCase):
     def test_primitive_types_have_agreed_ids_v2023(self):
         self.assertEqual(
             "LionCore-builtins-String",
-            LionCoreBuiltins.get_string(LionWebVersion.V2023_1).get_id(),
+            LionCoreBuiltins.get_string(LionWebVersion.V2023_1).id,
         )
         self.assertEqual(
             "LionCore-builtins-Boolean",
-            LionCoreBuiltins.get_boolean(LionWebVersion.V2023_1).get_id(),
+            LionCoreBuiltins.get_boolean(LionWebVersion.V2023_1).id,
         )
         self.assertEqual(
             "LionCore-builtins-Integer",
-            LionCoreBuiltins.get_integer(LionWebVersion.V2023_1).get_id(),
+            LionCoreBuiltins.get_integer(LionWebVersion.V2023_1).id,
         )
         self.assertEqual(
             "LionCore-builtins-JSON",
-            LionCoreBuiltins.get_json(LionWebVersion.V2023_1).get_id(),
+            LionCoreBuiltins.get_json(LionWebVersion.V2023_1).id,
         )
 
     def test_primitive_types_have_agreed_ids_v2024(self):
         self.assertEqual(
             "LionCore-builtins-String-2024-1",
-            LionCoreBuiltins.get_string(LionWebVersion.V2024_1).get_id(),
+            LionCoreBuiltins.get_string(LionWebVersion.V2024_1).id,
         )
         self.assertEqual(
             "LionCore-builtins-Boolean-2024-1",
-            LionCoreBuiltins.get_boolean(LionWebVersion.V2024_1).get_id(),
+            LionCoreBuiltins.get_boolean(LionWebVersion.V2024_1).id,
         )
         self.assertEqual(
             "LionCore-builtins-Integer-2024-1",
-            LionCoreBuiltins.get_integer(LionWebVersion.V2024_1).get_id(),
+            LionCoreBuiltins.get_integer(LionWebVersion.V2024_1).id,
         )
         with self.assertRaises(ValueError):
             LionCoreBuiltins.get_json(LionWebVersion.V2024_1)

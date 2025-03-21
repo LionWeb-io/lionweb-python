@@ -27,7 +27,7 @@ class SerializedChunk:
         return list(self.classifier_instances)
 
     def add_classifier_instance(self, instance):
-        self.classifier_instances_by_id[instance.get_id()] = instance
+        self.classifier_instances_by_id[instance.id] = instance
         self.classifier_instances.append(instance)
 
     def get_instance_by_id(self, instance_id: str) -> SerializedClassifierInstance:
