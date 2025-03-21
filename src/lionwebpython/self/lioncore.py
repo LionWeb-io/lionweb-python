@@ -66,6 +66,8 @@ class LionCore:
     def get_concept(
         cls, lion_web_version: LionWebVersion = LionWebVersion.current_version()
     ) -> Concept:
+        if not isinstance(lion_web_version, LionWebVersion):
+            raise ValueError(f"Expected lion_web_version to be an instance of LionWebVersion but got {lion_web_version}")
         return cls.get_instance(lion_web_version).require_concept_by_name("Concept")
 
     @classmethod
@@ -130,7 +132,8 @@ class LionCore:
     def get_instance(
         cls, lion_web_version: LionWebVersion = LionWebVersion.current_version()
     ) -> Language:
-
+        if not isinstance(lion_web_version, LionWebVersion):
+            raise ValueError(f"Expected lion_web_version to be an instance of LionWebVersion but got {lion_web_version}")
         if lion_web_version not in cls._instances:
             version_id_suffix = (
                 f"-{IdUtils.clean_string(lion_web_version.value)}"

@@ -68,3 +68,8 @@ class ClassifierInstance(Generic[T], HasFeatureValues, ABC):
             ClassifierInstance.collect_self_and_descendants(
                 child, include_annotations, result
             )
+
+    def __hash__(self):
+        return hash(self.id)
+
+

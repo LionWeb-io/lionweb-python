@@ -32,9 +32,9 @@ class LionCoreBuiltins(Language):
 
         from lionwebpython.language.primitive_type import PrimitiveType
 
-        string_type = PrimitiveType(lion_web_version, self, "String")
-        boolean_type = PrimitiveType(lion_web_version, self, "Boolean")
-        integer_type = PrimitiveType(lion_web_version, self, "Integer")
+        string_type = PrimitiveType(lion_web_version, language=self, name="String")
+        boolean_type = PrimitiveType(lion_web_version, language=self, name="Boolean")
+        integer_type = PrimitiveType(lion_web_version, language=self, name="Integer")
         self.add_element(string_type)
         self.add_element(boolean_type)
         self.add_element(integer_type)

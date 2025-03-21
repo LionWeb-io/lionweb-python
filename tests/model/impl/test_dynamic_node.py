@@ -67,7 +67,7 @@ class DynamicNodeTest(unittest.TestCase):
 
     def test_remove_child_on_multiple_containment(self):
         c = Concept()
-        containment = Containment.create_multiple("ch", c)
+        containment = Containment.create_multiple(name="ch", type=c)
         containment.set_key("my-containment")
         c.add_feature(containment)
         n1 = DynamicNode("id-123", c)

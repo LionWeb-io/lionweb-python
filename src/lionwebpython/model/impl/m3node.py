@@ -7,7 +7,7 @@ from lionwebpython.model.classifier_instance_utils import \
     ClassifierInstanceUtils
 from lionwebpython.model.impl.abstract_classifier_instance import \
     AbstractClassifierInstance
-from lionwebpython.model.node import Node
+from lionwebpython.model.node import Node, is_node
 
 T = TypeVar("T", bound="M3Node")
 
@@ -22,6 +22,8 @@ class M3Node(Generic[T], Node, IKeyed[T], AbstractClassifierInstance, ABC):
 
     def __init__(self, lion_web_version: Optional[LionWebVersion] = None):
         AbstractClassifierInstance.__init__(self)
+        if lion_web_version is not None and not isinstance(lion_web_version, LionWebVersion):
+            raise ValueError(f"Expected lion_web_version to be an instance of LionWebVersion or None but got {lion_web_version}")
         self.lion_web_version = lion_web_version or LionWebVersion.current_version()
         self._id: Optional[str] = None
         self.parent: Optional[Node] = None
@@ -40,7 +42,7 @@ class M3Node(Generic[T], Node, IKeyed[T], AbstractClassifierInstance, ABC):
         return self
 
     def set_parent(self, parent: Optional["ClassifierInstance"]) -> "M3Node":
-        if parent and not isinstance(parent, Node):
+        if parent is not None and not is_node(parent):
             raise ValueError("Not supported")
         self.parent = cast(Optional[Node], parent)
         return self
@@ -176,7 +178,11 @@ class M3Node(Generic[T], Node, IKeyed[T], AbstractClassifierInstance, ABC):
         """
         if value is None:
             return False
-        if value in self.get_containment_multiple_value(link_name):
+        if not is_node(value):
+            raise ValueError()
+        if any(value is v for v in self.get_containment_multiple_value(link_name)):
+            return False
+        if value.id is not None and any(value.id == v.id for v in self.get_containment_multiple_value(link_name)):
             return False
         cast(M3Node, value).set_parent(self)
         if link_name in self.containment_values:
@@ -192,3 +198,6 @@ class M3Node(Generic[T], Node, IKeyed[T], AbstractClassifierInstance, ABC):
 
     def get_lionweb_version(self) -> LionWebVersion:
         return self.lion_web_version
+
+    def __hash__(self):
+        return hash(self.id)

@@ -8,12 +8,12 @@ from lionwebpython.language.interface import Interface
 class ClassifierAncestorsTest(unittest.TestCase):
 
     def test_concept(self):
-        a = Concept("A")
-        b = Concept("b")
-        i = Interface("i")
-        j = Interface("j")
-        k = Interface("k")
-        myInterf = Interface("l")
+        a = Concept(name="A")
+        b = Concept(name="b")
+        i = Interface(name="i")
+        j = Interface(name="j")
+        k = Interface(name="k")
+        myInterf = Interface(name="l")
 
         a.set_extended_concept(b)
         a.add_implemented_interface(i)
@@ -30,10 +30,10 @@ class ClassifierAncestorsTest(unittest.TestCase):
         a.set_name("A")
         b = Annotation()
         b.set_name("b")
-        i = Interface("i")
-        j = Interface("j")
-        k = Interface("k")
-        myInterf = Interface("l")
+        i = Interface(name="i")
+        j = Interface(name="j")
+        k = Interface(name="k")
+        myInterf = Interface(name="l")
 
         a.set_extended_annotation(b)
         a.add_implemented_interface(i)
@@ -46,10 +46,10 @@ class ClassifierAncestorsTest(unittest.TestCase):
         self.assertEqual(set([b, i, j, k, myInterf]), set(a.all_ancestors()))
 
     def test_iface(self):
-        i = Interface("i")
-        j = Interface("j")
-        k = Interface("k")
-        myInterf = Interface("l")
+        i = Interface(name="i")
+        j = Interface(name="j")
+        k = Interface(name="k")
+        myInterf = Interface(name="l")
 
         i.add_extended_interface(j)
         i.add_extended_interface(k)
