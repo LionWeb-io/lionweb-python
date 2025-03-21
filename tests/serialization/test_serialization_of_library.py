@@ -39,7 +39,7 @@ class SerializationOfLibraryTest(SerializationTest):
         self.assertIsNotNone(library_name.get_key())
 
         book: Node = next(
-            node for node in deserialized_nodes if node.get_id() == "library-Book"
+            node for node in deserialized_nodes if node.id == "library-Book"
         )
         self.assertEqual(
             "Book", ClassifierInstanceUtils.get_property_value_by_name(book, "name")
@@ -52,7 +52,7 @@ class SerializationOfLibraryTest(SerializationTest):
         guided_book_writer: Concept = next(
             node
             for node in deserialized_nodes
-            if node.get_id() == "library-GuideBookWriter"
+            if node.id == "library-GuideBookWriter"
         )
         self.assertEqual(
             "GuideBookWriter",

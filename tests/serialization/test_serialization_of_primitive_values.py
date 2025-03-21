@@ -81,9 +81,9 @@ class TestSerializationOfPrimitiveValues(SerializationTest):
             MyNodeWithProperties.LANGUAGE
         )
         json_serialization.instantiator.register_custom_deserializer(
-            MyNodeWithProperties.CONCEPT.get_id(),
+            MyNodeWithProperties.CONCEPT.id,
             lambda concept, serialized_node, deserialized_nodes_by_id, properties_value: MyNodeWithProperties(
-                serialized_node.get_id()
+                serialized_node.id
             ),
         )
         deserialized = json_serialization.deserialize_json_to_nodes(serialized)
@@ -153,9 +153,9 @@ class TestSerializationOfPrimitiveValues(SerializationTest):
             MyNodeWithProperties.LANGUAGE
         )
         json_serialization.instantiator.register_custom_deserializer(
-            MyNodeWithProperties.CONCEPT.get_id(),
+            MyNodeWithProperties.CONCEPT.id,
             lambda concept, serialized_node, deserialized_nodes_by_id, properties_value: MyNodeWithProperties(
-                serialized_node.get_id()
+                serialized_node.id
             ),
         )
         deserialized = json_serialization.deserialize_json_to_nodes(serialized)
@@ -231,10 +231,10 @@ class TestSerializationOfPrimitiveValues(SerializationTest):
         def custom_deserializer(
             concept, serialized_node, deserialized_nodes_by_id, properties_value
         ):
-            return MyNodeWithProperties(serialized_node.get_id())
+            return MyNodeWithProperties(serialized_node.id)
 
         json_serialization.instantiator.register_custom_deserializer(
-            MyNodeWithProperties.CONCEPT.get_id(), custom_deserializer
+            MyNodeWithProperties.CONCEPT.id, custom_deserializer
         )
 
         deserialized = json_serialization.deserialize_json_to_nodes(
@@ -325,10 +325,10 @@ class TestSerializationOfPrimitiveValues(SerializationTest):
         def custom_deserializer(
             concept, serialized_node, deserialized_nodes_by_id, properties_value
         ):
-            return MyNodeWithProperties2023(serialized_node.get_id())
+            return MyNodeWithProperties2023(serialized_node.id)
 
         json_serialization.instantiator.register_custom_deserializer(
-            MyNodeWithProperties2023.CONCEPT.get_id(), custom_deserializer
+            MyNodeWithProperties2023.CONCEPT.id, custom_deserializer
         )
 
         deserialized = json_serialization.deserialize_json_to_nodes(serialized)

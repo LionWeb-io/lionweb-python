@@ -172,7 +172,7 @@ class JsonSerializationTest(SerializationTest):
         test_enum = next(
             n
             for n in deserialized_nodes
-            if n.get_id()
+            if n.id
             == "MDhjYWFkNzUtODI0Ni00NDI3LWJiNGQtODQ0NGI2YzVjNzI5LzI1ODUzNzgxNjU5NzMyMDQ1ODI"
         )
         self.assertEqual(test_enum.get_name(), "TestEnumeration1")
@@ -336,16 +336,16 @@ class JsonSerializationTest(SerializationTest):
     def prepare_deserialization_of_refmm(self, js):
         js.classifier_resolver.register_language(RefsLanguage.INSTANCE)
         js.instantiator.register_custom_deserializer(
-            RefsLanguage.CONTAINER_NODE.get_id(),
+            RefsLanguage.CONTAINER_NODE.id,
             lambda concept, serialized_node, deserialized_nodes_by_id, properties_values: ContainerNode(
                 properties_values.get(concept.get_containment_by_name("contained")),
-                serialized_node.get_id(),
+                serialized_node.id,
             ),
         )
         js.instantiator.register_custom_deserializer(
-            RefsLanguage.REF_NODE.get_id(),
+            RefsLanguage.REF_NODE.id,
             lambda concept, serialized_node, deserialized_nodes_by_id, properties_values: RefNode(
-                serialized_node.get_id()
+                serialized_node.id
             ),
         )
 
@@ -716,7 +716,7 @@ class JsonSerializationTest(SerializationTest):
 
         self.assertEqual(1, len(serialized_chunk.get_classifier_instances()))
         serialized_classifier_instance = serialized_chunk.get_classifier_instances()[0]
-        self.assertEqual("instance-a", serialized_classifier_instance.get_id())
+        self.assertEqual("instance-a", serialized_classifier_instance.id)
         self.assertEqual(1, len(serialized_classifier_instance.get_properties()))
         serialized_name = serialized_classifier_instance.get_properties()[0]
         expected_pointer = MetaPointer(
@@ -741,7 +741,7 @@ class JsonSerializationTest(SerializationTest):
 
         self.assertEqual(4, len(serialized_chunk.get_classifier_instances()))
         serialized_n1 = serialized_chunk.get_classifier_instances()[0]
-        self.assertEqual("n1", serialized_n1.get_id())
+        self.assertEqual("n1", serialized_n1.id)
         self.assertIsNone(serialized_n1.get_parent_node_id())
         self.assertEqual(["a1_1", "a1_2", "a2_3"], serialized_n1.get_annotations())
 
@@ -768,11 +768,11 @@ class JsonSerializationTest(SerializationTest):
 
         self.assertEqual(5, len(serialized_chunk.get_classifier_instances()))
         serialized_l = serialized_chunk.get_classifier_instances()[0]
-        self.assertEqual("l", serialized_l.get_id())
+        self.assertEqual("l", serialized_l.id)
         self.assertIsNone(serialized_l.get_parent_node_id())
 
         serialized_c = serialized_chunk.get_instance_by_id("c")
-        self.assertEqual("c", serialized_c.get_id())
+        self.assertEqual("c", serialized_c.id)
         self.assertEqual(["metaAnn_1"], serialized_c.get_annotations())
 
         hjs.register_language(meta_lang)
@@ -894,10 +894,10 @@ class JsonSerializationTest(SerializationTest):
         nodes = js.deserialize_json_to_nodes(json.load(is_))
         self.assertEqual(5, len(nodes))
 
-        pp1 = next(n for n in nodes if n.get_id() == "pp1")
+        pp1 = next(n for n in nodes if n.id == "pp1")
         self.assertIsInstance(pp1, ProxyNode)
 
-        pf1 = next(n for n in nodes if n.get_id() == "pf1")
+        pf1 = next(n for n in nodes if n.id == "pf1")
         self.assertFalse(isinstance(pf1, ProxyNode))
         self.assertEqual(pp1, pf1.get_parent())
 
@@ -961,14 +961,14 @@ class JsonSerializationTest(SerializationTest):
         pr0td1 = next(
             n
             for n in nodes
-            if n.get_id() == "synthetic_my-wonderful-partition_projects_0_todos_1"
+            if n.id == "synthetic_my-wonderful-partition_projects_0_todos_1"
         )
         self.assertIsInstance(pr0td1, ProxyNode)
 
         pr1td0 = next(
             n
             for n in nodes
-            if n.get_id() == "synthetic_my-wonderful-partition_projects_1_todos_0"
+            if n.id == "synthetic_my-wonderful-partition_projects_1_todos_0"
         )
         self.assertIsInstance(pr1td0, DynamicNode)
 
