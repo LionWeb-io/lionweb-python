@@ -71,7 +71,7 @@ class LionCoreBuiltins(Language):
         )
 
         for element in self.get_elements():
-            if element.get_id() is None:
+            if element.id is None:
                 element.set_id(
                     f"LionCore-builtins-{element.get_name()}{version_id_suffix}"
                 )

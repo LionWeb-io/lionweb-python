@@ -36,10 +36,10 @@ class Instantiator:
 
     def enable_dynamic_nodes(self):
         self.default_node_deserializer = lambda classifier, serialized_node, deserialized_instances_by_id, properties_values: (
-            DynamicNode(serialized_node.get_id(), classifier)
+            DynamicNode(serialized_node.id, classifier)
             if isinstance(classifier, Concept)
             else (
-                DynamicAnnotationInstance(serialized_node.get_id(), classifier)
+                DynamicAnnotationInstance(serialized_node.id, classifier)
                 if isinstance(classifier, Annotation)
                 else Exception("Unsupported classifier type")
             )
@@ -53,8 +53,8 @@ class Instantiator:
         deserialized_instances_by_id,
         properties_values,
     ) -> "Node":
-        if classifier.get_id() in self.custom_deserializers:
-            res = self.custom_deserializers[classifier.get_id()](
+        if classifier.id in self.custom_deserializers:
+            res = self.custom_deserializers[classifier.id](
                 classifier,
                 serialized_instance,
                 deserialized_instances_by_id,
@@ -81,56 +81,56 @@ class Instantiator:
         self.custom_deserializers.update(
             {
                 LionCore.get_language(lion_web_version)
-                .get_id(): lambda c, s, d, p: Language(
+                .id: lambda c, s, d, p: Language(
                     lion_web_version=lion_web_version
                 )
-                .set_id(s.get_id()),
+                .set_id(s.id),
                 LionCore.get_concept(lion_web_version)
-                .get_id(): lambda c, s, d, p: Concept(lion_web_version=lion_web_version)
-                .set_id(s.get_id()),
+                .id: lambda c, s, d, p: Concept(lion_web_version=lion_web_version)
+                .set_id(s.id),
                 LionCore.get_interface(lion_web_version)
-                .get_id(): lambda c, s, d, p: Interface(
+                .id: lambda c, s, d, p: Interface(
                     lion_web_version=lion_web_version
                 )
-                .set_id(s.get_id()),
+                .set_id(s.id),
                 LionCore.get_property(
                     lion_web_version
-                ).get_id(): lambda c, s, d, p: Property(
-                    lion_web_version=lion_web_version, id=s.get_id()
+                ).id: lambda c, s, d, p: Property(
+                    lion_web_version=lion_web_version, id=s.id
                 ),
                 LionCore.get_reference(
                     lion_web_version
-                ).get_id(): lambda c, s, d, p: Reference(
-                    lion_web_version=lion_web_version, id=s.get_id()
+                ).id: lambda c, s, d, p: Reference(
+                    lion_web_version=lion_web_version, id=s.id
                 ),
                 LionCore.get_containment(
                     lion_web_version
-                ).get_id(): lambda c, s, d, p: Containment(
-                    lion_web_version=lion_web_version, id=s.get_id()
+                ).id: lambda c, s, d, p: Containment(
+                    lion_web_version=lion_web_version, id=s.id
                 ),
                 LionCore.get_primitive_type(
                     lion_web_version
-                ).get_id(): lambda c, s, d, p: PrimitiveType(
-                    lion_web_version=lion_web_version, id=s.get_id()
+                ).id: lambda c, s, d, p: PrimitiveType(
+                    lion_web_version=lion_web_version, id=s.id
                 ),
                 LionCore.get_enumeration(lion_web_version)
-                .get_id(): lambda c, s, d, p: Enumeration(
+                .id: lambda c, s, d, p: Enumeration(
                     lion_web_version=lion_web_version
                 )
-                .set_id(s.get_id()),
+                .set_id(s.id),
                 LionCore.get_enumeration_literal(lion_web_version)
-                .get_id(): lambda c, s, d, p: EnumerationLiteral(
+                .id: lambda c, s, d, p: EnumerationLiteral(
                     lion_web_version=lion_web_version
                 )
-                .set_id(s.get_id()),
+                .set_id(s.id),
                 LionCore.get_annotation(lion_web_version)
-                .get_id(): lambda c, s, d, p: Annotation(
+                .id: lambda c, s, d, p: Annotation(
                     lion_web_version=lion_web_version
                 )
-                .set_id(s.get_id()),
-                LionCore.get_structured_data_type().get_id(): lambda c, s, d, p: StructuredDataType(
-                    id=s.get_id()
+                .set_id(s.id),
+                LionCore.get_structured_data_type().id: lambda c, s, d, p: StructuredDataType(
+                    id=s.id
                 ),
-                LionCore.get_field().get_id(): lambda c, s, d, p: Field(id=s.get_id()),
+                LionCore.get_field().id: lambda c, s, d, p: Field(id=s.id),
             }
         )

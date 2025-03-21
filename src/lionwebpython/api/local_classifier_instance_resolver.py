@@ -4,10 +4,10 @@ from lionwebpython.api.classifier_instance_resolver import \
 
 class LocalClassifierInstanceResolver(ClassifierInstanceResolver):
     def __init__(self, *instances):
-        self.instances = {instance.get_id(): instance for instance in instances}
+        self.instances = {instance.id: instance for instance in instances}
 
     def add(self, instance):
-        self.instances[instance.get_id()] = instance
+        self.instances[instance.id] = instance
 
     def resolve(self, instance_id):
         return self.instances.get(instance_id)

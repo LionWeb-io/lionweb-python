@@ -26,9 +26,9 @@ class PrimitiveValuesSerialization:
     def register_language(self, language):
         for element in language.get_elements():
             if isinstance(element, Enumeration):
-                self.enumerations_by_id[element.get_id()] = element
+                self.enumerations_by_id[element.id] = element
             elif isinstance(element, StructuredDataType):
-                self.structures_data_types_by_id[element.get_id()] = element
+                self.structures_data_types_by_id[element.id] = element
 
     def enable_dynamic_nodes(self):
         self.dynamic_nodes_enabled = True
@@ -48,10 +48,10 @@ class PrimitiveValuesSerialization:
                 field_value = json_obj[field.get_key()]
                 if field_value is None:
                     sdt_instance.set_field_value(field, None)
-                elif self.is_structured_data_type(field_data_type.get_id()):
+                elif self.is_structured_data_type(field_data_type.id):
                     sdt_instance.set_field_value(
                         field,
-                        self.deserialize_sdt(field_data_type.get_id(), field_value),
+                        self.deserialize_sdt(field_data_type.id, field_value),
                     )
                 else:
                     sdt_instance.set_field_value(
@@ -60,7 +60,7 @@ class PrimitiveValuesSerialization:
         return sdt_instance
 
     def deserialize(self, data_type, serialized_value, is_required=False):
-        data_type_id = data_type.get_id()
+        data_type_id = data_type.id
         if data_type_id in self.primitive_deserializers:
             return self.primitive_deserializers[data_type_id](
                 serialized_value, is_required
@@ -94,11 +94,11 @@ class PrimitiveValuesSerialization:
             field_value = structured_data_type_instance.get_field_value(field)
             if field_value is None:
                 json_obj[field.get_key()] = None
-            elif self.is_structured_data_type(field.get_type().get_id()):
+            elif self.is_structured_data_type(field.get_type().id):
                 json_obj[field.get_key()] = self.serialize_sdt(field_value)
             else:
                 json_obj[field.get_key()] = self.serialize(
-                    field.get_type().get_id(), field_value
+                    field.get_type().id, field_value
                 )
         return json_obj
 
@@ -162,7 +162,7 @@ class PrimitiveValuesSerialization:
         return deserializer
 
     def register_enum_class(self, enum_class: type, enumeration: Enumeration) -> None:
-        id = enumeration.get_id()
+        id = enumeration.id
         if id is None:
             raise ValueError()
         self.primitive_serializers[id] = PrimitiveValuesSerialization.serializer_for(
@@ -179,29 +179,29 @@ class PrimitiveValuesSerialization:
             raise ValueError("lion_web_version should not be null")
 
         self.primitive_deserializers[
-            cast(str, LionCoreBuiltins.get_boolean(lion_web_version).get_id())
+            cast(str, LionCoreBuiltins.get_boolean(lion_web_version).id)
         ] = lambda s, r: (None if not r and s is None else s.lower() == "true")
         self.primitive_deserializers[
-            cast(str, LionCoreBuiltins.get_string(lion_web_version).get_id())
+            cast(str, LionCoreBuiltins.get_string(lion_web_version).id)
         ] = lambda s, r: s
         if lion_web_version == LionWebVersion.V2023_1:
             self.primitive_deserializers[
-                cast(str, LionCoreBuiltins.get_json(lion_web_version).get_id())
+                cast(str, LionCoreBuiltins.get_json(lion_web_version).id)
             ] = lambda s, r: (None if s is None else json.loads(s))
         self.primitive_deserializers[
-            cast(str, LionCoreBuiltins.get_integer(lion_web_version).get_id())
+            cast(str, LionCoreBuiltins.get_integer(lion_web_version).id)
         ] = lambda s, r: (None if s is None else int(s))
 
         self.primitive_serializers[
-            cast(str, LionCoreBuiltins.get_boolean(lion_web_version).get_id())
+            cast(str, LionCoreBuiltins.get_boolean(lion_web_version).id)
         ] = lambda v: str(v).lower()
         if lion_web_version == LionWebVersion.V2023_1:
             self.primitive_serializers[
-                cast(str, LionCoreBuiltins.get_json(lion_web_version).get_id())
+                cast(str, LionCoreBuiltins.get_json(lion_web_version).id)
             ] = lambda v: json.dumps(v)
         self.primitive_serializers[
-            cast(str, LionCoreBuiltins.get_string(lion_web_version).get_id())
+            cast(str, LionCoreBuiltins.get_string(lion_web_version).id)
         ] = lambda v: v
         self.primitive_serializers[
-            cast(str, LionCoreBuiltins.get_integer(lion_web_version).get_id())
+            cast(str, LionCoreBuiltins.get_integer(lion_web_version).id)
         ] = lambda v: str(v)
