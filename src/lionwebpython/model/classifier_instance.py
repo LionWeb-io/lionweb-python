@@ -24,8 +24,14 @@ class ClassifierInstance(Generic[T], HasFeatureValues, ABC):
     def remove_annotation(self, instance: "AnnotationInstance") -> None:
         pass
 
+    @property
+    def id(self) -> Optional[str]:
+        """The unique identifier of this classifier instance."""
+        return self.get_id()
+
     @abstractmethod
     def get_id(self) -> Optional[str]:
+        """Deprecated: the id property should be used instead."""
         pass
 
     @abstractmethod

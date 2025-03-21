@@ -18,11 +18,14 @@ class DynamicAnnotationInstance(DynamicClassifierInstance, AnnotationInstance):
         annotated: Optional[ClassifierInstance] = None,
     ):
         super().__init__()
-        self.id = id
+        self._id = id
         self.annotation = annotation
         self.annotated: Optional[ClassifierInstance] = None
         if annotated:
             self.set_annotated(annotated)
+
+    def get_id(self) -> Optional[str]:
+        return self._id
 
     def set_annotation(self, annotation: Annotation):
         self.annotation = annotation

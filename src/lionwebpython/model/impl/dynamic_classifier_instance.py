@@ -20,16 +20,16 @@ class DynamicClassifierInstance(AbstractClassifierInstance, ClassifierInstance):
 
     def __init__(self):
         AbstractClassifierInstance.__init__(self)
-        self.id: Optional[str] = None
+        self._id: Optional[str] = None
         self.property_values: Dict[str, Any] = {}
         self.containment_values: Dict[str, List[Node]] = {}
         self.reference_values: Dict[str, List[ReferenceValue]] = {}
 
     def get_id(self) -> Optional[str]:
-        return self.id
+        return self._id
 
     def set_id(self, id: Optional[str]):
-        self.id = id
+        self._id = id
 
     # Public methods for properties
 

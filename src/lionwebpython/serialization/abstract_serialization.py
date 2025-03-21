@@ -150,11 +150,11 @@ class AbstractSerialization:
         self, classifier_instance: ClassifierInstance
     ) -> SerializedClassifierInstance:
         serialized_instance = SerializedClassifierInstance(
-            classifier_instance.get_id(),
+            classifier_instance.id,
             MetaPointer.from_language_entity(classifier_instance.get_classifier()),
         )
         parent = classifier_instance.get_parent()
-        serialized_instance.parent_node_id = parent.get_id() if parent else None
+        serialized_instance.parent_node_id = parent.id if parent else None
         self._serialize_properties(classifier_instance, serialized_instance)
         self._serialize_containments(classifier_instance, serialized_instance)
         self._serialize_references(classifier_instance, serialized_instance)
@@ -168,14 +168,14 @@ class AbstractSerialization:
             raise ValueError("AnnotationInstance should not be null")
 
         serialized_classifier_instance = SerializedClassifierInstance(
-            annotation_instance.get_id(),
+            annotation_instance.id,
             MetaPointer.from_language_entity(
                 annotation_instance.get_annotation_definition()
             ),
         )
         parent = annotation_instance.get_parent()
         serialized_classifier_instance.parent_node_id = (
-            parent.get_id() if parent else None
+            parent.id if parent else None
         )
         self._serialize_properties(annotation_instance, serialized_classifier_instance)
         self._serialize_containments(
@@ -215,11 +215,11 @@ class AbstractSerialization:
     def _serialize_property_value(self, data_type: DataType, value: object):
         if data_type is None:
             raise ValueError("Cannot serialize property when the dataType is null")
-        if data_type.get_id() is None:
+        if data_type.id is None:
             raise ValueError("Cannot serialize property when the dataType.ID is null")
         if value is None:
             return None
-        return self.primitive_values_serialization.serialize(data_type.get_id(), value)
+        return self.primitive_values_serialization.serialize(data_type.id, value)
 
     def _serialize_containments(
         self,
@@ -239,7 +239,7 @@ class AbstractSerialization:
             containment_value = SerializedContainmentValue(
                 MetaPointer.from_keyed(containment, language),
                 [
-                    child.get_id()
+                    child.id
                     for child in classifier_instance.get_children(containment)
                 ],
             )
@@ -272,7 +272,7 @@ class AbstractSerialization:
                                 rv.get_referred()
                             )
                         )
-                        else (rv.get_referred().get_id() if rv.get_referred() else None)
+                        else (rv.get_referred().id if rv.get_referred() else None)
                     ),
                     resolve_info=rv.get_resolve_info(),
                 )
@@ -289,7 +289,7 @@ class AbstractSerialization:
             raise ValueError("ClassifierInstance should not be null")
 
         serialized_classifier_instance.annotations = [
-            annotation.get_id() for annotation in classifier_instance.get_annotations()
+            annotation.id for annotation in classifier_instance.get_annotations()
         ]
 
     def deserialize_serialization_block(self, serialized_chunk: SerializedChunk):
@@ -422,13 +422,13 @@ class AbstractSerialization:
         deserialization_status.put_nodes_with_null_ids_in_front()
 
         if self.unavailable_parent_policy == UnavailableNodePolicy.NULL_REFERENCES:
-            known_ids = {ci.get_id() for ci in original_list}
+            known_ids = {ci.id for ci in original_list}
             for ci in original_list:
                 if ci.get_parent_node_id() not in known_ids:
                     deserialization_status.place(ci)
 
         elif self.unavailable_parent_policy == UnavailableNodePolicy.PROXY_NODES:
-            known_ids = {ci.get_id() for ci in original_list}
+            known_ids = {ci.id for ci in original_list}
             parent_ids = {
                 n.get_parent_node_id()
                 for n in original_list
@@ -449,7 +449,7 @@ class AbstractSerialization:
             while i < deserialization_status.how_many_to_sort():
                 node = deserialization_status.get_node_to_sort(i)
                 if node.get_parent_node_id() is None or any(
-                    sn.get_id() == node.get_parent_node_id()
+                    sn.id == node.get_parent_node_id()
                     for sn in deserialization_status.stream_sorted()
                 ):
                     deserialization_status.place(node)
