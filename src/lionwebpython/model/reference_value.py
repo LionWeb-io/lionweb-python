@@ -14,7 +14,7 @@ class ReferenceValue:
         return self.referred
 
     def get_referred_id(self) -> Optional[str]:
-        return self.referred.get_id() if self.referred else None
+        return self.referred.id if self.referred else None
 
     def set_referred(self, referred: Optional[Node]):
         self.referred = referred
@@ -36,4 +36,4 @@ class ReferenceValue:
         return hash((self.referred, self.resolve_info))
 
     def __str__(self):
-        return f"ReferenceValue{{referred={'null' if self.referred is None else self.referred.get_id()}, resolveInfo='{self.resolve_info}'}}"
+        return f"ReferenceValue{{referred={'null' if self.referred is None else self.referred.id}, resolveInfo='{self.resolve_info}'}}"
