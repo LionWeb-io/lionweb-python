@@ -14,7 +14,7 @@ from lionwebpython.model.reference_value import ReferenceValue
 
 class SimpleNode(AbstractClassifierInstance, Node):
     def __init__(self):
-        self.id: Optional[str] = None
+        self._id: Optional[str] = None
         self.parent: Optional["SimpleNode"] = None
         self.annotations: List["AnnotationInstance"] = []
 
@@ -23,13 +23,13 @@ class SimpleNode(AbstractClassifierInstance, Node):
         self.set_id(random_id)
 
     def set_id(self, node_id: str):
-        self.id = node_id
+        self._id = node_id
 
     def set_parent(self, parent: "SimpleNode"):
         self.parent = parent
 
     def get_id(self) -> Optional[str]:
-        return self.id
+        return self._id
 
     def get_parent(self) -> Optional["SimpleNode"]:
         return self.parent

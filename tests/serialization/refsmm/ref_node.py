@@ -12,7 +12,7 @@ class RefNode(SimpleNode):
         super().__init__()
         self.referred: Optional["RefNode"] = None
         if id is not None:
-            self.id = id
+            self._id = id
         else:
             self.assign_random_id()
 

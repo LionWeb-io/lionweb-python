@@ -23,7 +23,7 @@ class M3Node(Generic[T], Node, IKeyed[T], AbstractClassifierInstance, ABC):
     def __init__(self, lion_web_version: Optional[LionWebVersion] = None):
         AbstractClassifierInstance.__init__(self)
         self.lion_web_version = lion_web_version or LionWebVersion.current_version()
-        self.id: Optional[str] = None
+        self._id: Optional[str] = None
         self.parent: Optional[Node] = None
         self.property_values: dict[str, Optional[object]] = {}
         self.containment_values: dict[str, List[Node]] = {}
@@ -32,7 +32,7 @@ class M3Node(Generic[T], Node, IKeyed[T], AbstractClassifierInstance, ABC):
         self.reference_values: dict[str, List[ReferenceValue]] = {}
 
     def set_id(self, id: Optional[str]) -> T:
-        self.id = id
+        self._id = id
         return cast(T, self)
 
     def set_name(self, name: Optional[str]) -> "M3Node":
@@ -129,7 +129,7 @@ class M3Node(Generic[T], Node, IKeyed[T], AbstractClassifierInstance, ABC):
         self.reference_values[name] = values
 
     def get_id(self) -> Optional[str]:
-        return self.id
+        return self._id
 
     def __str__(self) -> str:
         return f"{self.__class__.__name__}[{self.get_id()}]"

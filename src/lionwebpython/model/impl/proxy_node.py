@@ -19,7 +19,7 @@ class ProxyNode(Node):
         raise self.CannotDoBecauseProxyException(self.id)
 
     class CannotDoBecauseProxyException(Exception):
-        def __init__(self, node_id: str):
+        def __init__(self, node_id: Optional[str]):
             super().__init__(
                 f"Replace the proxy node with a real node to perform this operation (nodeID: {node_id})"
             )
@@ -28,7 +28,7 @@ class ProxyNode(Node):
     def __init__(self, node_id: str):
         if node_id is None:
             raise ValueError("The node ID of a ProxyNode should not be null")
-        self.id = node_id
+        self._id = node_id
 
     def get_parent(self):
         raise self.CannotDoBecauseProxyException(self.id)
@@ -55,7 +55,7 @@ class ProxyNode(Node):
         raise self.CannotDoBecauseProxyException(self.id)
 
     def get_id(self) -> str:
-        return self.id
+        return self._id
 
     def get_classifier(self):
         raise self.CannotDoBecauseProxyException(self.id)

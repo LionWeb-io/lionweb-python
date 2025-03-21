@@ -323,7 +323,7 @@ class JsonSerializationTest(SerializationTest):
         il1 = IntLiteral(1, "int_1")
         il2 = IntLiteral(2, None)
         # Let's override it, as it gets a random id
-        il2.id = None
+        il2._id = None
         sum1 = Sum(il1, il2, None)
 
         js = SerializationProvider.get_standard_json_serialization()

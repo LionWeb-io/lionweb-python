@@ -14,7 +14,7 @@ class Sum(SimpleNode):
         self.left = left
         self.right = right
         if id:
-            self.id = id
+            self._id = id
         else:
             self.assign_random_id()
 

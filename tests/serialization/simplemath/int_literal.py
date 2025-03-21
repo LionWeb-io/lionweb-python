@@ -11,7 +11,7 @@ class IntLiteral(SimpleNode):
         super().__init__()
         self.value = value
         if id is not None:
-            self.id = id
+            self._id = id
         else:
             self.assign_random_id()
 

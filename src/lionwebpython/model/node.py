@@ -11,13 +11,25 @@ from lionwebpython.model.classifier_instance import ClassifierInstance
 class Node(ClassifierInstance["Concept"], ABC):
     """
     A node is an instance of a Concept. It contains all the values associated with that instance.
+
+
+    Attributes:
+        id: The unique identifier of this node. A valid Node should have a proper ID
+            but this property can return None if the Node is in an invalid state.
     """
+
+    @property
+    def id(self) -> Optional[str]:
+        """The unique identifier of this node."""
+        return self.get_id()
 
     @abstractmethod
     def get_id(self) -> Optional[str]:
         """
         Returns the Node ID.
         A valid Node ID should not be None, but this method can return None in case the Node is in an invalid state.
+
+        Deprecated: the id property should be used instead.
         """
         pass
 

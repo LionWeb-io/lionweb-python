@@ -11,7 +11,7 @@ from lionwebpython.model.node import Node
 
 class DynamicNode(DynamicClassifierInstance, Node, HasSettableParent):
     def __init__(self, id: Optional[str] = None, concept: Optional[Concept] = None):
-        self.id = id
+        self._id = id
         self.concept = concept
         self.parent: Optional[Node] = None
         self.property_values: Dict[str, Optional[object]] = {}
@@ -22,6 +22,9 @@ class DynamicNode(DynamicClassifierInstance, Node, HasSettableParent):
         from lionwebpython.model.annotation_instance import AnnotationInstance
 
         self.annotations: List[AnnotationInstance] = []
+
+    def get_id(self) -> Optional[str]:
+        return self._id
 
     def set_concept(self, concept: Concept):
         self.concept = concept
