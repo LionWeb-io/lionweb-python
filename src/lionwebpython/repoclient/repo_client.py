@@ -38,9 +38,10 @@ class RepoClient:
         self._repo_url = repo_url
         self._client_id = client_id
         self._repository_name = repository_name
-        self._serialization = serialization
-        if self._serialization is None:
+        if serialization is None:
             self._serialization = SerializationProvider.get_standard_json_serialization(self._lionweb_version)
+        else:
+            self._serialization = serialization
         self._serialization.unavailable_parent_policy = unavailable_parent_policy
         self._serialization.unavailable_children_policy = unavailable_children_policy
 
@@ -157,7 +158,7 @@ class RepoClient:
             "clientId": self._client_id,
         }
         if count:
-            query_params['count'] = count
+            query_params['count'] = str(count)
         response = requests.post(url, params=query_params, headers=headers)
         if response.status_code != 200:
             raise ValueError("Error:", response.status_code, response.text)
@@ -194,7 +195,7 @@ class RepoClient:
         if depth_limit is not None:
             if not isinstance(depth_limit, int):
                 raise ValueError(f"depth_limit should be an int, but it is {depth_limit}")
-            query_params['depthLimit'] = depth_limit
+            query_params['depthLimit'] = str(depth_limit)
         response = requests.post(
             url, params=query_params, json={"ids": ids}, headers=headers
         )
@@ -266,7 +267,7 @@ class RepoClient:
         Retrieve the list of ancestor node IDs for a given node ID.
         """
         result = []
-        current_node_id = node_id
+        current_node_id : Optional[str] = node_id
 
         while current_node_id:
             current_node_id = self.get_parent_id(current_node_id)
