@@ -27,8 +27,13 @@ class RepoClient:
         client_id="lwpython",
         repository_name: Optional[str] = "default",
         serialization: Optional[JsonSerialization] = None,
-        unavailable_parent_policy: UnavailableNodePolicy = UnavailableNodePolicy.PROXY_NODES
+        unavailable_parent_policy: UnavailableNodePolicy = UnavailableNodePolicy.PROXY_NODES,
+        unavailable_children_policy: UnavailableNodePolicy = UnavailableNodePolicy.PROXY_NODES,
     ):
+        if not isinstance(client_id, str):
+            raise ValueError(f"client_id should be a string, but it is {client_id}")
+        if not isinstance(repository_name, str):
+            raise ValueError(f"repository_name should be a string, but it is {repository_name}")
         self._lionweb_version = lionweb_version
         self._repo_url = repo_url
         self._client_id = client_id
@@ -37,6 +42,7 @@ class RepoClient:
         if self._serialization is None:
             self._serialization = SerializationProvider.get_standard_json_serialization(self._lionweb_version)
         self._serialization.unavailable_parent_policy = unavailable_parent_policy
+        self._serialization.unavailable_children_policy = unavailable_children_policy
 
     def serialization(self) -> JsonSerialization:
         return self._serialization
@@ -169,12 +175,16 @@ class RepoClient:
         if response.status_code != 200:
             raise ValueError("Error:", response.status_code, response.text)
 
-    def retrieve(self, ids: List[str], depth_limit=Optional[int]):
+    def retrieve(self, ids: List[str], depth_limit:Optional[int] = None):
+        if not self._is_list_of_strings(ids):
+            raise ValueError(f"ids should be a list of strings, but we got {ids}")
         data = self._retrieve_raw(ids, depth_limit=depth_limit)
         nodes = self._serialization.deserialize_json_to_nodes(data["chunk"])
         return nodes
 
-    def _retrieve_raw(self, ids: List[str], depth_limit=Optional[int]):
+    def _retrieve_raw(self, ids: List[str], depth_limit:Optional[int] = None):
+        if not self._is_list_of_strings(ids):
+            raise ValueError(f"ids should be a list of strings, but we got {ids}")
         url = f"{self._repo_url}/bulk/retrieve"
         headers = {"Content-Type": "application/json"}
         query_params = {
@@ -182,6 +192,8 @@ class RepoClient:
             "clientId": self._client_id,
         }
         if depth_limit is not None:
+            if not isinstance(depth_limit, int):
+                raise ValueError(f"depth_limit should be an int, but it is {depth_limit}")
             query_params['depthLimit'] = depth_limit
         response = requests.post(
             url, params=query_params, json={"ids": ids}, headers=headers
@@ -192,6 +204,9 @@ class RepoClient:
             return data
         else:
             raise ValueError("Error:", response.status_code, response.text)
+
+    def _is_list_of_strings(self, value):
+        return isinstance(value, list) and all(isinstance(item, str) for item in value)
 
     #####################################################
     # Inspection APIs                                   #
@@ -227,14 +242,14 @@ class RepoClient:
     # Convenience methods                               #
     #####################################################
 
-    def retrieve_partition(self, id: str, depth_limit=Optional[int]):
+    def retrieve_partition(self, id: str, depth_limit:Optional[int] = None):
         res = self.retrieve([id], depth_limit=depth_limit)
         roots = [n for n in res if res.get_parent() is None]
         if len(roots) != 1:
             raise ValueError()
         return roots[0]
 
-    def retrieve_node(self, id: str, depth_limit=Optional[int]):
+    def retrieve_node(self, id: str, depth_limit: Optional[int] = None):
         from lionwebpython.model.impl.proxy_node import ProxyNode
 
         retrieved_nodes = self.retrieve([id], depth_limit=depth_limit)
