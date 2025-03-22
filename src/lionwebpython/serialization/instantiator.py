@@ -81,21 +81,15 @@ class Instantiator:
         self.custom_deserializers.update(
             {
                 LionCore.get_language(lion_web_version)
-                .id: lambda c, s, d, p: Language(
-                    lion_web_version=lion_web_version
-                )
+                .id: lambda c, s, d, p: Language(lion_web_version=lion_web_version)
                 .set_id(s.id),
                 LionCore.get_concept(lion_web_version)
                 .id: lambda c, s, d, p: Concept(lion_web_version=lion_web_version)
                 .set_id(s.id),
                 LionCore.get_interface(lion_web_version)
-                .id: lambda c, s, d, p: Interface(
-                    lion_web_version=lion_web_version
-                )
+                .id: lambda c, s, d, p: Interface(lion_web_version=lion_web_version)
                 .set_id(s.id),
-                LionCore.get_property(
-                    lion_web_version
-                ).id: lambda c, s, d, p: Property(
+                LionCore.get_property(lion_web_version).id: lambda c, s, d, p: Property(
                     lion_web_version=lion_web_version, id=s.id
                 ),
                 LionCore.get_reference(
@@ -114,9 +108,7 @@ class Instantiator:
                     lion_web_version=lion_web_version, id=s.id
                 ),
                 LionCore.get_enumeration(lion_web_version)
-                .id: lambda c, s, d, p: Enumeration(
-                    lion_web_version=lion_web_version
-                )
+                .id: lambda c, s, d, p: Enumeration(lion_web_version=lion_web_version)
                 .set_id(s.id),
                 LionCore.get_enumeration_literal(lion_web_version)
                 .id: lambda c, s, d, p: EnumerationLiteral(
@@ -124,9 +116,7 @@ class Instantiator:
                 )
                 .set_id(s.id),
                 LionCore.get_annotation(lion_web_version)
-                .id: lambda c, s, d, p: Annotation(
-                    lion_web_version=lion_web_version
-                )
+                .id: lambda c, s, d, p: Annotation(lion_web_version=lion_web_version)
                 .set_id(s.id),
                 LionCore.get_structured_data_type().id: lambda c, s, d, p: StructuredDataType(
                     id=s.id
