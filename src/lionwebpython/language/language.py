@@ -60,6 +60,14 @@ class Language(M3Node["Language"], NamespaceProvider, IKeyed["Language"]):
     def key(self, new_value):
         self.set_property_value(property_name="key", value=new_value)
 
+    @property
+    def version(self):
+        return cast(str, self.get_property_value(property_name="version"))
+
+    @version.setter
+    def version(self, new_value):
+        self.set_property_value(property_name="version", value=new_value)
+
     def namespace_qualifier(self) -> str:
         name = self.get_name()
         if name:
