@@ -1,4 +1,4 @@
-from typing import TYPE_CHECKING, Optional
+from typing import TYPE_CHECKING, Optional, cast
 
 from lionwebpython.language.link import Link
 
@@ -108,3 +108,11 @@ class Reference(Link["Reference"]):
         from lionwebpython.self.lioncore import LionCore
 
         return LionCore.get_reference(self.get_lionweb_version())
+
+    @property
+    def key(self):
+        return cast(str, self.get_property_value(property_name="key"))
+
+    @key.setter
+    def key(self, new_value):
+        self.set_property_value(property_name="key", value=new_value)
