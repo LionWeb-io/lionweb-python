@@ -70,5 +70,13 @@ class LanguageEntity(M3Node[T], NamespacedEntity, IKeyed[T]):
         self.set_property_value(property_name="key", value=key)
         return cast(T, self)
 
+    @property
+    def key(self):
+        return cast(str, self.get_property_value(property_name="key"))
+
+    @key.setter
+    def key(self, new_value):
+        self.set_property_value(property_name="key", value=new_value)
+
     def __str__(self) -> str:
         return f"{super().__str__()}{{qualifiedName={DebugUtils.qualified_name(self)}}}"
