@@ -1,4 +1,4 @@
-from typing import Dict, List
+from typing import Dict, List, TYPE_CHECKING
 
 from lionwebpython.language.data_type import DataType
 from lionwebpython.lionweb_version import LionWebVersion
@@ -28,6 +28,8 @@ from lionwebpython.serialization.primitives_values_serialization import \
 from lionwebpython.serialization.unavailable_node_policy import \
     UnavailableNodePolicy
 
+if TYPE_CHECKING:
+    from lionwebpython.model.annotation_instance import AnnotationInstance
 
 class AbstractSerialization:
 

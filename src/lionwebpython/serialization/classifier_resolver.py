@@ -2,7 +2,7 @@ from typing import Dict, TYPE_CHECKING
 
 if TYPE_CHECKING:
     from lionwebpython.language import Concept, Language
-    from lionwebpython.language.classifier import Classifier
+    from lionwebpython.language import Classifier, Annotation
 from lionwebpython.serialization.data.metapointer import MetaPointer
 
 

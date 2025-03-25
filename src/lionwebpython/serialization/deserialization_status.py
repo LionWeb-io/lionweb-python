@@ -4,8 +4,6 @@ from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from lionwebpython.api.classifier_instance_resolver import \
         ClassifierInstanceResolver
-    from lionwebpython.api.composite_classifier_instance_resolver import \
-        CompositeClassifierInstanceResolver
     from lionwebpython.api.local_classifier_instance_resolver import \
         LocalClassifierInstanceResolver
     from lionwebpython.model.impl.proxy_node import ProxyNode
