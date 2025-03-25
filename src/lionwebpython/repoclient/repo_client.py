@@ -3,13 +3,14 @@ from typing import List, Optional
 import requests
 from pydantic import BaseModel
 
-from lionwebpython.serialization.json_serialization import JsonSerialization
 from lionwebpython.lionweb_version import LionWebVersion
 from lionwebpython.model import ClassifierInstance
 from lionwebpython.model.node import Node
+from lionwebpython.serialization.json_serialization import JsonSerialization
 from lionwebpython.serialization.serialization_provider import \
     SerializationProvider
-from lionwebpython.serialization.unavailable_node_policy import UnavailableNodePolicy
+from lionwebpython.serialization.unavailable_node_policy import \
+    UnavailableNodePolicy
 
 
 class RepositoryConfiguration(BaseModel):
@@ -33,13 +34,17 @@ class RepoClient:
         if not isinstance(client_id, str):
             raise ValueError(f"client_id should be a string, but it is {client_id}")
         if not isinstance(repository_name, str):
-            raise ValueError(f"repository_name should be a string, but it is {repository_name}")
+            raise ValueError(
+                f"repository_name should be a string, but it is {repository_name}"
+            )
         self._lionweb_version = lionweb_version
         self._repo_url = repo_url
         self._client_id = client_id
         self._repository_name = repository_name
         if serialization is None:
-            self._serialization = SerializationProvider.get_standard_json_serialization(self._lionweb_version)
+            self._serialization = SerializationProvider.get_standard_json_serialization(
+                self._lionweb_version
+            )
         else:
             self._serialization = serialization
         self._serialization.unavailable_parent_policy = unavailable_parent_policy
@@ -158,11 +163,11 @@ class RepoClient:
             "clientId": self._client_id,
         }
         if count:
-            query_params['count'] = str(count)
+            query_params["count"] = str(count)
         response = requests.post(url, params=query_params, headers=headers)
         if response.status_code != 200:
             raise ValueError("Error:", response.status_code, response.text)
-        return response.json()['ids']
+        return response.json()["ids"]
 
     def store(self, nodes: List["ClassifierInstance"]):
         url = f"{self._repo_url}/bulk/store"
@@ -176,14 +181,14 @@ class RepoClient:
         if response.status_code != 200:
             raise ValueError("Error:", response.status_code, response.text)
 
-    def retrieve(self, ids: List[str], depth_limit:Optional[int] = None):
+    def retrieve(self, ids: List[str], depth_limit: Optional[int] = None):
         if not self._is_list_of_strings(ids):
             raise ValueError(f"ids should be a list of strings, but we got {ids}")
         data = self._retrieve_raw(ids, depth_limit=depth_limit)
         nodes = self._serialization.deserialize_json_to_nodes(data["chunk"])
         return nodes
 
-    def _retrieve_raw(self, ids: List[str], depth_limit:Optional[int] = None):
+    def _retrieve_raw(self, ids: List[str], depth_limit: Optional[int] = None):
         if not self._is_list_of_strings(ids):
             raise ValueError(f"ids should be a list of strings, but we got {ids}")
         url = f"{self._repo_url}/bulk/retrieve"
@@ -194,8 +199,10 @@ class RepoClient:
         }
         if depth_limit is not None:
             if not isinstance(depth_limit, int):
-                raise ValueError(f"depth_limit should be an int, but it is {depth_limit}")
-            query_params['depthLimit'] = str(depth_limit)
+                raise ValueError(
+                    f"depth_limit should be an int, but it is {depth_limit}"
+                )
+            query_params["depthLimit"] = str(depth_limit)
         response = requests.post(
             url, params=query_params, json={"ids": ids}, headers=headers
         )
@@ -243,7 +250,7 @@ class RepoClient:
     # Convenience methods                               #
     #####################################################
 
-    def retrieve_partition(self, id: str, depth_limit:Optional[int] = None):
+    def retrieve_partition(self, id: str, depth_limit: Optional[int] = None):
         res = self.retrieve([id], depth_limit=depth_limit)
         roots = [n for n in res if res.get_parent() is None]
         if len(roots) != 1:
@@ -256,8 +263,12 @@ class RepoClient:
         retrieved_nodes = self.retrieve([id], depth_limit=depth_limit)
         if not retrieved_nodes:
             raise ValueError(f"Node id {id} not found")
-        roots = [n for n in retrieved_nodes if
-                 not isinstance(n, ProxyNode) and (n.get_parent() is None or isinstance(n.get_parent(), ProxyNode))]
+        roots = [
+            n
+            for n in retrieved_nodes
+            if not isinstance(n, ProxyNode)
+            and (n.get_parent() is None or isinstance(n.get_parent(), ProxyNode))
+        ]
         if len(roots) != 1:
             raise ValueError(f"Expected one root, but found {len(roots)}")
         return roots[0]
@@ -267,7 +278,7 @@ class RepoClient:
         Retrieve the list of ancestor node IDs for a given node ID.
         """
         result = []
-        current_node_id : Optional[str] = node_id
+        current_node_id: Optional[str] = node_id
 
         while current_node_id:
             current_node_id = self.get_parent_id(current_node_id)
@@ -287,8 +298,8 @@ class RepoClient:
         """
         Retrieve the parent node ID of a given node ID.
         """
-        nodes = self._retrieve_raw([node_id], depth_limit=0)['chunk']['nodes']
+        nodes = self._retrieve_raw([node_id], depth_limit=0)["chunk"]["nodes"]
         if len(nodes) != 1:
             raise ValueError()
         node = nodes[0]
-        return node['parent']
+        return node["parent"]

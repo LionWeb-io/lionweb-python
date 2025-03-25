@@ -70,3 +70,11 @@ class EnumerationLiteral(M3Node, NamespacedEntity, IKeyed):
     def set_key(self, key: str) -> "EnumerationLiteral":
         self.set_property_value(property_name="key", value=key)
         return self
+
+    @property
+    def key(self):
+        return cast(str, self.get_property_value(property_name="key"))
+
+    @key.setter
+    def key(self, new_value):
+        self.set_property_value(property_name="key", value=new_value)

@@ -37,6 +37,14 @@ class M3Node(Generic[T], Node, IKeyed[T], AbstractClassifierInstance, ABC):
         self._id = id
         return cast(T, self)
 
+    @property
+    def id(self) -> Optional[str]:
+        return self._id
+
+    @id.setter
+    def id(self, new_value):
+        self._id = new_value
+
     def set_name(self, name: Optional[str]) -> "M3Node":
         self.set_property_value(property_name="name", value=name)
         return self

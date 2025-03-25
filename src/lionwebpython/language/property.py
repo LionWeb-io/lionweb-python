@@ -107,3 +107,11 @@ class Property(Feature["Property"]):
         from lionwebpython.self.lioncore import LionCore
 
         return LionCore.get_property(self.get_lionweb_version())
+
+    @property
+    def key(self):
+        return cast(str, self.get_property_value(property_name="key"))
+
+    @key.setter
+    def key(self, new_value):
+        self.set_property_value(property_name="key", value=new_value)

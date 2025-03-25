@@ -80,7 +80,10 @@ class NodePopulator:
 
             deserialized_value = []
             for child_node_id in serialized_containment_value.value:
-                if self.serialization.unavailable_children_policy == UnavailableNodePolicy.PROXY_NODES:
+                if (
+                    self.serialization.unavailable_children_policy
+                    == UnavailableNodePolicy.PROXY_NODES
+                ):
                     deserialized_value.append(
                         self.classifier_instance_resolver.resolve_or_proxy(
                             child_node_id

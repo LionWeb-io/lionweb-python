@@ -7,9 +7,7 @@ from lionwebpython.self.lioncore import LionCore
 class BuiltinIDsAndKeysTest(unittest.TestCase):
 
     def test_M3ElementsHasExpectedIDsIn2023_1(self):
-        self.assertEqual(
-            "-id-Concept", LionCore.get_concept(LionWebVersion.V2023_1).id
-        )
+        self.assertEqual("-id-Concept", LionCore.get_concept(LionWebVersion.V2023_1).id)
         self.assertEqual(
             "-id-Concept-abstract",
             LionCore.get_concept(LionWebVersion.V2023_1)
@@ -60,9 +58,7 @@ class BuiltinIDsAndKeysTest(unittest.TestCase):
             "-id-EnumerationLiteral",
             LionCore.get_enumeration_literal(LionWebVersion.V2023_1).id,
         )
-        self.assertEqual(
-            "-id-Feature", LionCore.get_feature(LionWebVersion.V2023_1).id
-        )
+        self.assertEqual("-id-Feature", LionCore.get_feature(LionWebVersion.V2023_1).id)
 
         self.assertEqual(
             "-id-Feature-optional",
@@ -91,9 +87,7 @@ class BuiltinIDsAndKeysTest(unittest.TestCase):
         )
         self.assertEqual(
             "-id-Link-type",
-            LionCore.get_link(LionWebVersion.V2023_1)
-            .get_reference_by_name("type")
-            .id,
+            LionCore.get_link(LionWebVersion.V2023_1).get_reference_by_name("type").id,
         )
 
         self.assertEqual(

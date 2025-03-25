@@ -50,9 +50,7 @@ class SerializationOfLibraryTest(SerializationTest):
         )
 
         guided_book_writer: Concept = next(
-            node
-            for node in deserialized_nodes
-            if node.id == "library-GuideBookWriter"
+            node for node in deserialized_nodes if node.id == "library-GuideBookWriter"
         )
         self.assertEqual(
             "GuideBookWriter",

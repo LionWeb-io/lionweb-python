@@ -174,9 +174,7 @@ class AbstractSerialization:
             ),
         )
         parent = annotation_instance.get_parent()
-        serialized_classifier_instance.parent_node_id = (
-            parent.id if parent else None
-        )
+        serialized_classifier_instance.parent_node_id = parent.id if parent else None
         self._serialize_properties(annotation_instance, serialized_classifier_instance)
         self._serialize_containments(
             annotation_instance, serialized_classifier_instance
@@ -238,10 +236,7 @@ class AbstractSerialization:
                 raise ValueError()
             containment_value = SerializedContainmentValue(
                 MetaPointer.from_keyed(containment, language),
-                [
-                    child.id
-                    for child in classifier_instance.get_children(containment)
-                ],
+                [child.id for child in classifier_instance.get_children(containment)],
             )
             serialized_classifier_instance.add_containment_value(containment_value)
 
