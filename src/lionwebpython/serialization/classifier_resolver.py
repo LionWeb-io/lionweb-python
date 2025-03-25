@@ -1,7 +1,8 @@
-from typing import Dict
+from typing import Dict, TYPE_CHECKING
 
-from lionwebpython.language import Annotation, Concept, Language
-from lionwebpython.language.classifier import Classifier
+if TYPE_CHECKING:
+    from lionwebpython.language import Concept, Language
+    from lionwebpython.language.classifier import Classifier
 from lionwebpython.serialization.data.metapointer import MetaPointer
 
 
@@ -37,6 +38,8 @@ class ClassifierResolver:
             )
 
     def register_language(self, language: "Language") -> "ClassifierResolver":
+        from lionwebpython.language import Annotation, Concept
+
         for element in language.get_elements():
             if isinstance(element, Concept):
                 self.register_concept(element)

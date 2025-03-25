@@ -1,6 +1,7 @@
-from typing import Optional
+from typing import Optional, TYPE_CHECKING
 
-from lionwebpython.language.concept import Concept
+if TYPE_CHECKING:
+    from lionwebpython.language.concept import Concept
 from lionwebpython.language.data_type import DataType
 from lionwebpython.language.language import Language
 from lionwebpython.lionweb_version import LionWebVersion
@@ -22,5 +23,5 @@ class PrimitiveType(DataType):
         if key:
             self.set_key(key)
 
-    def get_classifier(self) -> Concept:
+    def get_classifier(self) -> 'Concept':
         return LionCore.get_primitive_type(self.get_lionweb_version())

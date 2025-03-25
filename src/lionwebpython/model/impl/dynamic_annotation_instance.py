@@ -1,6 +1,7 @@
-from typing import Optional, cast
+from typing import Optional, cast, TYPE_CHECKING
 
-from lionwebpython.language import Annotation
+if TYPE_CHECKING:
+    from lionwebpython.language import Annotation
 from lionwebpython.model.annotation_instance import AnnotationInstance
 from lionwebpython.model.classifier_instance import ClassifierInstance
 from lionwebpython.model.impl.abstract_classifier_instance import \
@@ -14,7 +15,7 @@ class DynamicAnnotationInstance(DynamicClassifierInstance, AnnotationInstance):
     def __init__(
         self,
         id: str,
-        annotation: Optional[Annotation] = None,
+        annotation: Optional['Annotation'] = None,
         annotated: Optional[ClassifierInstance] = None,
     ):
         super().__init__()
@@ -27,7 +28,7 @@ class DynamicAnnotationInstance(DynamicClassifierInstance, AnnotationInstance):
     def get_id(self) -> Optional[str]:
         return self._id
 
-    def set_annotation(self, annotation: Annotation):
+    def set_annotation(self, annotation: 'Annotation'):
         self.annotation = annotation
 
     def set_annotated(self, annotated: Optional[ClassifierInstance]):
@@ -42,7 +43,8 @@ class DynamicAnnotationInstance(DynamicClassifierInstance, AnnotationInstance):
         if self.annotated and isinstance(self.annotated, AbstractClassifierInstance):
             self.annotated.add_annotation(self)
 
-    def get_annotation_definition(self) -> Annotation:
+    def get_annotation_definition(self) -> 'Annotation':
+        from lionwebpython.language import Annotation
         return cast(Annotation, self.annotation)
 
     def get_parent(self) -> Optional[ClassifierInstance]:

@@ -1,6 +1,8 @@
-from typing import Optional, cast
+from typing import Optional, cast, TYPE_CHECKING
 
-from lionwebpython.language.concept import Concept
+if TYPE_CHECKING:
+    from lionwebpython.language.concept import Concept
+
 from lionwebpython.language.data_type import DataType
 from lionwebpython.language.ikeyed import IKeyed
 from lionwebpython.language.namespace_provider import NamespaceProvider
@@ -8,7 +10,6 @@ from lionwebpython.language.namespaced_entity import NamespacedEntity
 from lionwebpython.language.structured_data_type import StructuredDataType
 from lionwebpython.model.impl.m3node import M3Node
 from lionwebpython.model.reference_value import ReferenceValue
-from lionwebpython.self.lioncore import LionCore
 
 
 class Field(M3Node, NamespacedEntity, IKeyed):
@@ -55,7 +56,9 @@ class Field(M3Node, NamespacedEntity, IKeyed):
         else:
             raise ValueError("The parent is not a NamespaceProvider")
 
-    def get_classifier(self) -> Concept:
+    def get_classifier(self) -> 'Concept':
+        from lionwebpython.self.lioncore import LionCore
+
         return LionCore.get_field(self.get_lionweb_version())
 
     def get_type(self) -> Optional[DataType]:

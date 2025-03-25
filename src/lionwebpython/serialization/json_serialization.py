@@ -3,7 +3,6 @@ from typing import List, Set
 
 from lionwebpython.lionweb_version import LionWebVersion
 from lionwebpython.model import ClassifierInstance
-from lionwebpython.model.impl.proxy_node import ProxyNode
 from lionwebpython.model.node import Node
 from lionwebpython.serialization.abstract_serialization import \
     AbstractSerialization
@@ -20,6 +19,8 @@ class JsonSerialization(AbstractSerialization):
     def serialize_trees_to_json_element(
         self, roots: List[ClassifierInstance]
     ) -> JsonElement:
+        from lionwebpython.model.impl.proxy_node import ProxyNode
+
         nodes_ids: Set[str] = set()
         all_nodes: List[ClassifierInstance] = []
 
@@ -81,6 +82,8 @@ class JsonSerialization(AbstractSerialization):
     def serialize_tree_to_json_element(
         self, classifier_instance: ClassifierInstance
     ) -> JsonElement:
+        from lionwebpython.model.impl.proxy_node import ProxyNode
+
         if isinstance(classifier_instance, ProxyNode):
             raise ValueError("Proxy nodes cannot be serialized")
 

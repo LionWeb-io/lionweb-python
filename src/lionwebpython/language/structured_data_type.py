@@ -1,10 +1,11 @@
 from typing import TYPE_CHECKING, List, Optional
 
-from lionwebpython.language.concept import Concept
+if TYPE_CHECKING:
+    from lionwebpython.language.concept import Concept
 from lionwebpython.language.data_type import DataType
 from lionwebpython.language.language import Language
 from lionwebpython.language.namespace_provider import NamespaceProvider
-from lionwebpython.self.lioncore import LionCore
+
 
 
 class StructuredDataType(DataType, NamespaceProvider):
@@ -46,7 +47,8 @@ class StructuredDataType(DataType, NamespaceProvider):
     def namespace_qualifier(self) -> str:
         return self.qualified_name()
 
-    def get_classifier(self) -> Concept:
+    def get_classifier(self) -> 'Concept':
+        from lionwebpython.self.lioncore import LionCore
         return LionCore.get_structured_data_type(self.get_lionweb_version())
 
     def get_field_by_name(self, field_name: str) -> Optional["Field"]:

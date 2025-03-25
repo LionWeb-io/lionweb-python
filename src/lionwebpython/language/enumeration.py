@@ -1,12 +1,13 @@
-from typing import List, Optional
+from typing import List, Optional, TYPE_CHECKING
 
-from lionwebpython.language.concept import Concept
+if TYPE_CHECKING:
+    from lionwebpython.language.concept import Concept
+
 from lionwebpython.language.data_type import DataType
 from lionwebpython.language.enumeration_literal import EnumerationLiteral
 from lionwebpython.language.language import Language
 from lionwebpython.language.namespace_provider import NamespaceProvider
 from lionwebpython.lionweb_version import LionWebVersion
-from lionwebpython.self.lioncore import LionCore
 
 
 class Enumeration(DataType, NamespaceProvider):
@@ -32,5 +33,7 @@ class Enumeration(DataType, NamespaceProvider):
     def namespace_qualifier(self) -> str:
         raise NotImplementedError("Unsupported operation")
 
-    def get_classifier(self) -> Concept:
+    def get_classifier(self) -> 'Concept':
+        from lionwebpython.self.lioncore import LionCore
+
         return LionCore.get_enumeration(self.get_lionweb_version())

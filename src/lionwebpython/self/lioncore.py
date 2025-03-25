@@ -1,6 +1,7 @@
 from typing import TYPE_CHECKING, Dict, List, cast
 
-from lionwebpython.language.concept import Concept
+if TYPE_CHECKING:
+    from lionwebpython.language.concept import Concept
 from lionwebpython.language.containment import Containment
 from lionwebpython.language.language import Language
 from lionwebpython.language.lioncore_builtins import LionCoreBuiltins
@@ -19,7 +20,7 @@ class LionCore:
     @classmethod
     def get_language_entity(
         cls, lion_web_version: LionWebVersion = LionWebVersion.current_version()
-    ) -> Concept:
+    ) -> 'Concept':
         return cls.get_instance(lion_web_version).require_concept_by_name(
             "LanguageEntity"
         )
@@ -27,25 +28,25 @@ class LionCore:
     @classmethod
     def get_link(
         cls, lion_web_version: LionWebVersion = LionWebVersion.current_version()
-    ) -> Concept:
+    ) -> 'Concept':
         return cls.get_instance(lion_web_version).require_concept_by_name("Link")
 
     @classmethod
     def get_classifier(
         cls, lion_web_version: LionWebVersion = LionWebVersion.current_version()
-    ) -> Concept:
+    ) -> 'Concept':
         return cls.get_instance(lion_web_version).require_concept_by_name("Classifier")
 
     @classmethod
     def get_feature(
         cls, lion_web_version: LionWebVersion = LionWebVersion.current_version()
-    ) -> Concept:
+    ) -> 'Concept':
         return cls.get_instance(lion_web_version).require_concept_by_name("Feature")
 
     @classmethod
     def get_structured_data_type(
         cls, lion_web_version: LionWebVersion = LionWebVersion.current_version()
-    ) -> Concept:
+    ) -> 'Concept':
         return cls.get_instance(lion_web_version).require_concept_by_name(
             "StructuredDataType"
         )
@@ -53,19 +54,19 @@ class LionCore:
     @classmethod
     def get_field(
         cls, lion_web_version: LionWebVersion = LionWebVersion.current_version()
-    ) -> Concept:
+    ) -> 'Concept':
         return cls.get_instance(lion_web_version).require_concept_by_name("Field")
 
     @classmethod
     def get_annotation(
         cls, lion_web_version: LionWebVersion = LionWebVersion.current_version()
-    ) -> Concept:
+    ) -> 'Concept':
         return cls.get_instance(lion_web_version).require_concept_by_name("Annotation")
 
     @classmethod
     def get_concept(
         cls, lion_web_version: LionWebVersion = LionWebVersion.current_version()
-    ) -> Concept:
+    ) -> 'Concept':
         if not isinstance(lion_web_version, LionWebVersion):
             raise ValueError(f"Expected lion_web_version to be an instance of LionWebVersion but got {lion_web_version}")
         return cls.get_instance(lion_web_version).require_concept_by_name("Concept")
@@ -73,43 +74,43 @@ class LionCore:
     @classmethod
     def get_interface(
         cls, lion_web_version: LionWebVersion = LionWebVersion.current_version()
-    ) -> Concept:
+    ) -> 'Concept':
         return cls.get_instance(lion_web_version).require_concept_by_name("Interface")
 
     @classmethod
     def get_containment(
         cls, lion_web_version: LionWebVersion = LionWebVersion.current_version()
-    ) -> Concept:
+    ) -> 'Concept':
         return cls.get_instance(lion_web_version).require_concept_by_name("Containment")
 
     @classmethod
     def get_data_type(
         cls, lion_web_version: LionWebVersion = LionWebVersion.current_version()
-    ) -> Concept:
+    ) -> 'Concept':
         return cls.get_instance(lion_web_version).require_concept_by_name("DataType")
 
     @classmethod
     def get_enumeration(
         cls, lion_web_version: LionWebVersion = LionWebVersion.current_version()
-    ) -> Concept:
+    ) -> 'Concept':
         return cls.get_instance(lion_web_version).require_concept_by_name("Enumeration")
 
     @classmethod
     def get_language(
         cls, lion_web_version: LionWebVersion = LionWebVersion.current_version()
-    ) -> Concept:
+    ) -> 'Concept':
         return cls.get_instance(lion_web_version).require_concept_by_name("Language")
 
     @classmethod
     def get_reference(
         cls, lion_web_version: LionWebVersion = LionWebVersion.current_version()
-    ) -> Concept:
+    ) -> 'Concept':
         return cls.get_instance(lion_web_version).require_concept_by_name("Reference")
 
     @classmethod
     def get_property(
         cls, lion_web_version: LionWebVersion = LionWebVersion.current_version()
-    ) -> Concept:
+    ) -> 'Concept':
         return cls.get_instance(lion_web_version).require_concept_by_name("Property")
 
     @classmethod
@@ -132,6 +133,8 @@ class LionCore:
     def get_instance(
         cls, lion_web_version: LionWebVersion = LionWebVersion.current_version()
     ) -> Language:
+        from lionwebpython.language.concept import Concept
+
         if not isinstance(lion_web_version, LionWebVersion):
             raise ValueError(f"Expected lion_web_version to be an instance of LionWebVersion but got {lion_web_version}")
         if lion_web_version not in cls._instances:

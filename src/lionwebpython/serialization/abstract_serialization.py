@@ -1,17 +1,11 @@
 from typing import Dict, List
 
-from lionwebpython.api.composite_classifier_instance_resolver import \
-    CompositeClassifierInstanceResolver
-from lionwebpython.api.local_classifier_instance_resolver import \
-    LocalClassifierInstanceResolver
 from lionwebpython.language.data_type import DataType
 from lionwebpython.lionweb_version import LionWebVersion
 from lionwebpython.model import ClassifierInstance
-from lionwebpython.model.annotation_instance import AnnotationInstance
 from lionwebpython.model.classifier_instance_utils import \
     ClassifierInstanceUtils
 from lionwebpython.model.has_settable_parent import HasSettableParent
-from lionwebpython.model.impl.proxy_node import ProxyNode
 from lionwebpython.serialization.classifier_resolver import ClassifierResolver
 from lionwebpython.serialization.data.metapointer import MetaPointer
 from lionwebpython.serialization.data.serialized_chunk import SerializedChunk
@@ -29,8 +23,6 @@ from lionwebpython.serialization.deserialization_exception import \
 from lionwebpython.serialization.deserialization_status import \
     DeserializationStatus
 from lionwebpython.serialization.instantiator import Instantiator
-from lionwebpython.serialization.map_based_resolver import MapBasedResolver
-from lionwebpython.serialization.node_populator import NodePopulator
 from lionwebpython.serialization.primitives_values_serialization import \
     PrimitiveValuesSerialization
 from lionwebpython.serialization.unavailable_node_policy import \
@@ -44,6 +36,8 @@ class AbstractSerialization:
     def __init__(
         self, lionweb_version: LionWebVersion = LionWebVersion.current_version()
     ):
+        from lionwebpython.api.local_classifier_instance_resolver import \
+            LocalClassifierInstanceResolver
         self.lion_web_version = lionweb_version
         self.classifier_resolver = ClassifierResolver()
         self.instantiator = Instantiator()
@@ -162,7 +156,7 @@ class AbstractSerialization:
         return serialized_instance
 
     def serialize_annotation_instance(
-        self, annotation_instance: AnnotationInstance
+        self, annotation_instance: 'AnnotationInstance'
     ) -> SerializedClassifierInstance:
         if annotation_instance is None:
             raise ValueError("AnnotationInstance should not be null")
@@ -298,6 +292,13 @@ class AbstractSerialization:
         lion_web_version: LionWebVersion,
         serialized_classifier_instances: List[SerializedClassifierInstance],
     ) -> (List)[ClassifierInstance]:
+        from lionwebpython.api.composite_classifier_instance_resolver import \
+            CompositeClassifierInstanceResolver
+        from lionwebpython.model.annotation_instance import AnnotationInstance
+        from lionwebpython.model.impl.proxy_node import ProxyNode
+        from lionwebpython.serialization.map_based_resolver import MapBasedResolver
+        from lionwebpython.serialization.node_populator import NodePopulator
+
         if lion_web_version is None:
             raise ValueError("lion_web_version should not be null")
 

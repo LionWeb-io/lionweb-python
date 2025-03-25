@@ -1,6 +1,8 @@
 from abc import ABC, abstractmethod
+from typing import TYPE_CHECKING
 
-from lionwebpython.language import Annotation
+if TYPE_CHECKING:
+    from lionwebpython.language import Annotation
 from lionwebpython.model import ClassifierInstance
 
 
@@ -11,8 +13,8 @@ class AnnotationInstance(ClassifierInstance, ABC):
     """
 
     @abstractmethod
-    def get_annotation_definition(self) -> Annotation:
+    def get_annotation_definition(self) -> 'Annotation':
         pass
 
-    def get_classifier(self) -> Annotation:
+    def get_classifier(self) -> 'Annotation':
         return self.get_annotation_definition()

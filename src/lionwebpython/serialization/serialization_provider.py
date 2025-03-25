@@ -1,6 +1,5 @@
 from lionwebpython.language.lioncore_builtins import LionCoreBuiltins
 from lionwebpython.lionweb_version import LionWebVersion
-from lionwebpython.self.lioncore import LionCore
 from lionwebpython.serialization.json_serialization import JsonSerialization
 
 
@@ -28,6 +27,8 @@ class SerializationProvider:
 
     @staticmethod
     def standard_initialization(serialization):
+        from lionwebpython.self.lioncore import LionCore
+
         serialization.classifier_resolver.register_language(
             LionCore.get_instance(serialization.lion_web_version)
         )
