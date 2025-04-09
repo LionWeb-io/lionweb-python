@@ -55,5 +55,13 @@ class Link(Feature[T]):
             )
         return self  # type: ignore
 
+    @property
+    def key(self):
+        return cast(str, self.get_property_value(property_name="key"))
+
+    @key.setter
+    def key(self, new_value):
+        self.set_property_value(property_name="key", value=new_value)
+
     def __str__(self) -> str:
         return f"{super().__str__()}{{qualifiedName={self.get_name()}, type={self.get_type()}}}"

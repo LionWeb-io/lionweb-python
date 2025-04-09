@@ -34,6 +34,7 @@ class Instantiator:
 
     def enable_dynamic_nodes(self):
         from lionwebpython.language import Annotation, Concept
+
         self.default_node_deserializer = lambda classifier, serialized_node, deserialized_instances_by_id, properties_values: (
             DynamicNode(serialized_node.id, classifier)
             if isinstance(classifier, Concept)
@@ -77,7 +78,9 @@ class Instantiator:
         return self
 
     def register_lioncore_custom_deserializers(self, lion_web_version):
-        from lionwebpython.language import Annotation, Concept, Containment, Interface, Language, Property
+        from lionwebpython.language import (Annotation, Concept, Containment,
+                                            Interface, Language, Property)
+
         self.custom_deserializers.update(
             {
                 LionCore.get_language(lion_web_version)

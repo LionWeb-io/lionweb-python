@@ -1,7 +1,8 @@
-from typing import Dict, List, Optional, cast, TYPE_CHECKING
+from typing import TYPE_CHECKING, Dict, List, Optional, cast
 
 if TYPE_CHECKING:
     from lionwebpython.language.concept import Concept
+
 from lionwebpython.language.containment import Containment
 from lionwebpython.model.classifier_instance import ClassifierInstance
 from lionwebpython.model.has_settable_parent import HasSettableParent
@@ -11,7 +12,7 @@ from lionwebpython.model.node import Node
 
 
 class DynamicNode(DynamicClassifierInstance, Node, HasSettableParent):
-    def __init__(self, id: Optional[str] = None, concept: Optional['Concept'] = None):
+    def __init__(self, id: Optional[str] = None, concept: Optional["Concept"] = None):
         self._id = id
         self.concept = concept
         self.parent: Optional[Node] = None
@@ -27,14 +28,15 @@ class DynamicNode(DynamicClassifierInstance, Node, HasSettableParent):
     def get_id(self) -> Optional[str]:
         return self._id
 
-    def set_concept(self, concept: 'Concept'):
+    def set_concept(self, concept: "Concept"):
         self.concept = concept
 
     def get_parent(self) -> Optional[Node]:
         return self.parent
 
-    def get_classifier(self) -> 'Concept':
+    def get_classifier(self) -> "Concept":
         from lionwebpython.language.concept import Concept
+
         return cast(Concept, self.concept)
 
     def get_containment_feature(self) -> Optional[Containment]:

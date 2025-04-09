@@ -1,8 +1,9 @@
-from typing import Dict, TYPE_CHECKING
+from typing import TYPE_CHECKING, Dict
 
 if TYPE_CHECKING:
     from lionwebpython.language import Concept, Language
     from lionwebpython.language import Classifier, Annotation
+
 from lionwebpython.serialization.data.metapointer import MetaPointer
 
 

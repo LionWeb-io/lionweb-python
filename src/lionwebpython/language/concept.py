@@ -18,8 +18,13 @@ class Concept(Classifier["Concept"]):
         key: Optional[str] = None,
     ):
         from lionwebpython.lionweb_version import LionWebVersion
-        if lion_web_version is not None and not isinstance(lion_web_version, LionWebVersion):
-            raise ValueError(f"Expected lion_web_version to be an instance of LionWebVersion or None but got {lion_web_version}")
+
+        if lion_web_version is not None and not isinstance(
+            lion_web_version, LionWebVersion
+        ):
+            raise ValueError(
+                f"Expected lion_web_version to be an instance of LionWebVersion or None but got {lion_web_version}"
+            )
         super().__init__(
             lion_web_version=lion_web_version, language=language, name=name, id=id
         )

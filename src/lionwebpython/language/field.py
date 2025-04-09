@@ -1,4 +1,4 @@
-from typing import Optional, cast, TYPE_CHECKING
+from typing import TYPE_CHECKING, Optional, cast
 
 if TYPE_CHECKING:
     from lionwebpython.language.concept import Concept
@@ -56,7 +56,7 @@ class Field(M3Node, NamespacedEntity, IKeyed):
         else:
             raise ValueError("The parent is not a NamespaceProvider")
 
-    def get_classifier(self) -> 'Concept':
+    def get_classifier(self) -> "Concept":
         from lionwebpython.self.lioncore import LionCore
 
         return LionCore.get_field(self.get_lionweb_version())

@@ -1,12 +1,14 @@
-from typing import List, Optional
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, List, Optional
 
 if TYPE_CHECKING:
-    from lionwebpython.api.classifier_instance_resolver import \
-        ClassifierInstanceResolver
-    from lionwebpython.api.local_classifier_instance_resolver import \
-        LocalClassifierInstanceResolver
+    from lionwebpython.api.classifier_instance_resolver import (
+        ClassifierInstanceResolver,
+    )
+    from lionwebpython.api.local_classifier_instance_resolver import (
+        LocalClassifierInstanceResolver,
+    )
     from lionwebpython.model.impl.proxy_node import ProxyNode
+
 from lionwebpython.model.node import Node
 from lionwebpython.serialization.data.serialized_classifier_instance import \
     SerializedClassifierInstance
@@ -16,12 +18,14 @@ class DeserializationStatus:
     def __init__(
         self,
         original_list: List[SerializedClassifierInstance],
-        outside_instances_resolver: 'ClassifierInstanceResolver',
+        outside_instances_resolver: "ClassifierInstanceResolver",
     ):
+        from lionwebpython.api.composite_classifier_instance_resolver import \
+            CompositeClassifierInstanceResolver
         from lionwebpython.api.local_classifier_instance_resolver import \
             LocalClassifierInstanceResolver
-        from lionwebpython.api.composite_classifier_instance_resolver import CompositeClassifierInstanceResolver
         from lionwebpython.model.impl.proxy_node import ProxyNode
+
         self.sorted_list: List[SerializedClassifierInstance] = []
         self.nodes_to_sort = list(original_list)
         self.proxies: List[ProxyNode] = []
@@ -64,8 +68,9 @@ class DeserializationStatus:
             return resolved
         raise ValueError(f"The given ID resolved to a non-node instance: {resolved}")
 
-    def create_proxy(self, node_id: str) -> 'ProxyNode':
+    def create_proxy(self, node_id: str) -> "ProxyNode":
         from lionwebpython.model.impl.proxy_node import ProxyNode
+
         if self.global_instance_resolver.resolve(node_id) is not None:
             raise ValueError(f"Cannot create proxy for ID {node_id} - already resolved")
         proxy_node = ProxyNode(node_id)
@@ -73,5 +78,5 @@ class DeserializationStatus:
         self.proxies.append(proxy_node)
         return proxy_node
 
-    def get_proxies_instance_resolver(self) -> 'LocalClassifierInstanceResolver':
+    def get_proxies_instance_resolver(self) -> "LocalClassifierInstanceResolver":
         return self.proxies_instance_resolver

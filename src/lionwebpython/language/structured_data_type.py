@@ -7,7 +7,6 @@ from lionwebpython.language.language import Language
 from lionwebpython.language.namespace_provider import NamespaceProvider
 
 
-
 class StructuredDataType(DataType, NamespaceProvider):
     """
     Represents a collection of named instances of Data Types. They are meant to support a small
@@ -47,8 +46,9 @@ class StructuredDataType(DataType, NamespaceProvider):
     def namespace_qualifier(self) -> str:
         return self.qualified_name()
 
-    def get_classifier(self) -> 'Concept':
+    def get_classifier(self) -> "Concept":
         from lionwebpython.self.lioncore import LionCore
+
         return LionCore.get_structured_data_type(self.get_lionweb_version())
 
     def get_field_by_name(self, field_name: str) -> Optional["Field"]:

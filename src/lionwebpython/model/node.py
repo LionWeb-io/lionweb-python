@@ -5,15 +5,19 @@ if TYPE_CHECKING:
     from lionwebpython.language.concept import Concept
     from lionwebpython.language.containment import Containment
 
-from lionwebpython.model.classifier_instance import ClassifierInstance
 from typing_extensions import TypeGuard
+
+from lionwebpython.model.classifier_instance import ClassifierInstance
 
 
 def _properties_equality(node1, node2) -> bool:
     for property in node1.get_classifier().all_properties():
-        if node1.get_property_value(property=property) != node2.get_property_value(property=property):
+        if node1.get_property_value(property=property) != node2.get_property_value(
+            property=property
+        ):
             return False
     return True
+
 
 def _shallow_references_equality(node1, node2) -> bool:
     for reference in node1.get_classifier().all_references():
@@ -37,7 +41,10 @@ def _shallow_references_equality(node1, node2) -> bool:
                     return False
     return True
 
-def _shallow_classifier_instance_equality(classifier_instance_1, classifier_instance_2) -> bool:
+
+def _shallow_classifier_instance_equality(
+    classifier_instance_1, classifier_instance_2
+) -> bool:
     if classifier_instance_1 is None and classifier_instance_2 is None:
         return True
     if classifier_instance_1 is not None and classifier_instance_2 is not None:
@@ -48,7 +55,10 @@ def _shallow_classifier_instance_equality(classifier_instance_1, classifier_inst
         return False
     return False
 
-def _shallow_containments_equality(classifier_instance_1, classifier_instance_2) -> bool:
+
+def _shallow_containments_equality(
+    classifier_instance_1, classifier_instance_2
+) -> bool:
     for containment in classifier_instance_1.get_classifier().all_containments():
         nodes1 = classifier_instance_1.get_children(containment=containment)
         nodes2 = classifier_instance_2.get_children(containment=containment)
@@ -58,6 +68,7 @@ def _shallow_containments_equality(classifier_instance_1, classifier_instance_2)
             if not _shallow_classifier_instance_equality(nodes1[i], nodes2[i]):
                 return False
     return True
+
 
 def _shallow_annotations_equality(annotations1: list, annotations2: list) -> bool:
     if len(annotations1) != len(annotations2):
@@ -153,15 +164,18 @@ class Node(ClassifierInstance["Concept"], ABC):
         if not is_node(other):
             return False
         return (
-            self.id == other.id and
-            _shallow_classifier_instance_equality(self.get_parent(), other.get_parent()) and
-            _shallow_classifier_instance_equality(self.get_classifier(), other.get_classifier()) and
-            _properties_equality(self, other) and
-            _shallow_containments_equality(self, other) and
-            _shallow_references_equality(self, other) and
-            _shallow_annotations_equality(self, other)
+            self.id == other.id
+            and _shallow_classifier_instance_equality(
+                self.get_parent(), other.get_parent()
+            )
+            and _shallow_classifier_instance_equality(
+                self.get_classifier(), other.get_classifier()
+            )
+            and _properties_equality(self, other)
+            and _shallow_containments_equality(self, other)
+            and _shallow_references_equality(self, other)
+            and _shallow_annotations_equality(self, other)
         )
-
 
 
 def is_node(obj: object) -> TypeGuard[Node]:

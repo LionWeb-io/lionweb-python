@@ -71,5 +71,3 @@ class ClassifierInstance(Generic[T], HasFeatureValues, ABC):
 
     def __hash__(self):
         return hash(self.id)
-
-

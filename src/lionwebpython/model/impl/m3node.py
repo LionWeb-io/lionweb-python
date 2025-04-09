@@ -22,8 +22,12 @@ class M3Node(Generic[T], Node, IKeyed[T], AbstractClassifierInstance, ABC):
 
     def __init__(self, lion_web_version: Optional[LionWebVersion] = None):
         AbstractClassifierInstance.__init__(self)
-        if lion_web_version is not None and not isinstance(lion_web_version, LionWebVersion):
-            raise ValueError(f"Expected lion_web_version to be an instance of LionWebVersion or None but got {lion_web_version}")
+        if lion_web_version is not None and not isinstance(
+            lion_web_version, LionWebVersion
+        ):
+            raise ValueError(
+                f"Expected lion_web_version to be an instance of LionWebVersion or None but got {lion_web_version}"
+            )
         self.lion_web_version = lion_web_version or LionWebVersion.current_version()
         self._id: Optional[str] = None
         self.parent: Optional[Node] = None
@@ -190,7 +194,9 @@ class M3Node(Generic[T], Node, IKeyed[T], AbstractClassifierInstance, ABC):
             raise ValueError()
         if any(value is v for v in self.get_containment_multiple_value(link_name)):
             return False
-        if value.id is not None and any(value.id == v.id for v in self.get_containment_multiple_value(link_name)):
+        if value.id is not None and any(
+            value.id == v.id for v in self.get_containment_multiple_value(link_name)
+        ):
             return False
         cast(M3Node, value).set_parent(self)
         if link_name in self.containment_values:
