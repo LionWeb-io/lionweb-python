@@ -4,8 +4,7 @@ from typing import List, Set
 from lionweb.lionweb_version import LionWebVersion
 from lionweb.model import ClassifierInstance
 from lionweb.model.node import Node
-from lionweb.serialization.abstract_serialization import \
-    AbstractSerialization
+from lionweb.serialization.abstract_serialization import AbstractSerialization
 from lionweb.serialization.low_level_json_serialization import (
     JsonElement, LowLevelJsonSerialization)
 

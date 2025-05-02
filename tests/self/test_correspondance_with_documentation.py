@@ -5,8 +5,7 @@ import requests
 from lionweb.language.lioncore_builtins import LionCoreBuiltins
 from lionweb.lionweb_version import LionWebVersion
 from lionweb.self.lioncore import LionCore
-from lionweb.serialization.serialization_provider import \
-    SerializationProvider
+from lionweb.serialization.serialization_provider import SerializationProvider
 from lionweb.utils.model_comparator import ModelComparator
 
 

@@ -1,5 +1,4 @@
-from lionweb.api.classifier_instance_resolver import \
-    ClassifierInstanceResolver
+from lionweb.api.classifier_instance_resolver import ClassifierInstanceResolver
 
 
 class LocalClassifierInstanceResolver(ClassifierInstanceResolver):

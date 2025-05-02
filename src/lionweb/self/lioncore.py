@@ -407,8 +407,7 @@ class LionCore:
     @classmethod
     def _check_ids(cls, node: "M3Node", version_id_suffix: str):
         if node.get_id() is None:
-            from lionweb.language.namespaced_entity import \
-                NamespacedEntity
+            from lionweb.language.namespaced_entity import NamespacedEntity
 
             if isinstance(node, NamespacedEntity):
                 namespaced_entity = node

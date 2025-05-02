@@ -3,8 +3,7 @@ import unittest
 from lionweb.language.concept import Concept
 from lionweb.language.interface import Interface
 from lionweb.language.language import Language
-from lionweb.model.classifier_instance_utils import \
-    ClassifierInstanceUtils
+from lionweb.model.classifier_instance_utils import ClassifierInstanceUtils
 from lionweb.model.reference_value import ReferenceValue
 from lionweb.self.lioncore import LionCore
 

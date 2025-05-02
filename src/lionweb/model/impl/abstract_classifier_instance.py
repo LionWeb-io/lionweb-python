@@ -71,8 +71,7 @@ class AbstractClassifierInstance(Generic[T], ClassifierInstance[T], ABC):
             children = self.get_children(containment)
             if child in children:
                 children.remove(child)
-                from lionweb.model.has_settable_parent import \
-                    HasSettableParent
+                from lionweb.model.has_settable_parent import HasSettableParent
 
                 if isinstance(child, HasSettableParent):
                     child.set_parent(None)

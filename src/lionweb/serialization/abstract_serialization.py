@@ -3,8 +3,7 @@ from typing import TYPE_CHECKING, Dict, List
 from lionweb.language.data_type import DataType
 from lionweb.lionweb_version import LionWebVersion
 from lionweb.model import ClassifierInstance
-from lionweb.model.classifier_instance_utils import \
-    ClassifierInstanceUtils
+from lionweb.model.classifier_instance_utils import ClassifierInstanceUtils
 from lionweb.model.has_settable_parent import HasSettableParent
 from lionweb.serialization.classifier_resolver import ClassifierResolver
 from lionweb.serialization.data.metapointer import MetaPointer
@@ -20,13 +19,11 @@ from lionweb.serialization.data.serialized_reference_value import (
 from lionweb.serialization.data.used_language import UsedLanguage
 from lionweb.serialization.deserialization_exception import \
     DeserializationException
-from lionweb.serialization.deserialization_status import \
-    DeserializationStatus
+from lionweb.serialization.deserialization_status import DeserializationStatus
 from lionweb.serialization.instantiator import Instantiator
 from lionweb.serialization.primitives_values_serialization import \
     PrimitiveValuesSerialization
-from lionweb.serialization.unavailable_node_policy import \
-    UnavailableNodePolicy
+from lionweb.serialization.unavailable_node_policy import UnavailableNodePolicy
 
 if TYPE_CHECKING:
     from lionweb.model.annotation_instance import AnnotationInstance
@@ -300,8 +297,7 @@ class AbstractSerialization:
             CompositeClassifierInstanceResolver
         from lionweb.model.annotation_instance import AnnotationInstance
         from lionweb.model.impl.proxy_node import ProxyNode
-        from lionweb.serialization.map_based_resolver import \
-            MapBasedResolver
+        from lionweb.serialization.map_based_resolver import MapBasedResolver
         from lionweb.serialization.node_populator import NodePopulator
 
         if lion_web_version is None:

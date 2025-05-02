@@ -4,8 +4,7 @@ from typing import List, Optional
 from lionweb.language import Containment
 from lionweb.language.reference import Reference
 from lionweb.model.annotation_instance import AnnotationInstance
-from lionweb.model.classifier_instance_utils import \
-    ClassifierInstanceUtils
+from lionweb.model.classifier_instance_utils import ClassifierInstanceUtils
 from lionweb.model.impl.abstract_classifier_instance import \
     AbstractClassifierInstance
 from lionweb.model.node import Node

@@ -1,5 +1,4 @@
-from lionweb.model.classifier_instance_utils import \
-    ClassifierInstanceUtils
+from lionweb.model.classifier_instance_utils import ClassifierInstanceUtils
 from lionweb.model.node import Node
 from lionweb.utils.common_checks import CommonChecks
 from lionweb.utils.validation_result import ValidationResult

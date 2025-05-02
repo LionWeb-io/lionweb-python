@@ -4,11 +4,9 @@ from pathlib import Path
 
 from lionweb.language import Concept, Property
 from lionweb.lionweb_version import LionWebVersion
-from lionweb.model.classifier_instance_utils import \
-    ClassifierInstanceUtils
+from lionweb.model.classifier_instance_utils import ClassifierInstanceUtils
 from lionweb.model.node import Node
-from lionweb.serialization.serialization_provider import \
-    SerializationProvider
+from lionweb.serialization.serialization_provider import SerializationProvider
 from lionweb.serialization.serialized_json_comparison_utils import \
     SerializedJsonComparisonUtils
 

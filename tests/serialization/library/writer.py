@@ -1,8 +1,7 @@
 from typing import Optional, cast
 
 from lionweb.language.concept import Concept
-from lionweb.model.classifier_instance_utils import \
-    ClassifierInstanceUtils
+from lionweb.model.classifier_instance_utils import ClassifierInstanceUtils
 from lionweb.model.impl.dynamic_node import DynamicNode
 
 from .library_language import LibraryLanguage

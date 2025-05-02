@@ -5,8 +5,7 @@ from lionweb.language.language import Language
 from lionweb.language.lioncore_builtins import LionCoreBuiltins
 from lionweb.language.property import Property
 from lionweb.lionweb_version import LionWebVersion
-from lionweb.model.classifier_instance_utils import \
-    ClassifierInstanceUtils
+from lionweb.model.classifier_instance_utils import ClassifierInstanceUtils
 from lionweb.model.impl.dynamic_node import DynamicNode
 
 

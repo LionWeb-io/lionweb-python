@@ -1,7 +1,6 @@
 from typing import TYPE_CHECKING
 
-from lionweb.api.classifier_instance_resolver import \
-    ClassifierInstanceResolver
+from lionweb.api.classifier_instance_resolver import ClassifierInstanceResolver
 from lionweb.language.lioncore_builtins import LionCoreBuiltins
 from lionweb.lionweb_version import LionWebVersion
 from lionweb.model import ClassifierInstance
@@ -11,10 +10,8 @@ from lionweb.serialization.data.serialized_classifier_instance import \
     SerializedClassifierInstance
 from lionweb.serialization.deserialization_exception import \
     DeserializationException
-from lionweb.serialization.deserialization_status import \
-    DeserializationStatus
-from lionweb.serialization.unavailable_node_policy import \
-    UnavailableNodePolicy
+from lionweb.serialization.deserialization_status import DeserializationStatus
+from lionweb.serialization.unavailable_node_policy import UnavailableNodePolicy
 from lionweb.utils.autoresolve import Autoresolve
 
 

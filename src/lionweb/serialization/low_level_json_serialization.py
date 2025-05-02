@@ -14,8 +14,7 @@ from lionweb.serialization.data.serialized_reference_value import \
 from lionweb.serialization.data.used_language import UsedLanguage
 from lionweb.serialization.deserialization_exception import \
     DeserializationException
-from lionweb.serialization.json_utils import (JsonArray, JsonElement,
-                                              JsonObject)
+from lionweb.serialization.json_utils import JsonArray, JsonElement, JsonObject
 from lionweb.serialization.serialization_utils import SerializationUtils
 
 

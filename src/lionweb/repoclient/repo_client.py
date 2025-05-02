@@ -7,10 +7,8 @@ from lionweb.lionweb_version import LionWebVersion
 from lionweb.model import ClassifierInstance
 from lionweb.model.node import Node
 from lionweb.serialization.json_serialization import JsonSerialization
-from lionweb.serialization.serialization_provider import \
-    SerializationProvider
-from lionweb.serialization.unavailable_node_policy import \
-    UnavailableNodePolicy
+from lionweb.serialization.serialization_provider import SerializationProvider
+from lionweb.serialization.unavailable_node_policy import UnavailableNodePolicy
 
 
 class RepositoryConfiguration(BaseModel):

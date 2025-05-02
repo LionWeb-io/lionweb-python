@@ -4,8 +4,7 @@ from lionweb.language.containment import Containment
 from lionweb.language.lioncore_builtins import LionCoreBuiltins
 from lionweb.language.reference import Reference
 from lionweb.model.classifier_instance import ClassifierInstance
-from lionweb.model.classifier_instance_utils import \
-    ClassifierInstanceUtils
+from lionweb.model.classifier_instance_utils import ClassifierInstanceUtils
 from lionweb.model.has_settable_parent import HasSettableParent
 from lionweb.model.impl.abstract_classifier_instance import \
     AbstractClassifierInstance

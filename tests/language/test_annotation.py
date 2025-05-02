@@ -1,9 +1,8 @@
 import unittest
 
-from lionweb.language import (Annotation, Concept, Containment,
-                              Interface, Language, Property)
-from lionweb.model.classifier_instance_utils import \
-    ClassifierInstanceUtils
+from lionweb.language import (Annotation, Concept, Containment, Interface,
+                              Language, Property)
+from lionweb.model.classifier_instance_utils import ClassifierInstanceUtils
 from lionweb.model.reference_value import ReferenceValue
 from lionweb.self.lioncore import LionCore
 

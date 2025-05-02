@@ -3,19 +3,16 @@ import unittest
 
 from lionweb.language.lioncore_builtins import LionCoreBuiltins
 from lionweb.lionweb_version import LionWebVersion
-from lionweb.model.classifier_instance_utils import \
-    ClassifierInstanceUtils
+from lionweb.model.classifier_instance_utils import ClassifierInstanceUtils
 from lionweb.model.impl.dynamic_node import DynamicNode
 from lionweb.self.lioncore import LionCore
 from lionweb.serialization.deserialization_exception import \
     DeserializationException
-from lionweb.serialization.deserialization_status import \
-    DeserializationStatus
+from lionweb.serialization.deserialization_status import DeserializationStatus
 from lionweb.serialization.low_level_json_serialization import \
     LowLevelJsonSerialization
 from lionweb.serialization.node_populator import NodePopulator
-from lionweb.serialization.serialization_provider import \
-    SerializationProvider
+from lionweb.serialization.serialization_provider import SerializationProvider
 
 
 class NodePopulatorTest(unittest.TestCase):

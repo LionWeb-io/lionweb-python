@@ -15,8 +15,7 @@ class Language(M3Node["Language"], NamespaceProvider, IKeyed["Language"]):
         from lionweb.language.interface import Interface
         from lionweb.language.language_entity import LanguageEntity
         from lionweb.language.primitive_type import PrimitiveType
-        from lionweb.language.structured_data_type import \
-            StructuredDataType
+        from lionweb.language.structured_data_type import StructuredDataType
         from lionweb.model.reference_value import ReferenceValue
         from lionweb.self.lioncore import LionCore
         from lionweb.utils.language_validator import LanguageValidator
@@ -183,7 +182,6 @@ class Language(M3Node["Language"], NamespaceProvider, IKeyed["Language"]):
         return LanguageValidator().validate(self)
 
     def get_structured_data_types(self) -> List["StructuredDataType"]:
-        from lionweb.language.structured_data_type import \
-            StructuredDataType
+        from lionweb.language.structured_data_type import StructuredDataType
 
         return [e for e in self.get_elements() if isinstance(e, StructuredDataType)]

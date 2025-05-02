@@ -1,8 +1,7 @@
 import os
 
 from lionweb.lionweb_version import LionWebVersion
-from lionweb.repoclient.repo_client import (RepoClient,
-                                            RepositoryConfiguration)
+from lionweb.repoclient.repo_client import RepoClient, RepositoryConfiguration
 
 from .abstract_repo_client_functional_test import \
     AbstractRepoClientFunctionalTest

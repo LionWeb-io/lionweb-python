@@ -10,7 +10,7 @@ from testcontainers.postgres import PostgresContainer
 
 # Constants
 DB_IMAGE = "postgres:16.1"
-REPO_IMAGE = "model_repo_for_lwpython_tests"  # Replace with your Node.js image
+REPO_IMAGE = "model_repo_for_lwpython_tests"
 DB_USER = "postgres"
 DB_PASSWORD = "lionweb"
 DB_NAME = "lionweb_test"

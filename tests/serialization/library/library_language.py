@@ -4,8 +4,7 @@ import os
 from lionweb.language import Concept
 from lionweb.language.language import Language
 from lionweb.lionweb_version import LionWebVersion
-from lionweb.serialization.serialization_provider import \
-    SerializationProvider
+from lionweb.serialization.serialization_provider import SerializationProvider
 
 
 class LibraryLanguage:

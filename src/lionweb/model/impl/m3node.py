@@ -3,8 +3,7 @@ from typing import TYPE_CHECKING, Generic, List, Optional, TypeVar, cast
 
 from lionweb.language.ikeyed import IKeyed
 from lionweb.lionweb_version import LionWebVersion
-from lionweb.model.classifier_instance_utils import \
-    ClassifierInstanceUtils
+from lionweb.model.classifier_instance_utils import ClassifierInstanceUtils
 from lionweb.model.impl.abstract_classifier_instance import \
     AbstractClassifierInstance
 from lionweb.model.node import Node, is_node

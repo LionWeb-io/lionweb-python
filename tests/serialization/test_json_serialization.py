@@ -10,25 +10,21 @@ from lionweb.language.enumeration import Enumeration
 from lionweb.language.enumeration_literal import EnumerationLiteral
 from lionweb.language.lioncore_builtins import LionCoreBuiltins
 from lionweb.lionweb_version import LionWebVersion
-from lionweb.model.classifier_instance_utils import \
-    ClassifierInstanceUtils
+from lionweb.model.classifier_instance_utils import ClassifierInstanceUtils
 from lionweb.model.impl.dynamic_annotation_instance import \
     DynamicAnnotationInstance
 from lionweb.model.impl.dynamic_node import DynamicNode
-from lionweb.model.impl.enumeration_value_impl import \
-    EnumerationValueImpl
+from lionweb.model.impl.enumeration_value_impl import EnumerationValueImpl
 from lionweb.model.impl.proxy_node import ProxyNode
 from lionweb.model.reference_value import ReferenceValue
 from lionweb.serialization.data.metapointer import MetaPointer
 from lionweb.serialization.deserialization_exception import \
     DeserializationException
 from lionweb.serialization.json_serialization import JsonSerialization
-from lionweb.serialization.serialization_provider import \
-    SerializationProvider
+from lionweb.serialization.serialization_provider import SerializationProvider
 from lionweb.serialization.serialized_json_comparison_utils import \
     SerializedJsonComparisonUtils
-from lionweb.serialization.unavailable_node_policy import \
-    UnavailableNodePolicy
+from lionweb.serialization.unavailable_node_policy import UnavailableNodePolicy
 from lionweb.utils.language_validator import LanguageValidator
 
 from .library.book import Book

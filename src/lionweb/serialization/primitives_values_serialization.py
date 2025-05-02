@@ -9,8 +9,7 @@ from lionweb.lionweb_version import LionWebVersion
 from lionweb.model.impl.dynamic_structured_datype_instance import \
     DynamicStructuredDataTypeInstance
 from lionweb.model.impl.enumeration_value import EnumerationValue
-from lionweb.model.impl.enumeration_value_impl import \
-    EnumerationValueImpl
+from lionweb.model.impl.enumeration_value_impl import EnumerationValueImpl
 from lionweb.model.structured_data_type_instance import \
     StructuredDataTypeInstance
 

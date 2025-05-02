@@ -2,8 +2,7 @@ import unittest
 
 from serialization.my_annotation import MyAnnotation
 
-from lionweb.model.classifier_instance_utils import \
-    ClassifierInstanceUtils
+from lionweb.model.classifier_instance_utils import ClassifierInstanceUtils
 from lionweb.model.impl.dynamic_node import DynamicNode
 
 

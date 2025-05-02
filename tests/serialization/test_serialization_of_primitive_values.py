@@ -3,8 +3,7 @@ import unittest
 
 from lionweb.lionweb_version import LionWebVersion
 from lionweb.serialization.json_utils import JsonArray
-from lionweb.serialization.serialization_provider import \
-    SerializationProvider
+from lionweb.serialization.serialization_provider import SerializationProvider
 from lionweb.serialization.serialized_json_comparison_utils import \
     SerializedJsonComparisonUtils
 

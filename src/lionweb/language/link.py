@@ -2,8 +2,7 @@ from typing import TYPE_CHECKING, Optional, TypeVar, cast
 
 from lionweb.language.feature import Feature
 from lionweb.lionweb_version import LionWebVersion
-from lionweb.model.classifier_instance_utils import \
-    ClassifierInstanceUtils
+from lionweb.model.classifier_instance_utils import ClassifierInstanceUtils
 from lionweb.model.impl.m3node import M3Node
 
 T = TypeVar("T", bound=M3Node)

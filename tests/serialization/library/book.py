@@ -1,8 +1,7 @@
 from serialization.library.writer import Writer
 
 from lionweb.language.concept import Concept
-from lionweb.model.classifier_instance_utils import \
-    ClassifierInstanceUtils
+from lionweb.model.classifier_instance_utils import ClassifierInstanceUtils
 from lionweb.model.impl.dynamic_node import DynamicNode
 from lionweb.model.reference_value import ReferenceValue
 
