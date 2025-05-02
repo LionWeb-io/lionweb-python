@@ -1,9 +1,9 @@
 import unittest
 
-from lionwebpython.language.concept import Concept
-from lionwebpython.language.interface import Interface
-from lionwebpython.language.language import Language
-from lionwebpython.language.property import Property
+from lionweb.language.concept import Concept
+from lionweb.language.interface import Interface
+from lionweb.language.language import Language
+from lionweb.language.property import Property
 
 
 class ConceptTest(unittest.TestCase):

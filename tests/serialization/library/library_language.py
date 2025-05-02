@@ -1,10 +1,10 @@
 import json
 import os
 
-from lionwebpython.language import Concept
-from lionwebpython.language.language import Language
-from lionwebpython.lionweb_version import LionWebVersion
-from lionwebpython.serialization.serialization_provider import \
+from lionweb.language import Concept
+from lionweb.language.language import Language
+from lionweb.lionweb_version import LionWebVersion
+from lionweb.serialization.serialization_provider import \
     SerializationProvider
 
 

@@ -1,10 +1,10 @@
 from typing import Optional, cast
 
-from lionwebpython.language import Concept, Language, Property
-from lionwebpython.language.field import Field
-from lionwebpython.language.lioncore_builtins import LionCoreBuiltins
-from lionwebpython.language.structured_data_type import StructuredDataType
-from lionwebpython.model.impl.dynamic_node import DynamicNode
+from lionweb.language import Concept, Language, Property
+from lionweb.language.field import Field
+from lionweb.language.lioncore_builtins import LionCoreBuiltins
+from lionweb.language.structured_data_type import StructuredDataType
+from lionweb.model.impl.dynamic_node import DynamicNode
 
 
 class MyNodeWithStructuredDataType(DynamicNode):

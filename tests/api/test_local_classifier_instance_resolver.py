@@ -1,10 +1,10 @@
 import unittest
 
-from lionwebpython.api.local_classifier_instance_resolver import \
+from lionweb.api.local_classifier_instance_resolver import \
     LocalClassifierInstanceResolver
-from lionwebpython.language import Concept
-from lionwebpython.model.impl.dynamic_node import DynamicNode
-from lionwebpython.model.impl.proxy_node import ProxyNode
+from lionweb.language import Concept
+from lionweb.model.impl.dynamic_node import DynamicNode
+from lionweb.model.impl.proxy_node import ProxyNode
 
 
 class LocalClassifierInstanceResolverTest(unittest.TestCase):

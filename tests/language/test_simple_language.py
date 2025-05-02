@@ -1,8 +1,8 @@
 import unittest
 
-from lionwebpython.language.concept import Concept
-from lionwebpython.language.interface import Interface
-from lionwebpython.language.language import Language
+from lionweb.language.concept import Concept
+from lionweb.language.interface import Interface
+from lionweb.language.language import Language
 
 
 class SimpleLanguageLanguageTest(unittest.TestCase):

@@ -1,11 +1,11 @@
 import unittest
 
-from lionwebpython.language import (Annotation, Concept, Containment,
-                                    Interface, Language, Property)
-from lionwebpython.model.classifier_instance_utils import \
+from lionweb.language import (Annotation, Concept, Containment,
+                              Interface, Language, Property)
+from lionweb.model.classifier_instance_utils import \
     ClassifierInstanceUtils
-from lionwebpython.model.reference_value import ReferenceValue
-from lionwebpython.self.lioncore import LionCore
+from lionweb.model.reference_value import ReferenceValue
+from lionweb.self.lioncore import LionCore
 
 from .base_test import BaseTest
 

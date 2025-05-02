@@ -1,7 +1,7 @@
 import unittest
 
-from lionwebpython.lionweb_version import LionWebVersion
-from lionwebpython.self.lioncore import LionCore
+from lionweb.lionweb_version import LionWebVersion
+from lionweb.self.lioncore import LionCore
 
 
 class BuiltinIDsAndKeysTest(unittest.TestCase):

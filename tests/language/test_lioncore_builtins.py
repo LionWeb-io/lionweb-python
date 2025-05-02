@@ -1,9 +1,9 @@
 import unittest
 
-from lionwebpython.language.lioncore_builtins import LionCoreBuiltins
-from lionwebpython.language.primitive_type import PrimitiveType
-from lionwebpython.lionweb_version import LionWebVersion
-from lionwebpython.utils.language_validator import LanguageValidator
+from lionweb.language.lioncore_builtins import LionCoreBuiltins
+from lionweb.language.primitive_type import PrimitiveType
+from lionweb.lionweb_version import LionWebVersion
+from lionweb.utils.language_validator import LanguageValidator
 
 
 class LionCoreBuiltinsTest(unittest.TestCase):

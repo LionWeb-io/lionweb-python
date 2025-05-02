@@ -2,9 +2,9 @@ from typing import List, Optional
 
 from serialization.simple_node import SimpleNode
 
-from lionwebpython.language.concept import Concept
-from lionwebpython.language.reference import Reference
-from lionwebpython.model.reference_value import ReferenceValue
+from lionweb.language.concept import Concept
+from lionweb.language.reference import Reference
+from lionweb.model.reference_value import ReferenceValue
 
 
 class RefNode(SimpleNode):

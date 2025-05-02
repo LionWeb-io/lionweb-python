@@ -2,14 +2,14 @@ import json
 import unittest
 from pathlib import Path
 
-from lionwebpython.language import Concept, Property
-from lionwebpython.lionweb_version import LionWebVersion
-from lionwebpython.model.classifier_instance_utils import \
+from lionweb.language import Concept, Property
+from lionweb.lionweb_version import LionWebVersion
+from lionweb.model.classifier_instance_utils import \
     ClassifierInstanceUtils
-from lionwebpython.model.node import Node
-from lionwebpython.serialization.serialization_provider import \
+from lionweb.model.node import Node
+from lionweb.serialization.serialization_provider import \
     SerializationProvider
-from lionwebpython.serialization.serialized_json_comparison_utils import \
+from lionweb.serialization.serialized_json_comparison_utils import \
     SerializedJsonComparisonUtils
 
 from .library.book import Book

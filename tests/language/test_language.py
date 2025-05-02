@@ -1,6 +1,6 @@
 import unittest
 
-from lionwebpython.language.language import Language
+from lionweb.language.language import Language
 
 
 class LanguageTest(unittest.TestCase):

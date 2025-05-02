@@ -1,7 +1,7 @@
 import unittest
 
-from lionwebpython.self.lioncore import LionCore
-from lionwebpython.utils.language_validator import LanguageValidator
+from lionweb.self.lioncore import LionCore
+from lionweb.utils.language_validator import LanguageValidator
 
 
 class LionCoreTest(unittest.TestCase):

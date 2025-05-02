@@ -1,6 +1,6 @@
 import unittest
 
-from lionwebpython.language import Reference
+from lionweb.language import Reference
 
 
 class ReferenceTest(unittest.TestCase):

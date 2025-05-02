@@ -1,20 +1,20 @@
 import json
 import unittest
 
-from lionwebpython.language.lioncore_builtins import LionCoreBuiltins
-from lionwebpython.lionweb_version import LionWebVersion
-from lionwebpython.model.classifier_instance_utils import \
+from lionweb.language.lioncore_builtins import LionCoreBuiltins
+from lionweb.lionweb_version import LionWebVersion
+from lionweb.model.classifier_instance_utils import \
     ClassifierInstanceUtils
-from lionwebpython.model.impl.dynamic_node import DynamicNode
-from lionwebpython.self.lioncore import LionCore
-from lionwebpython.serialization.deserialization_exception import \
+from lionweb.model.impl.dynamic_node import DynamicNode
+from lionweb.self.lioncore import LionCore
+from lionweb.serialization.deserialization_exception import \
     DeserializationException
-from lionwebpython.serialization.deserialization_status import \
+from lionweb.serialization.deserialization_status import \
     DeserializationStatus
-from lionwebpython.serialization.low_level_json_serialization import \
+from lionweb.serialization.low_level_json_serialization import \
     LowLevelJsonSerialization
-from lionwebpython.serialization.node_populator import NodePopulator
-from lionwebpython.serialization.serialization_provider import \
+from lionweb.serialization.node_populator import NodePopulator
+from lionweb.serialization.serialization_provider import \
     SerializationProvider
 
 

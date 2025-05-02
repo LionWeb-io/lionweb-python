@@ -3,9 +3,9 @@ from typing import List
 from serialization.simple_node import SimpleNode
 from serialization.simplemath.int_literal import IntLiteral
 
-from lionwebpython.language.concept import Concept
-from lionwebpython.language.containment import Containment
-from lionwebpython.model.node import Node
+from lionweb.language.concept import Concept
+from lionweb.language.containment import Containment
+from lionweb.model.node import Node
 
 
 class Sum(SimpleNode):

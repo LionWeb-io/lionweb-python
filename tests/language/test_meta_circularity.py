@@ -1,16 +1,16 @@
 import unittest
 
-from lionwebpython.language.annotation import Annotation
-from lionwebpython.language.concept import Concept
-from lionwebpython.language.containment import Containment
-from lionwebpython.language.enumeration import Enumeration
-from lionwebpython.language.enumeration_literal import EnumerationLiteral
-from lionwebpython.language.interface import Interface
-from lionwebpython.language.language import Language
-from lionwebpython.language.primitive_type import PrimitiveType
-from lionwebpython.language.property import Property
-from lionwebpython.language.reference import Reference
-from lionwebpython.self.lioncore import LionCore
+from lionweb.language.annotation import Annotation
+from lionweb.language.concept import Concept
+from lionweb.language.containment import Containment
+from lionweb.language.enumeration import Enumeration
+from lionweb.language.enumeration_literal import EnumerationLiteral
+from lionweb.language.interface import Interface
+from lionweb.language.language import Language
+from lionweb.language.primitive_type import PrimitiveType
+from lionweb.language.property import Property
+from lionweb.language.reference import Reference
+from lionweb.self.lioncore import LionCore
 
 
 class MetaCircularityTest(unittest.TestCase):

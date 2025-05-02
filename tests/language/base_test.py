@@ -1,10 +1,10 @@
 import unittest
 
-from lionwebpython.language.language import Language
-from lionwebpython.model.node import Node
-from lionwebpython.utils.language_validator import LanguageValidator
-from lionwebpython.utils.node_tree_validator import NodeTreeValidator
-from lionwebpython.utils.validation_result import ValidationResult
+from lionweb.language.language import Language
+from lionweb.model.node import Node
+from lionweb.utils.language_validator import LanguageValidator
+from lionweb.utils.node_tree_validator import NodeTreeValidator
+from lionweb.utils.validation_result import ValidationResult
 
 
 class BaseTest(unittest.TestCase):

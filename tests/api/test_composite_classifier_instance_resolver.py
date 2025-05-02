@@ -1,6 +1,6 @@
 import unittest
 
-from lionwebpython.api.composite_classifier_instance_resolver import \
+from lionweb.api.composite_classifier_instance_resolver import \
     CompositeClassifierInstanceResolver
 
 

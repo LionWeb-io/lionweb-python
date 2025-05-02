@@ -2,12 +2,12 @@ import unittest
 
 import requests
 
-from lionwebpython.language.lioncore_builtins import LionCoreBuiltins
-from lionwebpython.lionweb_version import LionWebVersion
-from lionwebpython.self.lioncore import LionCore
-from lionwebpython.serialization.serialization_provider import \
+from lionweb.language.lioncore_builtins import LionCoreBuiltins
+from lionweb.lionweb_version import LionWebVersion
+from lionweb.self.lioncore import LionCore
+from lionweb.serialization.serialization_provider import \
     SerializationProvider
-from lionwebpython.utils.model_comparator import ModelComparator
+from lionweb.utils.model_comparator import ModelComparator
 
 
 class CorrespondenceWithDocumentationTest(unittest.TestCase):

@@ -1,7 +1,7 @@
-from lionwebpython.language.concept import Concept
-from lionwebpython.language.containment import Containment
-from lionwebpython.language.language import Language
-from lionwebpython.language.reference import Reference
+from lionweb.language.concept import Concept
+from lionweb.language.containment import Containment
+from lionweb.language.language import Language
+from lionweb.language.reference import Reference
 
 
 class RefsLanguage(Language):

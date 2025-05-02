@@ -1,8 +1,8 @@
 import unittest
 
-from lionwebpython.language.annotation import Annotation
-from lionwebpython.language.concept import Concept
-from lionwebpython.language.interface import Interface
+from lionweb.language.annotation import Annotation
+from lionweb.language.concept import Concept
+from lionweb.language.interface import Interface
 
 
 class ClassifierAncestorsTest(unittest.TestCase):

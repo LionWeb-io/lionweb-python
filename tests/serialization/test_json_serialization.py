@@ -3,33 +3,33 @@ import unittest
 from enum import Enum
 from pathlib import Path
 
-from lionwebpython.api.unresolved_classifier_instance_exception import \
+from lionweb.api.unresolved_classifier_instance_exception import \
     UnresolvedClassifierInstanceException
-from lionwebpython.language import Annotation, Concept, Language, Property
-from lionwebpython.language.enumeration import Enumeration
-from lionwebpython.language.enumeration_literal import EnumerationLiteral
-from lionwebpython.language.lioncore_builtins import LionCoreBuiltins
-from lionwebpython.lionweb_version import LionWebVersion
-from lionwebpython.model.classifier_instance_utils import \
+from lionweb.language import Annotation, Concept, Language, Property
+from lionweb.language.enumeration import Enumeration
+from lionweb.language.enumeration_literal import EnumerationLiteral
+from lionweb.language.lioncore_builtins import LionCoreBuiltins
+from lionweb.lionweb_version import LionWebVersion
+from lionweb.model.classifier_instance_utils import \
     ClassifierInstanceUtils
-from lionwebpython.model.impl.dynamic_annotation_instance import \
+from lionweb.model.impl.dynamic_annotation_instance import \
     DynamicAnnotationInstance
-from lionwebpython.model.impl.dynamic_node import DynamicNode
-from lionwebpython.model.impl.enumeration_value_impl import \
+from lionweb.model.impl.dynamic_node import DynamicNode
+from lionweb.model.impl.enumeration_value_impl import \
     EnumerationValueImpl
-from lionwebpython.model.impl.proxy_node import ProxyNode
-from lionwebpython.model.reference_value import ReferenceValue
-from lionwebpython.serialization.data.metapointer import MetaPointer
-from lionwebpython.serialization.deserialization_exception import \
+from lionweb.model.impl.proxy_node import ProxyNode
+from lionweb.model.reference_value import ReferenceValue
+from lionweb.serialization.data.metapointer import MetaPointer
+from lionweb.serialization.deserialization_exception import \
     DeserializationException
-from lionwebpython.serialization.json_serialization import JsonSerialization
-from lionwebpython.serialization.serialization_provider import \
+from lionweb.serialization.json_serialization import JsonSerialization
+from lionweb.serialization.serialization_provider import \
     SerializationProvider
-from lionwebpython.serialization.serialized_json_comparison_utils import \
+from lionweb.serialization.serialized_json_comparison_utils import \
     SerializedJsonComparisonUtils
-from lionwebpython.serialization.unavailable_node_policy import \
+from lionweb.serialization.unavailable_node_policy import \
     UnavailableNodePolicy
-from lionwebpython.utils.language_validator import LanguageValidator
+from lionweb.utils.language_validator import LanguageValidator
 
 from .library.book import Book
 from .library.guide_book_writer import GuideBookWriter

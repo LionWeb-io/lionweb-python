@@ -1,7 +1,7 @@
-from lionwebpython.language import (Annotation, Concept, Containment, Language,
-                                    Property)
-from lionwebpython.language.lioncore_builtins import LionCoreBuiltins
-from lionwebpython.model.impl.dynamic_annotation_instance import \
+from lionweb.language import (Annotation, Concept, Containment, Language,
+                              Property)
+from lionweb.language.lioncore_builtins import LionCoreBuiltins
+from lionweb.model.impl.dynamic_annotation_instance import \
     DynamicAnnotationInstance
 
 

@@ -1,6 +1,6 @@
 import unittest
 
-from lionwebpython.utils.common_checks import CommonChecks
+from lionweb.utils.common_checks import CommonChecks
 
 
 class TestIDsCheck(unittest.TestCase):

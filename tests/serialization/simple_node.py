@@ -1,15 +1,15 @@
 import random
 from typing import List, Optional
 
-from lionwebpython.language import Containment
-from lionwebpython.language.reference import Reference
-from lionwebpython.model.annotation_instance import AnnotationInstance
-from lionwebpython.model.classifier_instance_utils import \
+from lionweb.language import Containment
+from lionweb.language.reference import Reference
+from lionweb.model.annotation_instance import AnnotationInstance
+from lionweb.model.classifier_instance_utils import \
     ClassifierInstanceUtils
-from lionwebpython.model.impl.abstract_classifier_instance import \
+from lionweb.model.impl.abstract_classifier_instance import \
     AbstractClassifierInstance
-from lionwebpython.model.node import Node
-from lionwebpython.model.reference_value import ReferenceValue
+from lionweb.model.node import Node
+from lionweb.model.reference_value import ReferenceValue
 
 
 class SimpleNode(AbstractClassifierInstance, Node):

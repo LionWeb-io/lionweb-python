@@ -1,7 +1,7 @@
 import unittest
 
-from lionwebpython.language.enumeration import Enumeration
-from lionwebpython.language.enumeration_literal import EnumerationLiteral
+from lionweb.language.enumeration import Enumeration
+from lionweb.language.enumeration_literal import EnumerationLiteral
 
 
 class EnumerationTest(unittest.TestCase):

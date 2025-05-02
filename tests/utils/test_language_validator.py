@@ -1,8 +1,8 @@
 import unittest
 
-from lionwebpython.language import Annotation, Concept, Interface, Language
-from lionwebpython.language.primitive_type import PrimitiveType
-from lionwebpython.utils.language_validator import LanguageValidator
+from lionweb.language import Annotation, Concept, Interface, Language
+from lionweb.language.primitive_type import PrimitiveType
+from lionweb.utils.language_validator import LanguageValidator
 
 
 class LanguageValidatorTest(unittest.TestCase):

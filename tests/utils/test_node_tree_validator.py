@@ -1,10 +1,10 @@
 import unittest
 
-from lionwebpython.language import Concept
-from lionwebpython.model.impl.dynamic_node import DynamicNode
-from lionwebpython.utils.issue import Issue
-from lionwebpython.utils.issue_severity import IssueSeverity
-from lionwebpython.utils.node_tree_validator import NodeTreeValidator
+from lionweb.language import Concept
+from lionweb.model.impl.dynamic_node import DynamicNode
+from lionweb.utils.issue import Issue
+from lionweb.utils.issue_severity import IssueSeverity
+from lionweb.utils.node_tree_validator import NodeTreeValidator
 
 
 class NodeTreeValidatorTest(unittest.TestCase):

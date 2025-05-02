@@ -1,6 +1,6 @@
 import unittest
 
-from lionwebpython.language import Property
+from lionweb.language import Property
 
 
 class PropertyTest(unittest.TestCase):

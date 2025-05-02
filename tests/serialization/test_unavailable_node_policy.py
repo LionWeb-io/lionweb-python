@@ -1,6 +1,6 @@
 import unittest
 
-from lionwebpython.serialization.unavailable_node_policy import \
+from lionweb.serialization.unavailable_node_policy import \
     UnavailableNodePolicy
 
 

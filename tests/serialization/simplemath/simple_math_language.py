@@ -1,8 +1,8 @@
-from lionwebpython.language.concept import Concept
-from lionwebpython.language.containment import Containment
-from lionwebpython.language.language import Language
-from lionwebpython.language.lioncore_builtins import LionCoreBuiltins
-from lionwebpython.language.property import Property
+from lionweb.language.concept import Concept
+from lionweb.language.containment import Containment
+from lionweb.language.language import Language
+from lionweb.language.lioncore_builtins import LionCoreBuiltins
+from lionweb.language.property import Property
 
 
 class SimpleMathLanguage(Language):

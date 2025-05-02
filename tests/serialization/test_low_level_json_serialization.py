@@ -5,19 +5,19 @@ from typing import Union
 
 from serialization.serialization_test import SerializationTest
 
-from lionwebpython.language import Annotation, Concept, Language
-from lionwebpython.lionweb_version import LionWebVersion
-from lionwebpython.model.impl.dynamic_annotation_instance import \
+from lionweb.language import Annotation, Concept, Language
+from lionweb.lionweb_version import LionWebVersion
+from lionweb.model.impl.dynamic_annotation_instance import \
     DynamicAnnotationInstance
-from lionwebpython.model.impl.dynamic_node import DynamicNode
-from lionwebpython.self.lioncore import LionCore
-from lionwebpython.serialization.data.metapointer import MetaPointer
-from lionwebpython.serialization.data.serialized_reference_value import \
+from lionweb.model.impl.dynamic_node import DynamicNode
+from lionweb.self.lioncore import LionCore
+from lionweb.serialization.data.metapointer import MetaPointer
+from lionweb.serialization.data.serialized_reference_value import \
     SerializedReferenceValueEntry
-from lionwebpython.serialization.json_serialization import JsonSerialization
-from lionwebpython.serialization.low_level_json_serialization import \
+from lionweb.serialization.json_serialization import JsonSerialization
+from lionweb.serialization.low_level_json_serialization import \
     LowLevelJsonSerialization
-from lionwebpython.serialization.serialized_json_comparison_utils import \
+from lionweb.serialization.serialized_json_comparison_utils import \
     SerializedJsonComparisonUtils
 
 

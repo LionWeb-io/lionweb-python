@@ -1,9 +1,9 @@
 from typing import Optional, cast
 
-from lionwebpython.language.concept import Concept
-from lionwebpython.model.classifier_instance_utils import \
+from lionweb.language.concept import Concept
+from lionweb.model.classifier_instance_utils import \
     ClassifierInstanceUtils
-from lionwebpython.model.impl.dynamic_node import DynamicNode
+from lionweb.model.impl.dynamic_node import DynamicNode
 
 from .library_language import LibraryLanguage
 

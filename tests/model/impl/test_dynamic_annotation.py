@@ -2,9 +2,9 @@ import unittest
 
 from serialization.my_annotation import MyAnnotation
 
-from lionwebpython.model.classifier_instance_utils import \
+from lionweb.model.classifier_instance_utils import \
     ClassifierInstanceUtils
-from lionwebpython.model.impl.dynamic_node import DynamicNode
+from lionweb.model.impl.dynamic_node import DynamicNode
 
 
 class TestDynamicAnnotation(unittest.TestCase):

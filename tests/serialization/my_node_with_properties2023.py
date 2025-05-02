@@ -1,13 +1,13 @@
 from typing import Optional
 
-from lionwebpython.language.concept import Concept
-from lionwebpython.language.language import Language
-from lionwebpython.language.lioncore_builtins import LionCoreBuiltins
-from lionwebpython.language.property import Property
-from lionwebpython.lionweb_version import LionWebVersion
-from lionwebpython.model.classifier_instance_utils import \
+from lionweb.language.concept import Concept
+from lionweb.language.language import Language
+from lionweb.language.lioncore_builtins import LionCoreBuiltins
+from lionweb.language.property import Property
+from lionweb.lionweb_version import LionWebVersion
+from lionweb.model.classifier_instance_utils import \
     ClassifierInstanceUtils
-from lionwebpython.model.impl.dynamic_node import DynamicNode
+from lionweb.model.impl.dynamic_node import DynamicNode
 
 
 class MyNodeWithProperties2023(DynamicNode):

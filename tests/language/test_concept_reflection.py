@@ -1,12 +1,12 @@
 import unittest
 
-from lionwebpython.language.concept import Concept
-from lionwebpython.language.interface import Interface
-from lionwebpython.language.language import Language
-from lionwebpython.model.classifier_instance_utils import \
+from lionweb.language.concept import Concept
+from lionweb.language.interface import Interface
+from lionweb.language.language import Language
+from lionweb.model.classifier_instance_utils import \
     ClassifierInstanceUtils
-from lionwebpython.model.reference_value import ReferenceValue
-from lionwebpython.self.lioncore import LionCore
+from lionweb.model.reference_value import ReferenceValue
+from lionweb.self.lioncore import LionCore
 
 
 class ConceptReflectionTest(unittest.TestCase):

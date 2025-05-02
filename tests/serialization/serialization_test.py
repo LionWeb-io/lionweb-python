@@ -1,14 +1,14 @@
 import unittest
 from typing import TYPE_CHECKING, List
 
-from lionwebpython.language import Concept, Property
-from lionwebpython.model import ClassifierInstance
-from lionwebpython.model.node import Node
-from lionwebpython.serialization.json_utils import JsonArray, JsonObject
-from lionwebpython.utils.model_comparator import ModelComparator
+from lionweb.language import Concept, Property
+from lionweb.model import ClassifierInstance
+from lionweb.model.node import Node
+from lionweb.serialization.json_utils import JsonArray, JsonObject
+from lionweb.utils.model_comparator import ModelComparator
 
 if TYPE_CHECKING:
-    from lionwebpython.model.impl.dynamic_node import DynamicNode
+    from lionweb.model.impl.dynamic_node import DynamicNode
 
 
 class SerializationTest(unittest.TestCase):

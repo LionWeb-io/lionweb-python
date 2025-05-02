@@ -1,7 +1,7 @@
 import unittest
 
-from lionwebpython.language import Containment
-from lionwebpython.language.enumeration_literal import EnumerationLiteral
+from lionweb.language import Containment
+from lionweb.language.enumeration_literal import EnumerationLiteral
 
 
 class M3NodeTest(unittest.TestCase):

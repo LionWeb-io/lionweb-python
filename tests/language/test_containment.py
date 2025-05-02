@@ -1,6 +1,6 @@
 import unittest
 
-from lionwebpython.language import Containment
+from lionweb.language import Containment
 
 
 class ContainmentTest(unittest.TestCase):
