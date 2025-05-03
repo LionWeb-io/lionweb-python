@@ -5,6 +5,8 @@ from pathlib import Path
 from typing import List, Dict
 
 import astor
+
+from lionweb.language.lioncore_builtins import LionCoreBuiltins
 from lionweb.language import Language, Concept, Interface, Containment, Property, Feature
 from lionweb.language.classifier import Classifier
 from lionweb.language.enumeration import Enumeration
@@ -12,8 +14,8 @@ from lionweb.language.primitive_type import PrimitiveType
 from lionweb.language.reference import Reference
 from lionweb.lionweb_version import LionWebVersion
 
-from pylasu.lionweb.starlasu import StarLasuBaseLanguage
-from pylasu.lionweb.utils import calculate_field_name
+from lionweb.generation.utils import calculate_field_name
+from lionweb.self.lioncore import LionCore
 
 
 def _identify_topological_deps(classifiers: List[Classifier], id_to_concept) -> Dict[str, List[str]]:
@@ -119,20 +121,10 @@ def _generate_from_feature(feature: Feature, classdef: ClassDef):
 
 def _generate_from_concept(classifier: Concept) -> ClassDef:
     bases = []
-    if classifier.get_extended_concept().id == StarLasuBaseLanguage.get_astnode(LionWebVersion.V2023_1).id:
-        if len(classifier.get_implemented()) == 0:
-            bases.append('Node')
-    else:
+    if classifier.get_extended_concept():
         bases.append(classifier.get_extended_concept().get_name())
     special_interfaces = {
-        'com-strumenta-StarLasu-Expression-id': 'StarLasuExpression',
-        'com-strumenta-StarLasu-Statement-id': 'StarLasuStatement',
-        'com-strumenta-StarLasu-PlaceholderElement-id': 'StarLasuPlaceholderElement',
-        'com-strumenta-StarLasu-Parameter-id': 'StarLasuParameter',
-        'com-strumenta-StarLasu-Documentation-id': 'StarLasuDocumentation',
-        'com-strumenta-StarLasu-BehaviorDeclaration-id': 'StarLasuBehaviorDeclaration',
-        'com-strumenta-StarLasu-EntityDeclaration-id': 'StarLasuEntityDeclaration',
-        'LionCore-builtins-INamed': 'StarLasuNamed'
+        'LionCore-builtins-INamed': 'INamed'
     }
     for i in classifier.get_implemented():
         if i.get_id() in special_interfaces:
@@ -174,25 +166,7 @@ def classes_generation(click, language: Language, output):
         names=[ast.alias(name='Optional', asname=None)],
         level=0
     )
-    import_starlasu = ast.ImportFrom(
-        module='pylasu.model.metamodel',
-        names=[ast.alias(name='Expression', asname='StarLasuExpression'),
-               ast.alias(name='PlaceholderElement', asname='StarLasuPlaceholderElement'),
-               ast.alias(name='Named', asname='StarLasuNamed'),
-               ast.alias(name='TypeAnnotation', asname='StarLasuTypeAnnotation'),
-               ast.alias(name='Parameter', asname='StarLasuParameter'),
-               ast.alias(name='Statement', asname='StarLasuStatement'),
-               ast.alias(name='EntityDeclaration', asname='StarLasuEntityDeclaration'),
-               ast.alias(name='BehaviorDeclaration', asname='StarLasuBehaviorDeclaration'),
-               ast.alias(name='Documentation', asname='StarLasuDocumentation')],
-        level=0
-    )
-    import_node = ast.ImportFrom(
-        module='pylasu.model',
-        names=[ast.alias(name='Node', asname=None)],
-        level=0
-    )
-    module = ast.Module(body=[import_abc, import_dataclass, import_typing, import_enum, import_starlasu, import_node],
+    module = ast.Module(body=[import_abc, import_dataclass, import_typing, import_enum],
                         type_ignores=[])
 
     for element in language.get_elements():

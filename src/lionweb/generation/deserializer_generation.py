@@ -6,7 +6,7 @@ from lionweb.language import Language, Concept
 from lionweb.language.enumeration import Enumeration
 from lionweb.language.primitive_type import PrimitiveType
 
-from pylasu.lionweb.utils import to_snake_case, calculate_field_name
+from lionweb.generation.utils import (to_snake_case, calculate_field_name)
 
 
 def make_cond(enumeration_name: str, member_name: str):
