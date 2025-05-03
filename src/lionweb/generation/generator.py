@@ -1,6 +1,8 @@
 from typing import cast
 
 import click
+
+from lionweb.generation.language_generation import language_generation
 from lionweb.language import Language
 from lionweb.lionweb_version import LionWebVersion
 from lionweb.serialization.serialization_provider import SerializationProvider
@@ -29,6 +31,7 @@ def main(dependencies, lionweb_language, output):
     with open(lionweb_language, "r", encoding="utf-8") as f:
         content = f.read()
         language = cast(Language, serialization.deserialize_string_to_nodes(content)[0])
+    language_generation(click, language, output)
     classes_generation(click, language, output)
     deserializer_generation(click, language, output)
 
