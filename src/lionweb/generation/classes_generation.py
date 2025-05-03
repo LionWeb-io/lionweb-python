@@ -2,34 +2,31 @@ import ast
 import keyword
 from _ast import ClassDef
 from pathlib import Path
-from typing import List, Dict
+from typing import List, Dict, cast
 
-import astor
+import astor # type: ignore
 
-from lionweb.language.lioncore_builtins import LionCoreBuiltins
 from lionweb.language import Language, Concept, Interface, Containment, Property, Feature
 from lionweb.language.classifier import Classifier
 from lionweb.language.enumeration import Enumeration
 from lionweb.language.primitive_type import PrimitiveType
 from lionweb.language.reference import Reference
-from lionweb.lionweb_version import LionWebVersion
 
 from lionweb.generation.utils import calculate_field_name
-from lionweb.self.lioncore import LionCore
 
 
 def _identify_topological_deps(classifiers: List[Classifier], id_to_concept) -> Dict[str, List[str]]:
-    graph: Dict[str, List[str]] = {el.get_id(): [] for el in classifiers}
+    graph: Dict[str, List[str]] = {cast(str, el.get_id()): [] for el in classifiers}
     for c in classifiers:
         if isinstance(c, Concept):
-            if c.get_extended_concept() and c.get_extended_concept().get_id() in id_to_concept:
-                graph[c.get_id()].append(c.get_extended_concept().get_id())
+            if c.get_extended_concept() and cast(str, c.get_extended_concept().get_id()) in id_to_concept:
+                graph[c.get_id()].append(cast(str, c.get_extended_concept().get_id()))
             for i in c.get_implemented():
-                graph[c.get_id()].append(i.get_id())
+                graph[cast(str, c.get_id())].append(cast(str, i.get_id()))
             for f in c.get_features():
                 if isinstance(f, Containment):
-                    if f.get_type() and f.get_type().get_id() in id_to_concept:
-                        graph[c.get_id()].append(f.get_type().get_id())
+                    if f.get_type() and cast(str, f.get_type().get_id()) in id_to_concept:
+                        graph[cast(str, c.get_id())].append(cast(str, f.get_type().get_id()))
         elif isinstance(c, Interface):
             pass
         else:

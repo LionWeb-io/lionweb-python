@@ -85,9 +85,9 @@ class SerializationOfLibraryTest(SerializationTest):
         mv = Writer("mv", "Markus Völter")
         mb = Writer("mb", "Meinte Boersma")
         de = Book("de", "DSL Engineering", mv)
-        de.set_pages(558)
+        de.pages = 558
         bfd = Book("bfd", "Business-Friendly DSLs", mb)
-        bfd.set_pages(517)
+        bfd.pages = 517
         library.add_book(de)
         library.add_book(bfd)
 

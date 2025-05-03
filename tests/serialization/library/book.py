@@ -1,3 +1,5 @@
+from typing import cast, Optional
+
 from serialization.library.writer import Writer
 
 from lionweb.language.concept import Concept
@@ -12,24 +14,41 @@ class Book(DynamicNode):
 
         super().__init__(id, LibraryLanguage.BOOK)
         if title is not None:
-            self.set_title(title)
+            self.title = title
         if author is not None:
-            self.set_author(author)
+            self.author = author
 
-    def set_title(self, title: str):
+    @property
+    def title(self) -> str:
+        return cast(str, ClassifierInstanceUtils.get_property_value_by_name(self, "title"))
+
+    @title.setter
+    def title(self, value: str):
         property_ = self.get_classifier().get_property_by_name("title")
-        self.set_property_value(property=property_, value=title)
+        self.set_property_value(property=property_, value=value)
 
-    def set_pages(self, pages: int) -> "Book":
+    @property
+    def pages(self) -> int:
+        return cast(int, ClassifierInstanceUtils.get_property_value_by_name(self, "pages"))
+
+    @pages.setter
+    def pages(self, value: int):
         property_ = self.get_classifier().get_property_by_name("pages")
-        self.set_property_value(property=property_, value=pages)
-        return self
+        self.set_property_value(property=property_, value=value)
 
-    def get_title(self) -> str:
-        return ClassifierInstanceUtils.get_property_value_by_name(self, "title")
+    @property
+    def author(self) -> Optional['Writer']:
+        res = ClassifierInstanceUtils.get_only_reference_value_by_reference_name(self, 'author')
+        if res:
+            return cast(Writer, res.referred)
+        else:
+            return None
 
-    def set_author(self, author: "Writer"):
+    @author.setter
+    def author(self, author: "Writer"):
         reference = self.get_classifier().get_reference_by_name("author")
+        if self.author:
+            self.remove_reference_value_by_index(reference, 0)
         self.add_reference_value(reference, ReferenceValue(author, author.get_name()))
 
     def get_classifier(self) -> Concept:

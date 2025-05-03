@@ -1,7 +1,8 @@
 import ast
 from pathlib import Path
+from typing import cast
 
-import astor
+import astor  # type: ignore
 from lionweb.language import Language, Concept
 from lionweb.language.enumeration import Enumeration
 from lionweb.language.primitive_type import PrimitiveType
@@ -102,8 +103,9 @@ def generate_concept_deserializer(concept: Concept) -> ast.FunctionDef:
     for f in concept.all_features():
         field_name = calculate_field_name(f)
         constructor_assignments.append(ast.keyword(arg=field_name, value=ast.Constant(value=f.get_name())))
+    concept_name = cast(str, concept.get_name())
     return ast.FunctionDef(
-        name=f"_deserialize_{to_snake_case(concept.get_name())}",
+        name=f"_deserialize_{to_snake_case(concept_name)}",
         args=ast.arguments(
             posonlyargs=[],
             args=[
@@ -119,14 +121,14 @@ def generate_concept_deserializer(concept: Concept) -> ast.FunctionDef:
         body=[
             ast.Return(
                 value=ast.Call(
-                    func=ast.Name(id=concept.get_name(), ctx=ast.Load()),
+                    func=ast.Name(id=concept_name, ctx=ast.Load()),
                     args=[],
                     keywords=constructor_assignments
                 )
             )
         ],
         decorator_list=[],
-        returns=ast.Name(id=concept.get_name(), ctx=ast.Load())
+        returns=ast.Name(id=concept_name, ctx=ast.Load())
     )
 
 
@@ -171,13 +173,13 @@ def deserializer_generation(click, language: Language, output):
     )
     import_ast = ast.ImportFrom(
         module='.ast',
-        names=[ast.alias(name=e.get_name(), asname=None) for e in language.get_elements()
+        names=[ast.alias(name=cast(str, e.get_name()), asname=None) for e in language.get_elements()
                if not isinstance(e, PrimitiveType)],
         level=0
     )
     import_primitives = ast.ImportFrom(
         module='primitive_types',
-        names=[ast.alias(name=e.get_name(), asname=None) for e in language.get_elements()
+        names=[ast.alias(name=cast(str, e.get_name()), asname=None) for e in language.get_elements()
                if isinstance(e, PrimitiveType)],
         level=0
     )
@@ -213,16 +215,16 @@ def deserializer_generation(click, language: Language, output):
             # The function body
             literals = e.get_literals()
             current_if = ast.If(
-                test=make_cond(e.get_name(), literals[0].get_name()),
-                body=[make_return(e.get_name(), literals[0].get_name())],
+                test=make_cond(cast(str, e.get_name()), cast(str, literals[0].get_name())),
+                body=[make_return(cast(str, e.get_name()), cast(str, literals[0].get_name()))],
                 orelse=[]
             )
             root_if = current_if
 
             for literal in literals[1:]:
                 next_if = ast.If(
-                    test=make_cond(e.get_name(), literal.get_name()),
-                    body=[make_return(e.get_name(), literal.get_name())],
+                    test=make_cond(cast(str, e.get_name()), cast(str, literal.get_name())),
+                    body=[make_return(cast(str, e.get_name()), cast(str, literal.get_name()))],
                     orelse=[]
                 )
                 current_if.orelse = [next_if]
