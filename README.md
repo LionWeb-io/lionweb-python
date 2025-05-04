@@ -29,7 +29,7 @@ python -m build
 
 ## Release process
 
-* Update version in pyproject.toml and setup.py
+* Update version in pyproject.toml and setup.py and src/lionwweb/__init__.py
 * Create tag: `git tag -a v0.1.1 -m "Version 0.1.1"`
 * Release on Pypi:
 
