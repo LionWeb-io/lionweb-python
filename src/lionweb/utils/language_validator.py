@@ -47,7 +47,7 @@ class LanguageValidator(Validator):
     def validate_concept(self, result: ValidationResult, concept: Concept):
         self.check_ancestors(concept, result)
         result.check_for_error(
-            len(concept.get_implemented()) != len(set(concept.get_implemented())),
+            len(concept.implemented) != len(set(concept.implemented)),
             "The same interface has been implemented multiple times",
             concept,
         )

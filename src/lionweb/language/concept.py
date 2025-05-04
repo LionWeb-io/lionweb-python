@@ -46,7 +46,15 @@ class Concept(Classifier["Concept"]):
             bool, self.get_property_value(property_name="abstract", default_value=False)
         )
 
-    def set_abstract(self, value: bool):
+    @property
+    def abstract(self) -> bool:
+        return self.is_abstract()
+
+    @abstract.setter
+    def abstract(self, value: bool) -> None:
+        self.set_abstract(value)
+
+    def set_abstract(self, value: bool) -> None:
         self.set_property_value(property_name="abstract", value=value)
 
     def is_partition(self) -> bool:
@@ -55,26 +63,29 @@ class Concept(Classifier["Concept"]):
             self.get_property_value(property_name="partition", default_value=False),
         )
 
-    def set_partition(self, value: bool):
+    @property
+    def partition(self) -> bool:
+        return self.is_partition()
+
+    @partition.setter
+    def partition(self, value: bool) -> None:
+        self.set_partition(value)
+
+    def set_partition(self, value: bool) -> None:
         self.set_property_value(property_name="partition", value=value)
 
     def get_extended_concept(self) -> Optional["Concept"]:
         return cast(Optional["Concept"], self.get_reference_single_value("extends"))
 
-    def get_implemented(self) -> List[Interface]:
-        from lionweb.language.interface import Interface
+    @property
+    def extended_concept(self) -> Optional["Concept"]:
+        return self.get_extended_concept()
 
-        return cast(List[Interface], self.get_reference_multiple_value("implements"))
+    @extended_concept.setter
+    def extended_concept(self, extended: Optional["Concept"]) -> None:
+        self.set_extended_concept(extended)
 
-    def add_implemented_interface(self, iface: Interface):
-        from lionweb.model.classifier_instance_utils import \
-            ClassifierInstanceUtils
-
-        self.add_reference_multiple_value(
-            "implements", ClassifierInstanceUtils.reference_to(iface)
-        )
-
-    def set_extended_concept(self, extended: Optional["Concept"]):
+    def set_extended_concept(self, extended: Optional["Concept"]) -> None:
         if extended is None:
             self.set_reference_single_value("extends", None)
         else:
@@ -84,6 +95,23 @@ class Concept(Classifier["Concept"]):
             self.set_reference_single_value(
                 "extends", ClassifierInstanceUtils.reference_to(extended)
             )
+
+    def get_implemented(self) -> List[Interface]:
+        from lionweb.language.interface import Interface
+
+        return cast(List[Interface], self.get_reference_multiple_value("implements"))
+
+    @property
+    def implemented(self) -> List[Interface]:
+        return self.get_implemented()
+
+    def add_implemented_interface(self, iface: Interface):
+        from lionweb.model.classifier_instance_utils import \
+            ClassifierInstanceUtils
+
+        self.add_reference_multiple_value(
+            "implements", ClassifierInstanceUtils.reference_to(iface)
+        )
 
     def inherited_features(self) -> List[Feature]:
         from lionweb.language.feature import Feature

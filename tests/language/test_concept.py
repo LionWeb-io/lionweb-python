@@ -10,16 +10,16 @@ class ConceptTest(unittest.TestCase):
 
     def test_a_concept_is_non_abstract_by_default(self):
         c = Concept()
-        self.assertEqual(False, c.is_abstract())
+        self.assertEqual(False, c.abstract)
 
     def test_features_and_inheritance_cycles(self):
         lang = Language(name="MyLanguage", id="l-id", key="l-key", version="123")
         a = Concept(language=lang, name="A", id="a-id", key="a-key")
         b = Concept(language=lang, name="B", id="b-id", key="b-key")
         c = Concept(language=lang, name="C", id="c-id", key="c-key")
-        a.set_extended_concept(c)
-        b.set_extended_concept(a)
-        c.set_extended_concept(b)
+        a.extended_concept = c
+        b.extended_concept = a
+        c.extended_concept = b
         b.add_feature(Property(name="P1", container=b, id="p1-id").set_key("p1-key"))
 
         self.assertEqual(1, len(a.all_features()))
