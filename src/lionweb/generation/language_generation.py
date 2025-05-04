@@ -1,18 +1,11 @@
 import ast
-import keyword
-from _ast import ClassDef
 from pathlib import Path
-from typing import List, Dict, cast
 
-import astor # type: ignore
+import astor  # type: ignore
 
-from lionweb.language import Language, Concept, Interface, Containment, Property, Feature
-from lionweb.language.classifier import Classifier
-from lionweb.language.enumeration import Enumeration
-from lionweb.language.primitive_type import PrimitiveType
+from lionweb.language import Language, Concept, Containment, Property
 from lionweb.language.reference import Reference
 
-from lionweb.generation.utils import calculate_field_name
 
 def _set_lw_version(language: Language):
     return ast.keyword(arg="lion_web_version", value=ast.Attribute(

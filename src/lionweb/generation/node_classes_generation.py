@@ -15,14 +15,16 @@ def _identify_topological_deps(classifiers: List[Classifier], id_to_concept) -> 
     graph: Dict[str, List[str]] = {cast(str, el.get_id()): [] for el in classifiers}
     for c in classifiers:
         if isinstance(c, Concept):
-            if c.get_extended_concept() and cast(str, c.get_extended_concept().get_id()) in id_to_concept:
-                graph[c.get_id()].append(cast(str, c.get_extended_concept().get_id()))
+            c_id = cast(str, c.get_id())
+            ec = c.get_extended_concept()
+            if ec and cast(str, ec.get_id()) in id_to_concept:
+                graph[c_id].append(cast(str, ec.get_id()))
             for i in c.get_implemented():
-                graph[cast(str, c.get_id())].append(cast(str, i.get_id()))
+                graph[c_id].append(cast(str, i.get_id()))
             for f in c.get_features():
                 if isinstance(f, Containment):
                     if f.get_type() and cast(str, f.get_type().get_id()) in id_to_concept:
-                        graph[cast(str, c.get_id())].append(cast(str, f.get_type().get_id()))
+                        graph[cast(str, c_id)].append(cast(str, f.get_type().get_id()))
         elif isinstance(c, Interface):
             pass
         else:
@@ -345,8 +347,6 @@ def _generate_reference_setter(feature, prop_type):
     )
 
 def node_classes_generation(click, language: Language, output):
-    gen_package = None
-
     imports = [ast.ImportFrom(
             module='abc',
             names=[ast.alias(name='ABC', asname=None)],
