@@ -1,47 +1,43 @@
-from abc import ABC
-from dataclasses import dataclass
-from typing import Optional
-from enum import Enum
-from pylasu.model.metamodel import Expression as StarLasuExpression, PlaceholderElement as StarLasuPlaceholderElement, Named as StarLasuNamed, TypeAnnotation as StarLasuTypeAnnotation, Parameter as StarLasuParameter, Statement as StarLasuStatement, EntityDeclaration as StarLasuEntityDeclaration, BehaviorDeclaration as StarLasuBehaviorDeclaration, Documentation as StarLasuDocumentation
-from pylasu.model import Node
-from .ast import Book, Library, Writer, GuideBookWriter, SpecialistBookWriter
-from primitive_types import 
-from lionwebpython.serialization.json_serialization import JsonSerialization
+from gen.language import get_book, get_library, get_writer, get_guidebookwriter, get_specialistbookwriter
+from gen.node_classes import Book, Library, Writer, GuideBookWriter, SpecialistBookWriter
+from lionweb.serialization import AbstractSerialization
+from lionweb.serialization.data.serialized_classifier_instance import SerializedClassifierInstance
 
 
-def _deserialize_book(classifier, serialized_instance,
-    deserialized_instances_by_id, properties_values) ->Book:
-    return Book(title='title', pages='pages', author='author')
+def register_deserializers(serialization: AbstractSerialization):
 
+    def deserializer_book(classifier, serialized_instance:
+        SerializedClassifierInstance, deserialized_instances_by_id,
+        properties_values):
+        return Book(serialized_instance.id)
+    serialization.instantiator.register_custom_deserializer(get_book().id,
+        deserializer=deserializer_book)
 
-def _deserialize_library(classifier, serialized_instance,
-    deserialized_instances_by_id, properties_values) ->Library:
-    return Library(name='name', books='books')
+    def deserializer_library(classifier, serialized_instance:
+        SerializedClassifierInstance, deserialized_instances_by_id,
+        properties_values):
+        return Library(serialized_instance.id)
+    serialization.instantiator.register_custom_deserializer(get_library().
+        id, deserializer=deserializer_library)
 
+    def deserializer_writer(classifier, serialized_instance:
+        SerializedClassifierInstance, deserialized_instances_by_id,
+        properties_values):
+        return Writer(serialized_instance.id)
+    serialization.instantiator.register_custom_deserializer(get_writer().id,
+        deserializer=deserializer_writer)
 
-def _deserialize_writer(classifier, serialized_instance,
-    deserialized_instances_by_id, properties_values) ->Writer:
-    return Writer(name='name')
+    def deserializer_guidebookwriter(classifier, serialized_instance:
+        SerializedClassifierInstance, deserialized_instances_by_id,
+        properties_values):
+        return GuideBookWriter(serialized_instance.id)
+    serialization.instantiator.register_custom_deserializer(get_guidebookwriter
+        ().id, deserializer=deserializer_guidebookwriter)
 
-
-def _deserialize_guide_book_writer(classifier, serialized_instance,
-    deserialized_instances_by_id, properties_values) ->GuideBookWriter:
-    return GuideBookWriter(countries='countries', name='name')
-
-
-def _deserialize_specialist_book_writer(classifier, serialized_instance,
-    deserialized_instances_by_id, properties_values) ->SpecialistBookWriter:
-    return SpecialistBookWriter(subject='subject', name='name')
-
-
-def register_deserializers(json_serialization: JsonSerialization):
-    json_serialization.instantiator.register_custom_deserializer('library-Book'
-        , _deserialize_book)
-    json_serialization.instantiator.register_custom_deserializer(
-        'library-Library', _deserialize_library)
-    json_serialization.instantiator.register_custom_deserializer(
-        'library-Writer', _deserialize_writer)
-    json_serialization.instantiator.register_custom_deserializer(
-        'library-GuideBookWriter', _deserialize_guide_book_writer)
-    json_serialization.instantiator.register_custom_deserializer(
-        'library-SpecialistBookWriter', _deserialize_specialist_book_writer)
+    def deserializer_specialistbookwriter(classifier, serialized_instance:
+        SerializedClassifierInstance, deserialized_instances_by_id,
+        properties_values):
+        return SpecialistBookWriter(serialized_instance.id)
+    serialization.instantiator.register_custom_deserializer(
+        get_specialistbookwriter().id, deserializer=
+        deserializer_specialistbookwriter)
