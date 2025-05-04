@@ -82,6 +82,7 @@ class Reference(Link["Reference"]):
         name: Optional[str] = None,
         container: Optional["Classifier"] = None,
         id: Optional[str] = None,
+        key: Optional[str] = None,
     ):
         from lionweb.language.classifier import Classifier
 
@@ -103,6 +104,8 @@ class Reference(Link["Reference"]):
             super().__init__(name=name, id=id)
         else:
             super().__init__(name=name, container=container)
+        if key:
+            self.set_key(key)
 
     def get_classifier(self) -> "Concept":
         from lionweb.self.lioncore import LionCore

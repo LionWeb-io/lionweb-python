@@ -71,10 +71,13 @@ class Property(Feature["Property"]):
         name: Optional[str] = None,
         container: Optional["Classifier"] = None,
         id: Optional[str] = None,
+        key: Optional[str] = None,
     ):
         super().__init__(
             lion_web_version=lion_web_version, name=name, container=container, id=id
         )
+        if key:
+            self.set_key(key)
 
     def get_type(self) -> Optional["DataType"]:
         from lionweb.language.data_type import DataType

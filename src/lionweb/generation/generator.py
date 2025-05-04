@@ -13,7 +13,7 @@ from lionweb.serialization.serialization_provider import SerializationProvider
 @click.argument("lionweb-language", type=click.Path(exists=True, dir_okay=False, readable=True))
 @click.argument("output", type=click.Path(exists=False, file_okay=False, writable=True))
 def main(dependencies, lionweb_language, output):
-    from lionweb.generation.classes_generation import classes_generation
+    from lionweb.generation.node_classes_generation import node_classes_generation
     from lionweb.generation.deserializer_generation import deserializer_generation
     """Simple CLI that processes a file and writes results to a directory."""
     serialization = SerializationProvider.get_standard_json_serialization(LionWebVersion.V2023_1)
@@ -32,7 +32,7 @@ def main(dependencies, lionweb_language, output):
         content = f.read()
         language = cast(Language, serialization.deserialize_string_to_nodes(content)[0])
     language_generation(click, language, output)
-    classes_generation(click, language, output)
+    node_classes_generation(click, language, output)
     deserializer_generation(click, language, output)
 
 

@@ -8,7 +8,6 @@ from lionweb.language.reference import Reference
 from lionweb.language.structured_data_type import StructuredDataType
 from lionweb.model.impl.dynamic_annotation_instance import \
     DynamicAnnotationInstance
-from lionweb.model.impl.dynamic_node import DynamicNode
 from lionweb.self.lioncore import LionCore
 
 if TYPE_CHECKING:
@@ -34,6 +33,7 @@ class Instantiator:
 
     def enable_dynamic_nodes(self):
         from lionweb.language import Annotation, Concept
+        from lionweb.model.impl.dynamic_node import DynamicNode
 
         self.default_node_deserializer = lambda classifier, serialized_node, deserialized_instances_by_id, properties_values: (
             DynamicNode(serialized_node.id, classifier)

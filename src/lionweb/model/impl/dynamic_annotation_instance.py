@@ -9,7 +9,6 @@ from lionweb.model.impl.abstract_classifier_instance import \
     AbstractClassifierInstance
 from lionweb.model.impl.dynamic_classifier_instance import \
     DynamicClassifierInstance
-from lionweb.model.impl.dynamic_node import DynamicNode
 
 
 class DynamicAnnotationInstance(DynamicClassifierInstance, AnnotationInstance):
@@ -33,6 +32,7 @@ class DynamicAnnotationInstance(DynamicClassifierInstance, AnnotationInstance):
         self.annotation = annotation
 
     def set_annotated(self, annotated: Optional[ClassifierInstance]):
+        from lionweb.model.impl.dynamic_node import DynamicNode
         if annotated == self.annotated:
             # Necessary to avoid infinite loops
             return
