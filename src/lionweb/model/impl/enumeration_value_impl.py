@@ -15,7 +15,7 @@ class EnumerationValueImpl(EnumerationValue):
         el = self.enumeration_literal
         if el is None:
             raise ValueError()
-        en = el.get_enumeration()
+        en = el.enumeration
         if en is None:
             raise ValueError
         return en

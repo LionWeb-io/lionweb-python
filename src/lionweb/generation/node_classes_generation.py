@@ -476,7 +476,7 @@ def node_classes_generation(click, language: Language, output):
                     ],
                     value=ast.Constant(value=cast(str, literal.get_name())),
                 )
-                for literal in element.get_literals()
+                for literal in element.literals
             ]
 
             enum_class = ast.ClassDef(

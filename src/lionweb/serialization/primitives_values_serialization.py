@@ -68,7 +68,7 @@ class PrimitiveValuesSerialization:
             if serialized_value is None:
                 return None
             enumeration = self.enumerations_by_id[data_type_id]
-            for literal in enumeration.get_literals():
+            for literal in enumeration.literals:
                 if literal.key == serialized_value:
                     return EnumerationValueImpl(literal)
             raise ValueError(f"Invalid enumeration literal value: {serialized_value}")
@@ -141,8 +141,8 @@ class PrimitiveValuesSerialization:
     def serializer_for(enum_class: Type, enumeration):
         def serializer(value: Enum):
             literal_name = value.name
-            for literal in enumeration.get_literals():
-                if literal.get_name() == literal_name:
+            for literal in enumeration.literals:
+                if literal.name == literal_name:
                     return literal.key
             raise ValueError(f"Cannot serialize enum instance with name {literal_name}")
 
@@ -151,9 +151,9 @@ class PrimitiveValuesSerialization:
     @staticmethod
     def deserializer_for(enum_class: type[Enum], enumeration):
         def deserializer(serialized_value: str, required: bool):
-            for literal in enumeration.get_literals():
+            for literal in enumeration.literals:
                 if literal.key == serialized_value:
-                    return enum_class[literal.get_name()]
+                    return enum_class[literal.name]
             raise ValueError(f"Cannot deserialize value {serialized_value}")
 
         return deserializer

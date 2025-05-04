@@ -22,9 +22,9 @@ class LanguageValidator(Validator):
             raise RuntimeError(f"Invalid language: {vr.get_issues()}")
 
     def validate_enumeration(self, result: ValidationResult, enumeration: Enumeration):
-        for lit in enumeration.get_literals():
-            result.check_for_error(lit.get_name() is None, "Simple name not set", lit)
-        self.validate_names_are_unique(enumeration.get_literals(), result)
+        for lit in enumeration.literals:
+            result.check_for_error(lit.name is None, "Simple name not set", lit)
+        self.validate_names_are_unique(enumeration.literals, result)
 
     def validate_classifier(self, result: ValidationResult, classifier: Classifier):
         for feature in classifier.get_features():

@@ -31,16 +31,25 @@ class EnumerationLiteral(M3Node, NamespacedEntity, IKeyed):
             self.set_parent(enumeration)
 
         if name is not None:
-            self.set_name(name)
+            self.name = name
 
-    def get_name(self) -> Optional[str]:
+    @property
+    def name(self) -> Optional[str]:
         return cast(Optional[str], self.get_property_value(property_name="name"))
 
-    def set_name(self, name: Optional[str]) -> M3Node:
+    @name.setter
+    def name(self, name: Optional[str]) -> None:
         self.set_property_value(property_name="name", value=name)
+
+    def get_name(self) -> Optional[str]:
+        return self.name
+
+    def set_name(self, name: Optional[str]) -> "M3Node":
+        self.name = name
         return self
 
-    def get_enumeration(self) -> Optional["Enumeration"]:
+    @property
+    def enumeration(self) -> Optional["Enumeration"]:
         parent = self.get_parent()
         from lionweb.language.enumeration import Enumeration
 
@@ -53,28 +62,32 @@ class EnumerationLiteral(M3Node, NamespacedEntity, IKeyed):
                 "The parent of this EnumerationLiteral is not an Enumeration"
             )
 
-    def set_enumeration(self, enumeration: Optional["Enumeration"]) -> None:
+    @enumeration.setter
+    def enumeration(self, enumeration: Optional["Enumeration"]) -> None:
         self.set_parent(enumeration)
 
+    @property
+    def container(self) -> Optional["Enumeration"]:
+        return self.enumeration
+
     def get_container(self) -> Optional["Enumeration"]:
-        return self.get_enumeration()
+        return self.container
+
+    @property
+    def key(self) -> str:
+        return cast(str, self.get_property_value(property_name="key"))
+
+    @key.setter
+    def key(self, value: str) -> None:
+        self.set_property_value(property_name="key", value=value)
+
+    def get_key(self) -> str:
+        return self.key
+
+    def set_key(self, value: str) -> None:
+        self.key = value
 
     def get_classifier(self) -> "Concept":
         from lionweb.self.lioncore import LionCore
 
         return LionCore.get_enumeration_literal(self.get_lionweb_version())
-
-    def get_key(self) -> str:
-        return cast(str, self.get_property_value(property_name="key"))
-
-    def set_key(self, key: str) -> "EnumerationLiteral":
-        self.set_property_value(property_name="key", value=key)
-        return self
-
-    @property
-    def key(self):
-        return cast(str, self.get_property_value(property_name="key"))
-
-    @key.setter
-    def key(self, new_value):
-        self.set_property_value(property_name="key", value=new_value)

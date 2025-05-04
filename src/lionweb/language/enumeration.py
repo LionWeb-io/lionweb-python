@@ -21,7 +21,8 @@ class Enumeration(DataType, NamespaceProvider):
             lion_web_version=lion_web_version, language=language, name=name
         )
 
-    def get_literals(self) -> List[EnumerationLiteral]:
+    @property
+    def literals(self) -> List[EnumerationLiteral]:
         return self.get_containment_multiple_value("literals")
 
     def add_literal(self, literal: EnumerationLiteral) -> "Enumeration":
