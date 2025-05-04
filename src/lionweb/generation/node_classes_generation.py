@@ -1,4 +1,5 @@
 import ast
+from _ast import expr, stmt
 from pathlib import Path
 from typing import List, Dict, cast
 
@@ -23,8 +24,9 @@ def _identify_topological_deps(classifiers: List[Classifier], id_to_concept) -> 
                 graph[c_id].append(cast(str, i.get_id()))
             for f in c.get_features():
                 if isinstance(f, Containment):
-                    if f.get_type() and cast(str, f.get_type().get_id()) in id_to_concept:
-                        graph[cast(str, c_id)].append(cast(str, f.get_type().get_id()))
+                    f_type = f.get_type()
+                    if f_type and cast(str, f_type.get_id()) in id_to_concept:
+                        graph[cast(str, c_id)].append(cast(str, f_type.get_id()))
         elif isinstance(c, Interface):
             pass
         else:
@@ -52,7 +54,7 @@ def topological_classifiers_sort(classifiers: List[Classifier]) -> List[Classifi
             sorted_list.append(id_to_concept[name])
 
     for c in classifiers:
-        visit(c.get_id())
+        visit(cast(str, c.get_id()))
 
     return sorted_list
 
@@ -69,7 +71,7 @@ def _generate_concept_class(concept: Concept):
                     ast.arg(arg="id", annotation=ast.Name(id="str", ctx=ast.Load()))
                 ]
 
-    init_body = [
+    init_body : List[stmt] = [
                     ast.Expr(value=ast.Call(
                         func=ast.Attribute(value=ast.Call(
                             func=ast.Name(id="super", ctx=ast.Load()), args=[], keywords=[]),
@@ -77,7 +79,7 @@ def _generate_concept_class(concept: Concept):
                         args=[
                             ast.Name(id="id", ctx=ast.Load()),
                             ast.Call(
-                                func=ast.Name(id=f"get_{concept.get_name().lower()}", ctx=ast.Load()),
+                                func=ast.Name(id=f"get_{cast(str, concept.get_name()).lower()}", ctx=ast.Load()),
                                 args=[],
                                 keywords=[]
                             ),
@@ -97,7 +99,7 @@ def _generate_concept_class(concept: Concept):
     )
 
     # Property getter and setter (just for the first field, e.g. "title")
-    methods = [init_func]
+    methods : List[stmt] = [init_func]
     for feature in concept.get_features():
         if isinstance(feature, Property):
             if feature.get_type() == LionCoreBuiltins.get_boolean(concept.lion_web_version):
@@ -114,14 +116,15 @@ def _generate_concept_class(concept: Concept):
             # raise ValueError("Containment")
             pass
         elif isinstance(feature, Reference):
-            prop_type = feature.get_type().get_name()
+            feature_type = cast(Classifier, feature.get_type())
+            prop_type = cast(str, feature_type.get_name())
             methods.append(_generate_reference_getter(feature, prop_type))
             methods.append(_generate_reference_setter(feature, prop_type))
         else:
             raise ValueError()
 
     return ast.ClassDef(
-        name=concept.get_name(),
+        name=cast(str, concept.get_name()),
         bases=[ast.Name(id="DynamicNode", ctx=ast.Load())],
         keywords=[],
         body=methods,
@@ -347,7 +350,7 @@ def _generate_reference_setter(feature, prop_type):
     )
 
 def node_classes_generation(click, language: Language, output):
-    imports = [ast.ImportFrom(
+    imports : list[stmt] = [ast.ImportFrom(
             module='abc',
             names=[ast.alias(name='ABC', asname=None)],
             level=0
@@ -380,7 +383,7 @@ def node_classes_generation(click, language: Language, output):
         ast.ImportFrom(
             module='language',
             names=[ast.alias(name='get_language', asname=None)] +
-                  [ast.alias(name=f"get_{c.get_name().lower()}", asname=None) for c in language.get_elements() if
+                  [ast.alias(name=f"get_{cast(str, c.get_name()).lower()}", asname=None) for c in language.get_elements() if
                    isinstance(c, Concept)],
             level=0
         ),
@@ -392,6 +395,7 @@ def node_classes_generation(click, language: Language, output):
     module = ast.Module(body=imports, type_ignores=[])
 
     for element in language.get_elements():
+        e_name = cast(str, element.get_name())
         if isinstance(element, Concept):
             pass
         elif isinstance(element, Interface):
@@ -399,16 +403,16 @@ def node_classes_generation(click, language: Language, output):
         elif isinstance(element, PrimitiveType):
             pass
         elif isinstance(element, Enumeration):
-            members = [
+            members : List[stmt] = [
                 ast.Assign(
-                    targets=[ast.Name(id=literal.get_name(), ctx=ast.Store())],
-                    value=ast.Constant(value=literal.get_name())
+                    targets=[ast.Name(id=cast(str, literal.get_name()), ctx=ast.Store())],
+                    value=ast.Constant(value=cast(str, literal.get_name()))
                 )
                 for literal in element.get_literals()
             ]
 
             enum_class = ast.ClassDef(
-                name=element.get_name(),
+                name=e_name,
                 bases=[ast.Name(id="Enum", ctx=ast.Load())],
                 keywords=[],
                 body=members,
@@ -421,15 +425,16 @@ def node_classes_generation(click, language: Language, output):
     sorted_classifier = topological_classifiers_sort([c for c in language.get_elements() if isinstance(c, Classifier)])
 
     for classifier in sorted_classifier:
+        c_name = cast(str, classifier.get_name())
         if isinstance(classifier, Concept):
             module.body.append(_generate_concept_class(classifier))
         elif isinstance(classifier, Interface):
-            bases = []
-            if len(classifier.get_extended_interfaces()) == 0:
-                bases.append("Node")
+            bases : list[expr]= []
+            # if len(classifier.get_extended_interfaces()) == 0:
+            #     bases.append("Node")
                 # bases.append("ABC")
 
-            classdef = ast.ClassDef(classifier.get_name(), bases=bases,
+            classdef = ast.ClassDef(c_name, bases=bases,
                                     keywords=[],
                                     body=[ast.Pass()],
                                     decorator_list=[])

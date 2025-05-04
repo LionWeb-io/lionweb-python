@@ -1,5 +1,7 @@
 import ast
+from _ast import stmt
 from pathlib import Path
+from typing import cast, List
 
 import astor  # type: ignore
 
@@ -31,7 +33,7 @@ def _generate_language(language: Language) -> ast.Assign:
     )
 
 def language_generation(click, language: Language, output):
-    body = []
+    body : List[stmt] = []
     body.append(ast.ImportFrom(
         module="lionweb.language",
         names=[ast.alias(name="Language", asname=None),
@@ -59,45 +61,47 @@ def language_generation(click, language: Language, output):
     )
 
     # Function body for get_language()
-    function_body = []
+    function_body : List[stmt] = []
     function_body.append(_generate_language(language))
 
     for language_element in language.get_elements():
         if isinstance(language_element, Concept):
-            # concept1 = Concept(...)
+            concept_name = cast(str, language_element.get_name())
             function_body.append(ast.Assign(
-                targets=[ast.Name(id=language_element.get_name(), ctx=ast.Store())],
+                targets=[ast.Name(id=concept_name, ctx=ast.Store())],
                 value=ast.Call(
                     func=ast.Name(id="Concept", ctx=ast.Load()),
                     args=[],
                     keywords=[
                         _set_lw_version(language),
                         ast.keyword(arg="id", value=ast.Constant(value=language_element.id)),
-                        ast.keyword(arg="name", value=ast.Constant(value=language_element.get_name())),
+                        ast.keyword(arg="name", value=ast.Constant(value=concept_name)),
                         ast.keyword(arg="key", value=ast.Constant(value=language_element.get_key()))
                     ]
                 )
             ))
 
             if language_element.get_extended_concept():
+                ec = cast(Concept, language_element.get_extended_concept())
+                ec_name = cast(str, ec.get_name())
                 function_body.append(
-                    ast.Call(
+                    ast.Expr(ast.Call(
                         func=ast.Attribute(
-                            value=ast.Name(id=language_element.get_name(), ctx=ast.Load()),
+                            value=ast.Name(id=concept_name, ctx=ast.Load()),
                             attr="set_extended_concept",
                             ctx=ast.Load()
                         ),
-                        args=[ast.Name(id=language_element.get_extended_concept().get_name(), ctx=ast.Load())],
+                        args=[ast.Name(id=ec_name, ctx=ast.Load())],
                         keywords=[
 
                         ]
-                    ))
+                    )))
 
             for interf in language_element.get_implemented():
                 function_body.append(
-                    ast.Call(
+                    ast.Expr(ast.Call(
                         func=ast.Attribute(
-                                value=ast.Name(id=language_element.get_name(), ctx=ast.Load()),
+                                value=ast.Name(id=concept_name, ctx=ast.Load()),
                                 attr="add_implemented",
                                 ctx=ast.Load()
                             ),
@@ -105,7 +109,7 @@ def language_generation(click, language: Language, output):
                         keywords=[
 
                         ]
-                ))
+                )))
 
             # language.add_element(concept1)
             function_body.append(ast.Expr(
@@ -115,14 +119,14 @@ def language_generation(click, language: Language, output):
                         attr="add_element",
                         ctx=ast.Load()
                     ),
-                    args=[ast.Name(id=language_element.get_name(), ctx=ast.Load())],
+                    args=[ast.Name(id=concept_name, ctx=ast.Load())],
                     keywords=[]
                 )
             ))
 
             for feature in language_element.get_features():
                 if isinstance(feature, Reference):
-                    feature_creation =ast.Call(
+                    feature_creation = ast.Call(
                             func=ast.Name(id="Reference", ctx=ast.Load()),
                             args=[],
                             keywords=[
@@ -135,7 +139,7 @@ def language_generation(click, language: Language, output):
                     function_body.append(ast.Expr(
                         value=ast.Call(
                             func=ast.Attribute(
-                                value=ast.Name(id=language_element.get_name(), ctx=ast.Load()),
+                                value=ast.Name(id=concept_name, ctx=ast.Load()),
                                 attr="add_feature",
                                 ctx=ast.Load()
                             ),
@@ -157,7 +161,7 @@ def language_generation(click, language: Language, output):
                     function_body.append(ast.Expr(
                         value=ast.Call(
                             func=ast.Attribute(
-                                value=ast.Name(id=language_element.get_name(), ctx=ast.Load()),
+                                value=ast.Name(id=concept_name, ctx=ast.Load()),
                                 attr="add_feature",
                                 ctx=ast.Load()
                             ),
@@ -179,7 +183,7 @@ def language_generation(click, language: Language, output):
                     function_body.append(ast.Expr(
                         value=ast.Call(
                             func=ast.Attribute(
-                                value=ast.Name(id=language_element.get_name(), ctx=ast.Load()),
+                                value=ast.Name(id=concept_name, ctx=ast.Load()),
                                 attr="add_feature",
                                 ctx=ast.Load()
                             ),
@@ -206,8 +210,9 @@ def language_generation(click, language: Language, output):
 
     for language_element in language.get_elements():
         if isinstance(language_element, Concept):
+            concept_name = cast(str, language_element.get_name())
             body.append(ast.FunctionDef(
-        name=f"get_{language_element.get_name().lower()}",
+        name=f"get_{concept_name.lower()}",
         args=ast.arguments(posonlyargs=[], args=[], kwonlyargs=[], kw_defaults=[], defaults=[]),
         body=[
             ast.Return(
