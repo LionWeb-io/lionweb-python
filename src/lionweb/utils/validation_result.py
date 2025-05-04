@@ -13,10 +13,10 @@ class ValidationResult:
         return self.issues
 
     def is_successful(self) -> bool:
-        return all(issue.get_severity() != IssueSeverity.ERROR for issue in self.issues)
+        return not self.has_errors()
 
     def has_errors(self) -> bool:
-        return not self.is_successful()
+        return any(issue.is_error() for issue in self.issues)
 
     def add_error(self, message: str, subject: Node) -> "ValidationResult":
         self.issues.add(Issue(IssueSeverity.ERROR, message, subject))
