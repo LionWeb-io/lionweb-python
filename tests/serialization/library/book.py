@@ -1,4 +1,4 @@
-from typing import cast, Optional
+from typing import Optional, cast
 
 from serialization.library.writer import Writer
 
@@ -20,7 +20,9 @@ class Book(DynamicNode):
 
     @property
     def title(self) -> str:
-        return cast(str, ClassifierInstanceUtils.get_property_value_by_name(self, "title"))
+        return cast(
+            str, ClassifierInstanceUtils.get_property_value_by_name(self, "title")
+        )
 
     @title.setter
     def title(self, value: str):
@@ -29,7 +31,9 @@ class Book(DynamicNode):
 
     @property
     def pages(self) -> int:
-        return cast(int, ClassifierInstanceUtils.get_property_value_by_name(self, "pages"))
+        return cast(
+            int, ClassifierInstanceUtils.get_property_value_by_name(self, "pages")
+        )
 
     @pages.setter
     def pages(self, value: int):
@@ -37,8 +41,10 @@ class Book(DynamicNode):
         self.set_property_value(property=property_, value=value)
 
     @property
-    def author(self) -> Optional['Writer']:
-        res = ClassifierInstanceUtils.get_only_reference_value_by_reference_name(self, 'author')
+    def author(self) -> Optional["Writer"]:
+        res = ClassifierInstanceUtils.get_only_reference_value_by_reference_name(
+            self, "author"
+        )
         if res:
             return cast(Writer, res.referred)
         else:
