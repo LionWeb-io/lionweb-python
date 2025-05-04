@@ -1,11 +1,12 @@
 import ast
-from _ast import stmt
+from _ast import expr, stmt
 from pathlib import Path
 from typing import List, cast
 
 import astor  # type: ignore
 
-from lionweb.language import Concept, Containment, Language, Property
+from lionweb.language import (Concept, Containment, DataType, Language,
+                              LionCoreBuiltins, Property)
 from lionweb.language.reference import Reference
 
 
@@ -50,6 +51,7 @@ def language_generation(click, language: Language, output):
                 ast.alias(name="Property", asname=None),
                 ast.alias(name="Containment", asname=None),
                 ast.alias(name="Reference", asname=None),
+                ast.alias(name="LionCoreBuiltins", asname=None),
             ],
             level=0,
         )
@@ -182,6 +184,30 @@ def language_generation(click, language: Language, output):
                         )
                     )
                 elif isinstance(feature, Property):
+                    pt = cast(DataType, feature.get_type())
+                    property_type: expr
+                    if pt == LionCoreBuiltins.get_string(feature.lion_web_version):
+                        property_type = ast.Call(
+                            func=ast.Attribute(
+                                value=ast.Name(id="LionCoreBuiltins", ctx=ast.Load()),
+                                attr="get_string",
+                                ctx=ast.Load(),
+                            ),
+                            args=[],
+                            keywords=[_set_lw_version(language)],
+                        )
+                    elif pt == LionCoreBuiltins.get_integer(feature.lion_web_version):
+                        property_type = ast.Call(
+                            func=ast.Attribute(
+                                value=ast.Name(id="LionCoreBuiltins", ctx=ast.Load()),
+                                attr="get_integer",
+                                ctx=ast.Load(),
+                            ),
+                            args=[],
+                            keywords=[_set_lw_version(language)],
+                        )
+                    else:
+                        raise ValueError(cast(str, pt.get_name()))
                     feature_creation = ast.Call(
                         func=ast.Name(id="Property", ctx=ast.Load()),
                         args=[],
@@ -194,6 +220,7 @@ def language_generation(click, language: Language, output):
                             ast.keyword(
                                 arg="key", value=ast.Constant(value=feature.get_key())
                             ),
+                            ast.keyword(arg="type", value=property_type),
                         ],
                     )
                     function_body.append(

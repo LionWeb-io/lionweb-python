@@ -1,3 +1,5 @@
+from .abstract_serialization import \
+    AbstractSerialization as AbstractSerialization
 from .json_serialization import JsonSerialization as JsonSerialization
 from .serialization_provider import \
     SerializationProvider as SerializationProvider

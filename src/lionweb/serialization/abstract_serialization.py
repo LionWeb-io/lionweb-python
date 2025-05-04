@@ -194,7 +194,7 @@ class AbstractSerialization:
             mp = MetaPointer.from_keyed(property, language)
             dt = property.get_type()
             if dt is None:
-                raise ValueError()
+                raise ValueError(f"property {property.get_name()} has no type")
             property_value = classifier_instance.get_property_value(property=property)
             if property_value is not None or self.keep_null_properties:
                 serialized_property_value = SerializedPropertyValue(

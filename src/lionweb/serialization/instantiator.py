@@ -12,6 +12,8 @@ from lionweb.self.lioncore import LionCore
 
 if TYPE_CHECKING:
     from lionweb.model.node import Node
+    from lionweb.serialization.data.serialized_classifier_instance import \
+        SerializedClassifierInstance
 
 
 class Instantiator:
@@ -49,7 +51,7 @@ class Instantiator:
     def instantiate(
         self,
         classifier,
-        serialized_instance,
+        serialized_instance: "SerializedClassifierInstance",
         deserialized_instances_by_id,
         properties_values,
     ) -> "Node":
