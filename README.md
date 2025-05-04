@@ -1,6 +1,6 @@
 # LionWeb Python
 
-[![PyPI version](https://img.shields.io/pypi/v/lionweb-python)](https://pypi.org/project/lionweb-python/)
+[![PyPI version](https://img.shields.io/pypi/v/lionweb)](https://pypi.org/project/lionweb-python/)
 
 This library contains an implementation in Python of the LionWeb specifications.
 
