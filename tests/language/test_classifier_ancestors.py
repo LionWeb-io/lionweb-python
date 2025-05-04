@@ -35,7 +35,7 @@ class ClassifierAncestorsTest(unittest.TestCase):
         k = Interface(name="k")
         myInterf = Interface(name="l")
 
-        a.set_extended_annotation(b)
+        a.extended_annotation = b
         a.add_implemented_interface(i)
         a.add_implemented_interface(j)
         i.add_extended_interface(k)

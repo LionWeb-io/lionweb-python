@@ -15,6 +15,9 @@ class ValidationResult:
     def is_successful(self) -> bool:
         return all(issue.get_severity() != IssueSeverity.ERROR for issue in self.issues)
 
+    def has_errors(self) -> bool:
+        return not self.is_successful()
+
     def add_error(self, message: str, subject: Node) -> "ValidationResult":
         self.issues.add(Issue(IssueSeverity.ERROR, message, subject))
         return self

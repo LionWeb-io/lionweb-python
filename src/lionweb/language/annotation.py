@@ -31,24 +31,38 @@ class Annotation(Classifier["Annotation"]):
         if key:
             self.set_key(key)
 
-    def get_annotates(self) -> Optional[Classifier]:
+    @property
+    def annotates(self) -> Optional[Classifier]:
         return cast(Optional[Classifier], self.get_reference_single_value("annotates"))
 
-    def get_effectively_annotated(self) -> Optional[Classifier]:
-        """
-        An Annotation extending another annotation should not redefine annotates.
-        So the value is effectively inherited from the super annotation.
-        """
-        annotates = self.get_annotates()
-        extended = self.get_extended_annotation()
-        if annotates is None and extended is not None:
-            return extended.get_annotates()
-        return annotates
+    @annotates.setter
+    def annotates(self, target: Optional["Classifier"]):
+        if target is None:
+            self.set_reference_single_value("annotates", None)
+        else:
+            from lionweb.model.reference_value import ReferenceValue
 
-    def get_extended_annotation(self) -> Optional["Annotation"]:
+            self.set_reference_single_value(
+                "annotates", ReferenceValue(target, target.get_name())
+            )
+
+    @property
+    def extended_annotation(self) -> Optional["Annotation"]:
         return cast(Optional[Annotation], self.get_reference_single_value("extends"))
 
-    def get_implemented(self) -> List["Interface"]:
+    @extended_annotation.setter
+    def extended_annotation(self, extended: Optional["Annotation"]):
+        if extended is None:
+            self.set_reference_single_value("extends", None)
+        else:
+            from lionweb.model.reference_value import ReferenceValue
+
+            self.set_reference_single_value(
+                "extends", ReferenceValue(extended, extended.get_name())
+            )
+
+    @property
+    def implemented(self) -> List["Interface"]:
         return cast(List[Interface], self.get_reference_multiple_value("implements"))
 
     def add_implemented_interface(self, iface: "Interface"):
@@ -60,42 +74,33 @@ class Annotation(Classifier["Annotation"]):
             "implements", ReferenceValue(iface, iface.get_name())
         )
 
-    def set_extended_annotation(self, extended: Optional["Annotation"]):
-        if extended is None:
-            self.set_reference_single_value("extends", None)
-        else:
-            from lionweb.model.reference_value import ReferenceValue
-
-            self.set_reference_single_value(
-                "extends", ReferenceValue(extended, extended.get_name())
-            )
-
-    def set_annotates(self, target: Optional["Classifier"]):
-        if target is None:
-            self.set_reference_single_value("annotates", None)
-        else:
-            from lionweb.model.reference_value import ReferenceValue
-
-            self.set_reference_single_value(
-                "annotates", ReferenceValue(target, target.get_name())
-            )
+    def get_effectively_annotated(self) -> Optional[Classifier]:
+        """
+        An Annotation extending another annotation should not redefine annotates.
+        So the value is effectively inherited from the super annotation.
+        """
+        annotates = self.annotates
+        extended = self.extended_annotation
+        if annotates is None and extended is not None:
+            return extended.annotates
+        return annotates
 
     def direct_ancestors(self) -> List["Classifier"]:
         direct_ancestors: List[Classifier] = []
-        extended = self.get_extended_annotation()
+        extended = self.extended_annotation
         if extended:
             direct_ancestors.append(extended)
-        direct_ancestors.extend(self.get_implemented())
+        direct_ancestors.extend(self.implemented)
         return direct_ancestors
 
     def inherited_features(self) -> List["Feature"]:
         from lionweb.language.feature import Feature
 
         result: List[Feature] = []
-        extended = self.get_extended_annotation()
+        extended = self.extended_annotation
         if extended:
             self.combine_features(result, extended.all_features())
-        for super_interface in self.get_implemented():
+        for super_interface in self.implemented:
             self.combine_features(result, super_interface.all_features())
         return result
 

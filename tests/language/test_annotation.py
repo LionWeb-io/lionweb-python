@@ -40,7 +40,7 @@ class AnnotationTest(BaseTest):
         )
 
         my_concept = Concept(language=language, name="myc")
-        annotation.set_annotates(my_concept)
+        annotation.annotates = my_concept
         self.assertEqual(
             [my_concept],
             ClassifierInstanceUtils.get_referred_nodes(
@@ -57,7 +57,7 @@ class AnnotationTest(BaseTest):
             LionCore.get_annotation().get_reference_by_name("annotates"),
             ReferenceValue(my_concept, None),
         )
-        self.assertEqual(my_concept, annotation.get_annotates())
+        self.assertEqual(my_concept, annotation.annotates)
 
     def test_get_property_value_features(self):
         language = Language()
@@ -84,42 +84,42 @@ class AnnotationTest(BaseTest):
         other_annotation = Annotation(
             language=language, name="OtherAnnotation", id="oa", key="oa"
         )
-        other_annotation.set_annotates(my_concept)
+        other_annotation.annotates = my_concept
         super_annotation = Annotation(
             language=language, name="SuperAnnotation", id="sa", key="sa"
         )
-        super_annotation.set_annotates(my_concept)
+        super_annotation.annotates = my_concept
         my_ci = Interface(language=language, name="MyCI", id="ci", key="ci")
 
         annotation = Annotation(
             language=language, name="MyAnnotation", id="MyAnnotation-ID", key="ma"
         )
-        self.assertIsNone(annotation.get_annotates())
+        self.assertIsNone(annotation.annotates)
         self.assert_node_tree_is_valid(annotation)
         self.assert_language_is_not_valid(language)
 
-        annotation.set_annotates(my_concept)
-        self.assertEqual(my_concept, annotation.get_annotates())
+        annotation.annotates = my_concept
+        self.assertEqual(my_concept, annotation.annotates)
         self.assert_node_tree_is_valid(annotation)
         self.assert_language_is_valid(language)
 
-        annotation.set_annotates(my_ci)
-        self.assertEqual(my_ci, annotation.get_annotates())
+        annotation.annotates = my_ci
+        self.assertEqual(my_ci, annotation.annotates)
         self.assert_node_tree_is_valid(annotation)
         self.assert_language_is_valid(language)
 
-        annotation.set_annotates(other_annotation)
-        self.assertEqual(other_annotation, annotation.get_annotates())
+        annotation.annotates = other_annotation
+        self.assertEqual(other_annotation, annotation.annotates)
         self.assert_node_tree_is_valid(annotation)
         self.assert_language_is_valid(language)
 
-        annotation.set_annotates(None)
-        self.assertIsNone(annotation.get_annotates())
+        annotation.annotates = None
+        self.assertIsNone(annotation.annotates)
         self.assert_node_tree_is_valid(annotation)
         self.assert_language_is_not_valid(language)
 
-        annotation.set_extended_annotation(super_annotation)
-        self.assertIsNone(annotation.get_annotates())
+        annotation.extended_annotation = super_annotation
+        self.assertIsNone(annotation.annotates)
         self.assertEqual(my_concept, annotation.get_effectively_annotated())
         self.assert_node_tree_is_valid(annotation)
         self.assert_language_is_valid(language)
@@ -131,7 +131,7 @@ class AnnotationTest(BaseTest):
         annotation = Annotation(
             language=language, name="MyAnnotation", id="MyAnnotation-ID", key="ma"
         )
-        annotation.set_annotates(my_concept)
+        annotation.annotates = my_concept
         self.assert_node_tree_is_valid(annotation)
         self.assert_language_is_valid(language)
 

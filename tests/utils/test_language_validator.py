@@ -3,6 +3,7 @@ import unittest
 from lionweb.language import Annotation, Concept, Interface, Language
 from lionweb.language.primitive_type import PrimitiveType
 from lionweb.utils.language_validator import LanguageValidator
+from lionweb.utils.validation_result import ValidationResult
 
 
 class LanguageValidatorTest(unittest.TestCase):
@@ -35,7 +36,7 @@ class LanguageValidatorTest(unittest.TestCase):
             id="annotation-id",
         )
         c = Concept(language=language, name="C", id="c-id", key="c-key")
-        annotation.set_annotates(c)
+        annotation.annotates = c
         language.add_element(annotation)
         result = LanguageValidator().validate(language)
         self.assertTrue(result.is_successful())
@@ -72,6 +73,18 @@ class LanguageValidatorTest(unittest.TestCase):
         interface.add_extended_interface(interface)
         result = LanguageValidator().validate(language)
         self.assertFalse(result.is_successful())
+
+    def test_annotates(self):
+        language = Language(name="LangFoo", id="lf", key="lf")
+        c = Concept(language=language, name="MyConcept", id="c", key="c")
+        annotation = Annotation(
+            language=language, name="MyAnnotation", id="MyAnnotation-ID", key="ma"
+        )
+        annotation.annotates = c
+        validation_result = ValidationResult()
+        validator = LanguageValidator()
+        validator.check_annotates(annotation, validation_result)
+        self.assertFalse(validation_result.has_errors())
 
 
 if __name__ == "__main__":

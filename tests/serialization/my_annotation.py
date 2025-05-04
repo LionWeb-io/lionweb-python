@@ -14,12 +14,11 @@ class MyAnnotation(DynamicAnnotationInstance):
         .set_version("1")
     )
 
-    ANNOTATION = (
-        Annotation()
-        .set_id("MyAnnotation-id")
-        .set_key("MyAnnotation-key")
-        .set_name("MyAnnotation")
-        .set_parent(LANGUAGE)
+    ANNOTATION = Annotation(
+        language=LANGUAGE,
+        name="MyAnnotation",
+        id="MyAnnotation-ID",
+        key="ma",
     )
 
     VALUE = (
@@ -45,7 +44,7 @@ class MyAnnotation(DynamicAnnotationInstance):
         .set_id("my-amount")
     )
 
-    ANNOTATION.set_annotates(ANNOTATED)
+    ANNOTATION.annotates = ANNOTATED
     ANNOTATION.add_feature(
         Containment.create_multiple(name="values", type=VALUE)
         .set_key("my-values")

@@ -168,10 +168,10 @@ class LanguageValidator(Validator):
             annotation,
         )
         validation_result.check_for_error(
-            annotation.get_extended_annotation() is not None
-            and annotation.get_annotates() is not None
-            and annotation.get_annotates()
-            != cast(Annotation, annotation.get_extended_annotation()).get_annotates(),
+            annotation.extended_annotation is not None
+            and annotation.annotates is not None
+            and annotation.annotates
+            != cast(Annotation, annotation.extended_annotation).annotates,
             "When a sub annotation specifies a value for annotates, it must be the same value the super annotation specifies",
             annotation,
         )
