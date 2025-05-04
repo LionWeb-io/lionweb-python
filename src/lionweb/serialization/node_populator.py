@@ -12,7 +12,8 @@ from lionweb.serialization.deserialization_exception import \
     DeserializationException
 from lionweb.serialization.deserialization_status import DeserializationStatus
 from lionweb.serialization.unavailable_node_policy import UnavailableNodePolicy
-from lionweb.utils.autoresolve import Autoresolve
+from lionweb.utils.autoresolve import (LIONCORE_AUTORESOLVE_PREFIX,
+                                       LIONCOREBUILTINS_AUTORESOLVE_PREFIX)
 
 
 class NodePopulator:
@@ -38,13 +39,13 @@ class NodePopulator:
         lion_core_builtins = LionCoreBuiltins.get_instance(auto_resolve_version)
         for element in lion_core_builtins.get_elements():
             self.auto_resolve_map[
-                f"{Autoresolve.LIONCOREBUILTINS_AUTORESOLVE_PREFIX}{element.get_name()}"
+                f"{LIONCOREBUILTINS_AUTORESOLVE_PREFIX}{element.get_name()}"
             ] = element
 
         lion_core = LionCore.get_instance(auto_resolve_version)
         for element in lion_core.get_elements():
             self.auto_resolve_map[
-                f"{Autoresolve.LIONCORE_AUTORESOLVE_PREFIX}{element.get_name()}"
+                f"{LIONCORE_AUTORESOLVE_PREFIX}{element.get_name()}"
             ] = element
 
     def populate_classifier_instance(

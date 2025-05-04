@@ -1,3 +1,4 @@
-class Autoresolve:
-    LIONCORE_AUTORESOLVE_PREFIX = "LionWeb.LionCore_M3."
-    LIONCOREBUILTINS_AUTORESOLVE_PREFIX = "LionWeb.LionCore_builtins."
+from typing import Final
+
+LIONCORE_AUTORESOLVE_PREFIX: Final = "LionWeb.LionCore_M3."
+LIONCOREBUILTINS_AUTORESOLVE_PREFIX: Final = "LionWeb.LionCore_builtins."
