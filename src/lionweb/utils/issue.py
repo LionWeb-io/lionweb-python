@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 from typing import Optional
 
-from lionweb.model.node import Node
+from lionweb.model.node import ClassifierInstance
 from lionweb.utils.issue_severity import IssueSeverity
 
 
@@ -9,7 +9,7 @@ from lionweb.utils.issue_severity import IssueSeverity
 class Issue:
     severity: IssueSeverity
     message: str
-    subject: Optional[Node] = None
+    subject: Optional[ClassifierInstance] = None
 
     def is_error(self) -> bool:
         return self.severity == IssueSeverity.ERROR

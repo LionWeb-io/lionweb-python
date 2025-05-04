@@ -17,12 +17,12 @@ class NodeTreeValidator(Validator):
     ) -> None:
         if node.get_id() is not None:
             # It does not make sense to make the same ID as null and invalid
-            validation_result.check_for_error(
+            validation_result.add_error_if(
                 not is_valid_id(node.get_id()), "Invalid ID", node
             )
 
         if node.is_root():
-            validation_result.check_for_error(
+            validation_result.add_error_if(
                 not node.get_classifier().is_partition(),
                 "A root node should be an instance of a Partition concept",
                 node,
@@ -30,12 +30,12 @@ class NodeTreeValidator(Validator):
 
         for containment in node.get_classifier().all_containments():
             actual_n_children = len(node.get_children(containment))
-            validation_result.check_for_error(
+            validation_result.add_error_if(
                 containment.is_required() and actual_n_children == 0,
                 f"Containment {containment.get_name()} is required but no children are specified",
                 node,
             )
-            validation_result.check_for_error(
+            validation_result.add_error_if(
                 containment.is_single() and actual_n_children > 1,
                 f"Containment {containment.get_name()} is single but it has {actual_n_children} children",
                 node,

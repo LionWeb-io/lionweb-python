@@ -23,18 +23,18 @@ class LanguageValidator(Validator):
 
     def validate_enumeration(self, result: ValidationResult, enumeration: Enumeration):
         for lit in enumeration.literals:
-            result.check_for_error(lit.name is None, "Simple name not set", lit)
+            result.add_error_if(lit.name is None, "Simple name not set", lit)
         self.validate_names_are_unique(enumeration.literals, result)
 
     def validate_classifier(self, result: ValidationResult, classifier: Classifier):
         for feature in classifier.get_features():
-            result.check_for_error(
+            result.add_error_if(
                 feature.get_name() is None, "Simple name not set", feature
             )
-            result.check_for_error(
+            result.add_error_if(
                 feature.get_container() is None, "Container not set", feature
             )
-            result.check_for_error(
+            result.add_error_if(
                 feature.get_container() is not None
                 and isinstance(feature.get_container(), Node)
                 and cast(Node, feature.get_container()).get_id() is not None
@@ -46,7 +46,7 @@ class LanguageValidator(Validator):
 
     def validate_concept(self, result: ValidationResult, concept: Concept):
         self.check_ancestors(concept, result)
-        result.check_for_error(
+        result.add_error_if(
             len(concept.implemented) != len(set(concept.implemented)),
             "The same interface has been implemented multiple times",
             concept,
@@ -83,7 +83,7 @@ class LanguageValidator(Validator):
 
     def validate(self, language: Language) -> ValidationResult:
         result = NodeTreeValidator().validate(language)
-        result.check_for_error(
+        result.add_error_if(
             language.get_name() is None, "Qualified name not set", language
         )
 
@@ -92,12 +92,12 @@ class LanguageValidator(Validator):
         self.validate_keys_are_unique(language, result)
 
         for el in language.get_elements():
-            result.check_for_error(el.get_name() is None, "Simple name not set", el)
-            result.check_for_error(
+            result.add_error_if(el.get_name() is None, "Simple name not set", el)
+            result.add_error_if(
                 el.get_name() == "", "Simple name set to empty string", el
             )
-            result.check_for_error(el.get_language() is None, "Language not set", el)
-            result.check_for_error(
+            result.add_error_if(el.get_language() is None, "Language not set", el)
+            result.add_error_if(
                 el.get_language() is not None and el.get_language() != language,
                 "Language not set correctly",
                 el,
@@ -162,12 +162,12 @@ class LanguageValidator(Validator):
     def check_annotates(
         self, annotation: Annotation, validation_result: ValidationResult
     ):
-        validation_result.check_for_error(
+        validation_result.add_error_if(
             annotation.get_effectively_annotated() is None,
             "An annotation should specify annotates or inherit it",
             annotation,
         )
-        validation_result.check_for_error(
+        validation_result.add_error_if(
             annotation.extended_annotation is not None
             and annotation.annotates is not None
             and annotation.annotates
