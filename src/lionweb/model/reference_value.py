@@ -1,22 +1,24 @@
 from typing import Optional
 
-from lionweb.model.node import Node
+from lionweb.model import ClassifierInstance
 
 
 class ReferenceValue:
     def __init__(
-        self, referred: Optional[Node] = None, resolve_info: Optional[str] = None
+        self,
+        referred: Optional[ClassifierInstance] = None,
+        resolve_info: Optional[str] = None,
     ):
         self.referred = referred
         self.resolve_info = resolve_info
 
-    def get_referred(self) -> Optional[Node]:
+    def get_referred(self) -> Optional[ClassifierInstance]:
         return self.referred
 
     def get_referred_id(self) -> Optional[str]:
         return self.referred.id if self.referred else None
 
-    def set_referred(self, referred: Optional[Node]):
+    def set_referred(self, referred: Optional[ClassifierInstance]):
         self.referred = referred
 
     def get_resolve_info(self) -> Optional[str]:

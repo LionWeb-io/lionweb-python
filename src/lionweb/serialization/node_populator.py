@@ -1,9 +1,9 @@
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, cast
 
 from lionweb.api.classifier_instance_resolver import ClassifierInstanceResolver
 from lionweb.language.lioncore_builtins import LionCoreBuiltins
 from lionweb.lionweb_version import LionWebVersion
-from lionweb.model import ClassifierInstance
+from lionweb.model import ClassifierInstance, Node
 from lionweb.model.reference_value import ReferenceValue
 from lionweb.self.lioncore import LionCore
 from lionweb.serialization.data.serialized_classifier_instance import \
@@ -95,7 +95,7 @@ class NodePopulator:
 
             if deserialized_value != node.get_children(containment):
                 for child in deserialized_value:
-                    node.add_child(containment, child)
+                    node.add_child(containment, cast(Node, child))
 
     def populate_node_references(
         self,
@@ -144,6 +144,7 @@ class NodePopulator:
                     referred = self.auto_resolve_map.get(entry.resolve_info)
 
                 reference_value = ReferenceValue(
-                    referred=referred, resolve_info=entry.resolve_info
+                    referred=cast(ClassifierInstance, referred),
+                    resolve_info=entry.resolve_info,
                 )
                 node.add_reference_value(reference, reference_value)

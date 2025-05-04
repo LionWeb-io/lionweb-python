@@ -6,7 +6,7 @@ class HasFeatureValues(ABC):
     if TYPE_CHECKING:
         from lionweb.language.containment import Containment
         from lionweb.language.reference import Reference
-        from lionweb.model.node import Node
+        from lionweb.model import Node
         from lionweb.model.reference_value import ReferenceValue
 
     @abstractmethod

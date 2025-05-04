@@ -49,7 +49,7 @@ class ClassifierInstanceUtils:
     @staticmethod
     def get_referred_nodes(
         instance: "ClassifierInstance", reference: Optional["Reference"] = None
-    ) -> List["Node"]:
+    ) -> List["ClassifierInstance"]:
         return [
             e
             for e in [
