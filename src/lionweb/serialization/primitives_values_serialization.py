@@ -42,9 +42,9 @@ class PrimitiveValuesSerialization:
         sdt = self.structures_data_types_by_id[data_type_id]
         sdt_instance = DynamicStructuredDataTypeInstance(sdt)
         for field in sdt.get_fields():
-            if field.get_key() in json_obj:
-                field_data_type = field.get_type()
-                field_value = json_obj[field.get_key()]
+            if field.key in json_obj:
+                field_data_type = field.type
+                field_value = json_obj[field.key]
                 if field_value is None:
                     sdt_instance.set_field_value(field, None)
                 elif self.is_structured_data_type(field_data_type.id):
@@ -69,7 +69,7 @@ class PrimitiveValuesSerialization:
                 return None
             enumeration = self.enumerations_by_id[data_type_id]
             for literal in enumeration.get_literals():
-                if literal.get_key() == serialized_value:
+                if literal.key == serialized_value:
                     return EnumerationValueImpl(literal)
             raise ValueError(f"Invalid enumeration literal value: {serialized_value}")
         elif (
@@ -92,13 +92,11 @@ class PrimitiveValuesSerialization:
         ) in structured_data_type_instance.get_structured_data_type().get_fields():
             field_value = structured_data_type_instance.get_field_value(field)
             if field_value is None:
-                json_obj[field.get_key()] = None
-            elif self.is_structured_data_type(field.get_type().id):
-                json_obj[field.get_key()] = self.serialize_sdt(field_value)
+                json_obj[field.key] = None
+            elif self.is_structured_data_type(field.type.id):
+                json_obj[field.key] = self.serialize_sdt(field_value)
             else:
-                json_obj[field.get_key()] = self.serialize(
-                    field.get_type().id, field_value
-                )
+                json_obj[field.key] = self.serialize(field.type.id, field_value)
         return json_obj
 
     def serialize(self, primitive_type_id, value):
@@ -109,7 +107,7 @@ class PrimitiveValuesSerialization:
                 return None
             if isinstance(value, EnumerationValue):
                 enumeration_literal = value.get_enumeration_literal()
-                return enumeration_literal.get_key()
+                return enumeration_literal.key
             elif isinstance(value, Enum):
                 enumeration = self.enumerations_by_id.get(primitive_type_id)
                 if enumeration is None:
@@ -145,7 +143,7 @@ class PrimitiveValuesSerialization:
             literal_name = value.name
             for literal in enumeration.get_literals():
                 if literal.get_name() == literal_name:
-                    return literal.get_key()
+                    return literal.key
             raise ValueError(f"Cannot serialize enum instance with name {literal_name}")
 
         return serializer
@@ -154,7 +152,7 @@ class PrimitiveValuesSerialization:
     def deserializer_for(enum_class: type[Enum], enumeration):
         def deserializer(serialized_value: str, required: bool):
             for literal in enumeration.get_literals():
-                if literal.get_key() == serialized_value:
+                if literal.key == serialized_value:
                     return enum_class[literal.get_name()]
             raise ValueError(f"Cannot deserialize value {serialized_value}")
 

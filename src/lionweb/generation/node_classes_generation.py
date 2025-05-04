@@ -115,20 +115,15 @@ def _generate_concept_class(concept: Concept):
     methods: List[stmt] = [init_func]
     for feature in concept.get_features():
         if isinstance(feature, Property):
-            if feature.get_type() == LionCoreBuiltins.get_boolean(
-                concept.lion_web_version
-            ):
+            f_type = feature.type
+            if f_type == LionCoreBuiltins.get_boolean(concept.lion_web_version):
                 prop_type = "bool"
-            elif feature.get_type() == LionCoreBuiltins.get_string(
-                concept.lion_web_version
-            ):
+            elif f_type == LionCoreBuiltins.get_string(concept.lion_web_version):
                 prop_type = "str"
-            elif feature.get_type() == LionCoreBuiltins.get_integer(
-                concept.lion_web_version
-            ):
+            elif f_type == LionCoreBuiltins.get_integer(concept.lion_web_version):
                 prop_type = "int"
             else:
-                raise ValueError(f"type: {feature.get_type()}")
+                raise ValueError(f"type: {f_type}")
             methods.append(_generate_property_getter(feature, prop_type))
             methods.append(_generate_property_setter(feature, prop_type))
         elif isinstance(feature, Containment):

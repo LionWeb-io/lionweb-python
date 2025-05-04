@@ -124,7 +124,7 @@ class AbstractSerialization:
             # Add all properties' type languages
             for prop in classifier.all_properties():
                 self._consider_language_during_serialization(
-                    serialized_chunk, prop.get_type().get_language()
+                    serialized_chunk, prop.type.get_language()
                 )
 
             # Add all links' type languages
@@ -192,7 +192,7 @@ class AbstractSerialization:
             if language is None:
                 raise ValueError()
             mp = MetaPointer.from_keyed(property, language)
-            dt = property.get_type()
+            dt = property.type
             if dt is None:
                 raise ValueError(f"property {property.get_name()} has no type")
             property_value = classifier_instance.get_property_value(property=property)
@@ -498,10 +498,10 @@ class AbstractSerialization:
                 raise RuntimeError(
                     f"Property with metaPointer {serialized_property_value.meta_pointer} not found in classifier {classifier}. Available properties: {available_properties}"
                 )
-            if property.get_type() is None:
+            if property.type is None:
                 raise RuntimeError("Property type should not be null")
             deserialized_value = self.primitive_values_serialization.deserialize(
-                property.get_type(),
+                property.type,
                 serialized_property_value.value,
                 property.is_required(),
             )

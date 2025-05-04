@@ -179,84 +179,82 @@ class BuiltinIDsAndKeysTest(unittest.TestCase):
         )
 
     def test_M3ElementsHasExpectedKeys(self):
-        self.assertEqual("Concept", LionCore.get_concept().get_key())
+        self.assertEqual("Concept", LionCore.get_concept().key)
         self.assertEqual(
             "Concept-abstract",
-            LionCore.get_concept().get_property_by_name("abstract").get_key(),
+            LionCore.get_concept().get_property_by_name("abstract").key,
         )
         self.assertEqual(
             "Concept-extends",
-            LionCore.get_concept().get_reference_by_name("extends").get_key(),
+            LionCore.get_concept().get_reference_by_name("extends").key,
         )
-        self.assertEqual("Interface", LionCore.get_interface().get_key())
+        self.assertEqual("Interface", LionCore.get_interface().key)
         self.assertEqual(
             "Interface-extends",
-            LionCore.get_interface().get_reference_by_name("extends").get_key(),
+            LionCore.get_interface().get_reference_by_name("extends").key,
         )
 
-        self.assertEqual("Containment", LionCore.get_containment().get_key())
+        self.assertEqual("Containment", LionCore.get_containment().key)
 
-        self.assertEqual("DataType", LionCore.get_data_type().get_key())
+        self.assertEqual("DataType", LionCore.get_data_type().key)
 
-        self.assertEqual("Enumeration", LionCore.get_enumeration().get_key())
+        self.assertEqual("Enumeration", LionCore.get_enumeration().key)
         self.assertEqual(
             "Enumeration-literals",
-            LionCore.get_enumeration().get_containment_by_name("literals").get_key(),
+            LionCore.get_enumeration().get_containment_by_name("literals").key,
         )
 
-        self.assertEqual(
-            "EnumerationLiteral", LionCore.get_enumeration_literal().get_key()
-        )
+        self.assertEqual("EnumerationLiteral", LionCore.get_enumeration_literal().key)
 
-        self.assertEqual("Feature", LionCore.get_feature().get_key())
+        self.assertEqual("Feature", LionCore.get_feature().key)
         self.assertEqual(
             "Feature-optional",
-            LionCore.get_feature().get_property_by_name("optional").get_key(),
+            LionCore.get_feature().get_property_by_name("optional").key,
         )
 
-        self.assertEqual("Classifier", LionCore.get_classifier().get_key())
+        self.assertEqual("Classifier", LionCore.get_classifier().key)
         self.assertEqual(
             "Classifier-features",
-            LionCore.get_classifier().get_containment_by_name("features").get_key(),
+            LionCore.get_classifier().get_containment_by_name("features").key,
         )
 
-        self.assertEqual("Link", LionCore.get_link().get_key())
+        self.assertEqual("Link", LionCore.get_link().key)
         self.assertEqual(
             "Link-multiple",
-            LionCore.get_link().get_property_by_name("multiple").get_key(),
+            LionCore.get_link().get_property_by_name("multiple").key,
         )
         self.assertEqual(
-            "Link-type", LionCore.get_link().get_reference_by_name("type").get_key()
+            "Link-type", LionCore.get_link().get_reference_by_name("type").key
         )
 
-        self.assertEqual("Language", LionCore.get_language().get_key())
+        self.assertEqual("Language", LionCore.get_language().key)
         self.assertEqual(
             "LionCore-builtins-INamed-name",
-            LionCore.get_language().get_property_by_name("name").get_key(),
+            LionCore.get_language().get_property_by_name("name").key,
         )
         self.assertEqual(
-            "IKeyed-key", LionCore.get_language().get_property_by_name("key").get_key()
+            "IKeyed-key", LionCore.get_language().get_property_by_name("key").key
         )
         self.assertEqual(
             "Language-dependsOn",
-            LionCore.get_language().get_reference_by_name("dependsOn").get_key(),
+            LionCore.get_language().get_reference_by_name("dependsOn").key,
         )
         self.assertEqual(
             "Language-entities",
-            LionCore.get_language().get_containment_by_name("entities").get_key(),
+            LionCore.get_language().get_containment_by_name("entities").key,
         )
 
-        self.assertEqual("LanguageEntity", LionCore.get_language_entity().get_key())
+        self.assertEqual("LanguageEntity", LionCore.get_language_entity().key)
 
-        self.assertEqual("PrimitiveType", LionCore.get_primitive_type().get_key())
+        self.assertEqual("PrimitiveType", LionCore.get_primitive_type().key)
 
-        self.assertEqual("Property", LionCore.get_property().get_key())
+        self.assertEqual("Property", LionCore.get_property().key)
         self.assertEqual(
             "Property-type",
-            LionCore.get_property().get_reference_by_name("type").get_key(),
+            LionCore.get_property().get_reference_by_name("type").key,
         )
 
-        self.assertEqual("Reference", LionCore.get_reference().get_key())
+        self.assertEqual("Reference", LionCore.get_reference().key)
 
 
 if __name__ == "__main__":

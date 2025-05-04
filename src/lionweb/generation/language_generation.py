@@ -31,7 +31,7 @@ def _generate_language(language: Language) -> ast.Assign:
                 _set_lw_version(language),
                 ast.keyword(arg="id", value=ast.Constant(value=language.id)),
                 ast.keyword(arg="name", value=ast.Constant(value=language.get_name())),
-                ast.keyword(arg="key", value=ast.Constant(value=language.get_key())),
+                ast.keyword(arg="key", value=ast.Constant(value=language.key)),
                 ast.keyword(
                     arg="version", value=ast.Constant(value=language.get_version())
                 ),
@@ -100,7 +100,7 @@ def language_generation(click, language: Language, output):
                             ),
                             ast.keyword(
                                 arg="key",
-                                value=ast.Constant(value=language_element.get_key()),
+                                value=ast.Constant(value=language_element.key),
                             ),
                         ],
                     ),
@@ -166,7 +166,7 @@ def language_generation(click, language: Language, output):
                                 arg="name", value=ast.Constant(value=feature.get_name())
                             ),
                             ast.keyword(
-                                arg="key", value=ast.Constant(value=feature.get_key())
+                                arg="key", value=ast.Constant(value=feature.key)
                             ),
                         ],
                     )
@@ -184,7 +184,7 @@ def language_generation(click, language: Language, output):
                         )
                     )
                 elif isinstance(feature, Property):
-                    pt = cast(DataType, feature.get_type())
+                    pt = cast(DataType, feature.type)
                     property_type: expr
                     if pt == LionCoreBuiltins.get_string(feature.lion_web_version):
                         property_type = ast.Call(
@@ -218,7 +218,7 @@ def language_generation(click, language: Language, output):
                                 arg="name", value=ast.Constant(value=feature.get_name())
                             ),
                             ast.keyword(
-                                arg="key", value=ast.Constant(value=feature.get_key())
+                                arg="key", value=ast.Constant(value=feature.key)
                             ),
                             ast.keyword(arg="type", value=property_type),
                         ],
@@ -247,7 +247,7 @@ def language_generation(click, language: Language, output):
                                 arg="name", value=ast.Constant(value=feature.get_name())
                             ),
                             ast.keyword(
-                                arg="key", value=ast.Constant(value=feature.get_key())
+                                arg="key", value=ast.Constant(value=feature.key)
                             ),
                         ],
                     )

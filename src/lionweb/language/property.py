@@ -40,8 +40,8 @@ class Property(Feature["Property"]):
                 id=id,
             )
         )
-        property_instance.set_optional(True)
-        property_instance.set_type(type)
+        property_instance.optional = True
+        property_instance.type = type
         return property_instance
 
     @staticmethod
@@ -60,9 +60,9 @@ class Property(Feature["Property"]):
             else Property(name=name, id=id)
         )
         if key is not None:
-            property_instance.set_key(key)
-        property_instance.set_optional(False)
-        property_instance.set_type(type)
+            property_instance.key = key
+        property_instance.optional = False
+        property_instance.type = type
         return property_instance
 
     def __init__(
@@ -78,16 +78,18 @@ class Property(Feature["Property"]):
             lion_web_version=lion_web_version, name=name, container=container, id=id
         )
         if key:
-            self.set_key(key)
+            self.key = key
         if type:
-            self.set_type(type)
+            self.type = type
 
-    def get_type(self) -> Optional["DataType"]:
+    @property
+    def type(self) -> Optional["DataType"]:
         from lionweb.language.data_type import DataType
 
         return cast(Optional[DataType], self.get_reference_single_value("type"))
 
-    def set_type(self, type: Optional["DataType"]) -> "Property":
+    @type.setter
+    def type(self, type: Optional["DataType"]) -> None:
         if type is None:
             self.set_reference_single_value(link_name="type", value=None)
         else:
@@ -97,17 +99,32 @@ class Property(Feature["Property"]):
             self.set_reference_single_value(
                 "type", ClassifierInstanceUtils.reference_to(type)
             )
-        return self
+
+    @property
+    def optional(self) -> bool:
+        return cast(bool, self.get_property_value(property_name="optional"))
+
+    @optional.setter
+    def optional(self, value: bool) -> None:
+        self.set_property_value(property_name="optional", value=value)
+
+    @property
+    def key(self) -> Optional[str]:
+        return cast(Optional[str], self.get_property_value(property_name="key"))
+
+    @key.setter
+    def key(self, value: Optional[str]) -> None:
+        self.set_property_value(property_name="key", value=value)
 
     def __str__(self) -> str:
         from lionweb.language.debug_utils import DebugUtils
 
-        return f"{super().__str__()}{{qualifiedName={DebugUtils.qualified_name(self)}, type={self.get_type()}}}"
+        return f"{super().__str__()}{{qualifiedName={DebugUtils.qualified_name(self)}, type={self.type}}}"
 
     def __repr__(self):
         from lionweb.language.debug_utils import DebugUtils
 
-        return f"{super().__str__()}{{qualifiedName={DebugUtils.qualified_name(self)}, type={self.get_type()}}}"
+        return f"{super().__str__()}{{qualifiedName={DebugUtils.qualified_name(self)}, type={self.type}}}"
 
     def get_classifier(self) -> "Concept":
         from lionweb.self.lioncore import LionCore

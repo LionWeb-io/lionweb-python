@@ -75,7 +75,7 @@ class LionCoreBuiltins(Language):
                 element.set_id(
                     f"LionCore-builtins-{element.get_name()}{version_id_suffix}"
                 )
-            if element.get_key() is None:
+            if element.key is None:
                 element.set_key(f"LionCore-builtins-{element.get_name()}")
 
     @classmethod

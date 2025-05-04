@@ -36,16 +36,16 @@ class DynamicClassifierInstance(AbstractClassifierInstance, ClassifierInstance):
         property = kwargs["property"]
         if property is None:
             raise ValueError("Property should not be null")
-        if property.get_key() is None:
+        if property.key is None:
             raise ValueError("Property.key should not be null")
         if property not in self.get_classifier().all_properties():
             raise ValueError("Property not belonging to this classifier")
 
-        stored_value = self.property_values.get(property.get_key())
+        stored_value = self.property_values.get(property.key)
 
         if (
             stored_value is None
-            and property.get_type()
+            and property.type
             == LionCoreBuiltins.get_boolean(self.get_classifier().get_lionweb_version())
             and property.is_required()
         ):
@@ -58,7 +58,7 @@ class DynamicClassifierInstance(AbstractClassifierInstance, ClassifierInstance):
         value = kwargs["value"]
         if property is None:
             raise ValueError("Property should not be null")
-        if property.get_key() is None:
+        if property.key is None:
             raise ValueError("Cannot assign a property with no Key specified")
         if property not in self.get_classifier().all_properties():
             raise ValueError(
@@ -66,9 +66,9 @@ class DynamicClassifierInstance(AbstractClassifierInstance, ClassifierInstance):
             )
 
         if (value is None or value is False) and property.is_required():
-            self.property_values.pop(property.get_key(), None)
+            self.property_values.pop(property.key, None)
         else:
-            self.property_values[property.get_key()] = value
+            self.property_values[property.key] = value
 
     # Public methods for containments
 
