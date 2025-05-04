@@ -1,6 +1,6 @@
 from lionweb.model.classifier_instance_utils import ClassifierInstanceUtils
 from lionweb.model.node import Node
-from lionweb.utils.common_checks import CommonChecks
+from lionweb.utils import is_valid_id
 from lionweb.utils.validation_result import ValidationResult
 from lionweb.utils.validator import Validator
 
@@ -18,7 +18,7 @@ class NodeTreeValidator(Validator):
         if node.get_id() is not None:
             # It does not make sense to make the same ID as null and invalid
             validation_result.check_for_error(
-                not CommonChecks.is_valid_id(node.get_id()), "Invalid ID", node
+                not is_valid_id(node.get_id()), "Invalid ID", node
             )
 
         if node.is_root():

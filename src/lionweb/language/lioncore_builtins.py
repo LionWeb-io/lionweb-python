@@ -11,17 +11,16 @@ class LionCoreBuiltins(Language):
         from lionweb.language.primitive_type import PrimitiveType
         from lionweb.language.property import Property
         from lionweb.lionweb_version import LionWebVersion
-        from lionweb.utils.id_utils import IdUtils
 
     _instances: Dict["LionWebVersion", "LionCoreBuiltins"] = {}
 
     def __init__(self, lion_web_version: "LionWebVersion"):
         super().__init__(lion_web_version=lion_web_version, name="LionCore_builtins")
         from lionweb.lionweb_version import LionWebVersion
-        from lionweb.utils.id_utils import IdUtils
+        from lionweb.utils import clean_string_as_id
 
         version_id_suffix = (
-            f"-{IdUtils.clean_string(lion_web_version.value)}"
+            f"-{clean_string_as_id(lion_web_version.value)}"
             if lion_web_version != LionWebVersion.V2023_1
             else ""
         )

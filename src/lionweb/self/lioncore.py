@@ -10,7 +10,7 @@ from lionweb.language.property import Property
 from lionweb.language.reference import Reference
 from lionweb.lionweb_version import LionWebVersion
 from lionweb.model.impl.m3node import M3Node
-from lionweb.utils.id_utils import IdUtils
+from lionweb.utils import clean_string_as_id
 
 
 class LionCore:
@@ -144,7 +144,7 @@ class LionCore:
             )
         if lion_web_version not in cls._instances:
             version_id_suffix = (
-                f"-{IdUtils.clean_string(lion_web_version.value)}"
+                f"-{clean_string_as_id(lion_web_version.value)}"
                 if lion_web_version != LionWebVersion.V2023_1
                 else ""
             )
