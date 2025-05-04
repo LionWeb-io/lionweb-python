@@ -38,12 +38,12 @@ class SerializationProvider:
         serialization.primitive_values_serialization.register_lion_builtins_primitive_serializers_and_deserializers(
             serialization.lion_web_version
         )
-        serialization.instance_resolver.add_all(
+        serialization.instance_resolver.extend(
             LionCore.get_instance(
                 serialization.lion_web_version
             ).this_and_all_descendants()
         )
-        serialization.instance_resolver.add_all(
+        serialization.instance_resolver.extend(
             LionCoreBuiltins.get_instance(
                 serialization.lion_web_version
             ).this_and_all_descendants()

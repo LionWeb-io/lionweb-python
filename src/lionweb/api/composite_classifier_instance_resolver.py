@@ -23,7 +23,7 @@ class CompositeClassifierInstanceResolver(ClassifierInstanceResolver):
                 return instance
         return None
 
-    def __str__(self) -> str:
-        return (
-            f"CompositeClassifierInstanceResolver({self.classifier_instance_resolvers})"
-        )
+    def __repr__(self) -> str:
+        return f"{self.__class__.__name__}({self.classifier_instance_resolvers!r})"
+
+    __str__ = __repr__
