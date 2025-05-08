@@ -1,3 +1,4 @@
+from dataclasses import dataclass, field
 from typing import List, Optional
 
 from lionweb.serialization.data.metapointer import MetaPointer
@@ -9,15 +10,15 @@ from lionweb.serialization.data.serialized_reference_value import (
     SerializedReferenceValue, SerializedReferenceValueEntry)
 
 
+@dataclass
 class SerializedClassifierInstance:
-    def __init__(self, instance_id: Optional[str], classifier: MetaPointer):
-        self.id = instance_id
-        self.classifier: MetaPointer = classifier
-        self.properties: List[SerializedPropertyValue] = []
-        self.containments: List[SerializedContainmentValue] = []
-        self.references: List[SerializedReferenceValue] = []
-        self.annotations: List[str] = []
-        self.parent_node_id: Optional[str] = None
+    id: Optional[str]
+    classifier: MetaPointer
+    properties: List[SerializedPropertyValue] = field(default_factory=list)
+    containments: List[SerializedContainmentValue] = field(default_factory=list)
+    references: List[SerializedReferenceValue] = field(default_factory=list)
+    annotations: List[str] = field(default_factory=list)
+    parent_node_id: Optional[str] = None
 
     def get_parent_node_id(self):
         return self.parent_node_id
@@ -34,15 +35,6 @@ class SerializedClassifierInstance:
             children.extend(containment.get_value())
         return list(children)
 
-    def get_references(self):
-        return list(self.references)
-
-    def get_annotations(self):
-        return list(self.annotations)
-
-    def get_properties(self):
-        return list(self.properties)
-
     def add_property_value(self, property_value: SerializedPropertyValue):
         self.properties.append(property_value)
 
@@ -57,12 +49,6 @@ class SerializedClassifierInstance:
 
     def set_classifier(self, classifier: MetaPointer):
         self.classifier = classifier
-
-    def get_id(self) -> Optional[str]:
-        return self.id
-
-    def set_id(self, instance_id: Optional[str]):
-        self.id = instance_id
 
     def set_property_value(self, property_meta_pointer, serialized_value):
         from .serialized_property_value import SerializedPropertyValue

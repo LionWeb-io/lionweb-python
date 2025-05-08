@@ -104,9 +104,7 @@ class NodePopulator:
         serialized_classifier_instance: SerializedClassifierInstance,
     ) -> None:
         concept = node.get_classifier()
-        for (
-            serialized_reference_value
-        ) in serialized_classifier_instance.get_references():
+        for serialized_reference_value in serialized_classifier_instance.references:
             reference = concept.get_reference_by_meta_pointer(
                 serialized_reference_value.meta_pointer
             )

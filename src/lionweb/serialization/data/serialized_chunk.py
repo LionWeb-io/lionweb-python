@@ -17,15 +17,6 @@ class SerializedChunk:
         default_factory=dict
     )
 
-    def set_serialization_format_version(self, value: str):
-        self.serialization_format_version = value
-
-    def get_serialization_format_version(self) -> str:
-        return self.serialization_format_version
-
-    def get_classifier_instances(self) -> List[SerializedClassifierInstance]:
-        return list(self.classifier_instances)
-
     def add_classifier_instance(self, instance):
         self.classifier_instances_by_id[instance.id] = instance
         self.classifier_instances.append(instance)
@@ -39,11 +30,11 @@ class SerializedChunk:
     def add_language(self, language):
         self.languages.append(language)
 
-    def get_classifier_instances_by_id(self) -> Dict[str, object]:
-        return dict(self.classifier_instances_by_id)
-
-    def get_languages(self) -> List:
-        return list(self.languages)
+    def __str__(self):
+        return (
+            f"SerializationBlock{{serialization_format_version='{self.serialization_format_version}', "
+            f"languages={self.languages}, classifier_instances={self.classifier_instances}}}"
+        )
 
     def __eq__(self, other):
         if not isinstance(other, SerializedChunk):
@@ -63,8 +54,11 @@ class SerializedChunk:
             )
         )
 
-    def __str__(self):
-        return (
-            f"SerializationBlock{{serialization_format_version='{self.serialization_format_version}', "
-            f"languages={self.languages}, classifier_instances={self.classifier_instances}}}"
-        )
+    def get_classifier_instances(self) -> List[SerializedClassifierInstance]:
+        return list(self.classifier_instances)
+
+    def get_classifier_instances_by_id(self) -> Dict[str, object]:
+        return dict(self.classifier_instances_by_id)
+
+    def get_languages(self) -> List:
+        return list(self.languages)

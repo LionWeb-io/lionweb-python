@@ -35,9 +35,9 @@ class DeserializationStatus:
         )
 
     def put_nodes_with_null_ids_in_front(self) -> None:
-        null_id_nodes = [n for n in self.nodes_to_sort if n.get_id() is None]
+        null_id_nodes = [n for n in self.nodes_to_sort if n.id is None]
         self.sorted_list.extend(null_id_nodes)
-        self.nodes_to_sort = [n for n in self.nodes_to_sort if n.get_id() is not None]
+        self.nodes_to_sort = [n for n in self.nodes_to_sort if n.id is not None]
 
     def place(self, node: SerializedClassifierInstance) -> None:
         self.sorted_list.append(node)

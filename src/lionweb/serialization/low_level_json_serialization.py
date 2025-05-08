@@ -42,20 +42,18 @@ class LowLevelJsonSerialization:
         serialized_nodes = []
         for node in serialized_chunk.get_classifier_instances():
             node_json = {
-                "id": node.get_id(),
+                "id": node.id,
                 "classifier": self._serialize_metapointer_to_json_element(
                     node.get_classifier()
                 ),
                 "properties": [],
                 "containments": [],
                 "references": [],
-                "annotations": [
-                    annotation_id for annotation_id in node.get_annotations()
-                ],
+                "annotations": [annotation_id for annotation_id in node.annotations],
                 "parent": node.get_parent_node_id(),
             }
 
-            for property_value in node.get_properties():
+            for property_value in node.properties:
                 property_json = {
                     "property": self._serialize_metapointer_to_json_element(
                         property_value.get_meta_pointer()
@@ -75,7 +73,7 @@ class LowLevelJsonSerialization:
                 }
                 node_json["containments"].append(children_json)
 
-            for reference_value in node.get_references():
+            for reference_value in node.references:
                 reference_json = {
                     "reference": self._serialize_metapointer_to_json_element(
                         reference_value.get_meta_pointer()

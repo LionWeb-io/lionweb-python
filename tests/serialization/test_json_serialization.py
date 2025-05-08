@@ -713,8 +713,8 @@ class JsonSerializationTest(SerializationTest):
         self.assertEqual(1, len(serialized_chunk.get_classifier_instances()))
         serialized_classifier_instance = serialized_chunk.get_classifier_instances()[0]
         self.assertEqual("instance-a", serialized_classifier_instance.id)
-        self.assertEqual(1, len(serialized_classifier_instance.get_properties()))
-        serialized_name = serialized_classifier_instance.get_properties()[0]
+        self.assertEqual(1, len(serialized_classifier_instance.properties))
+        serialized_name = serialized_classifier_instance.properties[0]
         expected_pointer = MetaPointer(
             "LionCore-builtins", "2024.1", "LionCore-builtins-INamed-name"
         )
@@ -739,7 +739,7 @@ class JsonSerializationTest(SerializationTest):
         serialized_n1 = serialized_chunk.get_classifier_instances()[0]
         self.assertEqual("n1", serialized_n1.id)
         self.assertIsNone(serialized_n1.get_parent_node_id())
-        self.assertEqual(["a1_1", "a1_2", "a2_3"], serialized_n1.get_annotations())
+        self.assertEqual(["a1_1", "a1_2", "a2_3"], serialized_n1.annotations)
 
         deserialized = hjs.deserialize_serialization_block(serialized_chunk)
         self.assertEqual(4, len(deserialized))
@@ -769,7 +769,7 @@ class JsonSerializationTest(SerializationTest):
 
         serialized_c = serialized_chunk.get_instance_by_id("c")
         self.assertEqual("c", serialized_c.id)
-        self.assertEqual(["metaAnn_1"], serialized_c.get_annotations())
+        self.assertEqual(["metaAnn_1"], serialized_c.annotations)
 
         hjs.register_language(meta_lang)
         deserialized = hjs.deserialize_serialization_block(serialized_chunk)
@@ -780,7 +780,7 @@ class JsonSerializationTest(SerializationTest):
 
         self.assert_instances_are_equal(ann, deserialized[4])
         self.assertEqual(deserialized[3], deserialized[4].get_parent())
-        self.assertEqual(deserialized[3].get_annotations(), [deserialized[4]])
+        self.assertEqual(deserialized[3].annotations, [deserialized[4]])
 
     def test_serialization_include_builtins_when_used_in_properties(self):
         lang = Language("l", "l", "l", "1")

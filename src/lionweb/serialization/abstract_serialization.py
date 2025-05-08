@@ -485,9 +485,7 @@ class AbstractSerialization:
 
         # Prepare properties values for instantiator
         properties_values = {}
-        for (
-            serialized_property_value
-        ) in serialized_classifier_instance.get_properties():
+        for serialized_property_value in serialized_classifier_instance.properties:
             property = classifier.get_property_by_meta_pointer(
                 serialized_property_value.meta_pointer
             )
