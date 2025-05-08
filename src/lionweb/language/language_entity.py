@@ -38,7 +38,8 @@ class LanguageEntity(M3Node[T], NamespacedEntity, IKeyed[T]):
         else:
             self.set_parent(None)
 
-    def get_language(self) -> Optional[Language]:
+    @property
+    def language(self) -> Optional[Language]:
         parent = self.get_parent()
         if parent is None:
             return None

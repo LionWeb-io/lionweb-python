@@ -76,7 +76,7 @@ class ClassifierInstanceUtils:
 
     @staticmethod
     def reference_to(entity: "LanguageEntity") -> "ReferenceValue":
-        language = entity.get_language()
+        language = entity.language
         from lionweb.language.lioncore_builtins import LionCoreBuiltins
         from lionweb.lionweb_version import LionWebVersion
         from lionweb.model.reference_value import ReferenceValue
@@ -94,7 +94,7 @@ class ClassifierInstanceUtils:
             )
         elif (
             language
-            and isinstance(entity.get_language(), LionCoreBuiltins)
+            and isinstance(entity.language, LionCoreBuiltins)
             and entity.get_lionweb_version() == LionWebVersion.V2024_1
         ):
             return ReferenceValue(
@@ -114,7 +114,7 @@ class ClassifierInstanceUtils:
 
     @staticmethod
     def is_builtin_element_language_entity(entity: "LanguageEntity") -> bool:
-        language = entity.get_language()
+        language = entity.language
         from lionweb.language.lioncore_builtins import LionCoreBuiltins
         from lionweb.lionweb_version import LionWebVersion
 

@@ -96,9 +96,9 @@ class LanguageValidator(Validator):
             result.add_error_if(
                 el.get_name() == "", "Simple name set to empty string", el
             )
-            result.add_error_if(el.get_language() is None, "Language not set", el)
+            result.add_error_if(el.language is None, "Language not set", el)
             result.add_error_if(
-                el.get_language() is not None and el.get_language() != language,
+                el.language is not None and el.language != language,
                 "Language not set correctly",
                 el,
             )

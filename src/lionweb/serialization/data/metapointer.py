@@ -19,7 +19,7 @@ class MetaPointer:
     @staticmethod
     def from_language_entity(language_entity: "LanguageEntity") -> "MetaPointer":
         key = language_entity.get_key()
-        language = language_entity.get_language()
+        language = language_entity.language
         version = None
         language_key = None
 

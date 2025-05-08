@@ -96,8 +96,7 @@ class AbstractSerialization:
                         self.serialize_annotation_instance(annotation_instance)
                     )
                     self._consider_language_during_serialization(
-                        serialized_chunk,
-                        annotation_instance.get_classifier().get_language(),
+                        serialized_chunk, annotation_instance.get_classifier().language
                     )
 
             # Validate classifier and its language
@@ -107,7 +106,7 @@ class AbstractSerialization:
                     "A node should have a concept in order to be serialized"
                 )
 
-            language = classifier.get_language()
+            language = classifier.language
             if language is None:
                 raise ValueError(
                     f"A Concept should be part of a Language in order to be serialized. Concept {classifier} is not"
@@ -124,13 +123,13 @@ class AbstractSerialization:
             # Add all properties' type languages
             for prop in classifier.all_properties():
                 self._consider_language_during_serialization(
-                    serialized_chunk, prop.type.get_language()
+                    serialized_chunk, prop.type.language
                 )
 
             # Add all links' type languages
             for link in classifier.all_links():
                 self._consider_language_during_serialization(
-                    serialized_chunk, link.get_type().get_language()
+                    serialized_chunk, link.get_type().language
                 )
 
         return serialized_chunk
@@ -188,7 +187,7 @@ class AbstractSerialization:
             c = property.get_container()
             if c is None:
                 raise ValueError()
-            language = c.get_language()
+            language = c.language
             if language is None:
                 raise ValueError()
             mp = MetaPointer.from_keyed(property, language)
@@ -226,7 +225,7 @@ class AbstractSerialization:
             container = containment.get_container()
             if container is None:
                 raise ValueError()
-            language = container.get_language()
+            language = container.language
             if language is None:
                 raise ValueError()
             containment_value = SerializedContainmentValue(
@@ -248,7 +247,7 @@ class AbstractSerialization:
             classifier = reference.get_container()
             if classifier is None:
                 raise ValueError()
-            language = classifier.get_language()
+            language = classifier.language
             if language is None:
                 raise ValueError()
             reference_value.meta_pointer = MetaPointer.from_keyed(reference, language)
