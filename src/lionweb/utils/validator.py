@@ -5,7 +5,7 @@ class Validator(ABC):
     @abstractmethod
     def validate(self, element):
         """Abstract method to validate an element."""
-        pass
+        ...
 
     def is_valid(self, element) -> bool:
         """Checks if the validation result is successful."""
