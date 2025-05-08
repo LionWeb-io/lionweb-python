@@ -131,14 +131,14 @@ class Node(ClassifierInstance["Concept"], ABC):
         """
         Returns the parent of this node.
         """
-        pass
+        ...
 
     @abstractmethod
     def get_classifier(self) -> "Concept":
         """
         Returns the concept of which this Node is an instance. The Concept should not be abstract.
         """
-        pass
+        ...
 
     @abstractmethod
     def get_containment_feature(self) -> Optional["Containment"]:
@@ -146,7 +146,7 @@ class Node(ClassifierInstance["Concept"], ABC):
         Returns the Containment feature used to hold this Node within its parent.
         This will be None only for root nodes or dangling nodes.
         """
-        pass
+        ...
 
     def this_and_all_descendants(self) -> List["Node"]:
         """

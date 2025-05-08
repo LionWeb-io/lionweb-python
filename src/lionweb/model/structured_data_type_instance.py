@@ -11,12 +11,12 @@ class StructuredDataTypeInstance(ABC):
     @abstractmethod
     def get_structured_data_type(self) -> StructuredDataType:
         """The StructuredDataType of which this StructuredDataTypeInstance is an instance."""
-        pass
+        ...
 
     @abstractmethod
     def get_field_value(self, field: Field) -> Optional[Any]:
         """Get the field value associated with the specified field."""
-        pass
+        ...
 
     @abstractmethod
     def set_field_value(self, field: Field, value: Optional[Any]) -> None:
@@ -25,4 +25,4 @@ class StructuredDataTypeInstance(ABC):
         Raises:
             ValueError: If the value is not compatible with the field type.
         """
-        pass
+        ...
