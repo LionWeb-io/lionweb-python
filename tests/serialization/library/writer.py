@@ -1,7 +1,7 @@
 from typing import Optional, cast
 
 from lionweb.language.concept import Concept
-from lionweb.model.classifier_instance_utils import ClassifierInstanceUtils
+from lionweb.model.classifier_instance_utils import get_property_value_by_name
 from lionweb.model.impl.dynamic_node import DynamicNode
 
 from .library_language import LibraryLanguage
@@ -19,9 +19,7 @@ class Writer(DynamicNode):
         self.set_property_value(property=property, value=name)
 
     def get_name(self) -> str:
-        return cast(
-            str, ClassifierInstanceUtils.get_property_value_by_name(self, "name")
-        )
+        return cast(str, get_property_value_by_name(self, "name"))
 
     def get_classifier(self) -> Concept:
         return LibraryLanguage.WRITER

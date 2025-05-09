@@ -48,12 +48,10 @@ class LanguageEntity(M3Node[T], NamespacedEntity, IKeyed[T]):
         raise ValueError("The parent of this LanguageEntity is not a Language")
 
     def get_name(self) -> Optional[str]:
-        return cast(
-            Optional[str], self.get_property_value(property_name="name", type=str)
-        )
+        return cast(Optional[str], self.get_property_value(property="name"))
 
     def set_name(self, name: Optional[str]) -> T:
-        self.set_property_value(property_name="name", value=name)
+        self.set_property_value(property="name", value=name)
         return cast(T, self)
 
     def get_container(self) -> Optional[NamespaceProvider]:
@@ -65,19 +63,19 @@ class LanguageEntity(M3Node[T], NamespacedEntity, IKeyed[T]):
         raise ValueError("The parent is not a NamespaceProvider")
 
     def get_key(self) -> str:
-        return cast(str, self.get_property_value(property_name="key", type=str))
+        return cast(str, self.get_property_value(property="key"))
 
     def set_key(self, key: str) -> T:
-        self.set_property_value(property_name="key", value=key)
+        self.set_property_value(property="key", value=key)
         return cast(T, self)
 
     @property
     def key(self):
-        return cast(str, self.get_property_value(property_name="key"))
+        return cast(str, self.get_property_value(property="key"))
 
     @key.setter
     def key(self, new_value):
-        self.set_property_value(property_name="key", value=new_value)
+        self.set_property_value(property="key", value=new_value)
 
     def __str__(self) -> str:
         return f"{super().__str__()}{{qualifiedName={DebugUtils.qualified_name(self)}}}"

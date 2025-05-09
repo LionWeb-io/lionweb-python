@@ -71,12 +71,18 @@ class Containment(Link["Containment"]):
         id: Optional[str] = None,
         container: Optional["Classifier"] = None,
         key: Optional[str] = None,
+        type: Optional["Classifier"] = None,
+        multiple: bool = False,
+        optional: bool = False,
     ):
         super().__init__(
             lion_web_version=lion_web_version, name=name, id=id, container=container
         )
         if key:
             self.set_key(key)
+        self.set_multiple(multiple)
+        self.set_optional(optional)
+        self.set_type(type)
 
     def get_classifier(self) -> "Concept":
         from lionweb.self.lioncore import LionCore

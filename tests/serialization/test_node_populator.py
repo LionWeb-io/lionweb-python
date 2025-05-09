@@ -3,7 +3,8 @@ import unittest
 
 from lionweb.language.lioncore_builtins import LionCoreBuiltins
 from lionweb.lionweb_version import LionWebVersion
-from lionweb.model.classifier_instance_utils import ClassifierInstanceUtils
+from lionweb.model.classifier_instance_utils import \
+    get_only_reference_value_by_reference_name
 from lionweb.model.impl.dynamic_node import DynamicNode
 from lionweb.self.lioncore import LionCore
 from lionweb.serialization.deserialization_exception import \
@@ -71,9 +72,7 @@ class NodePopulatorTest(unittest.TestCase):
 
         self.assertEqual(
             LionCoreBuiltins.get_boolean(),
-            ClassifierInstanceUtils.get_only_reference_value_by_reference_name(
-                node, "type"
-            ).get_referred(),
+            get_only_reference_value_by_reference_name(node, "type").get_referred(),
         )
 
     def test_populate_reference_to_builtins_value_with_incorrect_id(self):
@@ -183,9 +182,7 @@ class NodePopulatorTest(unittest.TestCase):
 
         self.assertEqual(
             LionCoreBuiltins.get_boolean(),
-            ClassifierInstanceUtils.get_only_reference_value_by_reference_name(
-                node, "type"
-            ).get_referred(),
+            get_only_reference_value_by_reference_name(node, "type").get_referred(),
         )
 
 

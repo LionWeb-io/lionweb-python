@@ -4,7 +4,7 @@ from pathlib import Path
 
 from lionweb.language import Concept, Property
 from lionweb.lionweb_version import LionWebVersion
-from lionweb.model.classifier_instance_utils import ClassifierInstanceUtils
+from lionweb.model.classifier_instance_utils import get_property_value_by_name
 from lionweb.model.node import Node
 from lionweb.serialization.serialization_provider import SerializationProvider
 from lionweb.serialization.serialized_json_comparison_utils import \
@@ -39,12 +39,10 @@ class SerializationOfLibraryTest(SerializationTest):
         book: Node = next(
             node for node in deserialized_nodes if node.id == "library-Book"
         )
-        self.assertEqual(
-            "Book", ClassifierInstanceUtils.get_property_value_by_name(book, "name")
-        )
+        self.assertEqual("Book", get_property_value_by_name(book, "name"))
         self.assertEqual(
             "library-Book",
-            ClassifierInstanceUtils.get_property_value_by_name(book, "key"),
+            get_property_value_by_name(book, "key"),
         )
 
         guided_book_writer: Concept = next(
@@ -52,9 +50,7 @@ class SerializationOfLibraryTest(SerializationTest):
         )
         self.assertEqual(
             "GuideBookWriter",
-            ClassifierInstanceUtils.get_property_value_by_name(
-                guided_book_writer, "name"
-            ),
+            get_property_value_by_name(guided_book_writer, "name"),
         )
         self.assertIsNotNone(guided_book_writer.get_extended_concept())
 

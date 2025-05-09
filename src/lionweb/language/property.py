@@ -11,8 +11,6 @@ class Property(Feature["Property"]):
         from lionweb.language.data_type import DataType
         from lionweb.language.debug_utils import DebugUtils
         from lionweb.lionweb_version import LionWebVersion
-        from lionweb.model.classifier_instance_utils import \
-            ClassifierInstanceUtils
         from lionweb.self.lioncore import LionCore
 
     @staticmethod
@@ -93,28 +91,26 @@ class Property(Feature["Property"]):
         if type is None:
             self.set_reference_single_value(link_name="type", value=None)
         else:
-            from lionweb.model.classifier_instance_utils import \
-                ClassifierInstanceUtils
 
-            self.set_reference_single_value(
-                "type", ClassifierInstanceUtils.reference_to(type)
-            )
+            from lionweb.model.classifier_instance_utils import reference_to
+
+            self.set_reference_single_value("type", reference_to(type))
 
     @property
     def optional(self) -> bool:
-        return cast(bool, self.get_property_value(property_name="optional"))
+        return cast(bool, self.get_property_value(property="optional"))
 
     @optional.setter
     def optional(self, value: bool) -> None:
-        self.set_property_value(property_name="optional", value=value)
+        self.set_property_value(property="optional", value=value)
 
     @property
     def key(self) -> Optional[str]:
-        return cast(Optional[str], self.get_property_value(property_name="key"))
+        return cast(Optional[str], self.get_property_value(property="key"))
 
     @key.setter
     def key(self, value: Optional[str]) -> None:
-        self.set_property_value(property_name="key", value=value)
+        self.set_property_value(property="key", value=value)
 
     def __str__(self) -> str:
         from lionweb.language.debug_utils import DebugUtils

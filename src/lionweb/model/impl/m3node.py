@@ -1,9 +1,9 @@
 from abc import ABC
-from typing import TYPE_CHECKING, Generic, List, Optional, TypeVar, cast
+from typing import (TYPE_CHECKING, Any, Generic, List, Optional, TypeVar,
+                    Union, cast)
 
 from lionweb.language.ikeyed import IKeyed
 from lionweb.lionweb_version import LionWebVersion
-from lionweb.model.classifier_instance_utils import ClassifierInstanceUtils
 from lionweb.model.impl.abstract_classifier_instance import \
     AbstractClassifierInstance
 from lionweb.model.node import Node, is_node
@@ -49,7 +49,7 @@ class M3Node(Generic[T], Node, IKeyed[T], AbstractClassifierInstance, ABC):
         self._id = new_value
 
     def set_name(self, name: Optional[str]) -> "M3Node":
-        self.set_property_value(property_name="name", value=name)
+        self.set_property_value(property="name", value=name)
         return self
 
     def set_parent(self, parent: Optional["ClassifierInstance"]) -> "M3Node":
@@ -68,34 +68,26 @@ class M3Node(Generic[T], Node, IKeyed[T], AbstractClassifierInstance, ABC):
     def get_containment_feature(self) -> "Containment":
         raise NotImplementedError()
 
-    def get_property_value(self, **kwargs) -> Optional[object]:
-        property = kwargs.get("property")
-        property_name = kwargs.get("property_name")
-        if property and property_name:
-            raise ValueError()
-        if not property and not property_name:
-            raise ValueError()
-        if property_name and isinstance(property_name, str):
-            return self.property_values.get(property_name)
-        from lionweb.language.property import Property
-
-        if property and isinstance(property, Property):
-            return self.property_values.get(property.get_name())
+    def get_property_value(
+        self, property: Union[str, "Property"], default_value: Optional[Any] = None
+    ) -> Optional[object]:
+        if isinstance(property, str):
+            v = self.property_values.get(property)
         else:
-            raise ValueError()
-
-    def set_property_value(self, **kwargs) -> None:
-        property_name = kwargs.get("property_name")
-        property = kwargs.get("property")
-        value = kwargs.get("value")
-        from lionweb.language.property import Property
-
-        if property_name and isinstance(property_name, str):
-            self.property_values[property_name] = value
-        elif property and isinstance(property, Property):
-            self.property_values[property.get_name()] = value
+            v = self.property_values.get(cast(str, property.get_name()))
+        if v is None:
+            return default_value
         else:
-            raise ValueError()
+            return v
+
+    def set_property_value(
+        self, property: Union[str, "Property"], value: Optional[Any]
+    ) -> None:
+        if isinstance(property, str):
+            self.property_values[property] = value
+            return
+
+        self.property_values[cast(str, property.get_name())] = value
 
     def get_children(self, containment: Optional["Containment"] = None) -> List[Node]:
         if containment:
@@ -105,7 +97,9 @@ class M3Node(Generic[T], Node, IKeyed[T], AbstractClassifierInstance, ABC):
             else:
                 raise ValueError()
         else:
-            return ClassifierInstanceUtils.get_children(self)
+            from lionweb.model.classifier_instance_utils import get_children
+
+            return get_children(self)
 
     def add_child(self, containment: "Containment", child: Node) -> None:
         name = containment.get_name()

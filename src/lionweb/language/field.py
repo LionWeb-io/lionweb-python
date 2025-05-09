@@ -39,10 +39,10 @@ class Field(M3Node, NamespacedEntity, IKeyed):
             self.set_key(key)
 
     def get_name(self) -> Optional[str]:
-        return cast(Optional[str], self.get_property_value(property_name="name"))
+        return cast(Optional[str], self.get_property_value(property="name"))
 
     def set_name(self, name: Optional[str]):
-        self.set_property_value(property_name="name", value=name)
+        self.set_property_value(property="name", value=name)
 
     def get_container(self) -> Optional[NamespaceProvider]:
         """
@@ -73,8 +73,8 @@ class Field(M3Node, NamespacedEntity, IKeyed):
             )
 
     def get_key(self) -> str:
-        return cast(str, self.get_property_value(property_name="key"))
+        return cast(str, self.get_property_value(property="key"))
 
     def set_key(self, key: Optional[str]) -> "Field":
-        self.set_property_value(property_name="key", value=key)
+        self.set_property_value(property="key", value=key)
         return self

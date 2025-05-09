@@ -35,11 +35,11 @@ class EnumerationLiteral(M3Node, NamespacedEntity, IKeyed):
 
     @property
     def name(self) -> Optional[str]:
-        return cast(Optional[str], self.get_property_value(property_name="name"))
+        return cast(Optional[str], self.get_property_value(property="name"))
 
     @name.setter
     def name(self, name: Optional[str]) -> None:
-        self.set_property_value(property_name="name", value=name)
+        self.set_property_value(property="name", value=name)
 
     def get_name(self) -> Optional[str]:
         return self.name
@@ -75,11 +75,11 @@ class EnumerationLiteral(M3Node, NamespacedEntity, IKeyed):
 
     @property
     def key(self) -> str:
-        return cast(str, self.get_property_value(property_name="key"))
+        return cast(str, self.get_property_value(property="key"))
 
     @key.setter
     def key(self, value: str) -> None:
-        self.set_property_value(property_name="key", value=value)
+        self.set_property_value(property="key", value=value)
 
     def get_key(self) -> str:
         return self.key

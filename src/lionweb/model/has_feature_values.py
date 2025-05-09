@@ -1,19 +1,21 @@
 from abc import ABC, abstractmethod
-from typing import TYPE_CHECKING, List, Optional
+from typing import TYPE_CHECKING, Any, List, Optional, Union
 
 
 class HasFeatureValues(ABC):
     if TYPE_CHECKING:
-        from lionweb.language.containment import Containment
-        from lionweb.language.reference import Reference
-        from lionweb.model import Node
-        from lionweb.model.reference_value import ReferenceValue
+        from lionweb.language import Containment, Property, Reference
+        from lionweb.model import Node, ReferenceValue
 
     @abstractmethod
-    def get_property_value(self, **kwargs) -> Optional[object]: ...
+    def get_property_value(
+        self, property: Union[str, "Property"]
+    ) -> Optional[object]: ...
 
     @abstractmethod
-    def set_property_value(self, **kwargs) -> None: ...
+    def set_property_value(
+        self, property: Union[str, "Property"], value: Optional[Any]
+    ) -> None: ...
 
     @abstractmethod
     def get_children(self, containment: Optional["Containment"] = None) -> List: ...

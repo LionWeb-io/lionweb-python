@@ -5,7 +5,8 @@ from lionweb.language.language import Language
 from lionweb.language.lioncore_builtins import LionCoreBuiltins
 from lionweb.language.property import Property
 from lionweb.lionweb_version import LionWebVersion
-from lionweb.model.classifier_instance_utils import ClassifierInstanceUtils
+from lionweb.model.classifier_instance_utils import (
+    get_property_value_by_name, set_property_value_by_name)
 from lionweb.model.impl.dynamic_node import DynamicNode
 
 
@@ -68,26 +69,26 @@ class MyNodeWithProperties2023(DynamicNode):
         super().__init__(id, MyNodeWithProperties2023.CONCEPT)
 
     def get_p1(self) -> Optional[bool]:
-        return ClassifierInstanceUtils.get_property_value_by_name(self, "p1")
+        return get_property_value_by_name(self, "p1")
 
     def get_p2(self) -> Optional[int]:
-        return ClassifierInstanceUtils.get_property_value_by_name(self, "p2")
+        return get_property_value_by_name(self, "p2")
 
     def get_p3(self) -> Optional[str]:
-        return ClassifierInstanceUtils.get_property_value_by_name(self, "p3")
+        return get_property_value_by_name(self, "p3")
 
     def get_p4(self) -> Optional[dict]:
-        p4_value = ClassifierInstanceUtils.get_property_value_by_name(self, "p4")
+        p4_value = get_property_value_by_name(self, "p4")
         return p4_value
 
     def set_p1(self, value: bool):
-        ClassifierInstanceUtils.set_property_value_by_name(self, "p1", value)
+        set_property_value_by_name(self, "p1", value)
 
     def set_p2(self, value: int):
-        ClassifierInstanceUtils.set_property_value_by_name(self, "p2", value)
+        set_property_value_by_name(self, "p2", value)
 
     def set_p3(self, value: str):
-        ClassifierInstanceUtils.set_property_value_by_name(self, "p3", value)
+        set_property_value_by_name(self, "p3", value)
 
     def set_p4(self, value: dict):
-        ClassifierInstanceUtils.set_property_value_by_name(self, "p4", value)
+        set_property_value_by_name(self, "p4", value)

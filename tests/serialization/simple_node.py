@@ -4,7 +4,6 @@ from typing import List, Optional
 from lionweb.language import Containment
 from lionweb.language.reference import Reference
 from lionweb.model.annotation_instance import AnnotationInstance
-from lionweb.model.classifier_instance_utils import ClassifierInstanceUtils
 from lionweb.model.impl.abstract_classifier_instance import \
     AbstractClassifierInstance
 from lionweb.model.node import Node
@@ -52,7 +51,9 @@ class SimpleNode(AbstractClassifierInstance, Node):
 
     def get_children(self, containment: Optional[Containment] = None):
         if containment is None:
-            return ClassifierInstanceUtils.get_children(self)
+            from lionweb.model.classifier_instance_utils import get_children
+
+            return get_children(self)
         if containment not in self.get_classifier().all_containments():
             raise ValueError("Containment not belonging to this concept")
         return self.concrete_get_children(containment)

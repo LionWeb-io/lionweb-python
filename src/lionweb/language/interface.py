@@ -10,8 +10,6 @@ class Interface(Classifier["Interface"]):
         from lionweb.language.feature import Feature
         from lionweb.language.language import Language
         from lionweb.lionweb_version import LionWebVersion
-        from lionweb.model.classifier_instance_utils import \
-            ClassifierInstanceUtils
         from lionweb.self.lioncore import LionCore
 
     def __init__(
@@ -40,12 +38,10 @@ class Interface(Classifier["Interface"]):
     def add_extended_interface(self, extended_interface: "Interface"):
         if not extended_interface:
             raise ValueError("extended_interface should not be null")
-        from lionweb.model.classifier_instance_utils import \
-            ClassifierInstanceUtils
 
-        self.add_reference_multiple_value(
-            "extends", ClassifierInstanceUtils.reference_to(extended_interface)
-        )
+        from lionweb.model.classifier_instance_utils import reference_to
+
+        self.add_reference_multiple_value("extends", reference_to(extended_interface))
 
     def inherited_features(self) -> List["Feature"]:
         from lionweb.language.feature import Feature

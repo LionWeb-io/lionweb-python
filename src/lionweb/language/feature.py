@@ -40,21 +40,21 @@ class Feature(M3Node[T], NamespacedEntity, IKeyed[T], Generic[T]):
 
     def is_optional(self) -> bool:
         return cast(
-            bool, self.get_property_value(property_name="optional", default_value=False)
+            bool, self.get_property_value(property="optional", default_value=False)
         )
 
     def is_required(self) -> bool:
         return not self.is_optional()
 
     def set_optional(self, optional: bool) -> T:
-        self.set_property_value(property_name="optional", value=optional)
+        self.set_property_value(property="optional", value=optional)
         return cast(T, self)
 
     def get_name(self) -> Optional[str]:
-        return cast(str, self.get_property_value(property_name="name"))
+        return cast(str, self.get_property_value(property="name"))
 
     def set_name(self, name: Optional[str]):
-        self.set_property_value(property_name="name", value=name)
+        self.set_property_value(property="name", value=name)
 
     def get_container(self) -> Optional["Classifier"]:
         from lionweb.language.classifier import Classifier
@@ -67,19 +67,19 @@ class Feature(M3Node[T], NamespacedEntity, IKeyed[T], Generic[T]):
         raise ValueError("The parent is not a NamespaceProvider")
 
     def get_key(self) -> str:
-        return cast(str, self.get_property_value(property_name="key"))
+        return cast(str, self.get_property_value(property="key"))
 
     def set_key(self, key: str) -> T:
-        self.set_property_value(property_name="key", value=key)
+        self.set_property_value(property="key", value=key)
         return cast(T, self)
 
     @property
     def key(self):
-        return cast(str, self.get_property_value(property_name="key"))
+        return cast(str, self.get_property_value(property="key"))
 
     @key.setter
     def key(self, new_value):
-        self.set_property_value(property_name="key", value=new_value)
+        self.set_property_value(property="key", value=new_value)
 
     def get_declaring_language(self) -> "Language":
         container = self.get_container()

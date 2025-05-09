@@ -3,7 +3,7 @@ import unittest
 from lionweb.language.concept import Concept
 from lionweb.language.interface import Interface
 from lionweb.language.language import Language
-from lionweb.model.classifier_instance_utils import ClassifierInstanceUtils
+from lionweb.model.classifier_instance_utils import get_referred_nodes
 from lionweb.model.reference_value import ReferenceValue
 from lionweb.self.lioncore import LionCore
 
@@ -53,13 +53,11 @@ class ConceptReflectionTest(unittest.TestCase):
         other_concept = Concept(language=language, name="OtherConcept")
         reference = LionCore.get_concept().get_reference_by_name("extends")
         concept.set_extended_concept(None)
-        self.assertEqual(
-            [], ClassifierInstanceUtils.get_referred_nodes(concept, reference)
-        )
+        self.assertEqual([], get_referred_nodes(concept, reference))
         concept.set_extended_concept(other_concept)
         self.assertEqual(
             [other_concept],
-            ClassifierInstanceUtils.get_referred_nodes(concept, reference),
+            get_referred_nodes(concept, reference),
         )
 
     def test_set_reference_extended(self):
@@ -79,17 +77,11 @@ class ConceptReflectionTest(unittest.TestCase):
         i1 = Interface(language=language, name="I1")
         i2 = Interface(language=language, name="I2")
         reference = LionCore.get_concept().get_reference_by_name("implements")
-        self.assertEqual(
-            [], ClassifierInstanceUtils.get_referred_nodes(concept, reference)
-        )
+        self.assertEqual([], get_referred_nodes(concept, reference))
         concept.add_implemented_interface(i1)
-        self.assertEqual(
-            [i1], ClassifierInstanceUtils.get_referred_nodes(concept, reference)
-        )
+        self.assertEqual([i1], get_referred_nodes(concept, reference))
         concept.add_implemented_interface(i2)
-        self.assertEqual(
-            [i1, i2], ClassifierInstanceUtils.get_referred_nodes(concept, reference)
-        )
+        self.assertEqual([i1, i2], get_referred_nodes(concept, reference))
 
     def test_set_reference_implemented(self):
         language = Language()

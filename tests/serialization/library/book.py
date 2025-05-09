@@ -3,7 +3,8 @@ from typing import Optional, cast
 from serialization.library.writer import Writer
 
 from lionweb.language.concept import Concept
-from lionweb.model.classifier_instance_utils import ClassifierInstanceUtils
+from lionweb.model.classifier_instance_utils import (
+    get_only_reference_value_by_reference_name, get_property_value_by_name)
 from lionweb.model.impl.dynamic_node import DynamicNode
 from lionweb.model.reference_value import ReferenceValue
 
@@ -20,9 +21,7 @@ class Book(DynamicNode):
 
     @property
     def title(self) -> str:
-        return cast(
-            str, ClassifierInstanceUtils.get_property_value_by_name(self, "title")
-        )
+        return cast(str, get_property_value_by_name(self, "title"))
 
     @title.setter
     def title(self, value: str):
@@ -31,9 +30,7 @@ class Book(DynamicNode):
 
     @property
     def pages(self) -> int:
-        return cast(
-            int, ClassifierInstanceUtils.get_property_value_by_name(self, "pages")
-        )
+        return cast(int, get_property_value_by_name(self, "pages"))
 
     @pages.setter
     def pages(self, value: int):
@@ -42,9 +39,7 @@ class Book(DynamicNode):
 
     @property
     def author(self) -> Optional["Writer"]:
-        res = ClassifierInstanceUtils.get_only_reference_value_by_reference_name(
-            self, "author"
-        )
+        res = get_only_reference_value_by_reference_name(self, "author")
         if res:
             return cast(Writer, res.referred)
         else:

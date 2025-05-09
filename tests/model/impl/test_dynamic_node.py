@@ -8,7 +8,8 @@ from lionweb.language.containment import Containment
 from lionweb.language.language import Language
 from lionweb.language.lioncore_builtins import LionCoreBuiltins
 from lionweb.language.property import Property
-from lionweb.model.classifier_instance_utils import ClassifierInstanceUtils
+from lionweb.model.classifier_instance_utils import (
+    get_property_value_by_name, set_property_value_by_name)
 from lionweb.model.impl.dynamic_node import DynamicNode
 
 
@@ -135,13 +136,9 @@ class DynamicNodeTest(unittest.TestCase):
         )
         n1 = DynamicNode("n1", a)
 
-        self.assertEqual(
-            False, ClassifierInstanceUtils.get_property_value_by_name(n1, "foo")
-        )
-        ClassifierInstanceUtils.set_property_value_by_name(n1, "foo", True)
-        self.assertEqual(
-            True, ClassifierInstanceUtils.get_property_value_by_name(n1, "foo")
-        )
+        self.assertEqual(False, get_property_value_by_name(n1, "foo"))
+        set_property_value_by_name(n1, "foo", True)
+        self.assertEqual(True, get_property_value_by_name(n1, "foo"))
 
     def test_setting_false_nullable_boolean_property(self):
         lang = Language("MyLanguage", "l-id", "l-key", "123")
@@ -153,11 +150,9 @@ class DynamicNodeTest(unittest.TestCase):
         )
         n1 = DynamicNode("n1", a)
 
-        self.assertIsNone(ClassifierInstanceUtils.get_property_value_by_name(n1, "foo"))
-        ClassifierInstanceUtils.set_property_value_by_name(n1, "foo", False)
-        self.assertEqual(
-            False, ClassifierInstanceUtils.get_property_value_by_name(n1, "foo")
-        )
+        self.assertIsNone(get_property_value_by_name(n1, "foo"))
+        set_property_value_by_name(n1, "foo", False)
+        self.assertEqual(False, get_property_value_by_name(n1, "foo"))
 
     def test_setting_null_nullable_boolean_property(self):
         lang = Language("MyLanguage", "l-id", "l-key", "123")
@@ -169,18 +164,16 @@ class DynamicNodeTest(unittest.TestCase):
         )
         n1 = DynamicNode("n1", a)
 
-        self.assertIsNone(ClassifierInstanceUtils.get_property_value_by_name(n1, "foo"))
-        ClassifierInstanceUtils.set_property_value_by_name(n1, "foo", None)
-        self.assertIsNone(ClassifierInstanceUtils.get_property_value_by_name(n1, "foo"))
+        self.assertIsNone(get_property_value_by_name(n1, "foo"))
+        set_property_value_by_name(n1, "foo", None)
+        self.assertIsNone(get_property_value_by_name(n1, "foo"))
 
         # Check also what happens when we null a value that was previously not null
-        ClassifierInstanceUtils.set_property_value_by_name(n1, "foo", True)
-        self.assertEqual(
-            True, ClassifierInstanceUtils.get_property_value_by_name(n1, "foo")
-        )
+        set_property_value_by_name(n1, "foo", True)
+        self.assertEqual(True, get_property_value_by_name(n1, "foo"))
 
-        ClassifierInstanceUtils.set_property_value_by_name(n1, "foo", None)
-        self.assertIsNone(ClassifierInstanceUtils.get_property_value_by_name(n1, "foo"))
+        set_property_value_by_name(n1, "foo", None)
+        self.assertIsNone(get_property_value_by_name(n1, "foo"))
 
 
 if __name__ == "__main__":

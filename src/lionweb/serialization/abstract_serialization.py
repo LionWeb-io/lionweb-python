@@ -3,7 +3,6 @@ from typing import TYPE_CHECKING, Dict, List
 from lionweb.language.data_type import DataType
 from lionweb.lionweb_version import LionWebVersion
 from lionweb.model import ClassifierInstance
-from lionweb.model.classifier_instance_utils import ClassifierInstanceUtils
 from lionweb.model.has_settable_parent import HasSettableParent
 from lionweb.serialization.classifier_resolver import ClassifierResolver
 from lionweb.serialization.data.metapointer import MetaPointer
@@ -251,15 +250,16 @@ class AbstractSerialization:
             if language is None:
                 raise ValueError()
             reference_value.meta_pointer = MetaPointer.from_keyed(reference, language)
+            from lionweb.model.classifier_instance_utils import \
+                is_builtin_element
+
             reference_value.value = [
                 SerializedReferenceValueEntry(
                     reference=(
                         None
                         if (
                             self.builtins_reference_dangling
-                            and ClassifierInstanceUtils.is_builtin_element(
-                                rv.get_referred()
-                            )
+                            and is_builtin_element(rv.get_referred())
                         )
                         else (rv.get_referred().id if rv.get_referred() else None)
                     ),

@@ -10,7 +10,6 @@ from lionweb.language.enumeration import Enumeration
 from lionweb.language.enumeration_literal import EnumerationLiteral
 from lionweb.language.lioncore_builtins import LionCoreBuiltins
 from lionweb.lionweb_version import LionWebVersion
-from lionweb.model.classifier_instance_utils import ClassifierInstanceUtils
 from lionweb.model.impl.dynamic_annotation_instance import \
     DynamicAnnotationInstance
 from lionweb.model.impl.dynamic_node import DynamicNode
@@ -382,8 +381,10 @@ class JsonSerializationTest(SerializationTest):
 
         self.assertEqual(c2, c1.get_parent())
         self.assertEqual(c1, c2.get_parent())
-        self.assertEqual(ClassifierInstanceUtils.get_children(c1), [c2])
-        self.assertEqual(ClassifierInstanceUtils.get_children(c2), [c1])
+        from lionweb.model.classifier_instance_utils import get_children
+
+        self.assertEqual(get_children(c1), [c2])
+        self.assertEqual(get_children(c2), [c1])
 
         js = SerializationProvider.get_standard_json_serialization()
         serialized = js.serialize_nodes_to_json_element([c1, c2])
@@ -792,7 +793,10 @@ class JsonSerializationTest(SerializationTest):
         )
 
         n1 = DynamicNode("n1", c)
-        ClassifierInstanceUtils.set_property_value_by_name(n1, "foo", "abc")
+        from lionweb.model.classifier_instance_utils import \
+            set_property_value_by_name
+
+        set_property_value_by_name(n1, "foo", "abc")
 
         hjs = SerializationProvider.get_standard_json_serialization()
         serialized_chunk = hjs.serialize_nodes_to_serialization_block([n1])
@@ -1055,9 +1059,10 @@ class JsonSerializationTest(SerializationTest):
         self.assertEqual(
             ProxyNode("synthetic_my-wonderful-partition_projects_1"), todo0.get_parent()
         )
-        prerequisite_todo0 = ClassifierInstanceUtils.get_reference_value_by_name(
-            todo0, "prerequisite"
-        )
+        from lionweb.model.classifier_instance_utils import \
+            get_reference_value_by_name
+
+        prerequisite_todo0 = get_reference_value_by_name(todo0, "prerequisite")
         self.assertEqual(
             [ReferenceValue(referred=ProxyNode("external-1"), resolve_info=None)],
             prerequisite_todo0,

@@ -5,7 +5,6 @@ if TYPE_CHECKING:
 
 from lionweb.language.containment import Containment
 from lionweb.language.language import Language
-from lionweb.language.lioncore_builtins import LionCoreBuiltins
 from lionweb.language.property import Property
 from lionweb.language.reference import Reference
 from lionweb.lionweb_version import LionWebVersion
@@ -137,6 +136,7 @@ class LionCore:
         cls, lion_web_version: LionWebVersion = LionWebVersion.current_version()
     ) -> Language:
         from lionweb.language.concept import Concept
+        from lionweb.language.lioncore_builtins import LionCoreBuiltins
 
         if not isinstance(lion_web_version, LionWebVersion):
             raise ValueError(

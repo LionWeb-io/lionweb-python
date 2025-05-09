@@ -1,4 +1,3 @@
-from lionweb.model.classifier_instance_utils import ClassifierInstanceUtils
 from lionweb.model.node import Node
 from lionweb.utils import is_valid_id
 from lionweb.utils.validation_result import ValidationResult
@@ -41,7 +40,9 @@ class NodeTreeValidator(Validator):
                 node,
             )
 
-        for child in ClassifierInstanceUtils.get_children(node):
+        from lionweb.model.classifier_instance_utils import get_children
+
+        for child in get_children(node):
             self._validate_node_and_descendants(child, validation_result)
 
     def _validate_ids_are_unique(self, node: Node, result: ValidationResult) -> None:

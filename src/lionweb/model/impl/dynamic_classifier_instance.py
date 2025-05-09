@@ -1,15 +1,16 @@
-from typing import Any, Dict, List, Optional, Union, cast
+from typing import TYPE_CHECKING, Any, Dict, List, Optional, Union, cast
 
 from lionweb.language.containment import Containment
-from lionweb.language.lioncore_builtins import LionCoreBuiltins
 from lionweb.language.reference import Reference
 from lionweb.model.classifier_instance import ClassifierInstance
-from lionweb.model.classifier_instance_utils import ClassifierInstanceUtils
 from lionweb.model.has_settable_parent import HasSettableParent
 from lionweb.model.impl.abstract_classifier_instance import \
     AbstractClassifierInstance
 from lionweb.model.node import Node
 from lionweb.model.reference_value import ReferenceValue
+
+if TYPE_CHECKING:
+    from lionweb.language import Property
 
 
 class DynamicClassifierInstance(AbstractClassifierInstance, ClassifierInstance):
@@ -32,10 +33,21 @@ class DynamicClassifierInstance(AbstractClassifierInstance, ClassifierInstance):
 
     # Public methods for properties
 
-    def get_property_value(self, **kwargs) -> Optional[object]:
-        property = kwargs["property"]
+    def get_property_value(self, property: Union[str, "Property"]) -> Optional[object]:
+        from lionweb.language import Classifier
+        from lionweb.language.lioncore_builtins import LionCoreBuiltins
+
         if property is None:
             raise ValueError("Property should not be null")
+        if isinstance(property, str):
+            property_name = property
+            property_tmp = cast(Classifier, self.get_classifier()).get_property_by_name(
+                property_name
+            )
+            if property_tmp is None:
+                raise ValueError(f"Property {property_name} was not found")
+            else:
+                property = property_tmp
         if property.key is None:
             raise ValueError("Property.key should not be null")
         if property not in self.get_classifier().all_properties():
@@ -53,9 +65,18 @@ class DynamicClassifierInstance(AbstractClassifierInstance, ClassifierInstance):
 
         return stored_value
 
-    def set_property_value(self, **kwargs) -> None:
-        property = kwargs["property"]
-        value = kwargs["value"]
+    def set_property_value(self, property: Union[str, "Property"], value: Any) -> None:
+        from lionweb.language import Classifier
+
+        if isinstance(property, str):
+            property_name = property
+            property_tmp = cast(Classifier, self.get_classifier()).get_property_by_name(
+                property
+            )
+            if property_tmp is None:
+                raise ValueError(f"Property {property_name} not found")
+            else:
+                property = property_tmp
         if property is None:
             raise ValueError("Property should not be null")
         if property.key is None:
@@ -76,7 +97,9 @@ class DynamicClassifierInstance(AbstractClassifierInstance, ClassifierInstance):
         self, containment: Union[Containment, str, None] = None
     ) -> List[Node]:
         if containment is None:
-            return ClassifierInstanceUtils.get_children(self)
+            from lionweb.model.classifier_instance_utils import get_children
+
+            return get_children(self)
         my_containment: Union[Containment, str]
         if isinstance(containment, str):
             tmp = self.get_classifier().get_containment_by_name(containment)

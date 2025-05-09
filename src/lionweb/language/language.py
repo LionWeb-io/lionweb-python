@@ -40,20 +40,20 @@ class Language(M3Node["Language"], NamespaceProvider, IKeyed["Language"]):
             self.set_version(version)
 
     def set_name(self, name: Optional[str]) -> "Language":
-        self.set_property_value(property_name="name", value=name)
+        self.set_property_value(property="name", value=name)
         return self
 
     def set_version(self, version: Optional[str]) -> "Language":
-        self.set_property_value(property_name="version", value=version)
+        self.set_property_value(property="version", value=version)
         return self
 
     def set_key(self, key: str) -> "Language":
-        self.set_property_value(property_name="key", value=key)
+        self.set_property_value(property="key", value=key)
         return self
 
     @property
     def key(self):
-        return cast(str, self.get_property_value(property_name="key"))
+        return cast(str, self.get_property_value(property="key"))
 
     @key.setter
     def key(self, new_value):
@@ -137,13 +137,13 @@ class Language(M3Node["Language"], NamespaceProvider, IKeyed["Language"]):
         )
 
     def get_name(self) -> Optional[str]:
-        return cast(Optional[str], self.get_property_value(property_name="name"))
+        return cast(Optional[str], self.get_property_value(property="name"))
 
     def get_key(self) -> str:
-        return cast(str, self.get_property_value(property_name="key"))
+        return cast(str, self.get_property_value(property="key"))
 
     def get_version(self) -> Optional[str]:
-        return cast(Optional[str], self.get_property_value(property_name="version"))
+        return cast(Optional[str], self.get_property_value(property="version"))
 
     def get_element_by_name(self, name: str) -> Optional["LanguageEntity"]:
         return next((e for e in self.get_elements() if e.get_name() == name), None)

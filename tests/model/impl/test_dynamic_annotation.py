@@ -2,7 +2,8 @@ import unittest
 
 from serialization.my_annotation import MyAnnotation
 
-from lionweb.model.classifier_instance_utils import ClassifierInstanceUtils
+from lionweb.model.classifier_instance_utils import (
+    get_property_value_by_name, set_property_value_by_name)
 from lionweb.model.impl.dynamic_node import DynamicNode
 
 
@@ -12,7 +13,7 @@ class TestDynamicAnnotation(unittest.TestCase):
         my_annotation = MyAnnotation(id="ann1")
         value1 = DynamicNode("value1", MyAnnotation.VALUE)
 
-        ClassifierInstanceUtils.set_property_value_by_name(value1, "amount", 123)
+        set_property_value_by_name(value1, "amount", 123)
         my_annotation.add_child(containment="values", child=value1)
 
         self.assertEqual(1, len(my_annotation.get_children("values")))
@@ -20,9 +21,7 @@ class TestDynamicAnnotation(unittest.TestCase):
         retrieved_value1 = my_annotation.get_children("values")[0]
         self.assertEqual(
             123,
-            ClassifierInstanceUtils.get_property_value_by_name(
-                retrieved_value1, "amount"
-            ),
+            get_property_value_by_name(retrieved_value1, "amount"),
         )
 
 

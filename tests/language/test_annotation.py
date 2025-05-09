@@ -2,7 +2,7 @@ import unittest
 
 from lionweb.language import (Annotation, Concept, Containment, Interface,
                               Language, Property)
-from lionweb.model.classifier_instance_utils import ClassifierInstanceUtils
+from lionweb.model.classifier_instance_utils import get_referred_nodes
 from lionweb.model.reference_value import ReferenceValue
 from lionweb.self.lioncore import LionCore
 
@@ -34,7 +34,7 @@ class AnnotationTest(BaseTest):
         annotation = Annotation(language=language, name="MyAnnotation")
         self.assertEqual(
             [],
-            ClassifierInstanceUtils.get_referred_nodes(
+            get_referred_nodes(
                 annotation, LionCore.get_annotation().get_reference_by_name("annotates")
             ),
         )
@@ -43,7 +43,7 @@ class AnnotationTest(BaseTest):
         annotation.annotates = my_concept
         self.assertEqual(
             [my_concept],
-            ClassifierInstanceUtils.get_referred_nodes(
+            get_referred_nodes(
                 annotation, LionCore.get_annotation().get_reference_by_name("annotates")
             ),
         )
