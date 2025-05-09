@@ -41,110 +41,81 @@ This approach is ideal for **generic tools** and **runtime interoperability**. T
 ### Example
 
 ```python
-package com.example;
+from lionweb.language import Language, Concept, Property, Containment
+from lionweb.model import DynamicNode
+from lionweb.language import LionCoreBuiltins
+from lionweb.utils.node_tree_validator import NodeTreeValidator
 
-import io.lionweb.lioncore.java.language.*;
-import io.lionweb.lioncore.java.model.ClassifierInstanceUtils;
-import io.lionweb.lioncore.java.model.Node;
-import io.lionweb.lioncore.java.model.impl.DynamicNode;
-import io.lionweb.lioncore.java.utils.NodeTreeValidator;
-import io.lionweb.lioncore.java.utils.ValidationResult;
+# === Define the Language ===
 
-import java.util.List;
+# Define the 'TaskList' concept
+task_list_concept = Concept(
+    name="TaskList", key="TaskList", id="TaskList-id", abstract=False, partition=True
+)
 
-public class HomogeneousAPIExample {
+# Define the 'Task' concept
+task_concept = Concept(
+    name="Task", key="Task", id="Task-id", abstract=False, partition=False
+)
 
-    private static Concept taskListConcept;
-    private static Concept taskConcept;
-    private static Property nameProperty;
-    private static Containment tasksContainment;
-    private static Language taskLanguage;
+# Add a 'tasks' containment
+tasks_containment = Containment(
+    name="tasks",
+    key="TasksList-tasks",
+    id="TasksList-tasks-id",
+    type=task_concept,
+    multiple=True,
+    optional=False,
+)
+task_list_concept.add_feature(tasks_containment)
 
-    {
-        defineLanguage();
-    }
+# Add a 'name' property
+name_property = Property(
+    name="name", key="task-name", id="task-name-id", type=LionCoreBuiltins.get_string()
+)
+task_concept.add_feature(name_property)
 
-    public static void defineLanguage() {
-        // Define the 'TaskList' concept
-        taskListConcept = new Concept("TaskList");
-        taskListConcept.setID("TaskList-id");
-        taskListConcept.setName("TaskList");
-        taskListConcept.setKey("TaskList");
-        taskListConcept.setAbstract(false);
-        taskListConcept.setPartition(true);
+# Define the language container
+task_language = Language(
+    name="Task Language",
+    key="task",
+    id="task-id",
+    version="1.0"
+)
+task_language.add_element(task_list_concept)
+task_language.add_element(task_concept)
 
-        // Define the 'Task' concept
-        taskConcept = new Concept("Task");
-        taskConcept.setID("Task-id");
-        taskConcept.setName("Task");
-        taskConcept.setKey("Task");
-        taskConcept.setAbstract(false);
+# === Use DynamicNode to Build a Model ===
 
-        // Add a 'tasks' containment
-        tasksContainment = new Containment()
-                .setID("TasksList-tasks-id")
-                .setName("tasks")
-                .setKey("TasksList-tasks")
-                .setMultiple(true)
-                .setOptional(false)
-                .setType(taskConcept);
-        taskListConcept.addFeature(tasksContainment);
+# Create root node (a TaskList)
+errands = DynamicNode(id="errands", concept=task_list_concept)
 
-        // Add a 'name' property
-        nameProperty = new Property();
-        nameProperty.setID("task-name-id");
-        nameProperty.setName("name");
-        nameProperty.setKey("task-name");
-        nameProperty.setType(LionCoreBuiltins.getString());
-        taskConcept.addFeature(nameProperty);
+# Create first Task node
+task1 = DynamicNode(id="task1-id", concept=task_concept)
+task1.set_property_value(property=name_property, value="My Task #1")
+errands.add_child(tasks_containment, task1)
 
-        // Define the language container
-        taskLanguage = new Language();
-        taskLanguage.setID("task-id");
-        taskLanguage.setKey("task");
-        taskLanguage.setName("Task Language");
-        taskLanguage.setVersion("1.0");
-        taskLanguage.addElement(taskListConcept);
-        taskLanguage.addElement(taskConcept);
+# Create second Task node
+task2 = DynamicNode(id="task2-id", concept=task_concept)
+task2.set_property_value(name_property, "My Task #2")
+errands.add_child(tasks_containment, task2)
 
-    }
+# Validate the model tree
+result = NodeTreeValidator().validate(errands)
+if result.has_errors():
+    raise ValueError(f"The tree is invalid: {result}")
 
-    public void useDynamicNode() {
-        // Create the model
-        DynamicNode errands = new DynamicNode("errands", taskListConcept);
+# Access the model using direct containment
+tasks = errands.get_children(tasks_containment)
+print(f"Tasks found: {len(tasks)}")
+for task in tasks:
+    print(f" - {task.get_property_value(name_property)}")
 
-        DynamicNode task1 = new DynamicNode("task1-id", taskConcept);
-        task1.setPropertyValue(nameProperty, "My Task #1");
-        errands.addChild(tasksContainment, task1);
-
-        DynamicNode task2 = new DynamicNode("task2-id", taskConcept);
-        task2.setPropertyValue(nameProperty, "My Task #2");
-        errands.addChild(tasksContainment, task2);
-
-        ValidationResult res = new NodeTreeValidator().validate(errands);
-        if (!res.isSuccessful()) {
-            throw new IllegalStateException("The tree is invalid: " + res);
-        }
-
-        // Access the model
-        List<Node> tasks = errands.getChildren(tasksContainment);
-        System.out.println("Tasks found: " + tasks.size());
-        for (Node task : tasks) {
-            System.out.println(" - " + task.getPropertyValue(nameProperty));
-        }
-
-        // Access the model, using ClassifierInstanceUtils
-        List<? extends Node> tasksAgain = ClassifierInstanceUtils.getChildrenByContainmentName(errands, "tasks");
-        System.out.println("Tasks found: " + tasksAgain.size());
-        for (Node task : tasksAgain) {
-            System.out.println(" - " + ClassifierInstanceUtils.getPropertyValueByName(task, "name"));
-        }
-    }
-
-    public static void main(String[] args) {
-        new HomogeneousAPIExample().useDynamicNode();
-    }
-}
+# Access the model using name-based utilities
+tasks_again = errands.get_children("tasks")
+print(f"Tasks found again: {len(tasks_again)}")
+for task in tasks_again:
+    print(f" - {task.get_property_value('name')}")
 ```
 
 ### Evaluation
@@ -180,130 +151,120 @@ Or you can define a code generator which, given a language, produce the correspo
 ### Example
 
 ```python
-package com.example;
+import uuid
+from typing import List, cast
 
-import io.lionweb.lioncore.java.language.*;
-import io.lionweb.lioncore.java.model.impl.DynamicNode;
-import io.lionweb.lioncore.java.utils.NodeTreeValidator;
-import io.lionweb.lioncore.java.utils.ValidationResult;
+from lionweb.language import Language, Concept, Property, Containment
+from lionweb.model import DynamicNode
+from lionweb.language import LionCoreBuiltins
+from lionweb.utils.node_tree_validator import NodeTreeValidator
 
-import java.util.List;
-import java.util.UUID;
-import java.util.stream.Collectors;
 
-public class HeterogeneousAPIExample {
+# === Define the Language ===
 
-    private static Concept taskListConcept;
-    private static Concept taskConcept;
-    private static Property nameProperty;
-    private static Containment tasksContainment;
-    private static Language taskLanguage;
+# Global elements
+task_list_concept: Concept
+task_concept: Concept
+name_property: Property
+tasks_containment: Containment
+task_language: Language
 
-    {
-        defineLanguage();
-    }
 
-    private class TaskList extends DynamicNode {
-        TaskList() {
-            super(UUID.randomUUID().toString(), taskListConcept);
-        }
+def define_language():
+    global task_list_concept, task_concept, name_property, tasks_containment, task_language
 
-        void addTask(Task task) {
-            addChild(tasksContainment, task);
-        }
+    # Define the 'TaskList' concept
+    task_list_concept = Concept(
+        name="TaskList", key="TaskList", id="TaskList-id", abstract=False, partition=True
+    )
 
-        List<Task> getTasks() {
-            return getChildren(tasksContainment).stream().map(n -> (Task)n).collect(Collectors.toList());
-        }
-    }
+    # Define the 'Task' concept
+    task_concept = Concept(
+        name="Task", key="Task", id="Task-id", abstract=False, partition=False
+    )
 
-    private class Task extends DynamicNode {
-        Task(String name) {
-            super(UUID.randomUUID().toString(), taskConcept);
-            setName(name);
-        }
+    # Add a 'tasks' containment
+    tasks_containment = Containment(
+        name="tasks",
+        key="TasksList-tasks",
+        id="TasksList-tasks-id",
+        type=task_concept,
+        multiple=True,
+        optional=False,
+    )
+    task_list_concept.add_feature(tasks_containment)
 
-        void setName(String name) {
-            setPropertyValue(nameProperty, name);
-        }
+    # Add a 'name' property
+    name_property = Property(
+        name="name", key="task-name", id="task-name-id", type=LionCoreBuiltins.get_string()
+    )
+    task_concept.add_feature(name_property)
 
-        String getName() {
-            return (String) getPropertyValue(nameProperty);
-        }
-    }
+    # Define the language container
+    task_language = Language(
+        name="Task Language",
+        key="task",
+        id="task-id",
+        version="1.0"
+    )
+    task_language.add_element(task_list_concept)
+    task_language.add_element(task_concept)
 
-    public static void defineLanguage() {
-        // Define the 'TaskList' concept
-        taskListConcept = new Concept("TaskList");
-        taskListConcept.setID("TaskList-id");
-        taskListConcept.setName("TaskList");
-        taskListConcept.setKey("TaskList");
-        taskListConcept.setAbstract(false);
-        taskListConcept.setPartition(true);
 
-        // Define the 'Task' concept
-        taskConcept = new Concept("Task");
-        taskConcept.setID("Task-id");
-        taskConcept.setName("Task");
-        taskConcept.setKey("Task");
-        taskConcept.setAbstract(false);
+# === Define specific DynamicNode subclasses ===
 
-        // Add a 'tasks' containment
-        tasksContainment = new Containment()
-                .setID("TasksList-tasks-id")
-                .setName("tasks")
-                .setKey("TasksList-tasks")
-                .setMultiple(true)
-                .setOptional(false)
-                .setType(taskConcept);
-        taskListConcept.addFeature(tasksContainment);
+class Task(DynamicNode):
+    def __init__(self, name: str):
+        super().__init__(str(uuid.uuid4()), task_concept)
+        self.set_name(name)
 
-        // Add a 'name' property
-        nameProperty = new Property();
-        nameProperty.setID("task-name-id");
-        nameProperty.setName("name");
-        nameProperty.setKey("task-name");
-        nameProperty.setType(LionCoreBuiltins.getString());
-        taskConcept.addFeature(nameProperty);
+    def set_name(self, name: str):
+        self.set_property_value(name_property, name)
 
-        // Define the language container
-        taskLanguage = new Language();
-        taskLanguage.setID("task-id");
-        taskLanguage.setKey("task");
-        taskLanguage.setName("Task Language");
-        taskLanguage.setVersion("1.0");
-        taskLanguage.addElement(taskListConcept);
-        taskLanguage.addElement(taskConcept);
+    def get_name(self) -> str:
+        return self.get_property_value(name_property)
 
-    }
 
-    public void useSpecificClasses() {
-        // Create the model
-        TaskList errands = new TaskList();
+class TaskList(DynamicNode):
+    def __init__(self):
+        super().__init__(str(uuid.uuid4()), task_list_concept)
 
-        Task task1 = new Task("My Task #1");
-        errands.addTask(task1);
+    def add_task(self, task: Task):
+        self.add_child(tasks_containment, task)
 
-        Task task2 = new Task("My Task #2");
-        errands.addTask(task2);
+    def get_tasks(self) -> List[Task]:
+        return self.get_children(tasks_containment)
 
-        ValidationResult res = new NodeTreeValidator().validate(errands);
-        if (!res.isSuccessful()) {
-            throw new IllegalStateException("The tree is invalid: " + res);
-        }
 
-        // Access the model
-        List<Task> tasks = errands.getTasks();
-        System.out.println("Tasks found: " + tasks.size());
-        for (Task task : tasks) {
-            System.out.println(" - " + task.getName());
-        }
-    }
+# === Main usage function ===
 
-    public static void main(String[] args) {
-        new HeterogeneousAPIExample().useSpecificClasses();
-    }
-}
+def use_specific_classes():
+    define_language()
+
+    errands = TaskList()
+
+    task1 = Task("My Task #1")
+    errands.add_task(task1)
+
+    task2 = Task("My Task #2")
+    errands.add_task(task2)
+
+    # Validate
+    result = NodeTreeValidator().validate(errands)
+    if result.has_errors():
+        raise ValueError(f"The tree is invalid: {result}")
+
+    # Access
+    tasks = errands.get_tasks()
+    print(f"Tasks found: {len(tasks)}")
+    for task in tasks:
+        print(f" - {task.get_name()}")
+
+
+# === Entry Point ===
+
+if __name__ == "__main__":
+    use_specific_classes()
 ```
 
 ### Evaluation

@@ -2,9 +2,10 @@
 sidebar_position: 43
 ---
 
-# Serialization in LionWeb Java
+# Serialization in LionWeb Python
 
-The LionWeb Java library provides robust support for **serializing** and **deserializing** models composed of nodes. These nodes can represent instances of a language as well as the language definitions themselves.
+The LionWeb Python library provides robust support for **serializing** and **deserializing** models composed of nodes. 
+These nodes can represent instances of a language as well as the language definitions themselves.
 
 Serialization is essential to:
 - Communicate with a LionWeb-compliant repository.
@@ -14,7 +15,8 @@ Serialization is essential to:
 
 ## Homogeneous Serialization
 
-When working with the **homogeneous API**, such as `DynamicNode`, the LionWeb Java library provides default serialization mechanisms that can be used out of the box.
+When working with the **homogeneous API**, such as `DynamicNode`, the LionWeb Python library provides default 
+serialization mechanisms that can be used out of the box.
 
 The following example demonstrates how to:
 1. Define a small language consisting of `TaskList` and `Task` concepts.
@@ -75,7 +77,7 @@ Node restored = serialization.deserializeToNodes(json).get(0);
 
 ## Serializing Language Definitions
 
-LionWeb Java treats languages as regular node trees:
+LionWeb Python treats languages as regular node trees:
 - Concepts, Properties, Containments, and the Language itself are just nodes.
 - The default serializer knows how to instantiate these standard types.
 
@@ -90,7 +92,7 @@ No special registration is required for built-in language elements like `Languag
 
 ## A complete example
 
-By combining dynamic and custom deserialization strategies, LionWeb Java offers both flexibility and strong typing for working with serialized models and metamodels.
+By combining dynamic and custom deserialization strategies, LionWeb Python offers both flexibility and strong typing for working with serialized models and metamodels.
 
 ```java
 package com.example;
