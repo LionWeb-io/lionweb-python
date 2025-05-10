@@ -5,22 +5,12 @@ sidebar_position: 44
 
 # Working with the LionWeb Repository
 
-Working with the [LionWeb Repository](https://github.com/LionWeb-io/lionweb-repository) we can store and retrieve nodes. It is also a mean to exchange models with other LionWeb-compliant components. You can refer to the website of the LionWeb Repository to learn how to start it. 
+Working with the [LionWeb Repository](https://github.com/LionWeb-io/lionweb-repository) we can store and retrieve nodes. 
+It is also a mean to exchange models with other LionWeb-compliant components. You can refer to the website of the 
+LionWeb Repository to learn how to start it. 
 
-This page provides an overview of how to interact with the repository using the provided Java client and outlines the basic concepts involved.
-
-## Using Gradle
-
-Add the following to your `build.gradle` or `build.gradle.kts`:
-
-```kotlin
-dependencies {
-    // Previously added
-    implementation("io.lionweb.lionweb-java:lionweb-java-2024.1-core:$lionwebVersion")
-    // Specific for working with the LionWeb Repository
-    implementation("io.lionweb.lionweb-java:lionweb-java-2024.1-repo-client:$lionwebVersion")
-}
-```
+This page provides an overview of how to interact with the repository using the provided Python client and outlines the 
+basic concepts involved.
 
 ## Overview
 
@@ -37,12 +27,11 @@ In this guide we will only focus on the Bulk APIs.
 
 ## Working with the Bulk APIs
 
-It offers REST APIs for communication, which are wrapped in a convenient Java client: `LionWebRepoClient`. This client supports features like:
+It offers REST APIs for communication, which are wrapped in a convenient Python client: `RepoClient`. This client supports features like:
 
 - Creating and managing **partitions** (top-level model containers)
 - Storing and retrieving **nodes**
 - Supporting multiple **LionWeb versions**
-- Providing hooks for **functional testing**
 
 ## Example Usage
 
@@ -78,4 +67,5 @@ assertEquals(p1, retrievedNodes1.get(0));
 
 ### Creating partitions
 
-Something to keep in mind is that the LionWeb Repository will only let us create partitions without children. So, we may need to create a partition and only then add children to it by invoking **store**.
+Something to keep in mind is that the LionWeb Repository will only let us create partitions without children. 
+So, we may need to create a partition and only then add children to it by invoking **store**.
