@@ -6,7 +6,7 @@ from lionweb.language import Concept, Property
 from lionweb.lionweb_version import LionWebVersion
 from lionweb.model.classifier_instance_utils import get_property_value_by_name
 from lionweb.model.node import Node
-from lionweb.serialization.serialization_provider import SerializationProvider
+from lionweb.serialization import create_standard_json_serialization
 from lionweb.serialization.serialized_json_comparison_utils import \
     SerializedJsonComparisonUtils
 
@@ -27,9 +27,7 @@ class SerializationOfLibraryTest(SerializationTest):
             "r",
         ) as f:
             json_element = json.load(f)
-        json_serialization = SerializationProvider.get_standard_json_serialization(
-            LionWebVersion.V2023_1
-        )
+        json_serialization = create_standard_json_serialization(LionWebVersion.V2023_1)
         deserialized_nodes = json_serialization.deserialize_json_to_nodes(json_element)
 
         library: Concept = self.concept_by_id(deserialized_nodes, "library-Library")
@@ -64,9 +62,7 @@ class SerializationOfLibraryTest(SerializationTest):
         with input_path.open("r") as file:
             json_element = json.load(file)
 
-        json_serialization = SerializationProvider.get_standard_json_serialization(
-            LionWebVersion.V2023_1
-        )
+        json_serialization = create_standard_json_serialization(LionWebVersion.V2023_1)
         deserialized_nodes = json_serialization.deserialize_json_to_nodes(json_element)
         reserialized = json_serialization.serialize_tree_to_json_element(
             deserialized_nodes[0]
@@ -89,9 +85,7 @@ class SerializationOfLibraryTest(SerializationTest):
 
         # The library MM is not using the standard primitive types but its own, so we need to specify
         # how to serialize those values
-        json_serialization = SerializationProvider.get_standard_json_serialization(
-            LionWebVersion.V2023_1
-        )
+        json_serialization = create_standard_json_serialization(LionWebVersion.V2023_1)
 
         # Register serializers for custom primitive types
         json_serialization.primitive_values_serialization.register_serializer(
@@ -127,9 +121,7 @@ class SerializationOfLibraryTest(SerializationTest):
             "r",
         ) as f:
             data = json.load(f)
-        json_serialization = SerializationProvider.get_standard_json_serialization(
-            LionWebVersion.V2023_1
-        )
+        json_serialization = create_standard_json_serialization(LionWebVersion.V2023_1)
         with self.assertRaises(Exception):
             json_serialization.deserialize_json_to_nodes(data)
 

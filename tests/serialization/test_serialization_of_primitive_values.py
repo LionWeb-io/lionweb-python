@@ -2,8 +2,8 @@ import json
 import unittest
 
 from lionweb.lionweb_version import LionWebVersion
+from lionweb.serialization import create_standard_json_serialization
 from lionweb.serialization.json_utils import JsonArray
-from lionweb.serialization.serialization_provider import SerializationProvider
 from lionweb.serialization.serialized_json_comparison_utils import \
     SerializedJsonComparisonUtils
 
@@ -42,7 +42,7 @@ class TestSerializationOfPrimitiveValues(SerializationTest):
         }"""
         )
 
-        json_serialization = SerializationProvider.get_standard_json_serialization()
+        json_serialization = create_standard_json_serialization()
         serialized = json_serialization.serialize_nodes_to_json_element([node])
         SerializedJsonComparisonUtils.assert_equivalent_lionweb_json(
             expected, serialized
@@ -75,7 +75,7 @@ class TestSerializationOfPrimitiveValues(SerializationTest):
         }"""
         )
 
-        json_serialization = SerializationProvider.get_standard_json_serialization()
+        json_serialization = create_standard_json_serialization()
         json_serialization.classifier_resolver.register_language(
             MyNodeWithProperties.LANGUAGE
         )
@@ -116,7 +116,7 @@ class TestSerializationOfPrimitiveValues(SerializationTest):
         }"""
         )
 
-        json_serialization = SerializationProvider.get_standard_json_serialization()
+        json_serialization = create_standard_json_serialization()
         serialized = json_serialization.serialize_nodes_to_json_element(node)
         SerializedJsonComparisonUtils.assert_equivalent_lionweb_json(
             expected, serialized
@@ -147,7 +147,7 @@ class TestSerializationOfPrimitiveValues(SerializationTest):
         }"""
         )
 
-        json_serialization = SerializationProvider.get_standard_json_serialization()
+        json_serialization = create_standard_json_serialization()
         json_serialization.classifier_resolver.register_language(
             MyNodeWithProperties.LANGUAGE
         )
@@ -188,7 +188,7 @@ class TestSerializationOfPrimitiveValues(SerializationTest):
         }"""
         )
 
-        json_serialization = SerializationProvider.get_standard_json_serialization()
+        json_serialization = create_standard_json_serialization()
         serialized = json_serialization.serialize_nodes_to_json_element(node)
         SerializedJsonComparisonUtils.assert_equivalent_lionweb_json(
             expected, serialized
@@ -222,7 +222,7 @@ class TestSerializationOfPrimitiveValues(SerializationTest):
             ]
         }"""
 
-        json_serialization = SerializationProvider.get_standard_json_serialization()
+        json_serialization = create_standard_json_serialization()
         json_serialization.classifier_resolver.register_language(
             MyNodeWithProperties.LANGUAGE
         )
@@ -272,9 +272,7 @@ class TestSerializationOfPrimitiveValues(SerializationTest):
         }"""
         )
 
-        json_serialization = SerializationProvider.get_standard_json_serialization(
-            LionWebVersion.V2023_1
-        )
+        json_serialization = create_standard_json_serialization(LionWebVersion.V2023_1)
         serialized = json_serialization.serialize_nodes_to_json_element(node)
         SerializedJsonComparisonUtils.assert_equivalent_lionweb_json(
             expected, serialized
@@ -313,9 +311,7 @@ class TestSerializationOfPrimitiveValues(SerializationTest):
             ]
         }"""
         )
-        json_serialization = SerializationProvider.get_standard_json_serialization(
-            LionWebVersion.V2023_1
-        )
+        json_serialization = create_standard_json_serialization(LionWebVersion.V2023_1)
 
         json_serialization.classifier_resolver.register_language(
             MyNodeWithProperties2023.LANGUAGE

@@ -4,7 +4,7 @@ import os
 from lionweb.language import Concept
 from lionweb.language.language import Language
 from lionweb.lionweb_version import LionWebVersion
-from lionweb.serialization.serialization_provider import SerializationProvider
+from lionweb.serialization import create_standard_json_serialization
 
 
 class LibraryLanguage:
@@ -27,9 +27,7 @@ class LibraryLanguage:
         with open(file_path, "r") as file:
             json_element = json.load(file)
 
-        json_serialization = SerializationProvider.get_standard_json_serialization(
-            LionWebVersion.V2023_1
-        )
+        json_serialization = create_standard_json_serialization(LionWebVersion.V2023_1)
         deserialized_nodes = json_serialization.deserialize_json_to_nodes(json_element)
 
         LibraryLanguage.LIBRARY_MM = next(

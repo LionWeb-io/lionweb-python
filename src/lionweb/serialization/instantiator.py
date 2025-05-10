@@ -16,6 +16,12 @@ if TYPE_CHECKING:
         SerializedClassifierInstance
 
 
+class InstantiationError(Exception):
+    def __init__(self, classifier):
+        super().__init__(f"Unable to instantiate instance with classifier {classifier}")
+        self.classifier = classifier
+
+
 class Instantiator:
     class ClassifierSpecificInstantiator:
         def instantiate(
@@ -29,8 +35,8 @@ class Instantiator:
 
     def __init__(self):
         self.custom_deserializers: Dict[str, Callable] = {}
-        self.default_node_deserializer = lambda classifier, serialized_node, deserialized_instances_by_id, properties_values: Exception(
-            f"Unable to instantiate instance with classifier {classifier}"
+        self.default_node_deserializer = lambda classifier, serialized_node, deserialized_instances_by_id, properties_values: InstantiationError(
+            classifier
         )
 
     def enable_dynamic_nodes(self):
@@ -62,20 +68,20 @@ class Instantiator:
                 deserialized_instances_by_id,
                 properties_values,
             )
-            if isinstance(res, Exception):
-                raise res
-            return res
-        res = self.default_node_deserializer(
-            classifier,
-            serialized_instance,
-            deserialized_instances_by_id,
-            properties_values,
-        )
+        else:
+            res = self.default_node_deserializer(
+                classifier,
+                serialized_instance,
+                deserialized_instances_by_id,
+                properties_values,
+            )
         if isinstance(res, Exception):
             raise res
         return res
 
-    def register_custom_deserializer(self, classifier_id, deserializer):
+    def register_custom_deserializer(
+        self, classifier_id, deserializer
+    ) -> "Instantiator":
         self.custom_deserializers[classifier_id] = deserializer
         return self
 

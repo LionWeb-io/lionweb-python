@@ -7,21 +7,19 @@ from lionweb.model.classifier_instance_utils import \
     get_only_reference_value_by_reference_name
 from lionweb.model.impl.dynamic_node import DynamicNode
 from lionweb.self.lioncore import LionCore
+from lionweb.serialization import create_standard_json_serialization
 from lionweb.serialization.deserialization_exception import \
     DeserializationException
 from lionweb.serialization.deserialization_status import DeserializationStatus
 from lionweb.serialization.low_level_json_serialization import \
     LowLevelJsonSerialization
 from lionweb.serialization.node_populator import NodePopulator
-from lionweb.serialization.serialization_provider import SerializationProvider
 
 
 class NodePopulatorTest(unittest.TestCase):
 
     def test_populate_reference_to_builtins_value_with_correct_id(self):
-        serialization = SerializationProvider.get_standard_json_serialization(
-            LionWebVersion.V2024_1
-        )
+        serialization = create_standard_json_serialization(LionWebVersion.V2024_1)
         deserialization_status = DeserializationStatus(
             [], serialization.instance_resolver
         )
@@ -76,9 +74,7 @@ class NodePopulatorTest(unittest.TestCase):
         )
 
     def test_populate_reference_to_builtins_value_with_incorrect_id(self):
-        serialization = SerializationProvider.get_standard_json_serialization(
-            LionWebVersion.V2024_1
-        )
+        serialization = create_standard_json_serialization(LionWebVersion.V2024_1)
         deserialization_status = DeserializationStatus(
             [], serialization.instance_resolver
         )
@@ -129,9 +125,7 @@ class NodePopulatorTest(unittest.TestCase):
             node_populator.populate_classifier_instance(node, serialized_node)
 
     def test_populate_reference_to_builtins_value_with_no_id(self):
-        serialization = SerializationProvider.get_standard_json_serialization(
-            LionWebVersion.V2024_1
-        )
+        serialization = create_standard_json_serialization(LionWebVersion.V2024_1)
         deserialization_status = DeserializationStatus(
             [], serialization.instance_resolver
         )

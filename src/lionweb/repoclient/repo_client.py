@@ -6,8 +6,8 @@ from pydantic import BaseModel
 from lionweb.lionweb_version import LionWebVersion
 from lionweb.model import ClassifierInstance
 from lionweb.model.node import Node
+from lionweb.serialization import create_standard_json_serialization
 from lionweb.serialization.json_serialization import JsonSerialization
-from lionweb.serialization.serialization_provider import SerializationProvider
 from lionweb.serialization.unavailable_node_policy import UnavailableNodePolicy
 
 
@@ -40,7 +40,7 @@ class RepoClient:
         self._client_id = client_id
         self._repository_name = repository_name
         if serialization is None:
-            self._serialization = SerializationProvider.get_standard_json_serialization(
+            self._serialization = create_standard_json_serialization(
                 self._lionweb_version
             )
         else:

@@ -5,7 +5,7 @@ import click
 from lionweb.generation.language_generation import language_generation
 from lionweb.language import Language
 from lionweb.lionweb_version import LionWebVersion
-from lionweb.serialization.serialization_provider import SerializationProvider
+from lionweb.serialization import create_standard_json_serialization
 
 
 @click.command()
@@ -26,9 +26,7 @@ def main(dependencies, lionweb_language, output):
         node_classes_generation
 
     """Simple CLI that processes a file and writes results to a directory."""
-    serialization = SerializationProvider.get_standard_json_serialization(
-        LionWebVersion.V2023_1
-    )
+    serialization = create_standard_json_serialization(LionWebVersion.V2023_1)
 
     for dep in dependencies:
         click.echo(f"Processing dependency {dep}")

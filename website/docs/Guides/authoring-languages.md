@@ -85,7 +85,7 @@ if res.has_errors():
     raise ValueError(f"Let's fix these errors: {res.issues}")
 
 # Serialize to JSON
-serialization = SerializationProvider.get_standard_json_serialization()
+serialization = SerializationProvider.create_standard_json_serialization()
 json_output = serialization.serialize_tree_to_json_string(task_language)
 
 # Write to file
