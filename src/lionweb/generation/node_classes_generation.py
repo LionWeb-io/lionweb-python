@@ -1,4 +1,5 @@
 import ast
+import sys
 from _ast import expr, stmt
 from pathlib import Path
 from typing import Dict, List, Optional, cast
@@ -11,6 +12,24 @@ from lionweb.language.classifier import Classifier
 from lionweb.language.enumeration import Enumeration
 from lionweb.language.primitive_type import PrimitiveType
 from lionweb.language.reference import Reference
+
+
+def make_class_def(
+    name: str, bases: List[ast.expr], body: List[ast.stmt]
+) -> ast.ClassDef:
+    if sys.version_info >= (3, 12):
+        return ast.ClassDef(
+            name=name,
+            bases=bases,
+            keywords=[],
+            body=body,
+            decorator_list=[],
+            type_params=[],  # Only valid from Python 3.12+
+        )
+    else:
+        return ast.ClassDef(
+            name=name, bases=bases, keywords=[], body=body, decorator_list=[]
+        )
 
 
 def _identify_topological_deps(
@@ -144,13 +163,10 @@ def _generate_concept_class(concept: Concept):
         else:
             raise ValueError()
 
-    return ast.ClassDef(
+    return make_class_def(
         name=cast(str, concept.get_name()),
         bases=[ast.Name(id="DynamicNode", ctx=ast.Load())],
-        keywords=[],
         body=methods,
-        decorator_list=[],
-        type_params=[],
     )
 
 
@@ -491,13 +507,10 @@ def node_classes_generation(click, language: Language, output):
                 for literal in element.literals
             ]
 
-            enum_class = ast.ClassDef(
+            enum_class = make_class_def(
                 name=e_name,
                 bases=[ast.Name(id="Enum", ctx=ast.Load())],
-                keywords=[],
                 body=members,
-                decorator_list=[],
-                type_params=[],
             )
             module.body.append(enum_class)
         else:
@@ -514,13 +527,10 @@ def node_classes_generation(click, language: Language, output):
         elif isinstance(classifier, Interface):
             bases: list[expr] = []
 
-            classdef = ast.ClassDef(
+            classdef = make_class_def(
                 c_name,
                 bases=bases,
-                keywords=[],
                 body=[ast.Pass()],
-                decorator_list=[],
-                type_params=[],
             )
             module.body.append(classdef)
         else:
