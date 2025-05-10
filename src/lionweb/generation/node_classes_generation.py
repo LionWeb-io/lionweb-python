@@ -1,7 +1,7 @@
 import ast
 from _ast import expr, stmt
 from pathlib import Path
-from typing import Dict, List, cast
+from typing import Dict, List, Optional, cast
 
 import astor  # type: ignore
 
@@ -103,7 +103,13 @@ def _generate_concept_class(concept: Concept):
     init_func = ast.FunctionDef(
         name="__init__",
         args=ast.arguments(
-            posonlyargs=[], args=init_args, vararg=None, kwonlyargs=[], kw_defaults=[]
+            posonlyargs=[],  # Python 3.8+
+            args=init_args,
+            vararg=None,
+            kwonlyargs=[],
+            kw_defaults=cast(List[Optional[ast.expr]], []),
+            kwarg=None,
+            defaults=[],
         ),
         # defaults=init_defaults),
         body=init_body,
