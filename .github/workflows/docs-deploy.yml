@@ -26,10 +26,6 @@ jobs:
           cache: 'npm'
           cache-dependency-path: website/package-lock.json
 
-      - name: Build javadoc
-        working-directory: .
-        run: ./gradlew aggregateJavadoc
-
       - name: Install dependencies
         run: npm ci
       - name: Build website
