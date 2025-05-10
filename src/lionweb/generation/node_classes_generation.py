@@ -102,6 +102,7 @@ def _generate_concept_class(concept: Concept):
 
     init_func = ast.FunctionDef(
         name="__init__",
+        type_comment=None,
         args=ast.arguments(
             posonlyargs=[],  # Python 3.8+
             args=init_args,
@@ -149,6 +150,7 @@ def _generate_concept_class(concept: Concept):
         keywords=[],
         body=methods,
         decorator_list=[],
+        type_params=[],
     )
 
 
@@ -167,6 +169,7 @@ def _generate_property_setter(feature, prop_type):
             kwonlyargs=[],
             kw_defaults=[],
             defaults=[],
+            type_comment=None,
         ),
         body=[
             ast.Assign(
@@ -229,6 +232,7 @@ def _generate_property_getter(feature, prop_type):
             kwonlyargs=[],
             kw_defaults=[],
             defaults=[],
+            type_comment=None,
         ),
         body=[
             ast.Return(
@@ -264,6 +268,7 @@ def _generate_property_getter(feature, prop_type):
 def _generate_reference_getter(feature, prop_type):
     return ast.FunctionDef(
         name=feature.get_name(),
+        type_comment=None,
         args=ast.arguments(
             posonlyargs=[],
             args=[ast.arg(arg="self")],
@@ -320,6 +325,7 @@ def _generate_reference_getter(feature, prop_type):
 def _generate_reference_setter(feature, prop_type):
     return ast.FunctionDef(
         name=feature.get_name(),
+        type_comment=None,
         args=ast.arguments(
             posonlyargs=[],
             args=[
@@ -491,6 +497,7 @@ def node_classes_generation(click, language: Language, output):
                 keywords=[],
                 body=members,
                 decorator_list=[],
+                type_params=[],
             )
             module.body.append(enum_class)
         else:
@@ -506,12 +513,14 @@ def node_classes_generation(click, language: Language, output):
             module.body.append(_generate_concept_class(classifier))
         elif isinstance(classifier, Interface):
             bases: list[expr] = []
-            # if len(classifier.get_extended_interfaces()) == 0:
-            #     bases.append("Node")
-            # bases.append("ABC")
 
             classdef = ast.ClassDef(
-                c_name, bases=bases, keywords=[], body=[ast.Pass()], decorator_list=[]
+                c_name,
+                bases=bases,
+                keywords=[],
+                body=[ast.Pass()],
+                decorator_list=[],
+                type_params=[],
             )
             module.body.append(classdef)
         else:
