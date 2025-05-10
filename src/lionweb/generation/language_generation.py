@@ -5,6 +5,7 @@ from typing import List, cast
 
 import astor  # type: ignore
 
+from lionweb.generation.utils import make_function_def
 from lionweb.language import (Concept, Containment, DataType, Language,
                               LionCoreBuiltins, Property)
 from lionweb.language.reference import Reference
@@ -269,7 +270,7 @@ def language_generation(click, language: Language, output):
     function_body.append(ast.Return(value=ast.Name(id="language", ctx=ast.Load())))
 
     # Define get_language function
-    get_language_def = ast.FunctionDef(
+    get_language_def = make_function_def(
         name="get_language",
         args=ast.arguments(
             posonlyargs=[], args=[], kwonlyargs=[], kw_defaults=[], defaults=[]
@@ -277,7 +278,6 @@ def language_generation(click, language: Language, output):
         body=function_body,
         decorator_list=[decorator],
         returns=ast.Name(id="Language", ctx=ast.Load()),
-        type_comment=None,
     )
 
     # Wrap function in module
@@ -287,7 +287,7 @@ def language_generation(click, language: Language, output):
         if isinstance(language_element, Concept):
             concept_name = cast(str, language_element.get_name())
             body.append(
-                ast.FunctionDef(
+                make_function_def(
                     name=f"get_{concept_name.lower()}",
                     args=ast.arguments(
                         posonlyargs=[],
@@ -317,7 +317,6 @@ def language_generation(click, language: Language, output):
                     ],
                     decorator_list=[],
                     returns=ast.Name(id="Concept", ctx=ast.Load()),
-                    type_comment=None,
                 )
             )
 
