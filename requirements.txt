@@ -47,8 +47,6 @@ mypy==1.15.0
 mypy-extensions==1.0.0
 nh3==0.2.20
 nodeenv==1.9.1
-numpy==2.2.4
-openai==1.66.3
 packaging==24.2
 parso==0.8.4
 pathspec==0.12.1
@@ -62,7 +60,6 @@ pure_eval==0.2.3
 pydantic==2.10.6
 pydantic_core==2.27.2
 Pygments==2.19.1
-pylasu==0.8.1
 pyproject_hooks==1.2.0
 pytest==8.3.4
 python-dotenv==1.0.1
