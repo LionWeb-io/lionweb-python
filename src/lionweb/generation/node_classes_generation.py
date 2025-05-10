@@ -32,6 +32,36 @@ def make_class_def(
         )
 
 
+def make_function_def(
+    name: str,
+    args: ast.arguments,
+    body: List[ast.stmt],
+    decorator_list: Optional[List[ast.expr]] = None,
+    returns: Optional[ast.expr] = None,
+) -> ast.FunctionDef:
+    decorator_list = decorator_list or []
+
+    if sys.version_info >= (3, 12):
+        return ast.FunctionDef(
+            name=name,
+            args=args,
+            body=body,
+            decorator_list=decorator_list,
+            returns=returns,
+            type_comment=None,
+            type_params=[],
+        )
+    else:
+        return ast.FunctionDef(
+            name=name,
+            args=args,
+            body=body,
+            decorator_list=decorator_list,
+            returns=returns,
+            type_comment=None,
+        )
+
+
 def _identify_topological_deps(
     classifiers: List[Classifier], id_to_concept
 ) -> Dict[str, List[str]]:
@@ -119,9 +149,8 @@ def _generate_concept_class(concept: Concept):
         )
     ]
 
-    init_func = ast.FunctionDef(
+    init_func = make_function_def(
         name="__init__",
-        type_comment=None,
         args=ast.arguments(
             posonlyargs=[],  # Python 3.8+
             args=init_args,
@@ -171,7 +200,7 @@ def _generate_concept_class(concept: Concept):
 
 
 def _generate_property_setter(feature, prop_type):
-    return ast.FunctionDef(
+    return make_function_def(
         name=feature.get_name(),
         args=ast.arguments(
             posonlyargs=[],
@@ -240,7 +269,7 @@ def _generate_property_setter(feature, prop_type):
 
 
 def _generate_property_getter(feature, prop_type):
-    getter = ast.FunctionDef(
+    getter = make_function_def(
         name=feature.get_name(),
         args=ast.arguments(
             posonlyargs=[],
@@ -248,7 +277,6 @@ def _generate_property_getter(feature, prop_type):
             kwonlyargs=[],
             kw_defaults=[],
             defaults=[],
-            type_comment=None,
         ),
         body=[
             ast.Return(
@@ -282,9 +310,8 @@ def _generate_property_getter(feature, prop_type):
 
 
 def _generate_reference_getter(feature, prop_type):
-    return ast.FunctionDef(
+    return make_function_def(
         name=feature.get_name(),
-        type_comment=None,
         args=ast.arguments(
             posonlyargs=[],
             args=[ast.arg(arg="self")],
@@ -339,9 +366,8 @@ def _generate_reference_getter(feature, prop_type):
 
 
 def _generate_reference_setter(feature, prop_type):
-    return ast.FunctionDef(
+    return make_function_def(
         name=feature.get_name(),
-        type_comment=None,
         args=ast.arguments(
             posonlyargs=[],
             args=[
