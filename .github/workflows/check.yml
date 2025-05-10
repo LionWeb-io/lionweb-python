@@ -5,19 +5,30 @@ on: [push]
 jobs:
   build:
     runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        python-version: [3.9, 3.10, 3.11, 3.12]
+
     steps:
-    - uses: actions/checkout@v1
-    - name: Set up Python 3.9.21
-      uses: actions/setup-python@v2
+    - uses: actions/checkout@v2
+
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v4
       with:
-        python-version: 3.9.21
-    - name: Install deps
+        python-version: ${{ matrix.python-version }}
+
+    - name: Install dependencies
       run: pip install -r requirements.txt
+
     - name: Prepare for tests
       run: sh prepare_for_tests.sh
-    - name: Test
+
+    - name: Run unit tests
       run: PYTHONPATH=src python -m unittest discover tests
-    - name: Linting
+
+    - name: Lint with Ruff
       run: ruff check src/ tests/
-    - name: Checking types
+
+    - name: Type-check with MyPy
       run: mypy src/
