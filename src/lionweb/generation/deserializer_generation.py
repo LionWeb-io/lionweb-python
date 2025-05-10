@@ -5,6 +5,7 @@ from typing import List, cast
 
 import astor  # type: ignore
 
+from lionweb.generation.utils import make_function_def
 from lionweb.language import Concept, Language
 
 
@@ -55,7 +56,7 @@ def deserializer_generation(click, language: Language, output):
             concept_name = cast(str, language_element.get_name())
             # deserializer() inner function
             register_func_body.append(
-                ast.FunctionDef(
+                make_function_def(
                     name=f"deserializer_{concept_name.lower()}",
                     args=ast.arguments(
                         posonlyargs=[],
@@ -135,7 +136,7 @@ def deserializer_generation(click, language: Language, output):
                 )
             )
 
-    register_func = ast.FunctionDef(
+    register_func = make_function_def(
         name="register_deserializers",
         args=ast.arguments(
             posonlyargs=[],
