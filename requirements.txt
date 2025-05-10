@@ -81,12 +81,6 @@ tomli_w==1.2.0
 tomlkit==0.13.2
 tqdm==4.67.1
 traitlets==5.14.3
-tree-sitter==0.24.0
-tree-sitter-c-sharp==0.23.1
-tree-sitter-embedded-template==0.23.2
-tree-sitter-language-pack==0.6.1
-tree-sitter-php==0.23.11
-tree-sitter-yaml==0.7.0
 trove-classifiers==2025.3.13.13
 twine==6.1.0
 types-requests==2.32.0.20241016
