@@ -121,6 +121,9 @@ class RepoClient:
             raise ValueError("Error:", response.status_code, response.text)
         return response.json()["chunk"]["nodes"]
 
+    def create_partition(self, node: Node):
+        self.create_partitions([node])
+
     def create_partitions(self, nodes: List["Node"]):
         for n in nodes:
             if len(n.get_children(containment=None)) > 0:
