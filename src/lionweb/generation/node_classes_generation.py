@@ -2,7 +2,7 @@ import ast
 import sys
 from _ast import expr, stmt
 from pathlib import Path
-from typing import Dict, List, Optional, cast, Any
+from typing import Any, Dict, List, Optional, cast
 
 import astor  # type: ignore
 
@@ -49,7 +49,7 @@ def make_function_def(
             decorator_list=decorator_list,
             returns=returns,
             type_comment=None,
-            type_params=cast(List[Any], [])
+            type_params=cast(List[Any], []),
         )
     else:
         return ast.FunctionDef(
@@ -58,7 +58,7 @@ def make_function_def(
             body=body,
             decorator_list=decorator_list,
             returns=returns,
-            type_comment=None
+            type_comment=None,
         )
 
 
