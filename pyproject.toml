@@ -10,7 +10,7 @@ package-dir = {"" = "src"}
 
 [project]
 name = "lionweb"
-version = "0.2.0"
+version = "0.3.0"
 description = "A Python package for working with LionWeb"
 readme = "README.md"
 authors = [{ name = "Federico Tomassetti", email = "federico@strumenta.com" }]
