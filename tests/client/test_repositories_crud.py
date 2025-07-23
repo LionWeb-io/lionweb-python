@@ -1,18 +1,17 @@
 import os
 
+from lionweb.client.client import Client, RepositoryConfiguration
 from lionweb.lionweb_version import LionWebVersion
-from lionweb.repoclient.repo_client import RepoClient, RepositoryConfiguration
 
-from .abstract_repo_client_functional_test import \
-    AbstractRepoClientFunctionalTest
+from .abstract_client_functional_test import AbstractClientFunctionalTest
 
 
-class RepositoriesCRUD(AbstractRepoClientFunctionalTest):
+class RepositoriesCRUD(AbstractClientFunctionalTest):
 
     def test_list_repositories(self):
-        model_repo_url = f"http://localhost:{os.getenv('MODEL_REPO_PORT')}"
-        repo_client = RepoClient(
-            lionweb_version=LionWebVersion.V2023_1, repo_url=model_repo_url
+        server_url = f"http://localhost:{os.getenv('SERVER_PORT')}"
+        repo_client = Client(
+            lionweb_version=LionWebVersion.V2023_1, server_url=server_url
         )
         repos = repo_client.list_repositories()
         self.assertEqual(
@@ -27,9 +26,9 @@ class RepositoriesCRUD(AbstractRepoClientFunctionalTest):
         )
 
     def test_delete_repository(self):
-        model_repo_url = f"http://localhost:{os.getenv('MODEL_REPO_PORT')}"
-        repo_client = RepoClient(
-            lionweb_version=LionWebVersion.V2023_1, repo_url=model_repo_url
+        server_url = f"http://localhost:{os.getenv('SERVER_PORT')}"
+        repo_client = Client(
+            lionweb_version=LionWebVersion.V2023_1, server_url=server_url
         )
         repos = repo_client.list_repositories()
         self.assertEqual(
@@ -54,9 +53,9 @@ class RepositoriesCRUD(AbstractRepoClientFunctionalTest):
         )
 
     def test_create_repository(self):
-        model_repo_url = f"http://localhost:{os.getenv('MODEL_REPO_PORT')}"
-        repo_client = RepoClient(
-            lionweb_version=LionWebVersion.V2023_1, repo_url=model_repo_url
+        server_url = f"http://localhost:{os.getenv('SERVER_PORT')}"
+        repo_client = Client(
+            lionweb_version=LionWebVersion.V2023_1, server_url=server_url
         )
         repos = repo_client.list_repositories()
         self.assertEqual(

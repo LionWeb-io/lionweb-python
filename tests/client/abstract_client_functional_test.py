@@ -15,16 +15,16 @@ DB_USER = "postgres"
 DB_PASSWORD = "lionweb"
 DB_NAME = "lionweb_test"
 DB_HOST = "pgdb_for_lwpython_tests"
-MODEL_REPO_PORT = 3005
+SERVER_PORT = 3005
 DB_CONTAINER_PORT = 7100
 
 
-class AbstractRepoClientFunctionalTest(unittest.TestCase):
-    """Base class for integration tests with PostgreSQL and Model Repository."""
+class AbstractClientFunctionalTest(unittest.TestCase):
+    """Base class for integration tests with PostgreSQL and Model Server."""
 
     @classmethod
     def setUpClass(cls):
-        """Sets up the PostgreSQL container and the Model Repository service."""
+        """Sets up the PostgreSQL container and the Model Server service."""
 
         cls.network = Network()
         cls.network.create()
@@ -46,37 +46,37 @@ class AbstractRepoClientFunctionalTest(unittest.TestCase):
         # Print PostgreSQL logs in a separate thread
         cls._start_log_thread(cls.db, "POSTGRESQL")
 
-        # Start Model Repository
-        cls.model_repo = DockerContainer(REPO_IMAGE)
-        cls.model_repo.with_network(cls.network)
-        cls.model_repo.with_env("PGHOST", db_host)
-        cls.model_repo.with_env("PGPORT", str(db_port))
-        cls.model_repo.with_env("PGUSER", DB_USER)
-        cls.model_repo.with_env("PGPASSWORD", DB_PASSWORD)
-        cls.model_repo.with_env("PGDB", DB_NAME)
-        cls.model_repo.with_env("LIONWEB_VERSION", "1.0")  # Replace with actual version
-        cls.model_repo.with_exposed_ports(MODEL_REPO_PORT)
+        # Start LionWeb Server
+        cls.server = DockerContainer(REPO_IMAGE)
+        cls.server.with_network(cls.network)
+        cls.server.with_env("PGHOST", db_host)
+        cls.server.with_env("PGPORT", str(db_port))
+        cls.server.with_env("PGUSER", DB_USER)
+        cls.server.with_env("PGPASSWORD", DB_PASSWORD)
+        cls.server.with_env("PGDB", DB_NAME)
+        cls.server.with_env("LIONWEB_VERSION", "1.0")  # Replace with actual version
+        cls.server.with_exposed_ports(SERVER_PORT)
 
-        # Start the Model Repository and capture logs
-        cls.model_repo.start()
-        cls._start_log_thread(cls.model_repo, "MODEL_REPO")
+        # Start the Server and capture logs
+        cls.server.start()
+        cls._start_log_thread(cls.server, "SERVER")
 
         # Get mapped port
-        cls.model_repo_port = cls.model_repo.get_exposed_port(MODEL_REPO_PORT)
+        cls.server_port = cls.server.get_exposed_port(SERVER_PORT)
 
-        # Wait until the model repository is ready
+        # Wait until the server is ready
         # Wait for the server to be ready
-        print("Waiting for model repo...")
-        cls._wait_for_model_repo()
-        print("Model repo is up: let's start testing")
+        print("Waiting for server...")
+        cls._wait_for_server()
+        print("Server is up: let's start testing")
 
         # Expose port for tests
-        os.environ["MODEL_REPO_PORT"] = str(cls.model_repo_port)
+        os.environ["SERVER_PORT"] = str(cls.server_port)
         # Debugging Output
         print(
-            f"[DEBUG] Model Repository should be reachable at: http://localhost:{cls.model_repo_port}"
+            f"[DEBUG] Server should be reachable at: http://localhost:{cls.server_port}"
         )
-        print(f"[DEBUG] Environment MODEL_REPO_PORT = {os.getenv('MODEL_REPO_PORT')}")
+        print(f"[DEBUG] Environment SERVER_PORT = {os.getenv('SERVER_PORT')}")
         time.sleep(2)
 
     @classmethod
@@ -93,22 +93,22 @@ class AbstractRepoClientFunctionalTest(unittest.TestCase):
     @classmethod
     def tearDownClass(cls):
         """Cleanup the containers after tests."""
-        cls.model_repo.stop()
+        cls.server.stop()
         cls.db.stop()
 
     @classmethod
-    def _wait_for_model_repo(cls):
+    def _wait_for_server(cls):
         """Waits for the model repository to be available."""
         # cls._wait_for_logs(cls.model_repo, "Server is running", timeout=30)
 
-        """Waits for the Model Repository API to be available by checking the root endpoint."""
-        url = f"http://localhost:{cls.model_repo_port}/"
+        """Waits for the Server to be available by checking the root endpoint."""
+        url = f"http://localhost:{cls.server_port}/"
         max_attempts = 30  # Retry up to 60 seconds
 
         for attempt in range(max_attempts):
             try:
                 print(
-                    f"[DEBUG] Checking Model Repo readiness (attempt {attempt + 1}/{max_attempts}) at {url}..."
+                    f"[DEBUG] Checking Server readiness (attempt {attempt + 1}/{max_attempts}) at {url}..."
                 )
                 response = requests.get(url, timeout=5)
 
@@ -116,20 +116,18 @@ class AbstractRepoClientFunctionalTest(unittest.TestCase):
                     200,
                     404,
                 ]:  # Accepts 404 as it confirms a response
-                    print(
-                        f"[DEBUG] Model Repo is READY! Status: {response.status_code}"
-                    )
+                    print(f"[DEBUG] Server is READY! Status: {response.status_code}")
                     return
 
             except requests.ConnectionError:
-                print("[DEBUG] Model Repo API not ready yet... retrying in 2s")
+                print("[DEBUG] Server not ready yet... retrying in 2s")
 
             time.sleep(2)  # Wait before retrying
 
         # Print logs before failing
-        print("[ERROR] Model Repo did not become ready in time! Last logs:")
-        print(cls.model_repo.get_wrapped_container().logs(tail=50).decode())
-        raise RuntimeError("[ERROR] Model Repo API did not become ready in time!")
+        print("[ERROR] Server did not become ready in time! Last logs:")
+        print(cls.server.get_wrapped_container().logs(tail=50).decode())
+        raise RuntimeError("[ERROR] Server did not become ready in time!")
 
     @classmethod
     def _wait_for_logs(cls, container, expected_log, timeout=30):
@@ -138,11 +136,11 @@ class AbstractRepoClientFunctionalTest(unittest.TestCase):
         while time.time() - start_time < timeout:
             logs = container.get_wrapped_container().logs().decode()
             if expected_log in logs:
-                print(f"[MODEL_REPO] Detected '{expected_log}', Model Repo is ready!")
+                print(f"[SERVER] Detected '{expected_log}', Server is ready!")
                 return
             time.sleep(1)
         raise RuntimeError(
-            f"[MODEL_REPO] '{expected_log}' not found in logs after {timeout} seconds!"
+            f"[SERVER] '{expected_log}' not found in logs after {timeout} seconds!"
         )
 
     def assert_lw_trees_are_equal(self, a, b):
@@ -150,4 +148,4 @@ class AbstractRepoClientFunctionalTest(unittest.TestCase):
         assert a == b, f"Differences between {a} and {b}"
 
 
-MODEL_REPO_URL = f"http://localhost:{os.getenv('MODEL_REPO_PORT')}"
+SERVER_URL = f"http://localhost:{os.getenv('SERVER_PORT')}"

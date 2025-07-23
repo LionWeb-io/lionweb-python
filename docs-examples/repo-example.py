@@ -3,9 +3,9 @@ from typing import Optional, List
 
 from lionweb import LionWebVersion
 from lionweb.language import Concept, Property, LionCoreBuiltins, Containment, Language
-from lionweb.repoclient import RepoClient
+from lionweb.client import RepoClient
 from lionweb.model import DynamicNode
-from lionweb.repoclient.repo_client import RepositoryConfiguration
+from lionweb.client.repo_client import RepositoryConfiguration
 from lionweb.utils import root
 
 # Global elements

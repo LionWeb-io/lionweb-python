@@ -17,12 +17,12 @@ class RepositoryConfiguration(BaseModel):
     history: bool
 
 
-class RepoClient:
+class Client:
 
     def __init__(
         self,
         lionweb_version=LionWebVersion.current_version(),
-        repo_url="http://localhost:3005",
+        server_url="http://localhost:3005",
         client_id="lwpython",
         repository_name: Optional[str] = "default",
         serialization: Optional[JsonSerialization] = None,
@@ -36,7 +36,7 @@ class RepoClient:
                 f"repository_name should be a string, but it is {repository_name}"
             )
         self._lionweb_version = lionweb_version
-        self._repo_url = repo_url
+        self._server_url = server_url
         self._client_id = client_id
         self._repository_name = repository_name
         if serialization is None:
@@ -59,7 +59,7 @@ class RepoClient:
     #####################################################
 
     def create_database(self):
-        url = f"{self._repo_url}/createDatabase"
+        url = f"{self._server_url}/createDatabase"
         headers = {"Content-Type": "application/json"}
         query_params = {
             "clientId": self._client_id,
@@ -69,7 +69,7 @@ class RepoClient:
             raise ValueError("Error:", response.status_code, response.text)
 
     def list_repositories(self):
-        url = f"{self._repo_url}/listRepositories"
+        url = f"{self._server_url}/listRepositories"
         headers = {"Content-Type": "application/json"}
         query_params = {"clientId": self._client_id}
         response = requests.post(url, params=query_params, headers=headers)
@@ -85,7 +85,7 @@ class RepoClient:
         ]
 
     def create_repository(self, repository_configuration: RepositoryConfiguration):
-        url = f"{self._repo_url}/createRepository"
+        url = f"{self._server_url}/createRepository"
         headers = {"Content-Type": "application/json"}
         query_params = {
             "clientId": self._client_id,
@@ -98,7 +98,7 @@ class RepoClient:
             raise ValueError("Error:", response.status_code, response.text)
 
     def delete_repository(self, repository_name: str):
-        url = f"{self._repo_url}/deleteRepository"
+        url = f"{self._server_url}/deleteRepository"
         headers = {"Content-Type": "application/json"}
         query_params = {"clientId": self._client_id, "repository": repository_name}
         response = requests.post(url, params=query_params, headers=headers)
@@ -110,7 +110,7 @@ class RepoClient:
     #####################################################
 
     def list_partitions(self):
-        url = f"{self._repo_url}/bulk/listPartitions"
+        url = f"{self._server_url}/bulk/listPartitions"
         headers = {"Content-Type": "application/json"}
         query_params = {
             "repository": self._repository_name,
@@ -129,7 +129,7 @@ class RepoClient:
             if len(n.get_children(containment=None)) > 0:
                 raise ValueError("Cannot store a node with children as a new partition")
 
-        url = f"{self._repo_url}/bulk/createPartitions"
+        url = f"{self._server_url}/bulk/createPartitions"
         headers = {"Content-Type": "application/json"}
         query_params = {
             "repository": self._repository_name,
@@ -144,7 +144,7 @@ class RepoClient:
         if len(node_ids) == 0:
             return
 
-        url = f"{self._repo_url}/bulk/deletePartitions"
+        url = f"{self._server_url}/bulk/deletePartitions"
         headers = {"Content-Type": "application/json"}
         query_params = {
             "repository": self._repository_name,
@@ -157,7 +157,7 @@ class RepoClient:
             raise ValueError("Error:", response.status_code, response.text)
 
     def ids(self, count: Optional[int] = None) -> List[str]:
-        url = f"{self._repo_url}/bulk/ids"
+        url = f"{self._server_url}/bulk/ids"
         headers = {"Content-Type": "application/json"}
         query_params = {
             "repository": self._repository_name,
@@ -171,7 +171,7 @@ class RepoClient:
         return response.json()["ids"]
 
     def store(self, nodes: List["ClassifierInstance"]):
-        url = f"{self._repo_url}/bulk/store"
+        url = f"{self._server_url}/bulk/store"
         headers = {"Content-Type": "application/json"}
         query_params = {
             "repository": self._repository_name,
@@ -192,7 +192,7 @@ class RepoClient:
     def _retrieve_raw(self, ids: List[str], depth_limit: Optional[int] = None):
         if not self._is_list_of_strings(ids):
             raise ValueError(f"ids should be a list of strings, but we got {ids}")
-        url = f"{self._repo_url}/bulk/retrieve"
+        url = f"{self._server_url}/bulk/retrieve"
         headers = {"Content-Type": "application/json"}
         query_params = {
             "repository": self._repository_name,
@@ -222,7 +222,7 @@ class RepoClient:
     #####################################################
 
     def nodes_by_classifier(self):
-        url = f"{self._repo_url}/inspection/nodesByClassifier"
+        url = f"{self._server_url}/inspection/nodesByClassifier"
         headers = {"Content-Type": "application/json"}
         query_params = {
             "repository": self._repository_name,
@@ -235,7 +235,7 @@ class RepoClient:
         return response.json()
 
     def nodes_by_language(self):
-        url = f"{self._repo_url}/inspection/nodesByLanguage"
+        url = f"{self._server_url}/inspection/nodesByLanguage"
         headers = {"Content-Type": "application/json"}
         query_params = {
             "repository": self._repository_name,
