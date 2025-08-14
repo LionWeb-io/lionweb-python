@@ -695,7 +695,7 @@ class JsonSerializationTest(SerializationTest):
         my_instance = DynamicNode("instance-a", my_concept)
         json_ser = create_standard_json_serialization()
         json_ser.keep_null_properties = True
-        serialized_chunk = json_ser.serialize_nodes_to_serialization_block(
+        serialized_chunk = json_ser.serialize_nodes_to_serialization_chunk(
             [my_instance]
         )
 
@@ -722,7 +722,7 @@ class JsonSerializationTest(SerializationTest):
 
         hjs = create_standard_json_serialization()
         hjs.enable_dynamic_nodes()
-        serialized_chunk = hjs.serialize_nodes_to_serialization_block([n1])
+        serialized_chunk = hjs.serialize_nodes_to_serialization_chunk([n1])
 
         self.assertEqual(4, len(serialized_chunk.get_classifier_instances()))
         serialized_n1 = serialized_chunk.get_classifier_instances()[0]
@@ -730,7 +730,7 @@ class JsonSerializationTest(SerializationTest):
         self.assertIsNone(serialized_n1.get_parent_node_id())
         self.assertEqual(["a1_1", "a1_2", "a2_3"], serialized_n1.annotations)
 
-        deserialized = hjs.deserialize_serialization_block(serialized_chunk)
+        deserialized = hjs.deserialize_serialization_chunk(serialized_chunk)
         self.assertEqual(4, len(deserialized))
         self.assertEqual(n1, deserialized[0])
 
@@ -749,7 +749,7 @@ class JsonSerializationTest(SerializationTest):
 
         hjs = create_standard_json_serialization()
         hjs.enable_dynamic_nodes()
-        serialized_chunk = hjs.serialize_tree_to_serialization_block(lang)
+        serialized_chunk = hjs.serialize_tree_to_serialization_chunk(lang)
 
         self.assertEqual(5, len(serialized_chunk.get_classifier_instances()))
         serialized_l = serialized_chunk.get_classifier_instances()[0]
@@ -761,7 +761,7 @@ class JsonSerializationTest(SerializationTest):
         self.assertEqual(["metaAnn_1"], serialized_c.annotations)
 
         hjs.register_language(meta_lang)
-        deserialized = hjs.deserialize_serialization_block(serialized_chunk)
+        deserialized = hjs.deserialize_serialization_chunk(serialized_chunk)
         self.assertEqual(5, len(deserialized))
 
         self.assert_instances_are_equal(c, deserialized[3])
@@ -787,7 +787,7 @@ class JsonSerializationTest(SerializationTest):
         set_property_value_by_name(n1, "foo", "abc")
 
         hjs = create_standard_json_serialization()
-        serialized_chunk = hjs.serialize_nodes_to_serialization_block([n1])
+        serialized_chunk = hjs.serialize_nodes_to_serialization_chunk([n1])
 
         self.assertEqual(2, len(serialized_chunk.get_languages()))
         self.assertTrue(

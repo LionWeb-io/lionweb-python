@@ -62,3 +62,25 @@ class SerializedChunk:
 
     def get_languages(self) -> List:
         return list(self.languages)
+
+    def populate_used_languages(self) -> None:
+        """
+        Traverse the SerializedChunk, collecting all the metapointers
+        and populating the used languages accordingly.
+        """
+        for classifier_instance in self.classifier_instances:
+            self._consider_meta_pointer(classifier_instance.get_classifier())
+
+            for containment_value in classifier_instance.containments:
+                self._consider_meta_pointer(containment_value.get_meta_pointer())
+
+            for reference_value in classifier_instance.references:
+                self._consider_meta_pointer(reference_value.get_meta_pointer())
+
+            for property_value in classifier_instance.properties:
+                self._consider_meta_pointer(property_value.get_meta_pointer())
+
+    def _consider_meta_pointer(self, meta_pointer):
+        used_language = UsedLanguage.from_meta_pointer(meta_pointer)
+        if used_language not in self.languages:
+            self.languages.append(used_language)

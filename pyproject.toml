@@ -8,9 +8,12 @@ where = ["src"]
 [tool.setuptools]
 package-dir = {"" = "src"}
 
+[tool.setuptools.package-data]
+"lionweb" = ["py.typed"]
+
 [project]
 name = "lionweb"
-version = "0.3.0"
+version = "0.3.2"
 description = "A Python package for working with LionWeb"
 readme = "README.md"
 authors = [{ name = "Federico Tomassetti", email = "federico@strumenta.com" }]

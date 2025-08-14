@@ -60,10 +60,10 @@ class AbstractSerialization:
     def make_builtins_reference_dangling(self):
         self.builtins_reference_dangling = True
 
-    def serialize_tree_to_serialization_block(self, root):
+    def serialize_tree_to_serialization_chunk(self, root):
         classifier_instances = []
         self.collect_self_and_descendants(root, True, classifier_instances)
-        return self.serialize_nodes_to_serialization_block(classifier_instances)
+        return self.serialize_nodes_to_serialization_chunk(classifier_instances)
 
     def collect_self_and_descendants(
         self, instance: ClassifierInstance, include_self=True, collection=None
@@ -76,7 +76,7 @@ class AbstractSerialization:
             self.collect_self_and_descendants(child, True, collection)
         return collection
 
-    def serialize_nodes_to_serialization_block(self, classifier_instances):
+    def serialize_nodes_to_serialization_chunk(self, classifier_instances):
         serialized_chunk = SerializedChunk()
         serialized_chunk.serialization_format_version = self.lion_web_version.value
 
@@ -281,7 +281,7 @@ class AbstractSerialization:
             annotation.id for annotation in classifier_instance.get_annotations()
         ]
 
-    def deserialize_serialization_block(self, serialized_chunk: SerializedChunk):
+    def deserialize_serialization_chunk(self, serialized_chunk: SerializedChunk):
         serialized_instances = serialized_chunk.classifier_instances
         return self._deserialize_classifier_instances(
             self.lion_web_version, serialized_instances
@@ -387,20 +387,20 @@ class AbstractSerialization:
 
         return nodes_with_original_sorting
 
-    def _validate_serialization_block(
-        self, serialization_block: SerializedChunk
+    def _validate_serialization_chunk(
+        self, serialization_chunk: SerializedChunk
     ) -> None:
-        if serialization_block is None:
-            raise ValueError("serialization_block should not be null")
-        if serialization_block.serialization_format_version is None:
+        if serialization_chunk is None:
+            raise ValueError("serialization_chunk should not be null")
+        if serialization_chunk.serialization_format_version is None:
             raise ValueError("The serializationFormatVersion should not be null")
         if (
-            serialization_block.serialization_format_version
+            serialization_chunk.serialization_format_version
             != self.lion_web_version.value
         ):
             raise ValueError(
                 f"Only serializationFormatVersion supported by this instance of Serialization is '{self.lion_web_version.value}' "
-                f"but we found '{serialization_block.serialization_format_version}'"
+                f"but we found '{serialization_chunk.serialization_format_version}'"
             )
 
     def _sort_leaves_first(

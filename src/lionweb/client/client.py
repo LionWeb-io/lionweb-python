@@ -1,14 +1,18 @@
-from typing import List, Optional
+from typing import TYPE_CHECKING, List, Optional
 
 import requests
 from pydantic import BaseModel
 
 from lionweb.lionweb_version import LionWebVersion
-from lionweb.model import ClassifierInstance
 from lionweb.model.node import Node
 from lionweb.serialization import create_standard_json_serialization
 from lionweb.serialization.json_serialization import JsonSerialization
 from lionweb.serialization.unavailable_node_policy import UnavailableNodePolicy
+
+if TYPE_CHECKING:
+    from lionweb.model import ClassifierInstance
+
+    from .bulk_import import BulkImport
 
 
 class RepositoryConfiguration(BaseModel):
@@ -304,3 +308,48 @@ class Client:
             raise ValueError()
         node = nodes[0]
         return node["parent"]
+
+    #####################################################
+    # Additional APIs                                   #
+    #####################################################
+
+    def bulk_import_using_json(self, bulk_import: "BulkImport"):
+
+        body_attach_points = []
+
+        for attach_point in bulk_import.get_attach_points():
+            j_containment = {
+                "language": attach_point.containment.language,
+                "version": attach_point.containment.version,
+                "key": attach_point.containment.key,
+            }
+            j_el = {
+                "container": attach_point.container,
+                "root": attach_point.root_id,
+                "containment": j_containment,
+            }
+            body_attach_points.append(j_el)
+
+        from lionweb.serialization import LowLevelJsonSerialization
+
+        serialized_chunk_as_json = (
+            LowLevelJsonSerialization().serialize_to_json_element(
+                LowLevelJsonSerialization.group_nodes_into_serialization_block(
+                    bulk_import.get_nodes(), self._lionweb_version
+                )
+            )
+        )
+
+        body_nodes = serialized_chunk_as_json["nodes"]
+        body = {"attachPoints": body_attach_points, "nodes": body_nodes}
+
+        headers = {"Content-Type": "application/json"}
+        query_params = {
+            "repository": self._repository_name,
+            "clientId": self._client_id,
+        }
+
+        url = f"{self._server_url}/additional/bulkImport"
+        response = requests.post(url, params=query_params, json=body, headers=headers)
+        if response.status_code != 200:
+            raise ValueError("Error:", response.status_code, response.text)
