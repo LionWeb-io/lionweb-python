@@ -1,6 +1,7 @@
 import json
-from typing import List, cast
+from typing import Iterable, List, cast
 
+from lionweb import LionWebVersion
 from lionweb.serialization.data.metapointer import MetaPointer
 from lionweb.serialization.data.serialized_chunk import SerializedChunk
 from lionweb.serialization.data.serialized_classifier_instance import \
@@ -167,6 +168,18 @@ class LowLevelJsonSerialization:
     def require_is_string(value, desc: str):
         if not isinstance(value, str):
             raise ValueError(f"{desc} should be a string value")
+
+    @staticmethod
+    def group_nodes_into_serialization_block(
+        serialized_classifier_instances: Iterable[SerializedClassifierInstance],
+        lion_web_version: LionWebVersion,
+    ) -> SerializedChunk:
+        serialized_chunk = SerializedChunk()
+        serialized_chunk.serialization_format_version = lion_web_version.value
+        for sci in serialized_classifier_instances:
+            serialized_chunk.add_classifier_instance(sci)
+        serialized_chunk.populate_used_languages()
+        return serialized_chunk
 
     def _read_languages(
         self, serialized_chunk: SerializedChunk, top_level: JsonObject

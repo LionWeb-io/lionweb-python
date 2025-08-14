@@ -50,7 +50,7 @@ class JsonSerialization(AbstractSerialization):
     ) -> JsonElement:
         if isinstance(classifier_instances, ClassifierInstance):
             classifier_instances = [classifier_instances]
-        serialization_block = self.serialize_nodes_to_serialization_block(
+        serialization_block = self.serialize_nodes_to_serialization_chunk(
             classifier_instances
         )
         return LowLevelJsonSerialization().serialize_to_json_element(
@@ -110,5 +110,5 @@ class JsonSerialization(AbstractSerialization):
         serialization_block = (
             LowLevelJsonSerialization().deserialize_serialization_block(json_element)
         )
-        self._validate_serialization_block(serialization_block)
-        return self.deserialize_serialization_block(serialization_block)
+        self._validate_serialization_chunk(serialization_block)
+        return self.deserialize_serialization_chunk(serialization_block)
