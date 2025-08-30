@@ -20,3 +20,5 @@ from .primitive_type import PrimitiveType as PrimitiveType
 from .property import Property as Property
 from .reference import Reference as Reference
 from .structured_data_type import StructuredDataType as StructuredDataType
+from .definition import LanguageFactory as LanguageFactory
+from .definition import Multiplicity as Multiplicity
