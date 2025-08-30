@@ -37,6 +37,9 @@ jobs:
           if [ -f requirements-dev.txt ]; then pip install -r requirements-dev.txt; fi
           pip install coverage diff-cover
 
+      - name: Prepare for tests
+        run: sh prepare_for_tests.sh
+
       - name: Run unit tests with coverage
         run: |
           PYTHONPATH=src coverage run --rcfile=.coveragerc --source=src -m unittest discover tests
