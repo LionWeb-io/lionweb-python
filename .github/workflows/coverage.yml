@@ -1,0 +1,82 @@
+name: Code Coverage
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    env:
+      # Keep behavior identical to your local command
+      PYTHONPATH: src
+      # Set your thresholds here
+      OVERALL_COVERAGE_FAIL_UNDER: "80"
+      DIFF_COVER_FAIL_UNDER: "90"
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # needed for diff-cover to compare against main
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: "pip"
+
+      - name: Install test deps
+        run: |
+          python -m pip install --upgrade pip
+          # If you have a requirements-dev.txt, prefer that.
+          if [ -f requirements-dev.txt ]; then pip install -r requirements-dev.txt; fi
+          pip install coverage diff-cover
+
+      - name: Run unit tests with coverage
+        run: |
+          coverage run --rcfile=.coveragerc --source=src -m unittest discover tests
+          coverage report -m --fail-under="${OVERALL_COVERAGE_FAIL_UNDER}"
+          coverage xml -o coverage.xml
+          coverage html -d htmlcov
+
+      - name: Diff coverage for PR changes
+        if: ${{ github.event_name == 'pull_request' }}
+        run: |
+          # Ensure main is available for comparison
+          git fetch origin main:refs/remotes/origin/main
+
+          # Compute coverage on changed lines only and fail if under threshold
+          diff-cover coverage.xml \
+            --compare-branch=origin/main \
+            --fail-under="${DIFF_COVER_FAIL_UNDER}" \
+            --html-report diffcov.html > diffcov.txt || RC=$?
+
+          # Attach a concise summary to the job summary
+          {
+            echo "## Diff Coverage Summary"
+            echo ""
+            echo "\`diff-cover --fail-under=${DIFF_COVER_FAIL_UNDER}\` against origin/main"
+            echo ""
+            echo '```'
+            cat diffcov.txt
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
+
+          # Exit with diff-cover status if it failed
+          exit ${RC:-0}
+
+      - name: Upload HTML reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-reports
+          path: |
+            htmlcov/
+            diffcov.html
+            coverage.xml
+          if-no-files-found: ignore

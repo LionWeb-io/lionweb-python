@@ -48,3 +48,14 @@ twine upload dist/*
 sh prepare_for_tests.sh # to be run just once
 PYTHONPATH=src python -m unittest discover tests
 ```
+
+You can measure coverage like this:
+```
+PYTHONPATH=src coverage run -m unittest discover tests
+```
+
+And then generate a report with:
+```
+coverage html                                         
+# report generated under htmlcov/index.html
+```

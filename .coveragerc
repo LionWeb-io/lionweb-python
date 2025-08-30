@@ -1,0 +1,20 @@
+[run]
+branch = True
+parallel = False
+source =
+    src
+
+[report]
+show_missing = True
+skip_covered = False
+exclude_lines =
+    pragma: no cover
+    if __name__ == .__main__.:
+    # Add project-specific exclusions as needed
+
+omit =
+    tests/*
+    **/__init__.py
+
+[html]
+directory = htmlcov
