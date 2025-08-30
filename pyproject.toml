@@ -18,8 +18,16 @@ description = "A Python package for working with LionWeb"
 readme = "README.md"
 authors = [{ name = "Federico Tomassetti", email = "federico@strumenta.com" }]
 license = { file = "LICENSE.txt" }
-requires-python = ">=3.8"
+requires-python = ">=3.9"
 dependencies = [
     "requests",
-    "pydantic"
+    "pydantic",
+    "typing_extensions>=4.8",
+]
+
+[project.optional-dependencies]
+dev = [
+    "coverage",
+    "diff-cover",
+    "testcontainers>=4.0",
 ]
