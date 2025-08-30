@@ -8,6 +8,8 @@ This library is released under the Apache V2 License.
 
 Read the [Documentation](https://lionweb.io/lionweb-python)
 
+We support Python 3.9 to 3.13
+
 ## Linting
 
 ```
