@@ -42,7 +42,7 @@ jobs:
 
       - name: Run unit tests with coverage
         run: |
-          pip install -e .
+          pip install -e ".[dev]"
           coverage run --rcfile=.coveragerc --source=src -m unittest discover tests
           coverage report -m --fail-under="${OVERALL_COVERAGE_FAIL_UNDER}"
           coverage xml -o coverage.xml

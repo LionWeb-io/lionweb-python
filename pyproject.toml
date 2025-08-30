@@ -24,3 +24,11 @@ dependencies = [
     "pydantic",
     "typing_extensions>=4.8",
 ]
+
+[project.optional-dependencies]
+dev = [
+    "coverage",
+    "diff-cover",
+    "testcontainers>=4.0",
+    # add anything else your tests need (e.g. requests, httpx, pytest if you use it, etc.)
+]
