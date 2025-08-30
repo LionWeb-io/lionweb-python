@@ -42,7 +42,8 @@ jobs:
 
       - name: Run unit tests with coverage
         run: |
-          PYTHONPATH=src coverage run --rcfile=.coveragerc --source=src -m unittest discover tests
+          pip install -e .
+          coverage run --rcfile=.coveragerc --source=src -m unittest discover tests
           coverage report -m --fail-under="${OVERALL_COVERAGE_FAIL_UNDER}"
           coverage xml -o coverage.xml
           coverage html -d htmlcov
