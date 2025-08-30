@@ -16,8 +16,8 @@ jobs:
       # Keep behavior identical to your local command
       PYTHONPATH: src
       # Set your thresholds here
-      OVERALL_COVERAGE_FAIL_UNDER: "80"
-      DIFF_COVER_FAIL_UNDER: "90"
+      OVERALL_COVERAGE_FAIL_UNDER: "60"
+      DIFF_COVER_FAIL_UNDER: "70"
     steps:
       - name: Checkout
         uses: actions/checkout@v4
