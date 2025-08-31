@@ -35,6 +35,10 @@ class Interface(Classifier["Interface"]):
     def get_extended_interfaces(self) -> List["Interface"]:
         return self.get_reference_multiple_value("extends")
 
+    @property
+    def extended_interfaces(self) -> List["Interface"]:
+        return self.get_extended_interfaces()
+
     def add_extended_interface(self, extended_interface: "Interface"):
         if not extended_interface:
             raise ValueError("extended_interface should not be null")

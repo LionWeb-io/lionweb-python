@@ -84,6 +84,10 @@ class Classifier(LanguageEntity[T], NamespaceProvider):
     def get_features(self) -> List[Feature]:
         return self.get_containment_multiple_value("features")
 
+    @property
+    def features(self) -> List[Feature]:
+        return self.get_features()
+
     def add_feature(self, feature: Feature) -> "Classifier":
         self.add_containment_multiple_value("features", feature)
         feature.set_parent(self)

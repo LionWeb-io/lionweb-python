@@ -83,6 +83,10 @@ class Language(M3Node["Language"], NamespaceProvider, IKeyed["Language"]):
     def get_elements(self) -> List["LanguageEntity"]:
         return self.get_containment_multiple_value("entities")
 
+    @property
+    def elements(self) -> List["LanguageEntity"]:
+        return self.get_elements()
+
     def add_dependency(self, dependency: "Language") -> "Language":
         from lionweb.model.reference_value import ReferenceValue
 
@@ -189,6 +193,10 @@ class Language(M3Node["Language"], NamespaceProvider, IKeyed["Language"]):
 
     def get_name(self) -> Optional[str]:
         return cast(Optional[str], self.get_property_value(property="name"))
+
+    @property
+    def name(self) -> Optional[str]:
+        return self.get_name()
 
     def get_key(self) -> str:
         return cast(str, self.get_property_value(property="key"))
