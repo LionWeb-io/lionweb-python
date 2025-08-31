@@ -174,7 +174,9 @@ class Node(ClassifierInstance["Concept"], ABC):
             and _properties_equality(self, other)
             and _shallow_containments_equality(self, other)
             and _shallow_references_equality(self, other)
-            and _shallow_annotations_equality(self, other)
+            and _shallow_annotations_equality(
+                self.get_annotations(), other.get_annotations()
+            )
         )
 
 

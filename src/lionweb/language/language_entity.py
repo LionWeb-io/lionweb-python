@@ -54,6 +54,14 @@ class LanguageEntity(M3Node[T], NamespacedEntity, IKeyed[T]):
         self.set_property_value(property="name", value=name)
         return cast(T, self)
 
+    @property
+    def name(self) -> Optional[str]:
+        return self.get_name()
+
+    @name.setter
+    def name(self, new_value):
+        self.set_name(new_value)
+
     def get_container(self) -> Optional[NamespaceProvider]:
         parent = self.get_parent()
         if parent is None:

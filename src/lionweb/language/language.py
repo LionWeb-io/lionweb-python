@@ -10,7 +10,10 @@ T = TypeVar("T", bound=M3Node)
 
 class Language(M3Node["Language"], NamespaceProvider, IKeyed["Language"]):
     if TYPE_CHECKING:
+        from lionweb.language.annotation import Annotation
+        from lionweb.language.classifier import Classifier
         from lionweb.language.concept import Concept
+        from lionweb.language.data_type import DataType
         from lionweb.language.enumeration import Enumeration
         from lionweb.language.interface import Interface
         from lionweb.language.language_entity import LanguageEntity
@@ -80,6 +83,10 @@ class Language(M3Node["Language"], NamespaceProvider, IKeyed["Language"]):
     def get_elements(self) -> List["LanguageEntity"]:
         return self.get_containment_multiple_value("entities")
 
+    @property
+    def elements(self) -> List["LanguageEntity"]:
+        return self.get_elements()
+
     def add_dependency(self, dependency: "Language") -> "Language":
         from lionweb.model.reference_value import ReferenceValue
 
@@ -105,6 +112,30 @@ class Language(M3Node["Language"], NamespaceProvider, IKeyed["Language"]):
             None,
         )
 
+    def get_classifier_by_name(self, name: str) -> Optional["Classifier"]:
+        from lionweb.language.concept import Classifier
+
+        return next(
+            (
+                e
+                for e in self.get_elements()
+                if isinstance(e, Classifier) and e.get_name() == name
+            ),
+            None,
+        )
+
+    def get_annotation_by_name(self, name: str) -> Optional["Annotation"]:
+        from lionweb.language.annotation import Annotation
+
+        return next(
+            (
+                e
+                for e in self.get_elements()
+                if isinstance(e, Annotation) and e.get_name() == name
+            ),
+            None,
+        )
+
     def get_enumeration_by_name(self, name: str) -> Optional["Enumeration"]:
 
         from lionweb.language.enumeration import Enumeration
@@ -124,6 +155,30 @@ class Language(M3Node["Language"], NamespaceProvider, IKeyed["Language"]):
             raise ValueError(f"Concept named {name} was not found")
         return concept
 
+    def require_interface_by_name(self, name: str) -> "Interface":
+        interface = self.get_interface_by_name(name)
+        if not interface:
+            raise ValueError(f"Interface named {name} was not found")
+        return interface
+
+    def require_classifier_by_name(self, name: str) -> "Classifier":
+        classifier = self.get_classifier_by_name(name)
+        if not classifier:
+            raise ValueError(f"Classifier named {name} was not found")
+        return classifier
+
+    def require_primitive_type_by_name(self, name: str) -> "PrimitiveType":
+        primitive_type = self.get_primitive_type_by_name(name)
+        if not primitive_type:
+            raise ValueError(f"Primitive type named {name} was not found")
+        return primitive_type
+
+    def require_data_type_by_name(self, name: str) -> "DataType":
+        data_type = self.get_data_type_by_name(name)
+        if not data_type:
+            raise ValueError(f"Data type named {name} was not found")
+        return data_type
+
     def get_interface_by_name(self, name: str) -> Optional["Interface"]:
         from lionweb.language.interface import Interface
 
@@ -138,6 +193,10 @@ class Language(M3Node["Language"], NamespaceProvider, IKeyed["Language"]):
 
     def get_name(self) -> Optional[str]:
         return cast(Optional[str], self.get_property_value(property="name"))
+
+    @property
+    def name(self) -> Optional[str]:
+        return self.get_name()
 
     def get_key(self) -> str:
         return cast(str, self.get_property_value(property="key"))
@@ -156,6 +215,16 @@ class Language(M3Node["Language"], NamespaceProvider, IKeyed["Language"]):
             return element
         elif element:
             raise RuntimeError(f"Element {name} is not a PrimitiveType")
+        return None
+
+    def get_data_type_by_name(self, name: str) -> Optional["DataType"]:
+        element = self.get_element_by_name(name)
+        from lionweb.language.data_type import DataType
+
+        if isinstance(element, DataType):
+            return element
+        elif element:
+            raise RuntimeError(f"Element {name} is not a DataType")
         return None
 
     def get_classifier(self) -> "Concept":

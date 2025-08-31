@@ -46,6 +46,14 @@ class Feature(M3Node[T], NamespacedEntity, IKeyed[T], Generic[T]):
     def is_required(self) -> bool:
         return not self.is_optional()
 
+    @property
+    def optional(self) -> bool:
+        return self.is_optional()
+
+    @property
+    def required(self) -> bool:
+        return self.is_required()
+
     def set_optional(self, optional: bool) -> T:
         self.set_property_value(property="optional", value=optional)
         return cast(T, self)
@@ -55,6 +63,10 @@ class Feature(M3Node[T], NamespacedEntity, IKeyed[T], Generic[T]):
 
     def set_name(self, name: Optional[str]):
         self.set_property_value(property="name", value=name)
+
+    @property
+    def name(self) -> Optional[str]:
+        return self.get_name()
 
     def get_container(self) -> Optional["Classifier"]:
         from lionweb.language.classifier import Classifier

@@ -3,6 +3,8 @@ from .classifier import Classifier as Classifier
 from .concept import Concept as Concept
 from .containment import Containment as Containment
 from .data_type import DataType as DataType
+from .definition import LanguageFactory as LanguageFactory
+from .definition import Multiplicity as Multiplicity
 from .enumeration import Enumeration as Enumeration
 from .enumeration_literal import EnumerationLiteral as EnumerationLiteral
 from .feature import Feature as Feature

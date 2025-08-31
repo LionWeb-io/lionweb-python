@@ -39,6 +39,10 @@ class Link(Feature[T]):
         self.set_property_value(property="multiple", value=multiple)
         return self  # type: ignore
 
+    @property
+    def multiple(self) -> bool:
+        return self.is_multiple()
+
     def get_type(self) -> Optional["Classifier"]:
         from lionweb.language.classifier import Classifier
 
@@ -52,6 +56,10 @@ class Link(Feature[T]):
 
             self.set_reference_single_value("type", reference_to(type))
         return self  # type: ignore
+
+    @property
+    def type(self) -> Optional["Classifier"]:
+        return self.get_type()
 
     @property
     def key(self):

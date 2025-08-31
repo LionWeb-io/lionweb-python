@@ -1,4 +1,4 @@
-from typing import Optional, cast
+from typing import List, Optional, cast
 
 from lionweb.language.classifier import Classifier
 from lionweb.model import ClassifierInstance
@@ -56,6 +56,18 @@ class ComparisonResult:
             f"{context} (id={node_id}): different number of children for {containment_name}, a={children_a}, b={children_b}"
         )
 
+    def mark_different_children(
+        self,
+        context: str,
+        node_id: str,
+        containment_name: str,
+        children_a: List[str | None],
+        children_b: List[str | None],
+    ):
+        self.differences.append(
+            f"{context} (id={node_id}): different of children for {containment_name}, a={children_a}, b={children_b}"
+        )
+
     def mark_different_number_of_references(
         self,
         context: str,
@@ -111,6 +123,12 @@ class ComparisonResult:
 
 
 class ModelComparator:
+
+    def __init__(self, unordered_links=None):
+        if unordered_links is None:
+            unordered_links = []
+        self.unordered_links = unordered_links
+
     def compare(self, node_a: Node, node_b: Node):
         comparison_result = ComparisonResult()
         self._compare_nodes(node_a, node_b, comparison_result, "<root>")
@@ -200,13 +218,37 @@ class ModelComparator:
                     len(value_b),
                 )
             else:
-                for i, (child_a, child_b) in enumerate(zip(value_a, value_b)):
-                    self._compare_nodes(
-                        child_a,
-                        child_b,
-                        comparison_result,
-                        f"{context}/{containment.get_name()}[{i}]",
-                    )
+                if containment in self.unordered_links:
+                    children_a = sorted(value_a, key=lambda x: x.id)
+                    children_b = sorted(value_b, key=lambda x: x.id)
+                    children_a_ids = [c.id for c in children_a]
+                    children_b_ids = [c.id for c in children_b]
+                    if children_a_ids == children_b_ids:
+                        for i, (child_a, child_b) in enumerate(
+                            zip(children_a, children_b)
+                        ):
+                            self._compare_nodes(
+                                child_a,
+                                child_b,
+                                comparison_result,
+                                f"{context}/{containment.get_name()}[{i}]",
+                            )
+                    else:
+                        comparison_result.mark_different_children(
+                            f"{context}/{containment.get_name()}",
+                            cast(str, node_a.id),
+                            cast(str, containment.get_name()),
+                            children_a_ids,
+                            children_b_ids,
+                        )
+                else:
+                    for i, (child_a, child_b) in enumerate(zip(value_a, value_b)):
+                        self._compare_nodes(
+                            child_a,
+                            child_b,
+                            comparison_result,
+                            f"{context}/{containment.get_name()}[{i}]",
+                        )
 
     def _compare_annotations(
         self,

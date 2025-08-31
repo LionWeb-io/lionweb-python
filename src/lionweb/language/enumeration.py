@@ -16,10 +16,14 @@ class Enumeration(DataType, NamespaceProvider):
         lion_web_version: Optional["LionWebVersion"] = None,
         language: Optional[Language] = None,
         name: Optional[str] = None,
+        id: Optional[str] = None,
+        key: Optional[str] = None,
     ):
         super().__init__(
-            lion_web_version=lion_web_version, language=language, name=name
+            lion_web_version=lion_web_version, language=language, name=name, id=id
         )
+        if key:
+            self.set_key(key)
 
     @property
     def literals(self) -> List[EnumerationLiteral]:
@@ -38,3 +42,9 @@ class Enumeration(DataType, NamespaceProvider):
         from lionweb.self.lioncore import LionCore
 
         return LionCore.get_enumeration(self.get_lionweb_version())
+
+    def get_literal_by_name(self, name) -> Optional["EnumerationLiteral"]:
+        return next(
+            (literal for literal in self.literals if literal.get_name() == name),
+            None,
+        )
