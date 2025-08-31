@@ -105,6 +105,17 @@ class Language(M3Node["Language"], NamespaceProvider, IKeyed["Language"]):
             None,
         )
 
+    def get_classifier_by_name(self, name: str) -> Optional["Classifier"]:
+        from lionweb.language.concept import Classifier
+        return next(
+            (
+                e
+                for e in self.get_elements()
+                if isinstance(e, Classifier) and e.get_name() == name
+            ),
+            None,
+        )
+
     def get_enumeration_by_name(self, name: str) -> Optional["Enumeration"]:
 
         from lionweb.language.enumeration import Enumeration
