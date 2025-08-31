@@ -121,3 +121,58 @@ class Concept(Classifier["Concept"]):
         from lionweb.self.lioncore import LionCore
 
         return LionCore.get_concept(self.get_lionweb_version())
+
+    def __repr__(self) -> str:
+        cls = self.__class__.__name__
+
+        # Try to access common identifiers safely
+        name = getattr(self, "name", None)
+        id_ = getattr(self, "id", None)
+
+        # Try to retrieve key via getter first, fallback to attribute if available
+        key = None
+        get_key = getattr(self, "get_key", None)
+        if callable(get_key):
+            try:
+                key = get_key()
+            except Exception:
+                key = None
+        if key is None:
+            key = getattr(self, "key", None)
+
+        # Extended concept summary
+        ext = None
+        try:
+            extended = self.get_extended_concept()
+            if extended is not None:
+                ext_name = getattr(extended, "name", None)
+                ext_id = getattr(extended, "id", None)
+                ext = ext_name or ext_id or extended.__class__.__name__
+        except Exception:
+            ext = None
+
+        # Implemented interfaces summary (count only to keep it concise)
+        impl_count = None
+        try:
+            impl = self.get_implemented()
+            impl_count = len(impl) if impl is not None else 0
+        except Exception:
+            impl_count = None
+
+        parts = []
+        if name is not None:
+            parts.append(f"name={name!r}")
+        if id_ is not None:
+            parts.append(f"id={id_!r}")
+        if key is not None:
+            parts.append(f"key={key!r}")
+        if self.is_abstract():
+            parts.append("abstract=True")
+        if self.is_partition():
+            parts.append("partition=True")
+        if ext is not None:
+            parts.append(f"extends={ext!r}")
+        if impl_count is not None:
+            parts.append(f"implements={impl_count}")
+
+        return f"{cls}({', '.join(parts)})"

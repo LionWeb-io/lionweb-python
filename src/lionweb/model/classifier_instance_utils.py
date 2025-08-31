@@ -166,6 +166,7 @@ def get_only_reference_value_by_reference_name(
     else:
         return reference_values[0]
 
+
 def get_root(nodes: List["Node"]) -> "Node":
     if len(nodes) == 0:
         raise ValueError("No nodes found")

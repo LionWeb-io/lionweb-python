@@ -1,14 +1,14 @@
 import unittest
 from pathlib import Path
-
-from lionweb.model import get_root
-from lionweb.utils.model_comparator import ModelComparator
-
-from lionweb.serialization import JsonSerialization, create_standard_json_serialization
+from typing import cast
 
 from lionweb import LionWebVersion
-from lionweb.language import LanguageFactory, LionCoreBuiltins, Multiplicity
+from lionweb.language import (Language, LanguageFactory, LionCoreBuiltins,
+                              Multiplicity)
+from lionweb.model import get_root
 from lionweb.self.lioncore import LionCore
+from lionweb.serialization import create_standard_json_serialization
+from lionweb.utils.language_comparator import compare_languages
 
 
 class DefinitionTest(unittest.TestCase):
@@ -189,15 +189,23 @@ class DefinitionTest(unittest.TestCase):
     def test_ensure_language_definition_starlasu_specs_exactly(self):
         ser = create_standard_json_serialization(LionWebVersion.V2023_1)
         path = Path(__file__).parent / "ast.language.v1.json"
-        loaded_language = get_root(ser.deserialize_path_to_nodes(path))
+        loaded_language = cast(Language, get_root(ser.deserialize_path_to_nodes(path)))
 
         factory = LanguageFactory(
             lw_version=LionWebVersion.V2023_1,
             name="com.strumenta.StarLasu",
             id="com-strumenta-StarLasu",
             key="com_strumenta_starlasu",
-            id_calculator=lambda parent_id, name: name if parent_id is None else f"{parent_id}-{name}-id",
-            key_calculator=lambda parent_id, name: name if parent_id is None else f"{parent_id}-{name}-key"
+            id_calculator=lambda parent_id, name: (
+                name
+                if parent_id is None
+                else f"{(parent_id[:-3] if parent_id.endswith('-id') else parent_id)}-{name}-id"
+            ),
+            key_calculator=lambda parent_key, name: (
+                name
+                if parent_key is None
+                else f"{(parent_key[:-4] if parent_key.endswith('-key') else parent_key)}-{name}-key"
+            ),
         )
         factory.primitive_type("Char")
         factory.primitive_type("Point")
@@ -211,7 +219,18 @@ class DefinitionTest(unittest.TestCase):
         )
         placeholder_node_type = factory.enumeration(
             "PlaceholderNodeType",
-            ["MissingASTTransformation", "FailingASTTransformation"],
+            [
+                {
+                    "name": "MissingASTTransformation",
+                    "key": "com-strumenta-StarLasu-PlaceholderNode-PlaceholderNodeType-id-MissingASTTransformation-key",
+                },
+                {
+                    "name": "FailingASTTransformation",
+                    "key": "com-strumenta-StarLasu-PlaceholderNode-PlaceholderNodeType-id-FailingASTTransformation-key",
+                },
+            ],
+            id="com-strumenta-StarLasu-PlaceholderNode-PlaceholderNodeType-id",
+            key="com_strumenta_starlasu-PlaceholderNode-PlaceholderNodeType-key",
         )
         (
             factory.annotation(
@@ -238,10 +257,30 @@ class DefinitionTest(unittest.TestCase):
         factory.interface("TypeAnnotation", extends=[common_element])
 
         issue_type = factory.enumeration(
-            "IssueType", ["LEXICAL", "SYNTACTIC", "SEMANTIC", "TRANSLATION"]
+            "IssueType",
+            [
+                {
+                    "name": name,
+                    "id": f"com-strumenta-StarLasu_IssueType-{name}",
+                    "key": f"IssueType-{name}",
+                }
+                for name in ["LEXICAL", "SYNTACTIC", "SEMANTIC", "TRANSLATION"]
+            ],
+            id="com-strumenta-StarLasu_IssueType",
+            key="IssueType",
         )
         issue_severity = factory.enumeration(
-            "IssueSeverity", ["ERROR", "WARNING", "INFO"]
+            "IssueSeverity",
+            [
+                {
+                    "name": name,
+                    "id": f"com-strumenta-StarLasu_IssueSeverity-{name}",
+                    "key": f"IssueSeverity-{name}",
+                }
+                for name in ["ERROR", "WARNING", "INFO"]
+            ],
+            id="com-strumenta-StarLasu_IssueSeverity",
+            key="IssueSeverity",
         )
 
         issue = (
@@ -251,16 +290,23 @@ class DefinitionTest(unittest.TestCase):
             .property("severity", issue_severity)
             .property("position", position, Multiplicity.OPTIONAL)
         )
-        tokens = factory.primitive_type("Tokens")
-        (factory.concept("ParsingResult")
-         .containment("issues", issue, Multiplicity.ZERO_OR_MORE)
-         .containment("root", ast_node, Multiplicity.OPTIONAL)
-         .property("code", LionCoreBuiltins.get_string(LionWebVersion.V2023_1), Multiplicity.OPTIONAL)
-         .property("tokens", tokens, Multiplicity.OPTIONAL))
+        tokens = factory.primitive_type("TokensList")
+        (
+            factory.concept("ParsingResult")
+            .containment("issues", issue, Multiplicity.ZERO_OR_MORE)
+            .containment("root", ast_node, Multiplicity.OPTIONAL)
+            .property(
+                "code",
+                LionCoreBuiltins.get_string(LionWebVersion.V2023_1),
+                Multiplicity.OPTIONAL,
+            )
+            .property("tokens", tokens, Multiplicity.OPTIONAL)
+        )
 
         built_language = factory.build()
-        diff = ModelComparator().compare(loaded_language, built_language)
-        print(diff.differences)
+        diff = compare_languages(loaded_language, built_language)
+        if len(diff.differences) > 0:
+            print(diff.differences)
         self.assertTrue(diff.are_equivalent())
 
 

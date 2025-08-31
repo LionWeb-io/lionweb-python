@@ -6,6 +6,7 @@ from lionweb import LionWebVersion
 from .annotation import Annotation
 from .classifier import Classifier
 from .concept import Concept
+from .containment import Containment
 from .data_type import DataType
 from .enumeration import Enumeration
 from .enumeration_literal import EnumerationLiteral
@@ -14,7 +15,6 @@ from .language import Language
 from .primitive_type import PrimitiveType
 from .property import Property
 from .reference import Reference
-from .containment import Containment
 
 
 class Multiplicity(Enum):
@@ -36,6 +36,12 @@ class LinkData(TypedDict):
     name: str
     type: "ClassifierFactory"
     multiplicity: Multiplicity
+    id: Optional[str]
+    key: Optional[str]
+
+
+class LiteralData(TypedDict):
+    name: str
     id: Optional[str]
     key: Optional[str]
 
@@ -101,12 +107,12 @@ class ClassifierFactory:
         return self
 
     def containment(
-            self,
-            name: str,
-            type: "ClassifierFactory",
-            multiplicity: Multiplicity = Multiplicity.REQUIRED,
-            id: Optional[str] = None,
-            key: Optional[str] = None,
+        self,
+        name: str,
+        type: "ClassifierFactory",
+        multiplicity: Multiplicity = Multiplicity.REQUIRED,
+        id: Optional[str] = None,
+        key: Optional[str] = None,
     ) -> "ClassifierFactory":
         self.containments.append(
             {
@@ -152,21 +158,21 @@ class ClassifierFactory:
             property.type = type
             classifier.add_feature(property)
         for data in self.references:
-            containment = Reference(
+            reference = Reference(
                 lion_web_version=classifier.lion_web_version,
                 name=data["name"],
                 container=classifier,
                 id=data["id"] or id_calculator(classifier.id, data["name"]),
                 key=data["key"] or key_calculator(classifier.key, data["name"]),
             )
-            containment.set_optional(not data["multiplicity"].value["required"])
-            containment.set_multiple(data["multiplicity"].value["many"])
+            reference.set_optional(not data["multiplicity"].value["required"])
+            reference.set_multiple(data["multiplicity"].value["many"])
             type_name = data["type"].name
             link_type = language.require_classifier_by_name(type_name)
             if link_type is None:
                 raise ValueError(f"Type {type_name} not found")
-            containment.set_type(link_type)
-            classifier.add_feature(containment)
+            reference.set_type(link_type)
+            classifier.add_feature(reference)
         for data in self.containments:
             containment = Containment(
                 lion_web_version=classifier.lion_web_version,
@@ -256,7 +262,7 @@ class PrimitiveTypeFactory:
 
 class EnumerationTypeFactory:
 
-    def __init__(self, name: str, id: str, key: str, literals: List[str]):
+    def __init__(self, name: str, id: str, key: str, literals: List[str | LiteralData]):
         self.name = name
         self.id = id
         self.key = key
@@ -275,14 +281,29 @@ class EnumerationTypeFactory:
             id=self.id,
             key=self.key,
         )
-        for literal_name in self.literals:
-            literal = EnumerationLiteral(
-                lion_web_version=language.lion_web_version,
-                enumeration=enumeration,
-                name=literal_name,
-            )
-            literal.set_id(id_calculator(enumeration.id, literal_name))
-            literal.set_key(key_calculator(enumeration.key, literal_name))
+        for literal_data in self.literals:
+            if isinstance(literal_data, str):
+                literal = EnumerationLiteral(
+                    lion_web_version=language.lion_web_version,
+                    enumeration=enumeration,
+                    name=literal_data,
+                )
+                literal.set_id(id_calculator(enumeration.id, literal_data))
+                literal.set_key(key_calculator(enumeration.key, literal_data))
+            else:
+                literal = EnumerationLiteral(
+                    lion_web_version=language.lion_web_version,
+                    enumeration=enumeration,
+                    name=literal_data["name"],
+                )
+                literal.set_id(
+                    literal_data.get("id")
+                    or id_calculator(enumeration.id, literal_data["name"])
+                )
+                literal.set_key(
+                    literal_data.get("key")
+                    or key_calculator(enumeration.key, literal_data["name"])
+                )
         return enumeration
 
 
@@ -399,7 +420,7 @@ class LanguageFactory:
     def enumeration(
         self,
         name: str,
-        literals: List[str],
+        literals: List[str | LiteralData],
         id: Optional[str] = None,
         key: Optional[str] = None,
     ) -> EnumerationTypeFactory:
