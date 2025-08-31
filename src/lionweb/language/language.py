@@ -119,6 +119,18 @@ class Language(M3Node["Language"], NamespaceProvider, IKeyed["Language"]):
             None,
         )
 
+    def get_annotation_by_name(self, name: str) -> Optional["Annotation"]:
+        from lionweb.language.annotation import Annotation
+
+        return next(
+            (
+                e
+                for e in self.get_elements()
+                if isinstance(e, Annotation) and e.get_name() == name
+            ),
+            None,
+        )
+
     def get_enumeration_by_name(self, name: str) -> Optional["Enumeration"]:
 
         from lionweb.language.enumeration import Enumeration

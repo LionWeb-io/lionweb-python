@@ -112,6 +112,11 @@ class DefinitionTest(unittest.TestCase):
         self.assertEqual("com-strumenta-StarLasu_Char", pt.get_id())
         self.assertEqual("com_strumenta_starlasu_Char", pt.get_key())
 
+        e = language.get_enumeration_by_name("PlaceholderNodeType")
+
+        a = language.get_annotation_by_name("PlaceholderNode")
+        self.assertEqual(LionCore.get_concept(LionWebVersion.V2023_1), a.get_annotates())
+
 
 if __name__ == "__main__":
     unittest.main()

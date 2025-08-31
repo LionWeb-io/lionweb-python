@@ -2,7 +2,10 @@ from enum import Enum
 from typing import Callable, List, Optional, TypedDict
 
 from lionweb import LionWebVersion
-from lionweb.language import Annotation, DataType, Enumeration, Interface
+from .annotation import Annotation
+from .data_type import DataType
+from .enumeration import Enumeration
+from .interface import Interface
 
 from .classifier import Classifier
 from .concept import Concept
