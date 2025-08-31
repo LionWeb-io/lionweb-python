@@ -8,7 +8,6 @@ from lionweb.language.reference import Reference
 from lionweb.language.structured_data_type import StructuredDataType
 from lionweb.model.impl.dynamic_annotation_instance import \
     DynamicAnnotationInstance
-from lionweb.self.lioncore import LionCore
 
 if TYPE_CHECKING:
     from lionweb.model.node import Node
@@ -88,6 +87,7 @@ class Instantiator:
     def register_lioncore_custom_deserializers(self, lion_web_version):
         from lionweb.language import (Annotation, Concept, Containment,
                                       Interface, Language, Property)
+        from lionweb.self.lioncore import LionCore
 
         self.custom_deserializers.update(
             {

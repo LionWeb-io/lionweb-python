@@ -12,6 +12,7 @@ class Language(M3Node["Language"], NamespaceProvider, IKeyed["Language"]):
     if TYPE_CHECKING:
         from lionweb.language.classifier import Classifier
         from lionweb.language.concept import Concept
+        from lionweb.language.data_type import DataType
         from lionweb.language.enumeration import Enumeration
         from lionweb.language.interface import Interface
         from lionweb.language.language_entity import LanguageEntity
@@ -149,6 +150,12 @@ class Language(M3Node["Language"], NamespaceProvider, IKeyed["Language"]):
             raise ValueError(f"Primitive type named {name} was not found")
         return primitive_type
 
+    def require_data_type_by_name(self, name: str) -> "DataType":
+        data_type = self.get_data_type_by_name(name)
+        if not data_type:
+            raise ValueError(f"Data type named {name} was not found")
+        return data_type
+
     def get_interface_by_name(self, name: str) -> Optional["Interface"]:
         from lionweb.language.interface import Interface
 
@@ -181,6 +188,16 @@ class Language(M3Node["Language"], NamespaceProvider, IKeyed["Language"]):
             return element
         elif element:
             raise RuntimeError(f"Element {name} is not a PrimitiveType")
+        return None
+
+    def get_data_type_by_name(self, name: str) -> Optional["DataType"]:
+        element = self.get_element_by_name(name)
+        from lionweb.language.data_type import DataType
+
+        if isinstance(element, DataType):
+            return element
+        elif element:
+            raise RuntimeError(f"Element {name} is not a DataType")
         return None
 
     def get_classifier(self) -> "Concept":

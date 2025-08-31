@@ -16,10 +16,14 @@ class Enumeration(DataType, NamespaceProvider):
         lion_web_version: Optional["LionWebVersion"] = None,
         language: Optional[Language] = None,
         name: Optional[str] = None,
+        id: Optional[str] = None,
+        key: Optional[str] = None,
     ):
         super().__init__(
-            lion_web_version=lion_web_version, language=language, name=name
+            lion_web_version=lion_web_version, language=language, name=name, id=id
         )
+        if key:
+            self.set_key(key)
 
     @property
     def literals(self) -> List[EnumerationLiteral]:

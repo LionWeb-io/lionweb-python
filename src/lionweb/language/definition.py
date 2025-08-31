@@ -2,10 +2,14 @@ from enum import Enum
 from typing import Callable, List, Optional, TypedDict
 
 from lionweb import LionWebVersion
-from lionweb.language import (Classifier, Concept, PrimitiveType, Property,
-                              Reference)
+from lionweb.language import Annotation, DataType, Enumeration, Interface
 
+from .classifier import Classifier
+from .concept import Concept
 from .language import Language
+from .primitive_type import PrimitiveType
+from .property import Property
+from .reference import Reference
 
 
 class Multiplicity(Enum):
@@ -17,7 +21,7 @@ class Multiplicity(Enum):
 
 class PropertyData(TypedDict):
     name: str
-    type: "PrimitiveTypeFactory"
+    type: "PrimitiveTypeFactory | EnumerationTypeFactory | DataType"
     multiplicity: Multiplicity
     id: Optional[str]
     key: Optional[str]
@@ -46,7 +50,7 @@ class ClassifierFactory:
     def property(
         self,
         name: str,
-        type: "PrimitiveTypeFactory",
+        type: "PrimitiveTypeFactory | EnumerationTypeFactory | DataType",
         multiplicity: Multiplicity = Multiplicity.REQUIRED,
         id: Optional[str] = None,
         key: Optional[str] = None,
@@ -100,10 +104,17 @@ class ClassifierFactory:
                 or key_calculator(classifier.key, property_data["name"]),
             )
             property.set_optional(not property_data["multiplicity"].value["required"])
-            type_name = property_data["type"].name
-            type = language.require_primitive_type_by_name(type_name)
-            if type is None:
-                raise ValueError(f"Type {type_name} not found")
+            property_type = property_data["type"]
+            if isinstance(property_type, DataType):
+                type = property_type
+            else:
+                if isinstance(property_type, PrimitiveTypeFactory):
+                    type_name = property_type.name
+                elif isinstance(property_type, EnumerationTypeFactory):
+                    type_name = property_type.name
+                type = language.require_data_type_by_name(type_name)
+                if type is None:
+                    raise ValueError(f"Type {type_name} not found")
             property.type = type
             classifier.add_feature(property)
         for ref_data in self.references:
@@ -135,8 +146,29 @@ class ClassifierFactory:
                 name=self.name,
             )
             return concept
+        elif self.type == "Interface":
+            interface = Interface(
+                lion_web_version=language.lion_web_version,
+                language=language,
+                id=self.id,
+                key=self.key,
+                name=self.name,
+            )
+            return interface
+        elif self.type == "Annotation":
+            annotation = Annotation(
+                lion_web_version=language.lion_web_version,
+                language=language,
+                id=self.id,
+                key=self.key,
+                name=self.name,
+            )
+            return annotation
         else:
             raise ValueError(f"Invalid classifier type: {self.type}")
+
+    def set_annotates(self, annotates: "Classifier | ClassifierFactory"):
+        self.annotates = annotates
 
 
 class PrimitiveTypeFactory:
@@ -148,6 +180,24 @@ class PrimitiveTypeFactory:
 
     def build(self, language: Language) -> "PrimitiveType":
         ptype = PrimitiveType(
+            lion_web_version=language.lion_web_version,
+            language=language,
+            name=self.name,
+            id=self.id,
+            key=self.key,
+        )
+        return ptype
+
+
+class EnumerationTypeFactory:
+
+    def __init__(self, name: str, id: str, key: str):
+        self.name = name
+        self.id = id
+        self.key = key
+
+    def build(self, language: Language) -> "Enumeration":
+        ptype = Enumeration(
             lion_web_version=language.lion_web_version,
             language=language,
             name=self.name,
@@ -184,6 +234,7 @@ class LanguageFactory:
         self.key = key or self.key_calculator(None, name)
         self.classifiers: List[ClassifierFactory] = []
         self.primitive_types: List[PrimitiveTypeFactory] = []
+        self.enumerations: List[EnumerationTypeFactory] = []
 
     def build(self) -> Language:
         language = Language(
@@ -196,6 +247,8 @@ class LanguageFactory:
 
         for primitive_type in self.primitive_types:
             primitive_type.build(language)
+        for enumeration in self.enumerations:
+            enumeration.build(language)
 
         classifiers = {}
         for classifier in self.classifiers:
@@ -220,7 +273,11 @@ class LanguageFactory:
         return sub
 
     def interface(
-        self, name: str, id: Optional[str] = None, key: Optional[str] = None
+        self,
+        name: str,
+        id: Optional[str] = None,
+        key: Optional[str] = None,
+        extends: ClassifierFactory | Classifier | None = None,
     ) -> ClassifierFactory:
         sub = ClassifierFactory(
             "Interface",
@@ -228,6 +285,23 @@ class LanguageFactory:
             id=id or self.id_calculator(self.id, name),
             key=key or self.key_calculator(self.key, name),
         )
+        self.classifiers.append(sub)
+        return sub
+
+    def annotation(
+        self,
+        name: str,
+        annotates: ClassifierFactory | Classifier,
+        id: Optional[str] = None,
+        key: Optional[str] = None,
+    ) -> ClassifierFactory:
+        sub = ClassifierFactory(
+            "Annotation",
+            name,
+            id=id or self.id_calculator(self.id, name),
+            key=key or self.key_calculator(self.key, name),
+        )
+        sub.set_annotates(annotates)
         self.classifiers.append(sub)
         return sub
 
@@ -240,4 +314,19 @@ class LanguageFactory:
             key=key or self.key_calculator(self.key, name),
         )
         self.primitive_types.append(sub)
+        return sub
+
+    def enumeration(
+        self,
+        name: str,
+        literals: List[str],
+        id: Optional[str] = None,
+        key: Optional[str] = None,
+    ) -> EnumerationTypeFactory:
+        sub = EnumerationTypeFactory(
+            name,
+            id=id or self.id_calculator(self.id, name),
+            key=key or self.key_calculator(self.key, name),
+        )
+        self.enumerations.append(sub)
         return sub
