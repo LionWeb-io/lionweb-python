@@ -14,6 +14,7 @@ from .language import Language
 from .primitive_type import PrimitiveType
 from .property import Property
 from .reference import Reference
+from .containment import Containment
 
 
 class Multiplicity(Enum):
@@ -31,7 +32,7 @@ class PropertyData(TypedDict):
     key: Optional[str]
 
 
-class ReferenceData(TypedDict):
+class LinkData(TypedDict):
     name: str
     type: "ClassifierFactory"
     multiplicity: Multiplicity
@@ -56,7 +57,8 @@ class ClassifierFactory:
         self.id = id
         self.key = key
         self.properties: List[PropertyData] = []
-        self.references: List[ReferenceData] = []
+        self.references: List[LinkData] = []
+        self.containments: List[LinkData] = []
         self.annotates: Optional[Classifier | ClassifierFactory] = None
         self.extends = extends
 
@@ -88,6 +90,25 @@ class ClassifierFactory:
         key: Optional[str] = None,
     ) -> "ClassifierFactory":
         self.references.append(
+            {
+                "name": name,
+                "type": type,
+                "multiplicity": multiplicity,
+                "id": id,
+                "key": key,
+            }
+        )
+        return self
+
+    def containment(
+            self,
+            name: str,
+            type: "ClassifierFactory",
+            multiplicity: Multiplicity = Multiplicity.REQUIRED,
+            id: Optional[str] = None,
+            key: Optional[str] = None,
+    ) -> "ClassifierFactory":
+        self.containments.append(
             {
                 "name": name,
                 "type": type,
@@ -130,22 +151,38 @@ class ClassifierFactory:
                     raise ValueError(f"Type {type_name} not found")
             property.type = type
             classifier.add_feature(property)
-        for ref_data in self.references:
-            reference = Reference(
+        for data in self.references:
+            containment = Reference(
                 lion_web_version=classifier.lion_web_version,
-                name=ref_data["name"],
+                name=data["name"],
                 container=classifier,
-                id=ref_data["id"] or id_calculator(classifier.id, ref_data["name"]),
-                key=ref_data["key"] or key_calculator(classifier.key, ref_data["name"]),
+                id=data["id"] or id_calculator(classifier.id, data["name"]),
+                key=data["key"] or key_calculator(classifier.key, data["name"]),
             )
-            reference.set_optional(not ref_data["multiplicity"].value["required"])
-            reference.set_multiple(ref_data["multiplicity"].value["many"])
-            type_name = ref_data["type"].name
+            containment.set_optional(not data["multiplicity"].value["required"])
+            containment.set_multiple(data["multiplicity"].value["many"])
+            type_name = data["type"].name
             link_type = language.require_classifier_by_name(type_name)
             if link_type is None:
                 raise ValueError(f"Type {type_name} not found")
-            reference.set_type(link_type)
-            classifier.add_feature(reference)
+            containment.set_type(link_type)
+            classifier.add_feature(containment)
+        for data in self.containments:
+            containment = Containment(
+                lion_web_version=classifier.lion_web_version,
+                name=data["name"],
+                container=classifier,
+                id=data["id"] or id_calculator(classifier.id, data["name"]),
+                key=data["key"] or key_calculator(classifier.key, data["name"]),
+            )
+            containment.set_optional(not data["multiplicity"].value["required"])
+            containment.set_multiple(data["multiplicity"].value["many"])
+            type_name = data["type"].name
+            link_type = language.require_classifier_by_name(type_name)
+            if link_type is None:
+                raise ValueError(f"Type {type_name} not found")
+            containment.set_type(link_type)
+            classifier.add_feature(containment)
         if isinstance(classifier, Annotation):
             if isinstance(self.annotates, ClassifierFactory):
                 classifier.annotates = language.require_classifier_by_name(

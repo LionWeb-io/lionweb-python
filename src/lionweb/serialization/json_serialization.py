@@ -1,4 +1,5 @@
 import json
+from pathlib import Path
 from typing import List, Set
 
 from lionweb.lionweb_version import LionWebVersion
@@ -102,6 +103,9 @@ class JsonSerialization(AbstractSerialization):
             for ci in self.deserialize_to_classifier_instances(json_element)
             if isinstance(ci, Node)
         ]
+
+    def deserialize_path_to_nodes(self, source: Path) -> List[Node]:
+        return self.deserialize_string_to_nodes(source.read_text())
 
     def deserialize_string_to_nodes(self, json_str: str) -> List[Node]:
         return self.deserialize_json_to_nodes(json.loads(json_str))

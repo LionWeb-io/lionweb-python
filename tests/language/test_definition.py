@@ -1,4 +1,10 @@
 import unittest
+from pathlib import Path
+
+from lionweb.model import get_root
+from lionweb.utils.model_comparator import ModelComparator
+
+from lionweb.serialization import JsonSerialization, create_standard_json_serialization
 
 from lionweb import LionWebVersion
 from lionweb.language import LanguageFactory, LionCoreBuiltins, Multiplicity
@@ -179,6 +185,83 @@ class DefinitionTest(unittest.TestCase):
         p = c.get_property_by_name("position")
         self.assertEqual(True, p.optional)
         self.assertEqual(language.get_primitive_type_by_name("Position"), p.type)
+
+    def test_ensure_language_definition_starlasu_specs_exactly(self):
+        ser = create_standard_json_serialization(LionWebVersion.V2023_1)
+        path = Path(__file__).parent / "ast.language.v1.json"
+        loaded_language = get_root(ser.deserialize_path_to_nodes(path))
+
+        factory = LanguageFactory(
+            lw_version=LionWebVersion.V2023_1,
+            name="com.strumenta.StarLasu",
+            id="com-strumenta-StarLasu",
+            key="com_strumenta_starlasu",
+            id_calculator=lambda parent_id, name: name if parent_id is None else f"{parent_id}-{name}-id",
+            key_calculator=lambda parent_id, name: name if parent_id is None else f"{parent_id}-{name}-key"
+        )
+        factory.primitive_type("Char")
+        factory.primitive_type("Point")
+        position = factory.primitive_type("Position")
+
+        ast_node = factory.concept("ASTNode")
+        (
+            ast_node.property("position", position, Multiplicity.OPTIONAL)
+            .reference("originalNode", ast_node, Multiplicity.OPTIONAL)
+            .reference("transpiledNodes", ast_node, Multiplicity.ZERO_OR_MORE)
+        )
+        placeholder_node_type = factory.enumeration(
+            "PlaceholderNodeType",
+            ["MissingASTTransformation", "FailingASTTransformation"],
+        )
+        (
+            factory.annotation(
+                "PlaceholderNode", LionCore.get_concept(LionWebVersion.V2023_1)
+            )
+            .reference("originalNode", ast_node, Multiplicity.OPTIONAL)
+            .property("type", placeholder_node_type, Multiplicity.REQUIRED)
+            .property(
+                "message",
+                LionCoreBuiltins.get_string(LionWebVersion.V2023_1),
+                Multiplicity.REQUIRED,
+            )
+        )
+
+        common_element = factory.interface("CommonElement")
+        factory.interface("BehaviorDeclaration", extends=[common_element])
+        factory.interface("Documentation", extends=[common_element])
+        factory.interface("EntityDeclaration", extends=[common_element])
+        factory.interface("EntityGroupDeclaration", extends=[common_element])
+        factory.interface("Expression", extends=[common_element])
+        factory.interface("Parameter", extends=[common_element])
+        factory.interface("PlaceholderElement", extends=[common_element])
+        factory.interface("Statement", extends=[common_element])
+        factory.interface("TypeAnnotation", extends=[common_element])
+
+        issue_type = factory.enumeration(
+            "IssueType", ["LEXICAL", "SYNTACTIC", "SEMANTIC", "TRANSLATION"]
+        )
+        issue_severity = factory.enumeration(
+            "IssueSeverity", ["ERROR", "WARNING", "INFO"]
+        )
+
+        issue = (
+            factory.concept("Issue")
+            .property("message", LionCoreBuiltins.get_string(LionWebVersion.V2023_1))
+            .property("type", issue_type)
+            .property("severity", issue_severity)
+            .property("position", position, Multiplicity.OPTIONAL)
+        )
+        tokens = factory.primitive_type("Tokens")
+        (factory.concept("ParsingResult")
+         .containment("issues", issue, Multiplicity.ZERO_OR_MORE)
+         .containment("root", ast_node, Multiplicity.OPTIONAL)
+         .property("code", LionCoreBuiltins.get_string(LionWebVersion.V2023_1), Multiplicity.OPTIONAL)
+         .property("tokens", tokens, Multiplicity.OPTIONAL))
+
+        built_language = factory.build()
+        diff = ModelComparator().compare(loaded_language, built_language)
+        print(diff.differences)
+        self.assertTrue(diff.are_equivalent())
 
 
 if __name__ == "__main__":
