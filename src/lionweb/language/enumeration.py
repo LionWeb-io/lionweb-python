@@ -42,3 +42,9 @@ class Enumeration(DataType, NamespaceProvider):
         from lionweb.self.lioncore import LionCore
 
         return LionCore.get_enumeration(self.get_lionweb_version())
+
+    def get_literal_by_name(self, name) -> Optional["EnumerationLiteral"]:
+        return next(
+            (literal for literal in self.literals if literal.get_name() == name),
+            None,
+        )

@@ -10,6 +10,7 @@ T = TypeVar("T", bound=M3Node)
 
 class Language(M3Node["Language"], NamespaceProvider, IKeyed["Language"]):
     if TYPE_CHECKING:
+        from lionweb.language.annotation import Annotation
         from lionweb.language.classifier import Classifier
         from lionweb.language.concept import Concept
         from lionweb.language.data_type import DataType
@@ -149,6 +150,12 @@ class Language(M3Node["Language"], NamespaceProvider, IKeyed["Language"]):
         if not concept:
             raise ValueError(f"Concept named {name} was not found")
         return concept
+
+    def require_interface_by_name(self, name: str) -> "Interface":
+        interface = self.get_interface_by_name(name)
+        if not interface:
+            raise ValueError(f"Interface named {name} was not found")
+        return interface
 
     def require_classifier_by_name(self, name: str) -> "Classifier":
         classifier = self.get_classifier_by_name(name)

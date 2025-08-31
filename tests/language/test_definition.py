@@ -33,30 +33,39 @@ class DefinitionTest(unittest.TestCase):
                 "PlaceholderNode", LionCore.get_concept(LionWebVersion.V2023_1)
             )
             .reference("originalNode", ast_node, Multiplicity.OPTIONAL)
-            .property("type", placeholder_node_type, Multiplicity.OPTIONAL)
+            .property("type", placeholder_node_type, Multiplicity.REQUIRED)
             .property(
                 "message",
                 LionCoreBuiltins.get_string(LionWebVersion.V2023_1),
-                Multiplicity.OPTIONAL,
+                Multiplicity.REQUIRED,
             )
         )
 
         common_element = factory.interface("CommonElement")
-        factory.interface("BehaviorDeclaration", extends=common_element)
-        factory.interface("Documentation", extends=common_element)
-        factory.interface("EntityDeclaration", extends=common_element)
-        factory.interface("EntityGroupDeclaration", extends=common_element)
-        factory.interface("Expression", extends=common_element)
-        factory.interface("Parameter", extends=common_element)
-        factory.interface("PlaceholderElement", extends=common_element)
-        factory.interface("Statement", extends=common_element)
-        factory.interface("TypeAnnotation", extends=common_element)
+        factory.interface("BehaviorDeclaration", extends=[common_element])
+        factory.interface("Documentation", extends=[common_element])
+        factory.interface("EntityDeclaration", extends=[common_element])
+        factory.interface("EntityGroupDeclaration", extends=[common_element])
+        factory.interface("Expression", extends=[common_element])
+        factory.interface("Parameter", extends=[common_element])
+        factory.interface("PlaceholderElement", extends=[common_element])
+        factory.interface("Statement", extends=[common_element])
+        factory.interface("TypeAnnotation", extends=[common_element])
 
-        factory.enumeration(
+        issue_type = factory.enumeration(
             "IssueType", ["LEXICAL", "SYNTACTIC", "SEMANTIC", "TRANSLATION"]
         )
+        issue_severity = factory.enumeration(
+            "IssueSeverity", ["ERROR", "WARNING", "INFO"]
+        )
 
-        factory.concept("Issue")
+        (
+            factory.concept("Issue")
+            .property("message", LionCoreBuiltins.get_string(LionWebVersion.V2023_1))
+            .property("type", issue_type)
+            .property("severity", issue_severity)
+            .property("position", position, Multiplicity.OPTIONAL)
+        )
 
         language = factory.build()
         self.assertEqual(LionWebVersion.V2023_1, language.get_lionweb_version())
@@ -113,9 +122,62 @@ class DefinitionTest(unittest.TestCase):
         self.assertEqual("com_strumenta_starlasu_Char", pt.get_key())
 
         e = language.get_enumeration_by_name("PlaceholderNodeType")
+        self.assertEqual(2, len(e.literals))
+        self.assertEqual(
+            "com-strumenta-StarLasu_PlaceholderNodeType_MissingASTTransformation",
+            e.get_literal_by_name("MissingASTTransformation").get_id(),
+        )
+        self.assertEqual(
+            "com-strumenta-StarLasu_PlaceholderNodeType_FailingASTTransformation",
+            e.get_literal_by_name("FailingASTTransformation").get_id(),
+        )
 
         a = language.get_annotation_by_name("PlaceholderNode")
-        self.assertEqual(LionCore.get_concept(LionWebVersion.V2023_1), a.get_annotates())
+        self.assertEqual(LionCore.get_concept(LionWebVersion.V2023_1), a.annotates)
+
+        r = a.get_reference_by_name("originalNode")
+        self.assertEqual(True, r.is_optional())
+        self.assertEqual(False, r.is_multiple())
+        self.assertIs(language.get_concept_by_name("ASTNode"), r.get_type())
+
+        p = a.get_property_by_name("type")
+        self.assertEqual(False, p.is_optional())
+        self.assertEqual(
+            language.get_enumeration_by_name("PlaceholderNodeType"), p.type
+        )
+
+        p = a.get_property_by_name("message")
+        self.assertEqual(False, p.is_optional())
+        self.assertEqual(LionCoreBuiltins.get_string(LionWebVersion.V2023_1), p.type)
+
+        i = language.get_interface_by_name("CommonElement")
+        self.assertEqual([], i.get_extended_interfaces())
+
+        i = language.get_interface_by_name("BehaviorDeclaration")
+        self.assertEqual(
+            [language.get_interface_by_name("CommonElement")],
+            i.get_extended_interfaces(),
+        )
+
+        e = language.get_enumeration_by_name("IssueType")
+        self.assertEqual(4, len(e.literals))
+
+        e = language.get_enumeration_by_name("IssueSeverity")
+        self.assertEqual(3, len(e.literals))
+
+        c = language.get_concept_by_name("Issue")
+        p = c.get_property_by_name("type")
+        self.assertEqual(False, p.is_optional())
+        self.assertEqual(language.get_enumeration_by_name("IssueType"), p.type)
+        p = c.get_property_by_name("message")
+        self.assertEqual(False, p.is_optional())
+        self.assertEqual(LionCoreBuiltins.get_string(LionWebVersion.V2023_1), p.type)
+        p = c.get_property_by_name("severity")
+        self.assertEqual(False, p.is_optional())
+        self.assertEqual(language.get_enumeration_by_name("IssueSeverity"), p.type)
+        p = c.get_property_by_name("position")
+        self.assertEqual(True, p.is_optional())
+        self.assertEqual(language.get_primitive_type_by_name("Position"), p.type)
 
 
 if __name__ == "__main__":

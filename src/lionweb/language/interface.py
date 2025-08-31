@@ -74,3 +74,6 @@ class Interface(Classifier["Interface"]):
             if ei not in to_avoid:
                 interfaces.update(ei._all_extended_interfaces_helper(to_avoid))
         return interfaces
+
+    def __repr__(self) -> str:
+        return f"Interface({self.get_name()})"
