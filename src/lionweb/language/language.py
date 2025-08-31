@@ -10,6 +10,7 @@ T = TypeVar("T", bound=M3Node)
 
 class Language(M3Node["Language"], NamespaceProvider, IKeyed["Language"]):
     if TYPE_CHECKING:
+        from lionweb.language.classifier import Classifier
         from lionweb.language.concept import Concept
         from lionweb.language.enumeration import Enumeration
         from lionweb.language.interface import Interface
@@ -107,6 +108,7 @@ class Language(M3Node["Language"], NamespaceProvider, IKeyed["Language"]):
 
     def get_classifier_by_name(self, name: str) -> Optional["Classifier"]:
         from lionweb.language.concept import Classifier
+
         return next(
             (
                 e
@@ -134,6 +136,18 @@ class Language(M3Node["Language"], NamespaceProvider, IKeyed["Language"]):
         if not concept:
             raise ValueError(f"Concept named {name} was not found")
         return concept
+
+    def require_classifier_by_name(self, name: str) -> "Classifier":
+        classifier = self.get_classifier_by_name(name)
+        if not classifier:
+            raise ValueError(f"Classifier named {name} was not found")
+        return classifier
+
+    def require_primitive_type_by_name(self, name: str) -> "PrimitiveType":
+        primitive_type = self.get_primitive_type_by_name(name)
+        if not primitive_type:
+            raise ValueError(f"Primitive type named {name} was not found")
+        return primitive_type
 
     def get_interface_by_name(self, name: str) -> Optional["Interface"]:
         from lionweb.language.interface import Interface
