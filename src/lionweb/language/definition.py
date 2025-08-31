@@ -18,6 +18,14 @@ from .reference import Reference
 
 
 class Multiplicity(Enum):
+    """
+    Defines an enumeration for Multiplicity levels.
+
+    This enumeration is used to represent various levels of multiplicity for features.
+    It provides four standard levels:
+    OPTIONAL, REQUIRED, ZERO_OR_MORE, and ONE_OR_MORE.
+    """
+
     OPTIONAL = {"required": False, "many": False}
     REQUIRED = {"required": True, "many": False}
     ZERO_OR_MORE = {"required": False, "many": True}
@@ -25,6 +33,21 @@ class Multiplicity(Enum):
 
 
 class PropertyData(TypedDict):
+    """
+    Represents a dictionary-based structure for defining property metadata.
+
+    Attributes:
+        name: The name of the property. Must be a string.
+        type: The data type of the property. Accepts either a primitive type
+              factory, an enumeration type factory, or an already existing data type.
+        multiplicity: Specifies the multiplicity of the property (e.g., whether
+                      it is single-valued or multi-valued).
+        id: Optional field for an identifier for the property. If provided, must
+            be a string.
+        key: Optional field for a key that may be used to uniquely identify the
+             property in a composite structure. If provided, must be a string.
+    """
+
     name: str
     type: "PrimitiveTypeFactory | EnumerationTypeFactory | DataType"
     multiplicity: Multiplicity
@@ -47,6 +70,23 @@ class LiteralData(TypedDict):
 
 
 class ClassifierFactory:
+    """
+    A factory class for creating and managing different types of classifiers.
+
+    This class provides mechanisms for defining classifiers, including their properties,
+    references, and containments. It enables streamlined construction of models
+    and metadata through a fluent interface. The supported classifier types include
+    Concept, Interface, and Annotation. The factory ensures proper linking between
+    classifiers and their features, leveraging optional and multiple configurations for
+    flexibility.
+
+    Attributes:
+        type: The type of the classifier (one of "Concept", "Interface", "Annotation").
+        name: The name of the classifier.
+        id: A unique identifier for the classifier.
+        key: A unique key for identifying the classifier.
+        extends: A list of other ClassifierFactory or Classifier objects that this classifier extends.
+    """
 
     def __init__(
         self,
@@ -308,6 +348,39 @@ class EnumerationTypeFactory:
 
 
 class LanguageFactory:
+    """
+    Represents a factory for creating and managing languages and their components.
+
+    This class provides a way to construct various elements of a language such as concepts,
+    interfaces, annotations, primitive types, and enumerations. It allows defining a structured
+    language model and handles the assignment of identifiers and keys for each component.
+
+    Attributes:
+        lw_version: The LionWebVersion of the language.
+        version: Version number of the language as a string.
+        name: The name of the language.
+        id_calculator: A function to calculate the ID for language components.
+        key_calculator: A function to calculate the key for language components.
+        id: The identifier for the language.
+        key: The key for the language.
+        classifiers: List of ClassifierFactory objects included in the language.
+        primitive_types: List of PrimitiveTypeFactory objects representing primitive types in the language.
+        enumerations: List of EnumerationTypeFactory objects representing enumerations in the language.
+
+    Methods:
+        build:
+            Generates a Language instance by assembling all language components.
+        concept:
+            Creates a new concept classifier and adds it to the language.
+        interface:
+            Creates a new interface classifier and adds it to the language.
+        annotation:
+            Creates a new annotation classifier and associates it with a specified element.
+        primitive_type:
+            Creates a new primitive type and adds it to the language.
+        enumeration:
+            Creates a new enumeration type and adds it to the language.
+    """
 
     def __init__(
         self,
@@ -319,6 +392,41 @@ class LanguageFactory:
         id_calculator: Optional[Callable[[Optional[str], str], str]] = None,
         key_calculator: Optional[Callable[[Optional[str], str], str]] = None,
     ):
+        """
+        Initializes a new instance of the class with provided parameters and default values where
+        applicable. This constructor sets up foundational attributes for the instance, including name,
+        version, identifier, and calculators for generating IDs and keys. Attributes related to
+        classifiers, primitive types, and enumerations are also initialized as empty lists.
+
+        Parameters:
+            name (str): The name for the instance.
+            lw_version (Optional[LionWebVersion]): The version of the LionWeb. Defaults to None,
+                in which case the current version is used.
+            version (str): The version of the instance. Default is "1".
+            id (Optional[str]): The identifier for the instance. Defaults to None, in which case
+                a default ID is calculated.
+            key (Optional[str]): The key of the instance. Defaults to None, in which case a
+                default key is calculated.
+            id_calculator (Optional[Callable[[Optional[str], str], str]]): A function to calculate
+                the instance ID. Defaults to a lambda function to generate ID based on parent ID
+                and name if not provided.
+            key_calculator (Optional[Callable[[Optional[str], str], str]]): A function to calculate
+                the instance key. Defaults to a lambda function to generate key based on parent key
+                and name if not provided.
+
+        Attributes:
+            lw_version (LionWebVersion): The LionWeb version associated with the instance.
+            version (str): The version of the instance.
+            name (str): The name of the instance.
+            id (str): The identifier of the instance.
+            key (str): The key of the instance.
+            classifiers (List[ClassifierFactory]): List to store classifier factories related
+                to the instance.
+            primitive_types (List[PrimitiveTypeFactory]): List to store primitive type factories
+                related to the instance.
+            enumerations (List[EnumerationTypeFactory]): List to store enumeration type factories
+                related to the instance.
+        """
         self.lw_version = lw_version or LionWebVersion.current_version()
         self.version = version
         self.name = name
@@ -337,6 +445,18 @@ class LanguageFactory:
         self.enumerations: List[EnumerationTypeFactory] = []
 
     def build(self) -> Language:
+        """
+        Builds a Language object and populates its components.
+
+        This function is responsible for creating a `Language` instance based on the
+        attributes of the current object. It initializes the language with relevant
+        details such as its name, id, key, version, and lion web version. Additionally,
+        it iterates over primitive types, enumerations, and classifiers to build and
+        populate their corresponding components in the language.
+
+        Returns:
+            Language: The constructed `Language` object.
+        """
         language = Language(
             name=self.name,
             id=self.id,
