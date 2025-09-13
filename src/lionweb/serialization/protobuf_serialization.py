@@ -1,21 +1,16 @@
-import io
-from typing import List, Optional, Dict, TYPE_CHECKING
+from typing import List, Optional, TYPE_CHECKING
 
-from zipp.compat.overlay import zipfile
-
+import lionweb.serialization.proto.Chunk_pb2 as pb
 from lionweb.lionweb_version import LionWebVersion
 from lionweb.serialization import MetaPointer, SerializedClassifierInstance, SerializedPropertyValue, \
     SerializedContainmentValue, SerializedReferenceValue
 from lionweb.serialization.data import LanguageVersion
-
-import src.lionweb.serialization.proto.Chunk_pb2 as pb
+from lionweb.serialization.data import SerializationChunk
 from lionweb.serialization.data.serialized_reference_value import SerializedReferenceValueEntry
 from lionweb.serialization.deserialization_exception import DeserializationException
-from lionweb.serialization.data import SerializationChunk
 
 if TYPE_CHECKING:
 
-    from lionweb.model import Node
     from lionweb.serialization.data import SerializationChunk
 
 
@@ -38,8 +33,10 @@ class ProtoBufSerialization:
 
     def __init__(self, lionweb_version: Optional["LionWebVersion"] = LionWebVersion.current_version()) -> None:
         self._lionweb_version = lionweb_version
+        self._chunk_instance = pb.PBChunk() # Reusable instance
 
-    # # -------------------- Deserialization --------------------
+
+        # # -------------------- Deserialization --------------------
     #
     # def deserialize_to_nodes_from_bytes(self, data: bytes) -> List[Node]:
     #     pb_chunk = pb.S(data)
@@ -70,6 +67,14 @@ class ProtoBufSerialization:
     #     self._validate_serialization_block(serialization_chunk)
     #     return self._deserialize_serialization_chunk_to_instances(serialization_chunk)
     #
+
+    def read_chunk_from_bytes(self, data: bytes) -> pb.PBChunk:
+        """Read a protobuf Chunk from binary content"""
+        self._chunk_instance.Clear()  # Reset the instance
+        self._chunk_instance.ParseFromString(data)
+        return self._chunk_instance
+
+
     def _deserialize_pbchunk_to_serialization_chunk(self, chunk: pb.PBChunk) -> SerializationChunk:
         # Pre-size arrays as in Java
         string_count = len(chunk.interned_strings)
@@ -83,9 +88,9 @@ class ProtoBufSerialization:
 
         languages_array: List[Optional[LanguageVersion]] = [None] * (language_count + 1)
         languages_array[0] = None
-        for i, l in enumerate(chunk.interned_languages):
-            key = strings_array[l.si_key]
-            version = strings_array[l.si_version]
+        for i, language in enumerate(chunk.interned_languages):
+            key = strings_array[language.si_key]
+            version = strings_array[language.si_version]
             lv = LanguageVersion(key, version)
             languages_array[i + 1] = lv
 
@@ -339,12 +344,3 @@ class ProtoBufSerialization:
     #         chunk.interned_meta_pointers.append(pmp)
     #
     #     return chunk
-
-if __name__ == "__main__":
-    ps = ProtoBufSerialization(LionWebVersion.V2023_1)
-    with zipfile.ZipFile(f, 'r') as zf:
-        for name in zf.namelist():
-            content = zf.read(name)   # bytes
-            pb_chunk = pb.PBChunk()
-            pb_chunk.ParseFromString(content)
-            chunk = ps._deserialize_pbchunk_to_serialization_chunk(pb_chunk)
