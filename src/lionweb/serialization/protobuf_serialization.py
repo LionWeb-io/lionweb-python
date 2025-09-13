@@ -106,8 +106,9 @@ class ProtoBufSerialization:
             language_version = languages_array[mp.li_language]
             language_key : Optional[str] = language_version.key if language_version is not None else None
             language_v : Optional[str]= language_version.version if language_version is not None else None
+            language_version = LanguageVersion(language_key, language_v)
             meta_pointer = MetaPointer(
-                language_key, language_v, strings_array[mp.si_key]
+                language_version, strings_array[mp.si_key]
             )
             metapointers_array[i] = meta_pointer
 

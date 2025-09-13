@@ -1,5 +1,6 @@
-from typing import Dict, List, Optional, Union
+from typing import Dict, List, Optional, Union, cast, Any
 
+from lionweb.serialization.data import LanguageVersion
 from lionweb.serialization.data.metapointer import MetaPointer
 from lionweb.serialization.data.serialized_reference_value import \
     SerializedReferenceValueEntry
@@ -32,13 +33,17 @@ class SerializationUtils:
     ) -> Optional[MetaPointer]:
         if property_name not in json_object:
             return None
-        value = json_object.get(property_name)
+        value = cast(dict[Any, Any], json_object.get(property_name))
+        language_k : Optional[str] = cast(Optional[str], SerializationUtils.try_to_get_string_property(
+            value, "language"
+        ))
+        language_v : Optional[str] = cast(Optional[str], SerializationUtils.try_to_get_string_property(
+            value, "version"
+        ))
+        language_version = LanguageVersion(language_k, language_v)
         if isinstance(value, dict):
             return MetaPointer(
-                language=SerializationUtils.try_to_get_string_property(
-                    value, "language"
-                ),
-                version=SerializationUtils.try_to_get_string_property(value, "version"),
+                language_version=language_version,
                 key=SerializationUtils.try_to_get_string_property(value, "key"),
             )
         return None

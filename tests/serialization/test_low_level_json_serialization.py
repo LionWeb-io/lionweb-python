@@ -3,6 +3,7 @@ import unittest
 from pathlib import Path
 from typing import Union
 
+from lionweb.serialization.data import LanguageVersion
 from serialization.serialization_test import SerializationTest
 
 from lionweb.language import Annotation, Concept, Language
@@ -41,7 +42,7 @@ class LowLevelJsonSerializationTest(SerializationTest):
 
         lioncore = deserialized_instances[0]
         self.assertEqual(
-            MetaPointer("LionCore-M3", "2023.1", "Language"), lioncore.classifier
+            MetaPointer(LanguageVersion("LionCore-M3", "2023.1"), "Language"), lioncore.classifier
         )
         self.assertEqual("-id-LionCore-M3", lioncore.id)
         self.assertEqual(

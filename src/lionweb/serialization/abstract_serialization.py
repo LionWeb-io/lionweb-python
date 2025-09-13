@@ -142,6 +142,7 @@ class AbstractSerialization:
     def serialize_node(
         self, classifier_instance: ClassifierInstance
     ) -> SerializedClassifierInstance:
+        # Update all MetaPointer creations to use factory methods
         serialized_instance = SerializedClassifierInstance(
             classifier_instance.id,
             MetaPointer.from_language_entity(classifier_instance.get_classifier()),
@@ -189,6 +190,7 @@ class AbstractSerialization:
             language = c.language
             if language is None:
                 raise ValueError()
+            # In _serialize_properties:
             mp = MetaPointer.from_keyed(property, language)
             dt = property.type
             if dt is None:
@@ -227,6 +229,7 @@ class AbstractSerialization:
             language = container.language
             if language is None:
                 raise ValueError()
+            # In _serialize_containments:
             containment_value = SerializedContainmentValue(
                 MetaPointer.from_keyed(containment, language),
                 [child.id for child in classifier_instance.get_children(containment)],
@@ -249,6 +252,7 @@ class AbstractSerialization:
             language = classifier.language
             if language is None:
                 raise ValueError()
+            # In _serialize_references:
             reference_value.meta_pointer = MetaPointer.from_keyed(reference, language)
             from lionweb.model.classifier_instance_utils import \
                 is_builtin_element

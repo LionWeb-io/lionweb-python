@@ -17,6 +17,7 @@ from lionweb.model.impl.enumeration_value_impl import EnumerationValueImpl
 from lionweb.model.impl.proxy_node import ProxyNode
 from lionweb.model.reference_value import ReferenceValue
 from lionweb.serialization import create_standard_json_serialization
+from lionweb.serialization.data import LanguageVersion
 from lionweb.serialization.data.metapointer import MetaPointer
 from lionweb.serialization.deserialization_exception import \
     DeserializationException
@@ -705,7 +706,7 @@ class JsonSerializationTest(SerializationTest):
         self.assertEqual(1, len(serialized_classifier_instance.properties))
         serialized_name = serialized_classifier_instance.properties[0]
         expected_pointer = MetaPointer(
-            "LionCore-builtins", "2024.1", "LionCore-builtins-INamed-name"
+            LanguageVersion("LionCore-builtins", "2024.1"), "LionCore-builtins-INamed-name"
         )
         self.assertEqual(expected_pointer, serialized_name.get_meta_pointer())
 
