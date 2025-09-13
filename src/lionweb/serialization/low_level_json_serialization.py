@@ -3,7 +3,7 @@ from typing import Iterable, List, cast
 
 from lionweb import LionWebVersion
 from lionweb.serialization.data.metapointer import MetaPointer
-from lionweb.serialization.data.serialized_chunk import SerializedChunk
+from lionweb.serialization.data.serialized_chunk import SerializationChunk
 from lionweb.serialization.data.serialized_classifier_instance import \
     SerializedClassifierInstance
 from lionweb.serialization.data.serialized_containment_value import \
@@ -12,7 +12,7 @@ from lionweb.serialization.data.serialized_property_value import \
     SerializedPropertyValue
 from lionweb.serialization.data.serialized_reference_value import \
     SerializedReferenceValue
-from lionweb.serialization.data.used_language import UsedLanguage
+from lionweb.serialization.data.language_version import LanguageVersion
 from lionweb.serialization.deserialization_exception import \
     DeserializationException
 from lionweb.serialization.json_utils import JsonArray, JsonElement, JsonObject
@@ -22,8 +22,8 @@ from lionweb.serialization.serialization_utils import SerializationUtils
 class LowLevelJsonSerialization:
     def deserialize_serialization_block(
         self, json_element: JsonElement
-    ) -> SerializedChunk:
-        serialized_chunk = SerializedChunk()
+    ) -> SerializationChunk:
+        serialized_chunk = SerializationChunk()
         if isinstance(json_element, dict):
             self._check_no_extra_keys(
                 json_element, ["nodes", "serializationFormatVersion", "languages"]
@@ -38,7 +38,7 @@ class LowLevelJsonSerialization:
             )
 
     def serialize_to_json_element(
-        self, serialized_chunk: SerializedChunk
+        self, serialized_chunk: SerializationChunk
     ) -> JsonObject:
         serialized_nodes = []
         for node in serialized_chunk.get_classifier_instances():
@@ -97,7 +97,7 @@ class LowLevelJsonSerialization:
         }
 
     def _serialize_language_to_json_element(
-        self, language_key_version: UsedLanguage
+        self, language_key_version: LanguageVersion
     ) -> JsonObject:
         json_object = {
             "key": language_key_version.get_key(),
@@ -114,7 +114,7 @@ class LowLevelJsonSerialization:
             "key": meta_pointer.key,
         }
 
-    def serialize_to_json_string(self, serialized_chunk: SerializedChunk) -> str:
+    def serialize_to_json_string(self, serialized_chunk: SerializationChunk) -> str:
         return json.dumps(
             self.serialize_to_json_element(serialized_chunk),
             indent=2,
@@ -123,7 +123,7 @@ class LowLevelJsonSerialization:
     def deserialize_serialization_block_from_string(
         self,
         json_string: str,
-    ) -> SerializedChunk:
+    ) -> SerializationChunk:
         try:
             json_element = json.loads(json_string)
             return self.deserialize_serialization_block(json_element)
@@ -132,7 +132,7 @@ class LowLevelJsonSerialization:
 
     def deserialize_serialization_block_from_file(
         self, file_path: str
-    ) -> SerializedChunk:
+    ) -> SerializationChunk:
         try:
             with open(file_path, "r") as file:
                 json_element = json.load(file)
@@ -153,7 +153,7 @@ class LowLevelJsonSerialization:
             )
 
     def _read_serialization_format_version(
-        self, serialized_chunk: SerializedChunk, top_level: JsonObject
+        self, serialized_chunk: SerializationChunk, top_level: JsonObject
     ) -> None:
         if "serializationFormatVersion" not in top_level:
             raise ValueError("serializationFormatVersion not specified")
@@ -173,8 +173,8 @@ class LowLevelJsonSerialization:
     def group_nodes_into_serialization_block(
         serialized_classifier_instances: Iterable[SerializedClassifierInstance],
         lion_web_version: LionWebVersion,
-    ) -> SerializedChunk:
-        serialized_chunk = SerializedChunk()
+    ) -> SerializationChunk:
+        serialized_chunk = SerializationChunk()
         serialized_chunk.serialization_format_version = lion_web_version.value
         for sci in serialized_classifier_instances:
             serialized_chunk.add_classifier_instance(sci)
@@ -182,7 +182,7 @@ class LowLevelJsonSerialization:
         return serialized_chunk
 
     def _read_languages(
-        self, serialized_chunk: SerializedChunk, top_level: JsonObject
+        self, serialized_chunk: SerializationChunk, top_level: JsonObject
     ) -> None:
         if "languages" not in top_level:
             raise ValueError("languages not specified")
@@ -190,7 +190,7 @@ class LowLevelJsonSerialization:
         if isinstance(languages, list):
             for element in languages:
                 try:
-                    language_key_version = UsedLanguage()
+                    language_key_version = LanguageVersion()
                     if isinstance(element, dict):
                         extra_keys = set(element.keys()) - {"key", "version"}
                         if extra_keys:
@@ -220,7 +220,7 @@ class LowLevelJsonSerialization:
             raise ValueError(f"We expected a list, we got instead: {languages}")
 
     def _deserialize_classifier_instances(
-        self, serialized_chunk: SerializedChunk, top_level: JsonObject
+        self, serialized_chunk: SerializationChunk, top_level: JsonObject
     ) -> None:
         if "nodes" not in top_level:
             raise ValueError("nodes not specified")

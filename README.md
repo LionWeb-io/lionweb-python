@@ -61,3 +61,9 @@ And then generate a report with:
 coverage html                                         
 # report generated under htmlcov/index.html
 ```
+
+## Update Protobuffer classes
+
+```
+protoc --proto_path=./src --python_out=./src ./src/lionweb/serialization/proto/Chunk.proto
+```

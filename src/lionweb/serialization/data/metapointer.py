@@ -2,6 +2,7 @@ from dataclasses import dataclass
 from typing import TYPE_CHECKING, Optional
 
 
+# TODO adopt interning
 @dataclass(frozen=True, eq=True)
 class MetaPointer:
     if TYPE_CHECKING:

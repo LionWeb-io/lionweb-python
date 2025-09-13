@@ -2,7 +2,7 @@ from typing import Optional
 
 from lionweb.serialization.data.metapointer import MetaPointer
 
-
+# TODO intern values
 class SerializedPropertyValue:
     def __init__(self, meta_pointer: MetaPointer, value: Optional[str]):
         self.meta_pointer = meta_pointer

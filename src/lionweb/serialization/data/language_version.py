@@ -1,7 +1,7 @@
 from typing import Optional
 
 
-class UsedLanguage:
+class LanguageVersion:
     """
     The pair Language Key and Language Version identify a specific version of a language.
     Corresponds to the Java class 'UsedLanguage'.
@@ -20,7 +20,7 @@ class UsedLanguage:
             language: An object with `key` and `version` attributes.
 
         Returns:
-            UsedLanguage: An instance of UsedLanguage.
+            LanguageVersion: An instance of UsedLanguage.
 
         Raises:
             ValueError: If language or its attributes are None.
@@ -29,7 +29,7 @@ class UsedLanguage:
             raise ValueError("Language parameter should not be null")
         if language.version is None:
             raise ValueError("Language version should not be null")
-        return UsedLanguage(language.key, language.version)
+        return LanguageVersion(language.key, language.version)
 
     @staticmethod
     def from_meta_pointer(meta_pointer):
@@ -40,7 +40,7 @@ class UsedLanguage:
             meta_pointer: An object with `language` and `version` attributes.
 
         Returns:
-            UsedLanguage: An instance of UsedLanguage.
+            LanguageVersion: An instance of UsedLanguage.
 
         Raises:
             ValueError: If meta_pointer or its attributes are None.
@@ -51,7 +51,7 @@ class UsedLanguage:
             raise ValueError("meta_pointer language should not be null")
         if meta_pointer.version is None:
             raise ValueError("meta_pointer version should not be null")
-        return UsedLanguage(meta_pointer.language, meta_pointer.version)
+        return LanguageVersion(meta_pointer.language, meta_pointer.version)
 
     def get_key(self) -> Optional[str]:
         return self.key
@@ -66,7 +66,7 @@ class UsedLanguage:
         self.version = version
 
     def __eq__(self, other):
-        if not isinstance(other, UsedLanguage):
+        if not isinstance(other, LanguageVersion):
             return False
         return self.key == other.key and self.version == other.version
 
