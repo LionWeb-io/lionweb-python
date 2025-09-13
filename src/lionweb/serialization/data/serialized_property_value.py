@@ -1,6 +1,6 @@
-
-from typing import Optional, Dict, Tuple
 import threading
+from typing import Dict, Optional, Tuple
+
 from lionweb.serialization.data.metapointer import MetaPointer
 
 
@@ -10,7 +10,7 @@ class SerializedPropertyValue:
     """
 
     # Class-level cache for interning instances
-    _instances: Dict[Tuple[MetaPointer, Optional[str]], 'SerializedPropertyValue'] = {}
+    _instances: Dict[Tuple[MetaPointer, Optional[str]], "SerializedPropertyValue"] = {}
     _lock = threading.Lock()  # Thread-safe access to cache
 
     def __new__(cls, meta_pointer: MetaPointer, value: Optional[str] = None):
@@ -29,13 +29,15 @@ class SerializedPropertyValue:
 
     def __init__(self, meta_pointer: MetaPointer, value: Optional[str] = None):
         # Only initialize if not already initialized (due to interning)
-        if not hasattr(self, '_initialized'):
+        if not hasattr(self, "_initialized"):
             self._meta_pointer = meta_pointer
             self._value = value
             self._initialized = True
 
     @classmethod
-    def of(cls, meta_pointer: MetaPointer, value: Optional[str] = None) -> 'SerializedPropertyValue':
+    def of(
+        cls, meta_pointer: MetaPointer, value: Optional[str] = None
+    ) -> "SerializedPropertyValue":
         """
         Factory method to get an interned SerializedPropertyValue instance.
         This is the preferred way to create SerializedPropertyValue instances.
@@ -50,7 +52,9 @@ class SerializedPropertyValue:
         return self._meta_pointer
 
     def set_meta_pointer(self, meta_pointer: MetaPointer):
-        raise RuntimeError("SerializedPropertyValue instances are immutable after creation")
+        raise RuntimeError(
+            "SerializedPropertyValue instances are immutable after creation"
+        )
 
     def get_value(self) -> Optional[str]:
         return self._value
@@ -60,7 +64,9 @@ class SerializedPropertyValue:
         return self._value
 
     def set_value(self, value: Optional[str]):
-        raise RuntimeError("SerializedPropertyValue instances are immutable after creation")
+        raise RuntimeError(
+            "SerializedPropertyValue instances are immutable after creation"
+        )
 
     @classmethod
     def clear_cache(cls):

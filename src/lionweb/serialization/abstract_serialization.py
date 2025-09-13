@@ -5,6 +5,7 @@ from lionweb.lionweb_version import LionWebVersion
 from lionweb.model import ClassifierInstance
 from lionweb.model.has_settable_parent import HasSettableParent
 from lionweb.serialization.classifier_resolver import ClassifierResolver
+from lionweb.serialization.data.language_version import LanguageVersion
 from lionweb.serialization.data.metapointer import MetaPointer
 from lionweb.serialization.data.serialized_chunk import SerializationChunk
 from lionweb.serialization.data.serialized_classifier_instance import \
@@ -15,7 +16,6 @@ from lionweb.serialization.data.serialized_property_value import \
     SerializedPropertyValue
 from lionweb.serialization.data.serialized_reference_value import (
     SerializedReferenceValue, SerializedReferenceValueEntry)
-from lionweb.serialization.data.language_version import LanguageVersion
 from lionweb.serialization.deserialization_exception import \
     DeserializationException
 from lionweb.serialization.deserialization_status import DeserializationStatus

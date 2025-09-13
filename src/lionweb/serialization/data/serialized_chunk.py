@@ -1,9 +1,9 @@
 from dataclasses import dataclass, field
 from typing import Dict, List
 
+from lionweb.serialization.data.language_version import LanguageVersion
 from lionweb.serialization.data.serialized_classifier_instance import \
     SerializedClassifierInstance
-from lionweb.serialization.data.language_version import LanguageVersion
 
 
 @dataclass

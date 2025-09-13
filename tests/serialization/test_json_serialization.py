@@ -706,7 +706,8 @@ class JsonSerializationTest(SerializationTest):
         self.assertEqual(1, len(serialized_classifier_instance.properties))
         serialized_name = serialized_classifier_instance.properties[0]
         expected_pointer = MetaPointer(
-            LanguageVersion("LionCore-builtins", "2024.1"), "LionCore-builtins-INamed-name"
+            LanguageVersion("LionCore-builtins", "2024.1"),
+            "LionCore-builtins-INamed-name",
         )
         self.assertEqual(expected_pointer, serialized_name.get_meta_pointer())
 

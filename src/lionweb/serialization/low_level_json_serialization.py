@@ -1,7 +1,8 @@
 import json
-from typing import Iterable, List, cast, Optional
+from typing import Iterable, List, Optional, cast
 
 from lionweb import LionWebVersion
+from lionweb.serialization.data.language_version import LanguageVersion
 from lionweb.serialization.data.metapointer import MetaPointer
 from lionweb.serialization.data.serialized_chunk import SerializationChunk
 from lionweb.serialization.data.serialized_classifier_instance import \
@@ -12,7 +13,6 @@ from lionweb.serialization.data.serialized_property_value import \
     SerializedPropertyValue
 from lionweb.serialization.data.serialized_reference_value import \
     SerializedReferenceValue
-from lionweb.serialization.data.language_version import LanguageVersion
 from lionweb.serialization.deserialization_exception import \
     DeserializationException
 from lionweb.serialization.json_utils import JsonArray, JsonElement, JsonObject
@@ -206,7 +206,9 @@ class LowLevelJsonSerialization:
                             raise ValueError(
                                 "Both 'key' and 'version' should be strings"
                             )
-                        language_key_version = LanguageVersion(element.get("key"), element.get("version"))
+                        language_key_version = LanguageVersion(
+                            element.get("key"), element.get("version")
+                        )
                     else:
                         raise ValueError(
                             f"Language should be an object. Found: {element}"
@@ -290,9 +292,12 @@ class LowLevelJsonSerialization:
 
             for containment_entry in containments:
                 containment_obj = cast(JsonObject, containment_entry)
-                ids : List[Optional[str]] = SerializationUtils.try_to_get_array_of_ids(
-                    containment_obj, "children"
-                ) or []
+                ids: List[Optional[str]] = (
+                    SerializationUtils.try_to_get_array_of_ids(
+                        containment_obj, "children"
+                    )
+                    or []
+                )
                 mp = SerializationUtils.try_to_get_meta_pointer_property(
                     containment_obj, "containment"
                 )

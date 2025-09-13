@@ -1,4 +1,4 @@
-from typing import Dict, List, Optional, Union, cast, Any
+from typing import Any, Dict, List, Optional, Union, cast
 
 from lionweb.serialization.data import LanguageVersion
 from lionweb.serialization.data.metapointer import MetaPointer
@@ -34,12 +34,14 @@ class SerializationUtils:
         if property_name not in json_object:
             return None
         value = cast(dict[Any, Any], json_object.get(property_name))
-        language_k : Optional[str] = cast(Optional[str], SerializationUtils.try_to_get_string_property(
-            value, "language"
-        ))
-        language_v : Optional[str] = cast(Optional[str], SerializationUtils.try_to_get_string_property(
-            value, "version"
-        ))
+        language_k: Optional[str] = cast(
+            Optional[str],
+            SerializationUtils.try_to_get_string_property(value, "language"),
+        )
+        language_v: Optional[str] = cast(
+            Optional[str],
+            SerializationUtils.try_to_get_string_property(value, "version"),
+        )
         language_version = LanguageVersion(language_k, language_v)
         if isinstance(value, dict):
             return MetaPointer(
@@ -56,7 +58,7 @@ class SerializationUtils:
             return None
         value = json_object.get(property_name)
         if isinstance(value, list):
-            result : List[Optional[str]] = []
+            result: List[Optional[str]] = []
             for e in value:
                 if e is None:
                     raise DeserializationException(

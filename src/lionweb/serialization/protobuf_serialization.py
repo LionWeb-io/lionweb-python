@@ -1,17 +1,21 @@
-from typing import List, Optional, TYPE_CHECKING
+from typing import TYPE_CHECKING, List, Optional
 
 import lionweb.serialization.proto.Chunk_pb2 as pb
 from lionweb.lionweb_version import LionWebVersion
-from lionweb.serialization import MetaPointer, SerializedClassifierInstance, SerializedPropertyValue, \
-    SerializedContainmentValue, SerializedReferenceValue, SerializationChunk
+from lionweb.serialization import (MetaPointer, SerializationChunk,
+                                   SerializedClassifierInstance,
+                                   SerializedContainmentValue,
+                                   SerializedPropertyValue,
+                                   SerializedReferenceValue)
 from lionweb.serialization.data import LanguageVersion
-from lionweb.serialization.data.serialized_reference_value import SerializedReferenceValueEntry
-from lionweb.serialization.deserialization_exception import DeserializationException
+from lionweb.serialization.data.serialized_reference_value import \
+    SerializedReferenceValueEntry
+from lionweb.serialization.deserialization_exception import \
+    DeserializationException
 
 if TYPE_CHECKING:
 
     from lionweb.serialization.data import SerializationChunk
-
 
 
 # from io.lionweb.serialization.data import (
@@ -31,12 +35,15 @@ if TYPE_CHECKING:
 
 class ProtoBufSerialization:
 
-    def __init__(self, lionweb_version: Optional["LionWebVersion"] = LionWebVersion.current_version()) -> None:
+    def __init__(
+        self,
+        lionweb_version: Optional["LionWebVersion"] = LionWebVersion.current_version(),
+    ) -> None:
         self._lionweb_version = lionweb_version
-        self._chunk_instance = pb.PBChunk() # Reusable instance
-
+        self._chunk_instance = pb.PBChunk()  # Reusable instance
 
         # # -------------------- Deserialization --------------------
+
     #
     # def deserialize_to_nodes_from_bytes(self, data: bytes) -> List[Node]:
     #     pb_chunk = pb.S(data)
@@ -75,10 +82,13 @@ class ProtoBufSerialization:
         return self._chunk_instance
 
     def read_chunk_from_bytes(self, data: bytes) -> SerializationChunk:
-        return self._deserialize_pbchunk_to_serialization_chunk(self.read_pbchunk_from_bytes(data))
+        return self._deserialize_pbchunk_to_serialization_chunk(
+            self.read_pbchunk_from_bytes(data)
+        )
 
-
-    def _deserialize_pbchunk_to_serialization_chunk(self, chunk: pb.PBChunk) -> SerializationChunk:
+    def _deserialize_pbchunk_to_serialization_chunk(
+        self, chunk: pb.PBChunk
+    ) -> SerializationChunk:
         # Pre-size arrays as in Java
         string_count = len(chunk.interned_strings)
         language_count = len(chunk.interned_languages)
@@ -104,16 +114,20 @@ class ProtoBufSerialization:
                     f"Unable to deserialize meta pointer with language {mp.li_language}"
                 )
             language_version = languages_array[mp.li_language]
-            language_key : Optional[str] = language_version.key if language_version is not None else None
-            language_v : Optional[str]= language_version.version if language_version is not None else None
-            language_version = LanguageVersion(language_key, language_v)
-            meta_pointer = MetaPointer(
-                language_version, strings_array[mp.si_key]
+            language_key: Optional[str] = (
+                language_version.key if language_version is not None else None
             )
+            language_v: Optional[str] = (
+                language_version.version if language_version is not None else None
+            )
+            language_version = LanguageVersion(language_key, language_v)
+            meta_pointer = MetaPointer(language_version, strings_array[mp.si_key])
             metapointers_array[i] = meta_pointer
 
         serialization_chunk = SerializationChunk()
-        serialization_chunk.serialization_format_version = chunk.serialization_format_version
+        serialization_chunk.serialization_format_version = (
+            chunk.serialization_format_version
+        )
 
         valid_languages = [lv for lv in languages_array if lv is not None]
         for lv in valid_languages:
@@ -123,9 +137,13 @@ class ProtoBufSerialization:
         for n in chunk.nodes:
 
             id = strings_array[n.si_id] if n.HasField("si_id") else None
-            parent_node_id = strings_array[n.si_parent] if n.HasField("si_parent") else None
+            parent_node_id = (
+                strings_array[n.si_parent] if n.HasField("si_parent") else None
+            )
             classifier = metapointers_array[n.mpi_classifier]
-            sci = SerializedClassifierInstance(id, classifier, parent_node_id=parent_node_id)
+            sci = SerializedClassifierInstance(
+                id, classifier, parent_node_id=parent_node_id
+            )
 
             # properties
             for p in n.properties:
@@ -155,8 +173,16 @@ class ProtoBufSerialization:
                 srv = SerializedReferenceValue(metapointers_array[r.mpi_meta_pointer])
                 for rv in r.values:
 
-                    reference = strings_array[rv.si_referred] if rv.HasField("si_referred") else None
-                    resolve_info = strings_array[rv.si_resolveInfo] if rv.HasField("si_resolveInfo") else None
+                    reference = (
+                        strings_array[rv.si_referred]
+                        if rv.HasField("si_referred")
+                        else None
+                    )
+                    resolve_info = (
+                        strings_array[rv.si_resolveInfo]
+                        if rv.HasField("si_resolveInfo")
+                        else None
+                    )
                     entry = SerializedReferenceValueEntry(resolve_info, reference)
                     srv.add_value(entry)
                 if srv.value:
@@ -168,6 +194,7 @@ class ProtoBufSerialization:
             serialization_chunk.add_classifier_instance(sci)
 
         return serialization_chunk
+
     #
     # def _validate_serialization_block(self, serialization_chunk: SerializationChunk) -> None:
     #     # Mirror whatever the Java AbstractSerialization.validateSerializationBlock does.
@@ -350,4 +377,3 @@ class ProtoBufSerialization:
     #         chunk.interned_meta_pointers.append(pmp)
     #
     #     return chunk
-
