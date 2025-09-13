@@ -1,5 +1,5 @@
 import json
-from typing import Iterable, List, cast
+from typing import Iterable, List, cast, Optional
 
 from lionweb import LionWebVersion
 from lionweb.serialization.data.metapointer import MetaPointer
@@ -190,7 +190,6 @@ class LowLevelJsonSerialization:
         if isinstance(languages, list):
             for element in languages:
                 try:
-                    language_key_version = LanguageVersion()
                     if isinstance(element, dict):
                         extra_keys = set(element.keys()) - {"key", "version"}
                         if extra_keys:
@@ -207,8 +206,7 @@ class LowLevelJsonSerialization:
                             raise ValueError(
                                 "Both 'key' and 'version' should be strings"
                             )
-                        language_key_version.key = element.get("key")
-                        language_key_version.version = element.get("version")
+                        language_key_version = LanguageVersion(element.get("key"), element.get("version"))
                     else:
                         raise ValueError(
                             f"Language should be an object. Found: {element}"
@@ -292,11 +290,9 @@ class LowLevelJsonSerialization:
 
             for containment_entry in containments:
                 containment_obj = cast(JsonObject, containment_entry)
-                ids = SerializationUtils.try_to_get_array_of_ids(
+                ids : List[Optional[str]] = SerializationUtils.try_to_get_array_of_ids(
                     containment_obj, "children"
-                )
-                if ids is None:
-                    ids = []
+                ) or []
                 mp = SerializationUtils.try_to_get_meta_pointer_property(
                     containment_obj, "containment"
                 )

@@ -45,6 +45,7 @@ mdurl==0.1.2
 more-itertools==10.6.0
 mypy==1.15.0
 mypy-extensions==1.0.0
+mypy-protobuf==3.6.0
 nh3==0.2.20
 nodeenv==1.9.1
 numpy==2.0.2

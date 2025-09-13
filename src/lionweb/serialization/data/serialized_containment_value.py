@@ -1,10 +1,10 @@
-from typing import List
+from typing import List, Optional
 
 from lionweb.serialization.data.metapointer import MetaPointer
 
 
 class SerializedContainmentValue:
-    def __init__(self, meta_pointer: MetaPointer, value: List[str]):
+    def __init__(self, meta_pointer: MetaPointer, value: List[Optional[str]]):
         self.meta_pointer = meta_pointer
         self.value = value if value is not None else []
 
@@ -14,10 +14,10 @@ class SerializedContainmentValue:
     def set_meta_pointer(self, meta_pointer):
         self.meta_pointer = meta_pointer
 
-    def get_value(self) -> List[str]:
+    def get_value(self) -> List[Optional[str]]:
         return self.value.copy()
 
-    def set_value(self, value: List[str]):
+    def set_value(self, value: List[Optional[str]]):
         self.value = value.copy()
 
     def __eq__(self, other):

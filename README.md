@@ -65,5 +65,5 @@ coverage html
 ## Update Protobuffer classes
 
 ```
-protoc --proto_path=./src --python_out=./src ./src/lionweb/serialization/proto/Chunk.proto
+protoc --proto_path=./src --python_out=./src --mypy_out=./src -I . ./src/lionweb/serialization/proto/Chunk.proto 
 ```

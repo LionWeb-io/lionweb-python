@@ -3,15 +3,15 @@ from typing import List, Optional, TYPE_CHECKING
 import lionweb.serialization.proto.Chunk_pb2 as pb
 from lionweb.lionweb_version import LionWebVersion
 from lionweb.serialization import MetaPointer, SerializedClassifierInstance, SerializedPropertyValue, \
-    SerializedContainmentValue, SerializedReferenceValue
+    SerializedContainmentValue, SerializedReferenceValue, SerializationChunk
 from lionweb.serialization.data import LanguageVersion
-from lionweb.serialization.data import SerializationChunk
 from lionweb.serialization.data.serialized_reference_value import SerializedReferenceValueEntry
 from lionweb.serialization.deserialization_exception import DeserializationException
 
 if TYPE_CHECKING:
 
     from lionweb.serialization.data import SerializationChunk
+
 
 
 # from io.lionweb.serialization.data import (
@@ -68,11 +68,14 @@ class ProtoBufSerialization:
     #     return self._deserialize_serialization_chunk_to_instances(serialization_chunk)
     #
 
-    def read_chunk_from_bytes(self, data: bytes) -> pb.PBChunk:
+    def read_pbchunk_from_bytes(self, data: bytes) -> pb.PBChunk:
         """Read a protobuf Chunk from binary content"""
         self._chunk_instance.Clear()  # Reset the instance
         self._chunk_instance.ParseFromString(data)
         return self._chunk_instance
+
+    def read_chunk_from_bytes(self, data: bytes) -> SerializationChunk:
+        return self._deserialize_pbchunk_to_serialization_chunk(self.read_pbchunk_from_bytes(data))
 
 
     def _deserialize_pbchunk_to_serialization_chunk(self, chunk: pb.PBChunk) -> SerializationChunk:
@@ -101,17 +104,19 @@ class ProtoBufSerialization:
                     f"Unable to deserialize meta pointer with language {mp.li_language}"
                 )
             language_version = languages_array[mp.li_language]
+            language_key : Optional[str] = language_version.key if language_version is not None else None
+            language_v : Optional[str]= language_version.version if language_version is not None else None
             meta_pointer = MetaPointer(
-                language_version.key, language_version.version, strings_array[mp.si_key]
+                language_key, language_v, strings_array[mp.si_key]
             )
             metapointers_array[i] = meta_pointer
 
         serialization_chunk = SerializationChunk()
         serialization_chunk.serialization_format_version = chunk.serialization_format_version
 
-        for lv in languages_array:
-            if lv is not None:
-                serialization_chunk.add_language(lv)
+        valid_languages = [lv for lv in languages_array if lv is not None]
+        for lv in valid_languages:
+            serialization_chunk.add_language(lv)
 
         # Nodes
         for n in chunk.nodes:
@@ -131,7 +136,7 @@ class ProtoBufSerialization:
 
             # containments
             for c in n.containments:
-                children: List[str] = []
+                children: List[Optional[str]] = []
                 for child_index in c.si_children:
                     if child_index == 0:
                         raise DeserializationException(
@@ -344,3 +349,4 @@ class ProtoBufSerialization:
     #         chunk.interned_meta_pointers.append(pmp)
     #
     #     return chunk
+

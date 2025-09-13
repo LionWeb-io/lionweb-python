@@ -46,12 +46,12 @@ class SerializationUtils:
     @staticmethod
     def try_to_get_array_of_ids(
         json_object: JsonObject, property_name: str
-    ) -> Optional[List[str]]:
+    ) -> Optional[List[Optional[str]]]:
         if property_name not in json_object:
             return None
         value = json_object.get(property_name)
         if isinstance(value, list):
-            result = []
+            result : List[Optional[str]] = []
             for e in value:
                 if e is None:
                     raise DeserializationException(

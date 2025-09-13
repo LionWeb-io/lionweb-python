@@ -1,15 +1,45 @@
-from typing import Optional
+from typing import Optional, Dict, Tuple
+import threading
 
 
 class LanguageVersion:
     """
     The pair Language Key and Language Version identify a specific version of a language.
-    Corresponds to the Java class 'UsedLanguage'.
+    It is used also in the role of 'UsedLanguage', as specified in the specs.
     """
 
+    # Class-level cache for interning instances
+    _instances: Dict[Tuple[Optional[str], Optional[str]], 'LanguageVersion'] = {}
+    _lock = threading.Lock()  # Thread-safe access to cache
+
+    def __new__(cls, key: Optional[str] = None, version: Optional[str] = None):
+        # Create cache key
+        cache_key = (key, version)
+        
+        # Thread-safe cache lookup
+        with cls._lock:
+            if cache_key in cls._instances:
+                return cls._instances[cache_key]
+            
+            # Create new instance and cache it
+            instance = super().__new__(cls)
+            cls._instances[cache_key] = instance
+            return instance
+
     def __init__(self, key: Optional[str] = None, version: Optional[str] = None):
-        self.key = key
-        self.version = version
+        # Only initialize if not already initialized (due to interning)
+        if not hasattr(self, '_initialized'):
+            self._key = key
+            self._version = version
+            self._initialized = True
+
+    @classmethod
+    def of(cls, key: Optional[str] = None, version: Optional[str] = None) -> 'LanguageVersion':
+        """
+        Factory method to get an interned LanguageVersion instance.
+        This is the preferred way to create LanguageVersion instances.
+        """
+        return cls(key, version)
 
     @staticmethod
     def from_language(language):
@@ -51,23 +81,46 @@ class LanguageVersion:
             raise ValueError("meta_pointer language should not be null")
         if meta_pointer.version is None:
             raise ValueError("meta_pointer version should not be null")
-        return LanguageVersion(meta_pointer.language, meta_pointer.version)
+        return LanguageVersion.of(meta_pointer.language, meta_pointer.version)
 
     def get_key(self) -> Optional[str]:
-        return self.key
+        return self._key
 
     def set_key(self, key: str):
-        self.key = key
+        raise RuntimeError("LanguageVersion instances are immutable after creation")
 
     def get_version(self) -> Optional[str]:
-        return self.version
+        return self._version
 
     def set_version(self, version: str):
-        self.version = version
+        raise RuntimeError("LanguageVersion instances are immutable after creation")
+
+    @property
+    def key(self) -> Optional[str]:
+        return self._key
+
+    @property
+    def version(self) -> Optional[str]:
+        return self._version
+
+    @classmethod
+    def clear_cache(cls):
+        """Clear the interning cache. Useful for testing or memory management."""
+        with cls._lock:
+            cls._instances.clear()
+
+    @classmethod
+    def cache_size(cls) -> int:
+        """Get the current size of the interning cache."""
+        with cls._lock:
+            return len(cls._instances)
 
     def __eq__(self, other):
         if not isinstance(other, LanguageVersion):
             return False
+        # With interning, we can use identity comparison for performance
+        if self is other:
+            return True
         return self.key == other.key and self.version == other.version
 
     def __hash__(self):

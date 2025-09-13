@@ -42,5 +42,3 @@ def load_repository_archive(
     end = time.perf_counter()
     elapsed_seconds = end - start
     print(f"Uploaded {total_nodes} nodes in {elapsed_seconds:.3f} seconds")
-
-

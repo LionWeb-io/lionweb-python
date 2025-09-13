@@ -9,7 +9,7 @@ from lionweb.serialization.protobuf_serialization import ProtoBufSerialization
 def load_archive(filename) -> List[SerializationChunk]:
     ps = ProtoBufSerialization(LionWebVersion.V2023_1)
     start = time.time()
-    chunks = []
+    chunks : List[SerializationChunk] = []
     import zipfile
     with zipfile.ZipFile(filename, 'r') as zf:
         for name in zf.namelist():

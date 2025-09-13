@@ -27,7 +27,7 @@ class SerializationChunk:
             raise ValueError(f"Cannot find instance with ID {instance_id}")
         return instance
 
-    def add_language(self, language):
+    def add_language(self, language: LanguageVersion) -> None:
         self.languages.append(language)
 
     def __str__(self):
