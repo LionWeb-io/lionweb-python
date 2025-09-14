@@ -1,4 +1,5 @@
 from .abstract_serialization import AbstractSerialization
+from .archive import load_archive
 from .data import (MetaPointer, SerializationChunk,
                    SerializedClassifierInstance, SerializedContainmentValue,
                    SerializedPropertyValue, SerializedReferenceValue)
@@ -8,8 +9,6 @@ from .low_level_json_serialization import LowLevelJsonSerialization
 from .serialization_provider import (create_standard_json_serialization,
                                      setup_standard_initialization)
 from .serialized_json_comparison_utils import SerializedJsonComparisonUtils
-
-# from .protobuf_serialization import ProtobufSerialization
 
 __all__ = [
     "AbstractSerialization",
@@ -25,4 +24,5 @@ __all__ = [
     "SerializedPropertyValue",
     "SerializedReferenceValue",
     "LowLevelJsonSerialization",
+    "load_archive",
 ]

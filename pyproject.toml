@@ -23,6 +23,7 @@ dependencies = [
     "requests",
     "pydantic",
     "typing_extensions>=4.8",
+    "protobuf"
 ]
 
 [project.optional-dependencies]
