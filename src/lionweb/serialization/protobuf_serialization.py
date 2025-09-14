@@ -1,12 +1,12 @@
 from typing import TYPE_CHECKING, List, Optional
 
-import lionweb.serialization.proto.Chunk_pb2 as pb
 from lionweb.lionweb_version import LionWebVersion
 from lionweb.serialization.data import LanguageVersion
 from lionweb.serialization.data.serialized_reference_value import \
     SerializedReferenceValueEntry
 from lionweb.serialization.deserialization_exception import \
     DeserializationException
+from lionweb.serialization.proto import PBChunk
 
 if TYPE_CHECKING:
     from lionweb.serialization import (MetaPointer, SerializationChunk,
@@ -38,7 +38,7 @@ class ProtoBufSerialization:
         lionweb_version: Optional["LionWebVersion"] = LionWebVersion.current_version(),
     ) -> None:
         self._lionweb_version = lionweb_version
-        self._chunk_instance = pb.PBChunk()  # Reusable instance
+        self._chunk_instance = PBChunk()  # Reusable instance
 
         # # -------------------- Deserialization --------------------
 
@@ -73,7 +73,7 @@ class ProtoBufSerialization:
     #     return self._deserialize_serialization_chunk_to_instances(serialization_chunk)
     #
 
-    def read_pbchunk_from_bytes(self, data: bytes) -> pb.PBChunk:
+    def read_pbchunk_from_bytes(self, data: bytes) -> PBChunk:
         """Read a protobuf Chunk from binary content"""
         self._chunk_instance.Clear()  # Reset the instance
         self._chunk_instance.ParseFromString(data)
@@ -85,7 +85,7 @@ class ProtoBufSerialization:
         )
 
     def _deserialize_pbchunk_to_serialization_chunk(
-        self, chunk: pb.PBChunk
+        self, chunk: PBChunk
     ) -> "SerializationChunk":
         # Pre-size arrays as in Java
         string_count = len(chunk.interned_strings)

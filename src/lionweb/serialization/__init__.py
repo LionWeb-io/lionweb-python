@@ -1,5 +1,5 @@
 from .abstract_serialization import AbstractSerialization
-from .archive import load_archive
+from .archive import load_archive, process_archive
 from .data import (MetaPointer, SerializationChunk,
                    SerializedClassifierInstance, SerializedContainmentValue,
                    SerializedPropertyValue, SerializedReferenceValue)
@@ -25,4 +25,5 @@ __all__ = [
     "SerializedReferenceValue",
     "LowLevelJsonSerialization",
     "load_archive",
+    "process_archive",
 ]
