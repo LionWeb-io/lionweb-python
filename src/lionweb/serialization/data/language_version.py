@@ -1,5 +1,5 @@
 import threading
-from typing import Dict, Optional, Tuple
+from typing import ClassVar, Optional, Self
 
 
 class LanguageVersion:
@@ -9,8 +9,13 @@ class LanguageVersion:
     """
 
     # Class-level cache for interning instances
-    _instances: Dict[Tuple[Optional[str], Optional[str]], "LanguageVersion"] = {}
+    _instances: ClassVar[
+        dict[tuple[Optional[str], Optional[str]], "LanguageVersion"]
+    ] = {}
     _lock = threading.Lock()  # Thread-safe access to cache
+
+    _key: Optional[str]
+    _version: Optional[str]
 
     def __new__(cls, key: Optional[str] = None, version: Optional[str] = None):
         # Create cache key
@@ -23,20 +28,17 @@ class LanguageVersion:
 
             # Create new instance and cache it
             instance = super().__new__(cls)
+            instance._key = key
+            instance._version = version
             cls._instances[cache_key] = instance
             return instance
 
     def __init__(self, key: Optional[str] = None, version: Optional[str] = None):
-        # Only initialize if not already initialized (due to interning)
-        if not hasattr(self, "_initialized"):
-            self._key = key
-            self._version = version
-            self._initialized = True
+        # no-op; kept for signature compatibility
+        pass
 
     @classmethod
-    def of(
-        cls, key: Optional[str] = None, version: Optional[str] = None
-    ) -> "LanguageVersion":
+    def of(cls, key: Optional[str] = None, version: Optional[str] = None) -> Self:
         """
         Factory method to get an interned LanguageVersion instance.
         This is the preferred way to create LanguageVersion instances.
