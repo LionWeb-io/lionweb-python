@@ -1,5 +1,5 @@
 import threading
-from typing import Dict, Optional, Tuple
+from typing import ClassVar, Optional, Self
 
 from lionweb.serialization.data.language_version import LanguageVersion
 
@@ -11,10 +11,13 @@ class MetaPointer:
     """
 
     # Class-level cache for interning instances
-    _instances: Dict[Tuple[Optional[LanguageVersion], Optional[str]], "MetaPointer"] = (
-        {}
-    )
+    _instances: ClassVar[
+        dict[tuple[Optional[LanguageVersion], Optional[str]], "MetaPointer"]
+    ] = {}
     _lock = threading.Lock()  # Thread-safe access to cache
+
+    _language_version: Optional[LanguageVersion]
+    _key: Optional[str]
 
     def __new__(
         cls,
@@ -31,6 +34,8 @@ class MetaPointer:
 
             # Create new instance and cache it
             instance = super().__new__(cls)
+            instance._language_version = language_version
+            instance._key = key
             cls._instances[cache_key] = instance
             return instance
 
@@ -39,18 +44,15 @@ class MetaPointer:
         language_version: Optional[LanguageVersion] = None,
         key: Optional[str] = None,
     ):
-        # Only initialize if not already initialized (due to interning)
-        if not hasattr(self, "_initialized"):
-            self._language_version = language_version
-            self._key = key
-            self._initialized = True
+        # no-op; kept for signature compatibility
+        pass
 
     @classmethod
     def of(
         cls,
         language_version: Optional[LanguageVersion] = None,
         key: Optional[str] = None,
-    ) -> "MetaPointer":
+    ) -> Self:
         """
         Factory method to get an interned MetaPointer instance.
         This is the preferred way to create MetaPointer instances.
