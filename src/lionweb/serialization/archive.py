@@ -1,15 +1,17 @@
 from collections.abc import Callable
 from os import PathLike
-from typing import List
+from typing import TYPE_CHECKING, List
 
 from lionweb import LionWebVersion
-from lionweb.serialization import SerializationChunk
 from lionweb.serialization.protobuf_serialization import ProtoBufSerialization
+
+if TYPE_CHECKING:
+    from lionweb.serialization import SerializationChunk
 
 
 def process_archive(
     filename: str | PathLike,
-    chunk_processor: Callable[[int, int, SerializationChunk], None],
+    chunk_processor: Callable[[int, int, "SerializationChunk"], None],
 ) -> None:
     ps = ProtoBufSerialization(LionWebVersion.V2023_1)
     import zipfile
@@ -27,7 +29,7 @@ def process_archive(
             i += 1
 
 
-def load_archive(filename) -> List[SerializationChunk]:
+def load_archive(filename) -> List["SerializationChunk"]:
     chunks = []
     process_archive(filename, lambda i, n, chunk: chunks.append(chunk))
     return chunks

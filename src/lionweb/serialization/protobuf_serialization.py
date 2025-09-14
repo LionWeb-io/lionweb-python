@@ -2,11 +2,6 @@ from typing import TYPE_CHECKING, List, Optional
 
 import lionweb.serialization.proto.Chunk_pb2 as pb
 from lionweb.lionweb_version import LionWebVersion
-from lionweb.serialization import (MetaPointer, SerializationChunk,
-                                   SerializedClassifierInstance,
-                                   SerializedContainmentValue,
-                                   SerializedPropertyValue,
-                                   SerializedReferenceValue)
 from lionweb.serialization.data import LanguageVersion
 from lionweb.serialization.data.serialized_reference_value import \
     SerializedReferenceValueEntry
@@ -14,8 +9,11 @@ from lionweb.serialization.deserialization_exception import \
     DeserializationException
 
 if TYPE_CHECKING:
-
-    from lionweb.serialization.data import SerializationChunk
+    from lionweb.serialization import (MetaPointer, SerializationChunk,
+                                       SerializedClassifierInstance,
+                                       SerializedContainmentValue,
+                                       SerializedPropertyValue,
+                                       SerializedReferenceValue)
 
 
 # from io.lionweb.serialization.data import (
@@ -81,14 +79,14 @@ class ProtoBufSerialization:
         self._chunk_instance.ParseFromString(data)
         return self._chunk_instance
 
-    def read_chunk_from_bytes(self, data: bytes) -> SerializationChunk:
+    def read_chunk_from_bytes(self, data: bytes) -> "SerializationChunk":
         return self._deserialize_pbchunk_to_serialization_chunk(
             self.read_pbchunk_from_bytes(data)
         )
 
     def _deserialize_pbchunk_to_serialization_chunk(
         self, chunk: pb.PBChunk
-    ) -> SerializationChunk:
+    ) -> "SerializationChunk":
         # Pre-size arrays as in Java
         string_count = len(chunk.interned_strings)
         language_count = len(chunk.interned_languages)
