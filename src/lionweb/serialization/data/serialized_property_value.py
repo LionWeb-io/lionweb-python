@@ -1,5 +1,5 @@
 import threading
-from typing import Dict, Optional, Tuple
+from typing import ClassVar, Optional, Self
 
 from lionweb.serialization.data.metapointer import MetaPointer
 
@@ -10,8 +10,13 @@ class SerializedPropertyValue:
     """
 
     # Class-level cache for interning instances
-    _instances: Dict[Tuple[MetaPointer, Optional[str]], "SerializedPropertyValue"] = {}
+    _instances: ClassVar[
+        dict[tuple[MetaPointer, Optional[str]], "SerializedPropertyValue"]
+    ] = {}
     _lock = threading.Lock()  # Thread-safe access to cache
+
+    _meta_pointer: MetaPointer
+    _value: Optional[str]
 
     def __new__(cls, meta_pointer: MetaPointer, value: Optional[str] = None):
         # Create cache key
@@ -24,20 +29,17 @@ class SerializedPropertyValue:
 
             # Create new instance and cache it
             instance = super().__new__(cls)
+            instance._meta_pointer = meta_pointer
+            instance._value = value
             cls._instances[cache_key] = instance
             return instance
 
     def __init__(self, meta_pointer: MetaPointer, value: Optional[str] = None):
-        # Only initialize if not already initialized (due to interning)
-        if not hasattr(self, "_initialized"):
-            self._meta_pointer = meta_pointer
-            self._value = value
-            self._initialized = True
+        # no-op; kept for signature compatibility
+        pass
 
     @classmethod
-    def of(
-        cls, meta_pointer: MetaPointer, value: Optional[str] = None
-    ) -> "SerializedPropertyValue":
+    def of(cls, meta_pointer: MetaPointer, value: Optional[str] = None) -> Self:
         """
         Factory method to get an interned SerializedPropertyValue instance.
         This is the preferred way to create SerializedPropertyValue instances.
