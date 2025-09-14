@@ -1,4 +1,4 @@
-from typing import TYPE_CHECKING, Dict, List, Optional
+from typing import TYPE_CHECKING, Dict, List, Optional, Set
 
 from lionweb.lionweb_version import LionWebVersion
 from lionweb.serialization.data import LanguageVersion
@@ -17,8 +17,7 @@ from .abstract_serialization import AbstractSerialization
 if TYPE_CHECKING:
     from lionweb.serialization import (AbstractSerialization, MetaPointer,
                                        SerializationChunk,
-                                       SerializedClassifierInstance,
-                                       SerializedReferenceValue)
+                                       SerializedClassifierInstance)
 
 
 class ProtoBufSerialization(AbstractSerialization):
@@ -68,6 +67,7 @@ class ProtoBufSerialization(AbstractSerialization):
         from .data.serialized_containment_value import \
             SerializedContainmentValue
         from .data.serialized_property_value import SerializedPropertyValue
+        from .data.serialized_reference_value import SerializedReferenceValue
 
         metapointers_array: List[MetaPointer] = [None] * meta_pointer_count  # type: ignore
         for i, mp in enumerate(chunk.interned_meta_pointers):
@@ -294,3 +294,43 @@ class ProtoBufSerialization(AbstractSerialization):
             chunk.interned_meta_pointers.append(pmp)
 
         return chunk
+
+    def serialize_nodes_to_bytes(
+        self, classifier_instances: List[ClassifierInstance] | ClassifierInstance
+    ) -> bytes:
+        if isinstance(classifier_instances, ClassifierInstance):
+            classifier_instances = [classifier_instances]
+        chunk = self.serialize_nodes_to_serialization_chunk(classifier_instances)
+        return self.serialize_chunk_to_bytes(chunk)
+
+    def serialize_trees_to_bytes(self, roots: List[ClassifierInstance]) -> bytes:
+        from lionweb.model.impl.proxy_node import ProxyNode
+
+        nodes_ids: Set[str] = set()
+        all_nodes: List[ClassifierInstance] = []
+
+        for root in roots:
+            classifier_instances: List[ClassifierInstance] = list()
+            ClassifierInstance.collect_self_and_descendants(
+                root, True, classifier_instances
+            )
+
+            for node in classifier_instances:
+                id = node.id
+                if not id:
+                    raise ValueError()
+                # We support serialization of incorrect nodes, so we allow nodes without an ID
+                if id is not None:
+                    if id not in nodes_ids:
+                        all_nodes.append(node)
+                        nodes_ids.add(id)
+                else:
+                    all_nodes.append(node)
+
+        # Filter out ProxyNode instances before serialization
+        filtered_nodes = [node for node in all_nodes if not isinstance(node, ProxyNode)]
+        return self.serialize_nodes_to_bytes(filtered_nodes)
+
+    def deserialize_bytes_to_nodes(self, data: bytes) -> List[ClassifierInstance]:
+        chunk = self.deserialize_chunk_from_bytes(data)
+        return self.deserialize_serialization_chunk(chunk)

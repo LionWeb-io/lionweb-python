@@ -47,7 +47,7 @@ class JsonSerialization(AbstractSerialization):
         return self.serialize_nodes_to_json_element(filtered_nodes)
 
     def serialize_nodes_to_json_element(
-        self, classifier_instances: List[ClassifierInstance]
+        self, classifier_instances: List[ClassifierInstance] | ClassifierInstance
     ) -> JsonElement:
         if isinstance(classifier_instances, ClassifierInstance):
             classifier_instances = [classifier_instances]
