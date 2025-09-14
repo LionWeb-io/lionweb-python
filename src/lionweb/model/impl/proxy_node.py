@@ -1,8 +1,10 @@
-from typing import Optional
+from typing import TYPE_CHECKING, Optional
 
-from lionweb.language import Annotation
-from lionweb.model.annotation_instance import AnnotationInstance
 from lionweb.model.node import Node
+
+if TYPE_CHECKING:
+    from lionweb.language import Annotation
+    from lionweb.model.annotation_instance import AnnotationInstance
 
 
 class ProxyNode(Node):

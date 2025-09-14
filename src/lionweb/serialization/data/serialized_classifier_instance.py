@@ -32,7 +32,7 @@ class SerializedClassifierInstance:
     def get_children(self):
         children = []
         for containment in self.containments:
-            children.extend(containment.get_value())
+            children.extend(containment.get_children_ids())
         return list(children)
 
     def add_property_value(self, property_value: SerializedPropertyValue):
@@ -108,7 +108,7 @@ class SerializedClassifierInstance:
     ) -> List[Optional[str]]:
         for rv in self.containments:
             if rv.get_meta_pointer().key == containment_key:
-                return rv.get_value()
+                return rv.get_children_ids()
         return []
 
     def get_containment_values(
@@ -116,7 +116,7 @@ class SerializedClassifierInstance:
     ) -> List[Optional[str]]:
         for cv in self.containments:
             if containment_meta_pointer == cv.get_meta_pointer():
-                return cv.get_value()
+                return cv.get_children_ids()
         return []
 
     def set_annotations(self, annotation_ids: List[Optional[str]]):

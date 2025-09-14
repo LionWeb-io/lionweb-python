@@ -73,11 +73,11 @@ class NodePopulator:
                     f"Unable to resolve containment {serialized_containment_value.meta_pointer} in concept {concept}"
                 )
 
-            if serialized_containment_value.value is None:
+            if serialized_containment_value.children_ids is None:
                 raise ValueError("The containment value should not be null")
 
             deserialized_value = []
-            for child_node_id in serialized_containment_value.value:
+            for child_node_id in serialized_containment_value.children_ids:
                 if (
                     self.serialization.unavailable_children_policy
                     == UnavailableNodePolicy.PROXY_NODES

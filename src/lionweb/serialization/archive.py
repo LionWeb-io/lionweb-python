@@ -23,7 +23,7 @@ def process_archive(
             with zf.open(name) as entry_file:
                 content = entry_file.read()
             content = zf.read(name)  # bytes
-            chunk = ps.read_chunk_from_bytes(content)
+            chunk = ps.deserialize_chunk_from_bytes(content)
             del content
             chunk_processor(i, n_elements, chunk)
             i += 1

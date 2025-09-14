@@ -69,7 +69,7 @@ class LowLevelJsonSerialization:
                         children_value.get_meta_pointer()
                     ),
                     "children": SerializationUtils.to_json_array(
-                        children_value.get_value()
+                        children_value.get_children_ids()
                     ),
                 }
                 node_json["containments"].append(children_json)

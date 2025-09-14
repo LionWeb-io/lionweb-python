@@ -226,14 +226,14 @@ class JsonSerializationTest(SerializationTest):
                 for c in serialized_node.containments
                 if c.meta_pointer.key == "SimpleMath_Sum_left"
             )
-            left = deserialized_nodes_by_id.get(left_scv.value[0])
+            left = deserialized_nodes_by_id.get(left_scv.children_ids[0])
 
             right_scv = next(
                 c
                 for c in serialized_node.containments
                 if c.meta_pointer.key == "SimpleMath_Sum_right"
             )
-            right = deserialized_nodes_by_id.get(right_scv.value[0])
+            right = deserialized_nodes_by_id.get(right_scv.children_ids[0])
 
             return Sum(left, right, serialized_node.id)
 

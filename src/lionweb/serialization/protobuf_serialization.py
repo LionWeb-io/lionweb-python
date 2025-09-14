@@ -1,4 +1,4 @@
-from typing import TYPE_CHECKING, List, Optional
+from typing import TYPE_CHECKING, Dict, List, Optional
 
 from lionweb.lionweb_version import LionWebVersion
 from lionweb.serialization.data import LanguageVersion
@@ -6,88 +6,44 @@ from lionweb.serialization.data.serialized_reference_value import \
     SerializedReferenceValueEntry
 from lionweb.serialization.deserialization_exception import \
     DeserializationException
-from lionweb.serialization.proto import PBChunk
+from lionweb.serialization.proto import (PBChunk, PBContainment, PBLanguage,
+                                         PBMetaPointer, PBNode, PBProperty,
+                                         PBReference, PBReferenceValue)
+
+from ..model import ClassifierInstance
+from ..model.impl.proxy_node import ProxyNode
+from .abstract_serialization import AbstractSerialization
 
 if TYPE_CHECKING:
-    from lionweb.serialization import (MetaPointer, SerializationChunk,
+    from lionweb.serialization import (AbstractSerialization, MetaPointer,
+                                       SerializationChunk,
                                        SerializedClassifierInstance,
-                                       SerializedContainmentValue,
-                                       SerializedPropertyValue,
                                        SerializedReferenceValue)
 
 
-# from io.lionweb.serialization.data import (
-#     SerializationChunk,
-#     SerializedClassifierInstance,
-#     SerializedPropertyValue,
-#     SerializedContainmentValue,
-#     SerializedReferenceValue,
-#     LanguageVersion,
-# )
-# from io.lionweb.serialization.data.meta_pointer import MetaPointer
-# from io.lionweb.model import ClassifierInstance as LWClassifierInstance
-# from io.lionweb.model.impl import ProxyNode
-# from io.lionweb.serialization.exceptions import DeserializationException
-# # ------------------------------------------------------------------
-
-
-class ProtoBufSerialization:
+class ProtoBufSerialization(AbstractSerialization):
 
     def __init__(
-        self,
-        lionweb_version: Optional["LionWebVersion"] = LionWebVersion.current_version(),
+        self, lionweb_version: LionWebVersion = LionWebVersion.current_version()
     ) -> None:
-        self._lionweb_version = lionweb_version
+        super().__init__(lionweb_version=lionweb_version)
         self._chunk_instance = PBChunk()  # Reusable instance
 
-        # # -------------------- Deserialization --------------------
-
-    #
-    # def deserialize_to_nodes_from_bytes(self, data: bytes) -> List[Node]:
-    #     pb_chunk = pb.S(data)
-    #     return self.deserialize_to_nodes_from_pbchunk(pb_chunk)
-    #
-    # def deserialize_to_chunk_from_bytes(self, data: bytes) -> SerializationChunk:
-    #     pb_chunk = pb.FromString(data)
-    #     return self._deserialize_serialization_chunk(pb_chunk)
-    #
-    # def deserialize_to_nodes_from_file(self, path: str) -> List[Node]:
-    #     with open(path, "rb") as f:
-    #         return self.deserialize_to_nodes_from_stream(f)
-    #
-    # def deserialize_to_nodes_from_stream(self, stream) -> List[Node]:
-    #     data = stream.read()
-    #     pb_chunk = pb.FromString(data)
-    #     return self.deserialize_to_nodes_from_pbchunk(pb_chunk)
-    #
-    # def deserialize_to_nodes_from_pbchunk(self, chunk: PBChunk) -> List[Node]:
-    #     cis = self.deserialize_to_classifier_instances_from_pbchunk(chunk)
-    #     # Keep only Node instances
-    #     return [ci for ci in cis if isinstance(ci, LWClassifierInstance.Node)]  # adjust if needed
-    #
-    # def deserialize_to_classifier_instances_from_pbchunk(
-    #         self, chunk: PBChunk
-    # ) -> List[LWClassifierInstance]:
-    #     serialization_chunk = self._deserialize_serialization_chunk(chunk)
-    #     self._validate_serialization_block(serialization_chunk)
-    #     return self._deserialize_serialization_chunk_to_instances(serialization_chunk)
-    #
-
-    def read_pbchunk_from_bytes(self, data: bytes) -> PBChunk:
+    def _read_pbchunk_from_bytes(self, data: bytes) -> PBChunk:
         """Read a protobuf Chunk from binary content"""
         self._chunk_instance.Clear()  # Reset the instance
         self._chunk_instance.ParseFromString(data)
         return self._chunk_instance
 
-    def read_chunk_from_bytes(self, data: bytes) -> "SerializationChunk":
+    def deserialize_chunk_from_bytes(self, data: bytes) -> "SerializationChunk":
         return self._deserialize_pbchunk_to_serialization_chunk(
-            self.read_pbchunk_from_bytes(data)
+            self._read_pbchunk_from_bytes(data)
         )
 
     def _deserialize_pbchunk_to_serialization_chunk(
         self, chunk: PBChunk
     ) -> "SerializationChunk":
-        # Pre-size arrays as in Java
+        # Pre-size arrays
         string_count = len(chunk.interned_strings)
         language_count = len(chunk.interned_languages)
         meta_pointer_count = len(chunk.interned_meta_pointers)
@@ -104,6 +60,14 @@ class ProtoBufSerialization:
             version = strings_array[language.si_version]
             lv = LanguageVersion(key, version)
             languages_array[i + 1] = lv
+
+        from .data.metapointer import MetaPointer
+        from .data.serialized_chunk import SerializationChunk
+        from .data.serialized_classifier_instance import \
+            SerializedClassifierInstance
+        from .data.serialized_containment_value import \
+            SerializedContainmentValue
+        from .data.serialized_property_value import SerializedPropertyValue
 
         metapointers_array: List[MetaPointer] = [None] * meta_pointer_count  # type: ignore
         for i, mp in enumerate(chunk.interned_meta_pointers):
@@ -193,185 +157,140 @@ class ProtoBufSerialization:
 
         return serialization_chunk
 
-    #
-    # def _validate_serialization_block(self, serialization_chunk: SerializationChunk) -> None:
-    #     # Mirror whatever the Java AbstractSerialization.validateSerializationBlock does.
-    #     # If you have that logic elsewhere, call it here.
-    #     pass
-    #
-    # def _deserialize_serialization_chunk_to_instances(
-    #         self, serialization_chunk: SerializationChunk
-    # ) -> List[LWClassifierInstance]:
-    #     # In Java this likely transforms SerializedClassifierInstance -> runtime model instances.
-    #     # If you already have a function for that, call it here. Placeholder:
-    #     return serialization_chunk.get_classifier_instances()
-    #
-    # # -------------------- Serialization --------------------
-    #
-    # def serialize_trees_to_bytes(self, *roots: LWClassifierInstance) -> bytes:
-    #     nodes_ids: set = set()
-    #     all_nodes: List[LWClassifierInstance] = []
-    #
-    #     for root in roots:
-    #         classifier_instances: "set[LWClassifierInstance]" = set()
-    #         LWClassifierInstance.collectSelfAndDescendants(root, True, classifier_instances)
-    #
-    #         for n in classifier_instances:
-    #             nid = getattr(n, "id", None)
-    #             if nid is not None:
-    #                 if nid not in nodes_ids:
-    #                     all_nodes.append(n)
-    #                     nodes_ids.add(nid)
-    #             else:
-    #                 all_nodes.append(n)
-    #
-    #     # Filter out ProxyNode
-    #     filtered_nodes = [n for n in all_nodes if not isinstance(n, ProxyNode)]
-    #     return self.serialize_nodes_to_bytes(filtered_nodes)
-    #
-    # def serialize_nodes_to_bytes(self, classifier_instances: List[LWClassifierInstance]) -> bytes:
-    #     if any(isinstance(n, ProxyNode) for n in classifier_instances):
-    #         raise ValueError("Proxy nodes cannot be serialized")
-    #     serialization_block = self._serialize_nodes_to_serialization_chunk(classifier_instances)
-    #     return self.serialize_to_bytes(serialization_block)
-    #
-    # def serialize_to_bytes(self, serialization_chunk: SerializationChunk) -> bytes:
-    #     pb_chunk = self._serialize(serialization_chunk)
-    #     return pb_chunk.SerializeToString()
-    #
-    # def _serialize_nodes_to_serialization_chunk(
-    #         self, classifier_instances: List[LWClassifierInstance]
-    # ) -> SerializationChunk:
-    #     # Assuming you have equivalent functionality; call into your existing builder.
-    #     # Placeholder: if you already store SerializedClassifierInstance in the chunk, pass through.
-    #     sc = SerializationChunk()
-    #     # NOTE: You likely have domain-specific logic to convert real model instances
-    #     # into SerializedClassifierInstance; wire that here.
-    #     raise NotImplementedError("Implement model -> SerializedClassifierInstance marshalling")
-    #
-    # class _SerializeHelper:
-    #     """Mirror of the Java inner class SerializeHelper, adapted to Python."""
-    #
-    #     def __init__(self) -> None:
-    #         self.meta_pointers: List[MetaPointer] = []
-    #         self.strings: List[Optional[str]] = [None]
-    #         self.languages: List[Optional[LanguageVersion]] = [None]
-    #
-    #         self._meta_pointer_index: Dict[MetaPointer, int] = {}
-    #         self._string_index: Dict[Optional[str], int] = {None: 0}
-    #         self._language_index: Dict[Optional[LanguageVersion], int] = {None: 0}
-    #
-    #     def string_indexer(self, s: Optional[str]) -> int:
-    #         if s in self._string_index:
-    #             return self._string_index[s]
-    #         idx = len(self.strings)
-    #         self.strings.append(s)
-    #         self._string_index[s] = idx
-    #         return idx
-    #
-    #     def language_indexer(self, l: Optional[LanguageVersion]) -> int:
-    #         if l in self._language_index:
-    #             return self._language_index[l]
-    #         idx = len(self.languages)
-    #         self.languages.append(l)
-    #         self._language_index[l] = idx
-    #         return idx
-    #
-    #     def meta_pointer_indexer(self, mp: MetaPointer) -> int:
-    #         if mp in self._meta_pointer_index:
-    #             return self._meta_pointer_index[mp]
-    #         idx = len(self.meta_pointers)
-    #         # ensure indices for subparts
-    #         self.language_indexer(mp.language_version)
-    #         self.string_indexer(mp.key)
-    #         self.meta_pointers.append(mp)
-    #         self._meta_pointer_index[mp] = idx
-    #         return idx
-    #
-    #     def serialize_node(self, n: SerializedClassifierInstance) -> PBNode:
-    #         b = PBNode()
-    #
-    #         if n.id is not None:
-    #             b.si_id = self.string_indexer(n.id)
-    #         if n.parent_node_id is not None:
-    #             b.si_parent = self.string_indexer(n.parent_node_id)
-    #
-    #         b.mpi_classifier = self.meta_pointer_indexer(n.classifier)
-    #
-    #         # properties
-    #         for p in n.properties:
-    #             pbp = PBProperty()
-    #             if p.value is not None:
-    #                 pbp.si_value = self.string_indexer(p.value)
-    #             pbp.mpi_meta_pointer = self.meta_pointer_indexer(p.meta_pointer)
-    #             b.properties.append(pbp)
-    #
-    #         # containments
-    #         for c in n.containments:
-    #             pbc = PBContainment()
-    #             pbc.si_children.extend(self.string_indexer(cid) for cid in c.children_ids)
-    #             pbc.mpi_meta_pointer = self.meta_pointer_indexer(c.meta_pointer)
-    #             b.containments.append(pbc)
-    #
-    #         # references
-    #         for r in n.references:
-    #             pbr = PBReference()
-    #             for rv in r.value:
-    #                 pbv = PBReferenceValue()
-    #                 if rv.reference is not None:
-    #                     pbv.si_referred = self.string_indexer(rv.reference)
-    #                 if rv.resolve_info is not None:
-    #                     pbv.si_resolve_info = self.string_indexer(rv.resolve_info)
-    #                 pbr.values.append(pbv)
-    #             pbr.mpi_meta_pointer = self.meta_pointer_indexer(r.meta_pointer)
-    #             b.references.append(pbr)
-    #
-    #         # annotations
-    #         for a in n.annotations:
-    #             b.si_annotations.append(self.string_indexer(a))
-    #
-    #         return b
-    #
-    # def serialize_tree(self, classifier_instance: LWClassifierInstance) -> PBChunk:
-    #     if isinstance(classifier_instance, ProxyNode):
-    #         raise ValueError("Proxy nodes cannot be serialized")
-    #     classifier_instances: "set[LWClassifierInstance]" = set()
-    #     LWClassifierInstance.collectSelfAndDescendants(
-    #         classifier_instance, True, classifier_instances
-    #     )
-    #     filtered = [n for n in classifier_instances if not isinstance(n, ProxyNode)]
-    #     sc = self._serialize_nodes_to_serialization_chunk(filtered)
-    #     return self._serialize(sc)
-    #
-    # def _serialize(self, serialization_chunk: SerializationChunk) -> PBChunk:
-    #     chunk = PBChunk()
-    #     chunk.serialization_format_version = serialization_chunk.serialization_format_version
-    #
-    #     helper = self._SerializeHelper()
-    #
-    #     instances: List[SerializedClassifierInstance] = serialization_chunk.get_classifier_instances()
-    #     for inst in instances:
-    #         chunk.nodes.append(helper.serialize_node(inst))
-    #
-    #     # languages first (match Java’s ordering)
-    #     for lv in helper.languages:
-    #         if lv is not None:
-    #             pl = PBLanguage()
-    #             if lv.key is not None:
-    #                 pl.si_key = helper.string_indexer(lv.key)
-    #             if lv.version is not None:
-    #                 pl.si_version = helper.string_indexer(lv.version)
-    #             chunk.interned_languages.append(pl)
-    #
-    #     for s in helper.strings:
-    #         if s is not None:
-    #             chunk.interned_strings.append(s)
-    #
-    #     for mp in helper.meta_pointers:
-    #         pmp = PBMetaPointer()
-    #         pmp.li_language = helper.language_indexer(mp.language_version)
-    #         if mp.key is not None:
-    #             pmp.si_key = helper.string_indexer(mp.key)
-    #         chunk.interned_meta_pointers.append(pmp)
-    #
-    #     return chunk
+    def serialize_chunk_to_bytes(
+        self, serialization_chunk: "SerializationChunk"
+    ) -> bytes:
+        pb_chunk = self._serialize(serialization_chunk)
+        return pb_chunk.SerializeToString()
+
+    class _SerializeHelper:
+
+        def __init__(self) -> None:
+            self.meta_pointers: List[MetaPointer] = []
+            self.strings: List[Optional[str]] = [None]
+            self.languages: List[Optional[LanguageVersion]] = [None]
+
+            self._meta_pointer_index: Dict[MetaPointer, int] = {}
+            self._string_index: Dict[Optional[str], int] = {None: 0}
+            self._language_index: Dict[Optional[LanguageVersion], int] = {None: 0}
+
+        def string_indexer(self, s: Optional[str]) -> int:
+            if s in self._string_index:
+                return self._string_index[s]
+            idx = len(self.strings)
+            self.strings.append(s)
+            self._string_index[s] = idx
+            return idx
+
+        def language_indexer(self, lang: Optional[LanguageVersion]) -> int:
+            if lang in self._language_index:
+                return self._language_index[lang]
+            idx = len(self.languages)
+            self.languages.append(lang)
+            self._language_index[lang] = idx
+            return idx
+
+        def meta_pointer_indexer(self, mp: "MetaPointer") -> int:
+            if mp in self._meta_pointer_index:
+                return self._meta_pointer_index[mp]
+            idx = len(self.meta_pointers)
+            # ensure indices for subparts
+            self.language_indexer(mp.language_version)
+            self.string_indexer(mp.key)
+            self.meta_pointers.append(mp)
+            self._meta_pointer_index[mp] = idx
+            return idx
+
+        def serialize_node(self, n: "SerializedClassifierInstance") -> PBNode:
+            b = PBNode()
+
+            if n.id is not None:
+                b.si_id = self.string_indexer(n.id)
+            if n.parent_node_id is not None:
+                b.si_parent = self.string_indexer(n.parent_node_id)
+
+            b.mpi_classifier = self.meta_pointer_indexer(n.classifier)
+
+            # properties
+            for p in n.properties:
+                pbp = PBProperty()
+                if p.value is not None:
+                    pbp.si_value = self.string_indexer(p.value)
+                pbp.mpi_meta_pointer = self.meta_pointer_indexer(p.meta_pointer)
+                b.properties.append(pbp)
+
+            # containments
+            for c in n.containments:
+                pbc = PBContainment()
+                pbc.si_children.extend(
+                    self.string_indexer(cid) for cid in c.children_ids
+                )
+                pbc.mpi_meta_pointer = self.meta_pointer_indexer(c.meta_pointer)
+                b.containments.append(pbc)
+
+            # references
+            for r in n.references:
+                pbr = PBReference()
+                for rv in r.value:
+                    pbv = PBReferenceValue()
+                    if rv.reference is not None:
+                        pbv.si_referred = self.string_indexer(rv.reference)
+                    if rv.resolve_info is not None:
+                        pbv.si_resolveInfo = self.string_indexer(rv.resolve_info)
+                    pbr.values.append(pbv)
+                pbr.mpi_meta_pointer = self.meta_pointer_indexer(r.meta_pointer)
+                b.references.append(pbr)
+
+            # annotations
+            for a in n.annotations:
+                b.si_annotations.append(self.string_indexer(a))
+
+            return b
+
+    def serialize_tree(self, classifier_instance: ClassifierInstance) -> PBChunk:
+        if isinstance(classifier_instance, ProxyNode):
+            raise ValueError("Proxy nodes cannot be serialized")
+        classifier_instances: "set[ClassifierInstance]" = set()
+        ClassifierInstance.collect_self_and_descendants(
+            classifier_instance, True, classifier_instances
+        )
+        filtered = [n for n in classifier_instances if not isinstance(n, ProxyNode)]
+        sc = self.serialize_nodes_to_serialization_chunk(filtered)
+        return self._serialize(sc)
+
+    def _serialize(self, serialization_chunk: "SerializationChunk") -> PBChunk:
+        chunk = PBChunk()
+        chunk.serialization_format_version = (
+            serialization_chunk.serialization_format_version
+        )
+
+        helper = self._SerializeHelper()
+
+        instances: List[SerializedClassifierInstance] = (
+            serialization_chunk.get_classifier_instances()
+        )
+        for inst in instances:
+            chunk.nodes.append(helper.serialize_node(inst))
+
+        # languages first (match Java’s ordering)
+        for lv in helper.languages:
+            if lv is not None:
+                pl = PBLanguage()
+                if lv.key is not None:
+                    pl.si_key = helper.string_indexer(lv.key)
+                if lv.version is not None:
+                    pl.si_version = helper.string_indexer(lv.version)
+                chunk.interned_languages.append(pl)
+
+        for s in helper.strings:
+            if s is not None:
+                chunk.interned_strings.append(s)
+
+        for mp in helper.meta_pointers:
+            pmp = PBMetaPointer()
+            pmp.li_language = helper.language_indexer(mp.language_version)
+            if mp.key is not None:
+                pmp.si_key = helper.string_indexer(mp.key)
+            chunk.interned_meta_pointers.append(pmp)
+
+        return chunk

@@ -1,6 +1,7 @@
 from lionweb.language.lioncore_builtins import LionCoreBuiltins
 from lionweb.lionweb_version import LionWebVersion
 from lionweb.serialization.json_serialization import JsonSerialization
+from lionweb.serialization.protobuf_serialization import ProtoBufSerialization
 
 
 def create_standard_json_serialization(
@@ -11,6 +12,18 @@ def create_standard_json_serialization(
     if not isinstance(lion_web_version, LionWebVersion):
         raise ValueError()
     serialization = JsonSerialization(lion_web_version)
+    setup_standard_initialization(serialization)
+    return serialization
+
+
+def create_standard_protobuf_serialization(
+    lion_web_version: LionWebVersion = LionWebVersion.current_version(),
+):
+    if lion_web_version is None:
+        lion_web_version = LionWebVersion.current_version
+    if not isinstance(lion_web_version, LionWebVersion):
+        raise ValueError()
+    serialization = ProtoBufSerialization(lion_web_version)
     setup_standard_initialization(serialization)
     return serialization
 
