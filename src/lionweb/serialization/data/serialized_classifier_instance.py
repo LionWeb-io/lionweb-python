@@ -57,7 +57,9 @@ class SerializedClassifierInstance:
             SerializedPropertyValue(property_meta_pointer, serialized_value)
         )
 
-    def add_children(self, containment_meta_pointer, children_ids: List[Optional[str]]):
+    def add_children(
+        self, containment_meta_pointer: MetaPointer, children_ids: List[Optional[str]]
+    ):
         from .serialized_containment_value import SerializedContainmentValue
 
         self.containments.append(
@@ -109,7 +111,9 @@ class SerializedClassifierInstance:
                 return rv.get_value()
         return []
 
-    def get_containment_values(self, containment_meta_pointer) -> List[Optional[str]]:
+    def get_containment_values(
+        self, containment_meta_pointer: MetaPointer
+    ) -> List[Optional[str]]:
         for cv in self.containments:
             if containment_meta_pointer == cv.get_meta_pointer():
                 return cv.get_value()
