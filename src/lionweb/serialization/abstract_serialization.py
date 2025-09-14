@@ -5,8 +5,9 @@ from lionweb.lionweb_version import LionWebVersion
 from lionweb.model import ClassifierInstance
 from lionweb.model.has_settable_parent import HasSettableParent
 from lionweb.serialization.classifier_resolver import ClassifierResolver
+from lionweb.serialization.data.language_version import LanguageVersion
 from lionweb.serialization.data.metapointer import MetaPointer
-from lionweb.serialization.data.serialized_chunk import SerializedChunk
+from lionweb.serialization.data.serialized_chunk import SerializationChunk
 from lionweb.serialization.data.serialized_classifier_instance import \
     SerializedClassifierInstance
 from lionweb.serialization.data.serialized_containment_value import \
@@ -15,7 +16,6 @@ from lionweb.serialization.data.serialized_property_value import \
     SerializedPropertyValue
 from lionweb.serialization.data.serialized_reference_value import (
     SerializedReferenceValue, SerializedReferenceValueEntry)
-from lionweb.serialization.data.used_language import UsedLanguage
 from lionweb.serialization.deserialization_exception import \
     DeserializationException
 from lionweb.serialization.deserialization_status import DeserializationStatus
@@ -77,7 +77,7 @@ class AbstractSerialization:
         return collection
 
     def serialize_nodes_to_serialization_chunk(self, classifier_instances):
-        serialized_chunk = SerializedChunk()
+        serialized_chunk = SerializationChunk()
         serialized_chunk.serialization_format_version = self.lion_web_version.value
 
         for classifier_instance in classifier_instances:
@@ -135,7 +135,7 @@ class AbstractSerialization:
 
     def _consider_language_during_serialization(self, serialized_chunk, language):
         self.register_language(language)
-        used_language = UsedLanguage(language.get_key(), language.get_version())
+        used_language = LanguageVersion(language.get_key(), language.get_version())
         if used_language not in serialized_chunk.languages:
             serialized_chunk.languages.append(used_language)
 
@@ -281,7 +281,7 @@ class AbstractSerialization:
             annotation.id for annotation in classifier_instance.get_annotations()
         ]
 
-    def deserialize_serialization_chunk(self, serialized_chunk: SerializedChunk):
+    def deserialize_serialization_chunk(self, serialized_chunk: SerializationChunk):
         serialized_instances = serialized_chunk.classifier_instances
         return self._deserialize_classifier_instances(
             self.lion_web_version, serialized_instances
@@ -388,7 +388,7 @@ class AbstractSerialization:
         return nodes_with_original_sorting
 
     def _validate_serialization_chunk(
-        self, serialization_chunk: SerializedChunk
+        self, serialization_chunk: SerializationChunk
     ) -> None:
         if serialization_chunk is None:
             raise ValueError("serialization_chunk should not be null")

@@ -74,7 +74,9 @@ class DynamicClassifierInstance(AbstractClassifierInstance, ClassifierInstance):
                 property
             )
             if property_tmp is None:
-                raise ValueError(f"Property {property_name} not found")
+                raise ValueError(
+                    f"Property {property_name} not found. Classifier {self.get_classifier()}"
+                )
             else:
                 property = property_tmp
         if property is None:

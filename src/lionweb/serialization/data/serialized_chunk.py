@@ -1,15 +1,15 @@
 from dataclasses import dataclass, field
 from typing import Dict, List
 
+from lionweb.serialization.data.language_version import LanguageVersion
 from lionweb.serialization.data.serialized_classifier_instance import \
     SerializedClassifierInstance
-from lionweb.serialization.data.used_language import UsedLanguage
 
 
 @dataclass
-class SerializedChunk:
+class SerializationChunk:
     serialization_format_version: str = ""
-    languages: List[UsedLanguage] = field(default_factory=list)
+    languages: List[LanguageVersion] = field(default_factory=list)
     classifier_instances: List[SerializedClassifierInstance] = field(
         default_factory=list
     )
@@ -27,7 +27,7 @@ class SerializedChunk:
             raise ValueError(f"Cannot find instance with ID {instance_id}")
         return instance
 
-    def add_language(self, language):
+    def add_language(self, language: LanguageVersion) -> None:
         self.languages.append(language)
 
     def __str__(self):
@@ -37,7 +37,7 @@ class SerializedChunk:
         )
 
     def __eq__(self, other):
-        if not isinstance(other, SerializedChunk):
+        if not isinstance(other, SerializationChunk):
             return False
         return (
             self.serialization_format_version == other.serialization_format_version
@@ -81,6 +81,6 @@ class SerializedChunk:
                 self._consider_meta_pointer(property_value.get_meta_pointer())
 
     def _consider_meta_pointer(self, meta_pointer):
-        used_language = UsedLanguage.from_meta_pointer(meta_pointer)
+        used_language = LanguageVersion.from_meta_pointer(meta_pointer)
         if used_language not in self.languages:
             self.languages.append(used_language)

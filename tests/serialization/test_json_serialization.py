@@ -17,6 +17,7 @@ from lionweb.model.impl.enumeration_value_impl import EnumerationValueImpl
 from lionweb.model.impl.proxy_node import ProxyNode
 from lionweb.model.reference_value import ReferenceValue
 from lionweb.serialization import create_standard_json_serialization
+from lionweb.serialization.data import LanguageVersion
 from lionweb.serialization.data.metapointer import MetaPointer
 from lionweb.serialization.deserialization_exception import \
     DeserializationException
@@ -225,14 +226,14 @@ class JsonSerializationTest(SerializationTest):
                 for c in serialized_node.containments
                 if c.meta_pointer.key == "SimpleMath_Sum_left"
             )
-            left = deserialized_nodes_by_id.get(left_scv.value[0])
+            left = deserialized_nodes_by_id.get(left_scv.children_ids[0])
 
             right_scv = next(
                 c
                 for c in serialized_node.containments
                 if c.meta_pointer.key == "SimpleMath_Sum_right"
             )
-            right = deserialized_nodes_by_id.get(right_scv.value[0])
+            right = deserialized_nodes_by_id.get(right_scv.children_ids[0])
 
             return Sum(left, right, serialized_node.id)
 
@@ -705,7 +706,8 @@ class JsonSerializationTest(SerializationTest):
         self.assertEqual(1, len(serialized_classifier_instance.properties))
         serialized_name = serialized_classifier_instance.properties[0]
         expected_pointer = MetaPointer(
-            "LionCore-builtins", "2024.1", "LionCore-builtins-INamed-name"
+            LanguageVersion("LionCore-builtins", "2024.1"),
+            "LionCore-builtins-INamed-name",
         )
         self.assertEqual(expected_pointer, serialized_name.get_meta_pointer())
 

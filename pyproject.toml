@@ -13,16 +13,17 @@ package-dir = {"" = "src"}
 
 [project]
 name = "lionweb"
-version = "0.3.3"
+version = "0.3.4"
 description = "A Python package for working with LionWeb"
 readme = "README.md"
 authors = [{ name = "Federico Tomassetti", email = "federico@strumenta.com" }]
 license = { file = "LICENSE.txt" }
-requires-python = ">=3.10"
+requires-python = ">=3.11"
 dependencies = [
     "requests",
     "pydantic",
     "typing_extensions>=4.8",
+    "protobuf"
 ]
 
 [project.optional-dependencies]

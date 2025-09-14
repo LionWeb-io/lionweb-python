@@ -11,6 +11,7 @@ from lionweb.model.impl.dynamic_annotation_instance import \
     DynamicAnnotationInstance
 from lionweb.model.impl.dynamic_node import DynamicNode
 from lionweb.self.lioncore import LionCore
+from lionweb.serialization.data import LanguageVersion
 from lionweb.serialization.data.metapointer import MetaPointer
 from lionweb.serialization.data.serialized_reference_value import \
     SerializedReferenceValueEntry
@@ -41,7 +42,8 @@ class LowLevelJsonSerializationTest(SerializationTest):
 
         lioncore = deserialized_instances[0]
         self.assertEqual(
-            MetaPointer("LionCore-M3", "2023.1", "Language"), lioncore.classifier
+            MetaPointer(LanguageVersion("LionCore-M3", "2023.1"), "Language"),
+            lioncore.classifier,
         )
         self.assertEqual("-id-LionCore-M3", lioncore.id)
         self.assertEqual(
