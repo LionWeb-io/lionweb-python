@@ -278,8 +278,13 @@ class ClassifierFactory:
         else:
             raise ValueError(f"Invalid classifier type: {self.type}")
 
-    def set_annotates(self, annotates: "Classifier | ClassifierFactory"):
+    def set_extends(self, extends: "Classifier | ClassifierFactory") -> "ClassifierFactory":
+        self.extends = extends
+        return self
+
+    def set_annotates(self, annotates: "Classifier | ClassifierFactory") -> "ClassifierFactory":
         self.annotates = annotates
+        return self
 
 
 class PrimitiveTypeFactory:

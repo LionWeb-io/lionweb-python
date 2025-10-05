@@ -8,6 +8,7 @@ from lionweb.lionweb_version import LionWebVersion
 from lionweb.serialization import create_standard_json_serialization
 
 
+
 @click.command()
 @click.option(
     "-d",
@@ -20,6 +21,28 @@ from lionweb.serialization import create_standard_json_serialization
 )
 @click.argument("output", type=click.Path(exists=False, file_okay=False, writable=True))
 def main(dependencies, lionweb_language, output):
+    """
+    Simple CLI command for processing LionWeb language files and generate corresponding classes to a specified
+    output directory. The CLI can also consider multiple dependency files for language registration prior to handling the main
+    language file.
+
+    Arguments:
+        lionweb_language (Path): Path to the LionWeb language file that needs
+            processing. Must be a readable file and exists.
+        output (Path): Path to the output directory where the results will be
+            written. Must not exist before execution.
+
+    Options:
+        -d, --dependencies (Path): Paths to dependency files. Each file must
+            exist, be readable, and not a directory. Can be specified multiple
+            times.
+
+    Raises:
+        IOError: If there is an issue reading the provided files or writing
+            results to the output directory.
+        Exception: For any internal error encountered during processing.
+
+    """
     from lionweb.generation.deserializer_generation import \
         deserializer_generation
     from lionweb.generation.node_classes_generation import \
