@@ -6,7 +6,7 @@ from typing import Dict, List, Optional, cast
 import astor  # type: ignore
 
 from lionweb.generation.configuration import LanguageMappingSpec, PrimitiveTypeMappingSpec, BaseGenerator
-from lionweb.generation.utils import make_class_def, make_function_def
+from lionweb.generation.utils import make_class_def, make_function_def, to_type_name
 from lionweb.language import (Concept, Containment, Interface, Language,
                               LionCoreBuiltins, Property)
 from lionweb.language.classifier import Classifier
@@ -509,7 +509,8 @@ class NodeClassesGenerator(BaseGenerator):
                     prop_type = "int"
                 elif f_type.language == concept.language:
                     if isinstance(f_type, Enumeration):
-                        raise ValueError(f"using enumeration that we are generating")
+                        # This should have been created in this file
+                        prop_type = to_type_name(f_type.name)
                     else:
                         raise ValueError(f"using type that we are generating")
                 else:

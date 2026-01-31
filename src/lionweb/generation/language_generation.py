@@ -8,7 +8,7 @@ import astor  # type: ignore
 
 from lionweb.generation.configuration import LanguageMappingSpec, PrimitiveTypeMappingSpec, BaseGenerator
 from lionweb.language import PrimitiveType
-from lionweb.generation.utils import make_function_def, dotted_name_expr
+from lionweb.generation.utils import make_function_def, dotted_name_expr, to_var_name
 from lionweb.language import (Concept, Containment, DataType, Language,
                               LionCoreBuiltins, Property)
 from lionweb.language.reference import Reference
@@ -44,22 +44,7 @@ def _generate_language(language: Language) -> ast.Assign:
     )
 
 
-def to_var_name(name: str) -> str:
-    """Convert a name to snake_case while avoiding Python keywords."""
-    import keyword
-    import re
 
-    # Convert to snake_case
-    # Insert underscore before uppercase letters
-    s1 = re.sub('(.)([A-Z][a-z]+)', r'\1_\2', name)
-    # Insert underscore before uppercase letters that follow lowercase letters or numbers
-    snake_case = re.sub('([a-z0-9])([A-Z])', r'\1_\2', s1).lower()
-
-    # If the result is a Python keyword, append an underscore
-    if keyword.iskeyword(snake_case):
-        snake_case += '_'
-
-    return snake_case
 
 
 class LanguageGenerator(BaseGenerator):
@@ -68,15 +53,13 @@ class LanguageGenerator(BaseGenerator):
                  primitive_types: tuple[PrimitiveTypeMappingSpec, ...],):
         super().__init__(language_packages, primitive_types)
 
-    def _define_concept_in_language(self, concept: Concept, get_language_body: List[stmt]):
-        """
-        add to the get_language() function the definition of the concept
-        """
+    def _create_concept_in_language(self, concept: Concept, get_language_body: List[stmt]):
         language = concept.language
         concept_name = cast(str, concept.get_name())
+        var_name = to_var_name(concept_name)
         get_language_body.append(
             ast.Assign(
-                targets=[ast.Name(id=concept_name, ctx=ast.Store())],
+                targets=[ast.Name(id=var_name, ctx=ast.Store())],
                 value=ast.Call(
                     func=ast.Name(id="Concept", ctx=ast.Load()),
                     args=[],
@@ -96,6 +79,28 @@ class LanguageGenerator(BaseGenerator):
                 ),
             )
         )
+        # language.add_element(concept1)
+        get_language_body.append(
+            ast.Expr(
+                value=ast.Call(
+                    func=ast.Attribute(
+                        value=ast.Name(id="language", ctx=ast.Load()),
+                        attr="add_element",
+                        ctx=ast.Load(),
+                    ),
+                    args=[ast.Name(id=var_name, ctx=ast.Load())],
+                    keywords=[],
+                )
+            )
+        )
+
+    def _populate_concept_in_language(self, concept: Concept, get_language_body: List[stmt]):
+        """
+        add to the get_language() function the definition of the concept
+        """
+        language = concept.language
+        concept_name = cast(str, concept.get_name())
+        var_name = to_var_name(concept_name)
 
         if concept.get_extended_concept():
             ec = cast(Concept, concept.get_extended_concept())
@@ -104,11 +109,11 @@ class LanguageGenerator(BaseGenerator):
                 ast.Expr(
                     ast.Call(
                         func=ast.Attribute(
-                            value=ast.Name(id=concept_name, ctx=ast.Load()),
+                            value=ast.Name(id=var_name, ctx=ast.Load()),
                             attr="set_extended_concept",
                             ctx=ast.Load(),
                         ),
-                        args=[ast.Name(id=ec_name, ctx=ast.Load())],
+                        args=[ast.Name(id=to_var_name(ec_name), ctx=ast.Load())],
                         keywords=[],
                     )
                 )
@@ -119,7 +124,7 @@ class LanguageGenerator(BaseGenerator):
                 ast.Expr(
                     ast.Call(
                         func=ast.Attribute(
-                            value=ast.Name(id=concept_name, ctx=ast.Load()),
+                            value=ast.Name(id=var_name, ctx=ast.Load()),
                             attr="add_implemented",
                             ctx=ast.Load(),
                         ),
@@ -128,21 +133,6 @@ class LanguageGenerator(BaseGenerator):
                     )
                 )
             )
-
-        # language.add_element(concept1)
-        get_language_body.append(
-            ast.Expr(
-                value=ast.Call(
-                    func=ast.Attribute(
-                        value=ast.Name(id="language", ctx=ast.Load()),
-                        attr="add_element",
-                        ctx=ast.Load(),
-                    ),
-                    args=[ast.Name(id=concept_name, ctx=ast.Load())],
-                    keywords=[],
-                )
-            )
-        )
 
         for feature in concept.get_features():
             if isinstance(feature, Reference):
@@ -164,7 +154,7 @@ class LanguageGenerator(BaseGenerator):
                     ast.Expr(
                         value=ast.Call(
                             func=ast.Attribute(
-                                value=ast.Name(id=concept_name, ctx=ast.Load()),
+                                value=ast.Name(id=var_name, ctx=ast.Load()),
                                 attr="add_feature",
                                 ctx=ast.Load(),
                             ),
@@ -224,7 +214,7 @@ class LanguageGenerator(BaseGenerator):
                     ast.Expr(
                         value=ast.Call(
                             func=ast.Attribute(
-                                value=ast.Name(id=concept_name, ctx=ast.Load()),
+                                value=ast.Name(id=var_name, ctx=ast.Load()),
                                 attr="add_feature",
                                 ctx=ast.Load(),
                             ),
@@ -252,7 +242,7 @@ class LanguageGenerator(BaseGenerator):
                     ast.Expr(
                         value=ast.Call(
                             func=ast.Attribute(
-                                value=ast.Name(id=concept_name, ctx=ast.Load()),
+                                value=ast.Name(id=var_name, ctx=ast.Load()),
                                 attr="add_feature",
                                 ctx=ast.Load(),
                             ),
@@ -261,7 +251,6 @@ class LanguageGenerator(BaseGenerator):
                         )
                     )
                 )
-
 
     def _define_primitive_type_in_language(self, primitive_type: PrimitiveType, get_language_body: List[stmt]):
         primitive_type_name = cast(str, primitive_type.get_name())
@@ -287,6 +276,19 @@ class LanguageGenerator(BaseGenerator):
                         ),
                     ],
                 ),
+            )
+        )
+        get_language_body.append(
+            ast.Expr(
+                value=ast.Call(
+                    func=ast.Attribute(
+                        value=ast.Name(id="language", ctx=ast.Load()),
+                        attr="add_element",
+                        ctx=ast.Load(),
+                    ),
+                    args=[ast.Name(id=var_name, ctx=ast.Load())],
+                    keywords=[],
+                )
             )
         )
 
@@ -334,11 +336,14 @@ class LanguageGenerator(BaseGenerator):
 
         for language_element in language.get_elements():
             if isinstance(language_element, Concept):
-                self._define_concept_in_language(language_element, function_body)
+                self._create_concept_in_language(language_element, function_body)
 
             if isinstance(language_element, PrimitiveType):
                 self._define_primitive_type_in_language(language_element, function_body)
 
+        for language_element in language.get_elements():
+            if isinstance(language_element, Concept):
+                self._populate_concept_in_language(language_element, function_body)
 
         # return language
         function_body.append(ast.Return(value=ast.Name(id="language", ctx=ast.Load())))

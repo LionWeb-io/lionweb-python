@@ -23,6 +23,29 @@ def to_snake_case(name: Optional[str]) -> str:
     return name.lower()
 
 
+def to_var_name(name: str) -> str:
+    """Convert a name to snake_case while avoiding Python keywords."""
+    import keyword
+    import re
+
+    # Convert to snake_case
+    # Insert underscore before uppercase letters
+    s1 = re.sub('(.)([A-Z][a-z]+)', r'\1_\2', name)
+    # Insert underscore before uppercase letters that follow lowercase letters or numbers
+    snake_case = re.sub('([a-z0-9])([A-Z])', r'\1_\2', s1).lower()
+
+    # If the result is a Python keyword, append an underscore
+    if keyword.iskeyword(snake_case):
+        snake_case += '_'
+
+    return snake_case
+
+
+def to_type_name(name: str) -> str:
+    """Convert a name to snake_case while avoiding Python keywords."""
+    return to_var_name(name).capitalize()
+
+
 def make_class_def(
     name: str, bases: List[ast.expr], body: List[ast.stmt]
 ) -> ast.ClassDef:
