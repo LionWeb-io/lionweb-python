@@ -69,3 +69,14 @@ def make_function_def(
             returns=returns,
             type_comment=None,
         )
+
+def dotted_name_expr(dotted: str) -> ast.expr:
+    """Turn 'my.package.name' into an AST expr representing that dotted access."""
+    parts = dotted.split(".")
+    if not parts or any(not p for p in parts):
+        raise ValueError(f"Invalid dotted name: {dotted!r}")
+
+    node: ast.expr = ast.Name(id=parts[0], ctx=ast.Load())
+    for part in parts[1:]:
+        node = ast.Attribute(value=node, attr=part, ctx=ast.Load())
+    return node

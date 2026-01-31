@@ -5,6 +5,7 @@ from typing import Dict, List, Optional, cast
 
 import astor  # type: ignore
 
+from lionweb.generation.configuration import LanguageMappingSpec, PrimitiveTypeMappingSpec, BaseGenerator
 from lionweb.generation.utils import make_class_def, make_function_def
 from lionweb.language import (Concept, Containment, Interface, Language,
                               LionCoreBuiltins, Property)
@@ -63,92 +64,6 @@ def topological_classifiers_sort(classifiers: List[Classifier]) -> List[Classifi
     return sorted_list
 
 
-def _generate_concept_class(concept: Concept):
-    """
-    :param class_name: e.g. "Book"
-    :param concept_ref: e.g. "BOOK" (refers to LibraryLanguage.BOOK)
-    :param fields: list of tuples like [("title", "str"), ("author", '"Writer"')]
-    """
-    # __init__ method
-    init_args = [
-        ast.arg(arg="self"),
-        ast.arg(arg="id", annotation=ast.Name(id="str", ctx=ast.Load())),
-    ]
-
-    init_body: List[stmt] = [
-        ast.Expr(
-            value=ast.Call(
-                func=ast.Attribute(
-                    value=ast.Call(
-                        func=ast.Name(id="super", ctx=ast.Load()), args=[], keywords=[]
-                    ),
-                    attr="__init__",
-                    ctx=ast.Load(),
-                ),
-                args=[
-                    ast.Name(id="id", ctx=ast.Load()),
-                    ast.Call(
-                        func=ast.Name(
-                            id=f"get_{cast(str, concept.get_name()).lower()}",
-                            ctx=ast.Load(),
-                        ),
-                        args=[],
-                        keywords=[],
-                    ),
-                ],
-                keywords=[],
-            )
-        )
-    ]
-
-    init_func = make_function_def(
-        name="__init__",
-        args=ast.arguments(
-            posonlyargs=[],  # Python 3.8+
-            args=init_args,
-            vararg=None,
-            kwonlyargs=[],
-            kw_defaults=cast(List[Optional[ast.expr]], []),
-            kwarg=None,
-            defaults=[],
-        ),
-        # defaults=init_defaults),
-        body=init_body,
-        decorator_list=[],
-        returns=None,
-    )
-
-    # Property getter and setter (just for the first field, e.g. "title")
-    methods: List[stmt] = [init_func]
-    for feature in concept.get_features():
-        if isinstance(feature, Property):
-            f_type = feature.type
-            if f_type == LionCoreBuiltins.get_boolean(concept.lion_web_version):
-                prop_type = "bool"
-            elif f_type == LionCoreBuiltins.get_string(concept.lion_web_version):
-                prop_type = "str"
-            elif f_type == LionCoreBuiltins.get_integer(concept.lion_web_version):
-                prop_type = "int"
-            else:
-                raise ValueError(f"type: {f_type}")
-            methods.append(_generate_property_getter(feature, prop_type))
-            methods.append(_generate_property_setter(feature, prop_type))
-        elif isinstance(feature, Containment):
-            # raise ValueError("Containment")
-            pass
-        elif isinstance(feature, Reference):
-            feature_type = cast(Classifier, feature.get_type())
-            prop_type = cast(str, feature_type.get_name())
-            methods.append(_generate_reference_getter(feature, prop_type))
-            methods.append(_generate_reference_setter(feature, prop_type))
-        else:
-            raise ValueError()
-
-    return make_class_def(
-        name=cast(str, concept.get_name()),
-        bases=[ast.Name(id="DynamicNode", ctx=ast.Load())],
-        body=methods,
-    )
 
 
 def _generate_property_setter(feature, prop_type):
@@ -416,107 +331,208 @@ def _generate_reference_setter(feature, prop_type):
         returns=None,
     )
 
+class NodeClassesGenerator(BaseGenerator):
 
-def node_classes_generation(click, language: Language, output):
-    imports: list[stmt] = [
-        ast.ImportFrom(
-            module="abc", names=[ast.alias(name="ABC", asname=None)], level=0
-        ),
-        ast.ImportFrom(
-            module="dataclasses",
-            names=[ast.alias(name="dataclass", asname=None)],
-            level=0,
-        ),
-        ast.ImportFrom(
-            module="enum", names=[ast.alias(name="Enum", asname=None)], level=0
-        ),
-        ast.ImportFrom(
-            module="typing",
-            names=[
-                ast.alias(name="Optional", asname=None),
-                ast.alias(name="cast", asname=None),
-            ],
-            level=0,
-        ),
-        ast.ImportFrom(
-            module="lionweb.model.classifier_instance_utils",
-            names=[ast.alias(name="ClassifierInstanceUtils", asname=None)],
-            level=0,
-        ),
-        ast.ImportFrom(
-            module="lionweb.model.impl.dynamic_node",
-            names=[ast.alias(name="DynamicNode", asname=None)],
-            level=0,
-        ),
-        ast.ImportFrom(
-            module="language",
-            names=[ast.alias(name="get_language", asname=None)]
-            + [
-                ast.alias(name=f"get_{cast(str, c.get_name()).lower()}", asname=None)
-                for c in language.get_elements()
-                if isinstance(c, Concept)
-            ],
-            level=0,
-        ),
-        ast.ImportFrom(
-            module="lionweb.model.reference_value",
-            names=[ast.alias(name="ReferenceValue", asname=None)],
-            level=0,
-        ),
-    ]
-    module = ast.Module(body=imports, type_ignores=[])
+    def __init__(self, language_packages: tuple[LanguageMappingSpec, ...],
+                 primitive_types: tuple[PrimitiveTypeMappingSpec, ...],):
+        super().__init__(language_packages, primitive_types)
 
-    for element in language.get_elements():
-        e_name = cast(str, element.get_name())
-        if isinstance(element, Concept):
-            pass
-        elif isinstance(element, Interface):
-            pass
-        elif isinstance(element, PrimitiveType):
-            pass
-        elif isinstance(element, Enumeration):
-            members: List[stmt] = [
-                ast.Assign(
-                    targets=[
-                        ast.Name(id=cast(str, literal.get_name()), ctx=ast.Store())
-                    ],
-                    value=ast.Constant(value=cast(str, literal.get_name())),
+    def node_classes_generation(self, click, language: Language, output):
+        imports: list[stmt] = [
+            ast.ImportFrom(
+                module="abc", names=[ast.alias(name="ABC", asname=None)], level=0
+            ),
+            ast.ImportFrom(
+                module="dataclasses",
+                names=[ast.alias(name="dataclass", asname=None)],
+                level=0,
+            ),
+            ast.ImportFrom(
+                module="enum", names=[ast.alias(name="Enum", asname=None)], level=0
+            ),
+            ast.ImportFrom(
+                module="typing",
+                names=[
+                    ast.alias(name="Optional", asname=None),
+                    ast.alias(name="cast", asname=None),
+                ],
+                level=0,
+            ),
+            ast.ImportFrom(
+                module="lionweb.model.classifier_instance_utils",
+                names=[ast.alias(name="ClassifierInstanceUtils", asname=None)],
+                level=0,
+            ),
+            ast.ImportFrom(
+                module="lionweb.model.impl.dynamic_node",
+                names=[ast.alias(name="DynamicNode", asname=None)],
+                level=0,
+            ),
+            ast.ImportFrom(
+                module="language",
+                names=[ast.alias(name="get_language", asname=None)]
+                + [
+                    ast.alias(name=f"get_{cast(str, c.get_name()).lower()}", asname=None)
+                    for c in language.get_elements()
+                    if isinstance(c, Concept)
+                ],
+                level=0,
+            ),
+            ast.ImportFrom(
+                module="lionweb.model.reference_value",
+                names=[ast.alias(name="ReferenceValue", asname=None)],
+                level=0,
+            ),
+        ]
+        module = ast.Module(body=imports, type_ignores=[])
+
+        for element in language.get_elements():
+            e_name = cast(str, element.get_name())
+            if isinstance(element, Concept):
+                pass
+            elif isinstance(element, Interface):
+                pass
+            elif isinstance(element, PrimitiveType):
+                pass
+            elif isinstance(element, Enumeration):
+                members: List[stmt] = [
+                    ast.Assign(
+                        targets=[
+                            ast.Name(id=cast(str, literal.get_name()), ctx=ast.Store())
+                        ],
+                        value=ast.Constant(value=cast(str, literal.get_name())),
+                    )
+                    for literal in element.literals
+                ]
+
+                enum_class = make_class_def(
+                    name=e_name,
+                    bases=[ast.Name(id="Enum", ctx=ast.Load())],
+                    body=members,
                 )
-                for literal in element.literals
-            ]
+                module.body.append(enum_class)
+            else:
+                raise ValueError(f"Unsupported {element}")
 
-            enum_class = make_class_def(
-                name=e_name,
-                bases=[ast.Name(id="Enum", ctx=ast.Load())],
-                body=members,
+        sorted_classifier = topological_classifiers_sort(
+            [c for c in language.get_elements() if isinstance(c, Classifier)]
+        )
+
+        for classifier in sorted_classifier:
+            c_name = cast(str, classifier.get_name())
+            if isinstance(classifier, Concept):
+                module.body.append(self._generate_concept_class(classifier))
+            elif isinstance(classifier, Interface):
+                bases: list[expr] = []
+
+                classdef = make_class_def(
+                    c_name,
+                    bases=bases,
+                    body=[ast.Pass()],
+                )
+                module.body.append(classdef)
+            else:
+                raise ValueError()
+
+        click.echo(f"📂 Saving ast to: {output}")
+        generated_code = astor.to_source(module)
+        output_path = Path(output)
+        output_path.mkdir(parents=True, exist_ok=True)
+        with Path(f"{output}/node_classes.py").open("w", encoding="utf-8") as f:
+            f.write(generated_code)
+
+    def _generate_concept_class(self, concept: Concept):
+        """
+        :param class_name: e.g. "Book"
+        :param concept_ref: e.g. "BOOK" (refers to LibraryLanguage.BOOK)
+        :param fields: list of tuples like [("title", "str"), ("author", '"Writer"')]
+        """
+        # __init__ method
+        init_args = [
+            ast.arg(arg="self"),
+            ast.arg(arg="id", annotation=ast.Name(id="str", ctx=ast.Load())),
+        ]
+
+        init_body: List[stmt] = [
+            ast.Expr(
+                value=ast.Call(
+                    func=ast.Attribute(
+                        value=ast.Call(
+                            func=ast.Name(id="super", ctx=ast.Load()), args=[], keywords=[]
+                        ),
+                        attr="__init__",
+                        ctx=ast.Load(),
+                    ),
+                    args=[
+                        ast.Name(id="id", ctx=ast.Load()),
+                        ast.Call(
+                            func=ast.Name(
+                                id=f"get_{cast(str, concept.get_name()).lower()}",
+                                ctx=ast.Load(),
+                            ),
+                            args=[],
+                            keywords=[],
+                        ),
+                    ],
+                    keywords=[],
+                )
             )
-            module.body.append(enum_class)
-        else:
-            raise ValueError(f"Unsupported {element}")
+        ]
 
-    sorted_classifier = topological_classifiers_sort(
-        [c for c in language.get_elements() if isinstance(c, Classifier)]
-    )
+        init_func = make_function_def(
+            name="__init__",
+            args=ast.arguments(
+                posonlyargs=[],  # Python 3.8+
+                args=init_args,
+                vararg=None,
+                kwonlyargs=[],
+                kw_defaults=cast(List[Optional[ast.expr]], []),
+                kwarg=None,
+                defaults=[],
+            ),
+            # defaults=init_defaults),
+            body=init_body,
+            decorator_list=[],
+            returns=None,
+        )
 
-    for classifier in sorted_classifier:
-        c_name = cast(str, classifier.get_name())
-        if isinstance(classifier, Concept):
-            module.body.append(_generate_concept_class(classifier))
-        elif isinstance(classifier, Interface):
-            bases: list[expr] = []
+        # Property getter and setter (just for the first field, e.g. "title")
+        methods: List[stmt] = [init_func]
+        for feature in concept.get_features():
+            if isinstance(feature, Property):
+                f_type = feature.type
+                if f_type == LionCoreBuiltins.get_boolean(concept.lion_web_version):
+                    prop_type = "bool"
+                elif f_type == LionCoreBuiltins.get_string(concept.lion_web_version):
+                    prop_type = "str"
+                elif f_type == LionCoreBuiltins.get_integer(concept.lion_web_version):
+                    prop_type = "int"
+                elif f_type.language == concept.language:
+                    if isinstance(f_type, Enumeration):
+                        raise ValueError(f"using enumeration that we are generating")
+                    else:
+                        raise ValueError(f"using type that we are generating")
+                else:
+                    qualified_name = self._primitive_type_lookup(f_type)
+                    if qualified_name is not None:
+                        prop_type = qualified_name
+                    else:
+                        raise ValueError(f"type: {f_type}")
+                methods.append(_generate_property_getter(feature, prop_type))
+                methods.append(_generate_property_setter(feature, prop_type))
+            elif isinstance(feature, Containment):
+                # raise ValueError("Containment")
+                pass
+            elif isinstance(feature, Reference):
+                feature_type = cast(Classifier, feature.get_type())
+                prop_type = cast(str, feature_type.get_name())
+                methods.append(_generate_reference_getter(feature, prop_type))
+                methods.append(_generate_reference_setter(feature, prop_type))
+            else:
+                raise ValueError()
 
-            classdef = make_class_def(
-                c_name,
-                bases=bases,
-                body=[ast.Pass()],
-            )
-            module.body.append(classdef)
-        else:
-            raise ValueError()
-
-    click.echo(f"📂 Saving ast to: {output}")
-    generated_code = astor.to_source(module)
-    output_path = Path(output)
-    output_path.mkdir(parents=True, exist_ok=True)
-    with Path(f"{output}/node_classes.py").open("w", encoding="utf-8") as f:
-        f.write(generated_code)
+        return make_class_def(
+            name=cast(str, concept.get_name()),
+            bases=[ast.Name(id="DynamicNode", ctx=ast.Load())],
+            body=methods,
+        )
