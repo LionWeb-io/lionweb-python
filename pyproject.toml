@@ -23,8 +23,13 @@ dependencies = [
     "requests",
     "pydantic",
     "typing_extensions>=4.8",
-    "protobuf"
+    "protobuf",
+    "click",
+    "astor"
 ]
+
+[project.scripts]
+lionweb-gen = "lionweb.generation.generator:main"
 
 [project.optional-dependencies]
 dev = [

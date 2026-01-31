@@ -5,6 +5,7 @@ from typing import List, cast
 
 import astor  # type: ignore
 
+from lionweb.language import PrimitiveType
 from lionweb.generation.utils import make_function_def
 from lionweb.language import (Concept, Containment, DataType, Language,
                               LionCoreBuiltins, Property)
@@ -41,6 +42,24 @@ def _generate_language(language: Language) -> ast.Assign:
     )
 
 
+def to_var_name(name: str) -> str:
+    """Convert a name to snake_case while avoiding Python keywords."""
+    import keyword
+    import re
+
+    # Convert to snake_case
+    # Insert underscore before uppercase letters
+    s1 = re.sub('(.)([A-Z][a-z]+)', r'\1_\2', name)
+    # Insert underscore before uppercase letters that follow lowercase letters or numbers
+    snake_case = re.sub('([a-z0-9])([A-Z])', r'\1_\2', s1).lower()
+
+    # If the result is a Python keyword, append an underscore
+    if keyword.iskeyword(snake_case):
+        snake_case += '_'
+
+    return snake_case
+
+
 def language_generation(click, language: Language, output):
     body: List[stmt] = []
     body.append(
@@ -51,6 +70,7 @@ def language_generation(click, language: Language, output):
                 ast.alias(name="Concept", asname=None),
                 ast.alias(name="Property", asname=None),
                 ast.alias(name="Containment", asname=None),
+                ast.alias(name="PrimitiveType", asname=None),
                 ast.alias(name="Reference", asname=None),
                 ast.alias(name="LionCoreBuiltins", asname=None),
             ],
@@ -266,6 +286,32 @@ def language_generation(click, language: Language, output):
                         )
                     )
 
+        if isinstance(language_element, PrimitiveType):
+            primitive_type_name = cast(str, language_element.get_name())
+            var_name = to_var_name(primitive_type_name)
+            function_body.append(
+                ast.Assign(
+                    targets=[ast.Name(id=var_name, ctx=ast.Store())],
+                    value=ast.Call(
+                        func=ast.Name(id="PrimitiveType", ctx=ast.Load()),
+                        args=[],
+                        keywords=[
+                            _set_lw_version(language),
+                            ast.keyword(
+                                arg="id", value=ast.Constant(value=language_element.id)
+                            ),
+                            ast.keyword(
+                                arg="name", value=ast.Constant(value=primitive_type_name)
+                            ),
+                            ast.keyword(
+                                arg="key",
+                                value=ast.Constant(value=language_element.key),
+                            ),
+                        ],
+                    ),
+                )
+            )
+
     # return language
     function_body.append(ast.Return(value=ast.Name(id="language", ctx=ast.Load())))
 
@@ -317,6 +363,40 @@ def language_generation(click, language: Language, output):
                     ],
                     decorator_list=[],
                     returns=ast.Name(id="Concept", ctx=ast.Load()),
+                )
+            )
+        if isinstance(language_element, PrimitiveType):
+            body.append(
+                make_function_def(
+                    name=f"get_{language_element.get_name().lower()}",
+                    args=ast.arguments(
+                        posonlyargs=[],
+                        args=[],
+                        kwonlyargs=[],
+                        kw_defaults=[],
+                        defaults=[],
+                    ),
+                    body=[
+                        ast.Return(
+                            value=ast.Call(
+                                func=ast.Attribute(
+                                    value=ast.Call(
+                                        func=ast.Name(
+                                            id="get_language", ctx=ast.Load()
+                                        ),
+                                        args=[],
+                                        keywords=[],
+                                    ),
+                                    attr="get_primitive_type_by_name",
+                                    ctx=ast.Load(),
+                                ),
+                                args=[ast.Constant(value=language_element.get_name())],
+                                keywords=[],
+                            )
+                        )
+                    ],
+                    decorator_list=[],
+                    returns=ast.Name(id="PrimitiveType", ctx=ast.Load()),
                 )
             )
 

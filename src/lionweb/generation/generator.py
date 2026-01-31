@@ -16,11 +16,19 @@ from lionweb.serialization import create_standard_json_serialization
     type=click.Path(exists=True, dir_okay=False, readable=True),
     multiple=True,
 )
+@click.option(
+    "--lionweb-version",
+    "--lwv",
+    default=LionWebVersion.V2023_1,
+    help="LionWeb version to use for processing. Defaults to 2023.1.",
+    type=LionWebVersion,
+    multiple=False,
+)
 @click.argument(
     "lionweb-language", type=click.Path(exists=True, dir_okay=False, readable=True)
 )
 @click.argument("output", type=click.Path(exists=False, file_okay=False, writable=True))
-def main(dependencies, lionweb_language, output):
+def main(dependencies, lionweb_version: LionWebVersion, lionweb_language, output):
     """
     Simple CLI command for processing LionWeb language files and generate corresponding classes to a specified
     output directory. The CLI can also consider multiple dependency files for language registration prior to handling the main
