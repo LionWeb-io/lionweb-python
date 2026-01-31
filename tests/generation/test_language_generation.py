@@ -4,7 +4,7 @@ import textwrap
 import unittest
 from typing import List
 
-from lionweb.generation.language_generation import language_generation
+from lionweb.generation.language_generation import LanguageGenerator
 from lionweb.language import LanguageFactory
 
 class MockClick:
@@ -26,7 +26,7 @@ class LanguageGenerationTest(unittest.TestCase):
         mocked_click = MockClick()
 
         with tempfile.TemporaryDirectory() as outdir:
-            language_generation(mocked_click, language, outdir)
+            LanguageGenerator().language_generation(mocked_click, language, outdir)
             rel_paths = [
                 os.path.relpath(os.path.join(root, name), outdir)
                 for root, dirs, files in os.walk(outdir)

@@ -1,16 +1,15 @@
 import ast
 from _ast import expr, stmt
-from dataclasses import dataclass
 from pathlib import Path
 from typing import List, cast
 
 import astor  # type: ignore
 
 from lionweb.generation.configuration import LanguageMappingSpec, PrimitiveTypeMappingSpec, BaseGenerator
-from lionweb.language import PrimitiveType
-from lionweb.generation.utils import make_function_def, dotted_name_expr, to_var_name
+from lionweb.generation.utils import make_function_def, to_var_name
 from lionweb.language import (Concept, Containment, DataType, Language,
                               LionCoreBuiltins, Property)
+from lionweb.language import PrimitiveType
 from lionweb.language.reference import Reference
 
 
@@ -44,17 +43,16 @@ def _generate_language(language: Language) -> ast.Assign:
     )
 
 
-
-
-
 class LanguageGenerator(BaseGenerator):
 
-    def __init__(self, language_packages: tuple[LanguageMappingSpec, ...],
-                 primitive_types: tuple[PrimitiveTypeMappingSpec, ...],):
+    def __init__(self, language_packages: tuple[LanguageMappingSpec, ...] = (),
+                 primitive_types: tuple[PrimitiveTypeMappingSpec, ...]=()):
         super().__init__(language_packages, primitive_types)
 
     def _create_concept_in_language(self, concept: Concept, get_language_body: List[stmt]):
         language = concept.language
+        if language is None:
+            raise ValueError(f"Concept {concept.get_name()} has no language")
         concept_name = cast(str, concept.get_name())
         var_name = to_var_name(concept_name)
         get_language_body.append(
@@ -99,6 +97,8 @@ class LanguageGenerator(BaseGenerator):
         add to the get_language() function the definition of the concept
         """
         language = concept.language
+        if language is None:
+            raise ValueError(f"Concept {concept.get_name()} has no language")
         concept_name = cast(str, concept.get_name())
         var_name = to_var_name(concept_name)
 
@@ -194,7 +194,10 @@ class LanguageGenerator(BaseGenerator):
                     if package is not None:
                         property_type = self._primitive_type_lookup_exp(package, pt.get_name())
                     else:
-                        raise ValueError(f"We need to load {cast(str, pt.get_name())} from language {pt.language.get_name()} but no mapping was found")
+                        pt_language = pt.language
+                        if pt_language is None:
+                            raise ValueError(f"Property {feature.get_name()} has no language")
+                        raise ValueError(f"We need to load {cast(str, pt.get_name())} from language {pt_language.get_name()} but no mapping was found")
                 feature_creation = ast.Call(
                     func=ast.Name(id="Property", ctx=ast.Load()),
                     args=[],
@@ -255,6 +258,8 @@ class LanguageGenerator(BaseGenerator):
     def _define_primitive_type_in_language(self, primitive_type: PrimitiveType, get_language_body: List[stmt]):
         primitive_type_name = cast(str, primitive_type.get_name())
         language = primitive_type.language
+        if language is None:
+            raise ValueError(f"Primitive type {primitive_type_name} has no language")
         var_name = to_var_name(primitive_type_name)
         get_language_body.append(
             ast.Assign(
@@ -399,9 +404,10 @@ class LanguageGenerator(BaseGenerator):
                     )
                 )
             if isinstance(language_element, PrimitiveType):
+                element_name = cast(str, language_element.get_name())
                 body.append(
                     make_function_def(
-                        name=f"get_{language_element.get_name().lower()}",
+                        name=f"get_{element_name.lower()}",
                         args=ast.arguments(
                             posonlyargs=[],
                             args=[],

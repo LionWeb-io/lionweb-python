@@ -501,6 +501,8 @@ class NodeClassesGenerator(BaseGenerator):
         for feature in concept.get_features():
             if isinstance(feature, Property):
                 f_type = feature.type
+                if f_type is None:
+                    raise ValueError("feature type is None")
                 if f_type == LionCoreBuiltins.get_boolean(concept.lion_web_version):
                     prop_type = "bool"
                 elif f_type == LionCoreBuiltins.get_string(concept.lion_web_version):
@@ -512,9 +514,9 @@ class NodeClassesGenerator(BaseGenerator):
                         # This should have been created in this file
                         prop_type = to_type_name(f_type.name)
                     else:
-                        raise ValueError(f"using type that we are generating")
+                        raise ValueError("using type that we are generating")
                 else:
-                    qualified_name = self._primitive_type_lookup(f_type)
+                    qualified_name = self._data_type_lookup(f_type)
                     if qualified_name is not None:
                         prop_type = qualified_name
                     else:

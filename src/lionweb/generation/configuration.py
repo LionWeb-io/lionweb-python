@@ -1,8 +1,9 @@
 import ast
 from dataclasses import dataclass
+from typing import Optional
 
 from lionweb.generation.utils import dotted_name_expr
-from lionweb.language import Language, PrimitiveType
+from lionweb.language import Language, DataType
 
 
 @dataclass(frozen=True)
@@ -30,13 +31,16 @@ class BaseGenerator:
                 return mapping.package
         return None
 
-    def _primitive_type_lookup(self, primitive_type: PrimitiveType) -> str | None:
+    def _data_type_lookup(self, primitive_type: DataType) -> str | None:
         for mapping in self.primitive_types:
             if primitive_type.id == mapping.primitive_type or primitive_type.name == mapping.primitive_type:
                 return mapping.qualified_name
         return None
 
-    def _primitive_type_lookup_exp(self, package_str: str, primitive_type_name: str) -> ast.expr:
+    def _primitive_type_lookup_exp(self, package_str: str, primitive_type_name: Optional[str]) -> ast.expr:
+        if primitive_type_name is None:
+            raise ValueError("Primitive type name must be specified")
+
         # my.package.name
         base = dotted_name_expr(package_str)
 

@@ -130,7 +130,7 @@ class ClassifierFactory:
     def reference(
         self,
         name: str,
-        type: "ClassifierFactory | Classifier" = None,
+        type: "ClassifierFactory | Classifier",
         multiplicity: Multiplicity = Multiplicity.REQUIRED,
         id: Optional[str] = None,
         key: Optional[str] = None,
@@ -279,7 +279,7 @@ class ClassifierFactory:
             raise ValueError(f"Invalid classifier type: {self.type}")
 
     def set_extends(self, extends: "Classifier | ClassifierFactory") -> "ClassifierFactory":
-        self.extends = extends
+        self.extends = [extends]
         return self
 
     def set_annotates(self, annotates: "Classifier | ClassifierFactory") -> "ClassifierFactory":

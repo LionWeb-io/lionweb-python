@@ -23,10 +23,13 @@ def to_snake_case(name: Optional[str]) -> str:
     return name.lower()
 
 
-def to_var_name(name: str) -> str:
+def to_var_name(name: Optional[str]) -> str:
     """Convert a name to snake_case while avoiding Python keywords."""
     import keyword
     import re
+
+    if name is None:
+        raise ValueError("Name should not be None")
 
     # Convert to snake_case
     # Insert underscore before uppercase letters
@@ -41,7 +44,7 @@ def to_var_name(name: str) -> str:
     return snake_case
 
 
-def to_type_name(name: str) -> str:
+def to_type_name(name: Optional[str]) -> str:
     """Convert a name to snake_case while avoiding Python keywords."""
     return to_var_name(name).capitalize()
 
