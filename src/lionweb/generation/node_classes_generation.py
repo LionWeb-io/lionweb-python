@@ -530,6 +530,11 @@ class NodeClassesGenerator(BaseGenerator):
                 names=[ast.alias(name="ReferenceValue", asname=None)],
                 level=0,
             ),
+            ast.ImportFrom(
+                module="lionweb.model",
+                names=[ast.alias(name="Node", asname=None)],
+                level=0,
+            ),
         ]
         module = ast.Module(body=imports, type_ignores=[])
 
@@ -570,7 +575,7 @@ class NodeClassesGenerator(BaseGenerator):
             if isinstance(classifier, Concept):
                 module.body.append(self._generate_concept_class(classifier))
             elif isinstance(classifier, Interface):
-                bases: list[expr] = []
+                bases: list[expr] = [ast.Name(id="Node", ctx=ast.Load()), ast.Name(id="ABC", ctx=ast.Load())]
 
                 classdef = make_class_def(
                     c_name,
