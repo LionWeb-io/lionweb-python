@@ -46,7 +46,7 @@ def to_var_name(name: Optional[str]) -> str:
 
 def to_type_name(name: Optional[str]) -> str:
     """Convert a name to snake_case while avoiding Python keywords."""
-    return to_var_name(name).capitalize()
+    return name[0].upper() + name[1:]
 
 
 def make_class_def(

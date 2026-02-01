@@ -35,7 +35,14 @@ def _identify_topological_deps(
                     if f_type and cast(str, f_type.get_id()) in id_to_concept:
                         graph[cast(str, c_id)].append(cast(str, f_type.get_id()))
         elif isinstance(c, Interface):
-            pass
+            c_id = cast(str, c.get_id())
+            for i in c.get_extended_interfaces():
+                graph[c_id].append(cast(str, i.get_id()))
+            for f in c.get_features():
+                if isinstance(f, Containment):
+                    f_type = f.get_type()
+                    if f_type and cast(str, f_type.get_id()) in id_to_concept:
+                        graph[cast(str, c_id)].append(cast(str, f_type.get_id()))
         else:
             raise ValueError()
     return graph
@@ -636,19 +643,27 @@ class NodeClassesGenerator(BaseGenerator):
                     ),
                     args=[
                         ast.Name(id="id", ctx=ast.Load()),
-                        ast.Call(
-                            func=ast.Name(
-                                id=f"get_{cast(str, concept.get_name()).lower()}",
-                                ctx=ast.Load(),
-                            ),
-                            args=[],
-                            keywords=[],
-                        ),
                     ],
                     keywords=[],
                 )
-            )
+            ),
+            ast.Expr(ast.Assign(
+              targets=[ast.Attribute(
+                  value=ast.Name(id="self", ctx=ast.Load()),
+                  attr="concept",
+                  ctx=ast.Load(),
+              )],
+                value=ast.Call(
+                    func=ast.Name(
+                        id=f"get_{cast(str, concept.get_name()).lower()}",
+                        ctx=ast.Load(),
+                    ),
+                    args=[],
+                    keywords=[],
+                )
+            ))
         ]
+
 
         init_func = make_function_def(
             name="__init__",
@@ -710,8 +725,12 @@ class NodeClassesGenerator(BaseGenerator):
             else:
                 raise ValueError()
 
+        bases = [ast.Name(id="DynamicNode", ctx=ast.Load())]
+        if concept.get_extended_concept() is not None:
+            bases = [ast.Name(id=cast(str, to_type_name(concept.get_extended_concept().get_name())), ctx=ast.Load())]
+
         return make_class_def(
-            name=cast(str, concept.get_name()),
-            bases=[ast.Name(id="DynamicNode", ctx=ast.Load())],
+            name=cast(str, to_type_name(concept.get_name())),
+            bases=bases,
             body=methods,
         )
