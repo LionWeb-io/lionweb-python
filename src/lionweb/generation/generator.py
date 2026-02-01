@@ -3,11 +3,13 @@ from typing import cast
 import click
 
 from lionweb.generation.configuration import PrimitiveTypeMappingSpec
-from lionweb.generation.language_generation import LanguageGenerator, LanguageMappingSpec
+from lionweb.generation.language_generation import (LanguageGenerator,
+                                                    LanguageMappingSpec)
 from lionweb.generation.node_classes_generation import NodeClassesGenerator
 from lionweb.language import Language
 from lionweb.lionweb_version import LionWebVersion
 from lionweb.serialization import create_standard_json_serialization
+
 
 class LanguageMappingSpecMappingType(click.ParamType):
     name = "LANG=PACKAGE"
@@ -58,10 +60,14 @@ class PrimitiveTypeMappingSpecMappingType(click.ParamType):
         if not qualified_name:
             self.fail("QUALIFIED_NAME part cannot be empty.", param, ctx)
 
-        return PrimitiveTypeMappingSpec(primitive_type=primitive_type, qualified_name=qualified_name)
+        return PrimitiveTypeMappingSpec(
+            primitive_type=primitive_type, qualified_name=qualified_name
+        )
+
 
 LANG_MAPPING = LanguageMappingSpecMappingType()
 PRIMITIVE_TYPE_MAPPING = PrimitiveTypeMappingSpecMappingType()
+
 
 @click.command()
 @click.option(
@@ -100,10 +106,14 @@ PRIMITIVE_TYPE_MAPPING = PrimitiveTypeMappingSpecMappingType()
     help="Map a primitive type ID or name to the Python type that provides it. Repeatable.",
 )
 @click.argument("output", type=click.Path(exists=False, file_okay=False, writable=True))
-def main(dependencies, lionweb_version: LionWebVersion, lionweb_language,
-         language_packages: tuple[LanguageMappingSpec, ...],
-         primitive_types: tuple[PrimitiveTypeMappingSpec, ...],
-         output):
+def main(
+    dependencies,
+    lionweb_version: LionWebVersion,
+    lionweb_language,
+    language_packages: tuple[LanguageMappingSpec, ...],
+    primitive_types: tuple[PrimitiveTypeMappingSpec, ...],
+    output,
+):
     """
     Simple CLI command for processing LionWeb language files and generate corresponding classes to a specified
     output directory. The CLI can also consider multiple dependency files for language registration prior to handling the main
@@ -147,8 +157,12 @@ def main(dependencies, lionweb_version: LionWebVersion, lionweb_language,
     with open(lionweb_language, "r", encoding="utf-8") as f:
         content = f.read()
         language = cast(Language, serialization.deserialize_string_to_nodes(content)[0])
-    LanguageGenerator(language_packages, primitive_types).language_generation(click, language, output)
-    NodeClassesGenerator(language_packages, primitive_types). node_classes_generation(click, language, output)
+    LanguageGenerator(language_packages, primitive_types).language_generation(
+        click, language, output
+    )
+    NodeClassesGenerator(language_packages, primitive_types).node_classes_generation(
+        click, language, output
+    )
     deserializer_generation(click, language, output)
 
 

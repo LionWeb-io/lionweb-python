@@ -33,13 +33,13 @@ def to_var_name(name: Optional[str]) -> str:
 
     # Convert to snake_case
     # Insert underscore before uppercase letters
-    s1 = re.sub('(.)([A-Z][a-z]+)', r'\1_\2', name)
+    s1 = re.sub("(.)([A-Z][a-z]+)", r"\1_\2", name)
     # Insert underscore before uppercase letters that follow lowercase letters or numbers
-    snake_case = re.sub('([a-z0-9])([A-Z])', r'\1_\2', s1).lower()
+    snake_case = re.sub("([a-z0-9])([A-Z])", r"\1_\2", s1).lower()
 
     # If the result is a Python keyword, append an underscore
     if keyword.iskeyword(snake_case):
-        snake_case += '_'
+        snake_case += "_"
 
     return snake_case
 
@@ -97,6 +97,7 @@ def make_function_def(
             returns=returns,
             type_comment=None,
         )
+
 
 def dotted_name_expr(dotted: str) -> ast.expr:
     """Turn 'my.package.name' into an AST expr representing that dotted access."""

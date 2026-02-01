@@ -1,16 +1,17 @@
 import ast
 from _ast import expr, stmt
 from pathlib import Path
-from typing import Dict, List, Optional, cast, Set
+from typing import Dict, List, Optional, Set, cast
 
 import astor  # type: ignore
 
-from lionweb.generation.utils import to_var_name, to_snake_case
 from lionweb.generation.base_generator import BaseGenerator
-from lionweb.generation.configuration import LanguageMappingSpec, PrimitiveTypeMappingSpec
-from lionweb.generation.utils import make_class_def, make_function_def, to_type_name
-from lionweb.language import (Concept, Containment, Interface, Language,
-                              LionCoreBuiltins, Property, Feature)
+from lionweb.generation.configuration import (LanguageMappingSpec,
+                                              PrimitiveTypeMappingSpec)
+from lionweb.generation.utils import (make_class_def, make_function_def,
+                                      to_snake_case, to_type_name, to_var_name)
+from lionweb.language import (Concept, Containment, Feature, Interface,
+                              Language, LionCoreBuiltins, Property)
 from lionweb.language.classifier import Classifier
 from lionweb.language.enumeration import Enumeration
 from lionweb.language.primitive_type import PrimitiveType
@@ -92,6 +93,7 @@ def _expr_to_get_property(feature: Property):
         keywords=[],
     )
 
+
 def _expr_to_get_reference(feature: Reference):
     return ast.Call(
         func=ast.Attribute(
@@ -110,6 +112,7 @@ def _expr_to_get_reference(feature: Reference):
         args=[ast.Constant(value=feature.get_name())],
         keywords=[],
     )
+
 
 def _generate_property_setter(feature, prop_type):
     return make_function_def(
@@ -131,7 +134,7 @@ def _generate_property_setter(feature, prop_type):
         body=[
             ast.Assign(
                 targets=[ast.Name(id="property_", ctx=ast.Store())],
-                value=_expr_to_get_property(feature)
+                value=_expr_to_get_property(feature),
             ),
             ast.Expr(
                 value=ast.Call(
@@ -216,7 +219,9 @@ def _generate_reference_getter(feature, prop_type):
             ast.Assign(
                 targets=[ast.Name(id="res", ctx=ast.Store())],
                 value=ast.Call(
-                    func=ast.Name(id="get_only_reference_value_by_reference_name", ctx=ast.Load()),
+                    func=ast.Name(
+                        id="get_only_reference_value_by_reference_name", ctx=ast.Load()
+                    ),
                     args=[
                         ast.Name(id="self", ctx=ast.Load()),
                         ast.Constant(value=feature.get_name()),
@@ -353,10 +358,14 @@ def _generate_reference_setter(feature, prop_type):
         returns=None,
     )
 
+
 class NodeClassesGenerator(BaseGenerator):
 
-    def __init__(self, language_packages: tuple[LanguageMappingSpec, ...],
-                 primitive_types: tuple[PrimitiveTypeMappingSpec, ...],):
+    def __init__(
+        self,
+        language_packages: tuple[LanguageMappingSpec, ...],
+        primitive_types: tuple[PrimitiveTypeMappingSpec, ...],
+    ):
         super().__init__(language_packages, primitive_types)
 
     def _generate_multiple_reference_getter(self, feature, prop_type):
@@ -508,14 +517,18 @@ class NodeClassesGenerator(BaseGenerator):
                 names=[
                     ast.alias(name="Optional", asname=None),
                     ast.alias(name="cast", asname=None),
-                    ast.alias(name="List", asname=None)
+                    ast.alias(name="List", asname=None),
                 ],
                 level=0,
             ),
             ast.ImportFrom(
                 module="lionweb.model.classifier_instance_utils",
-                names=[ast.alias(name="get_only_reference_value_by_reference_name", asname=None),
-                       ast.alias(name="get_property_value_by_name", asname=None)],
+                names=[
+                    ast.alias(
+                        name="get_only_reference_value_by_reference_name", asname=None
+                    ),
+                    ast.alias(name="get_property_value_by_name", asname=None),
+                ],
                 level=0,
             ),
             ast.ImportFrom(
@@ -527,7 +540,9 @@ class NodeClassesGenerator(BaseGenerator):
                 module=".language",
                 names=[ast.alias(name="get_language", asname=None)]
                 + [
-                    ast.alias(name=f"get_{cast(str, c.get_name()).lower()}", asname=None)
+                    ast.alias(
+                        name=f"get_{cast(str, c.get_name()).lower()}", asname=None
+                    )
                     for c in language.get_elements()
                     if isinstance(c, Concept)
                 ],
@@ -558,7 +573,10 @@ class NodeClassesGenerator(BaseGenerator):
                 members: List[stmt] = [
                     ast.Assign(
                         targets=[
-                            ast.Name(id=cast(str, to_var_name(literal.get_name())), ctx=ast.Store())
+                            ast.Name(
+                                id=cast(str, to_var_name(literal.get_name())),
+                                ctx=ast.Store(),
+                            )
                         ],
                         value=ast.Constant(value=cast(str, literal.get_name())),
                     )
@@ -583,7 +601,10 @@ class NodeClassesGenerator(BaseGenerator):
             if isinstance(classifier, Concept):
                 module.body.append(self._generate_concept_class(classifier))
             elif isinstance(classifier, Interface):
-                bases: list[expr] = [ast.Name(id="Node", ctx=ast.Load()), ast.Name(id="ABC", ctx=ast.Load())]
+                bases: list[expr] = [
+                    ast.Name(id="Node", ctx=ast.Load()),
+                    ast.Name(id="ABC", ctx=ast.Load()),
+                ]
 
                 classdef = make_class_def(
                     c_name,
@@ -637,7 +658,9 @@ class NodeClassesGenerator(BaseGenerator):
                 value=ast.Call(
                     func=ast.Attribute(
                         value=ast.Call(
-                            func=ast.Name(id="super", ctx=ast.Load()), args=[], keywords=[]
+                            func=ast.Name(id="super", ctx=ast.Load()),
+                            args=[],
+                            keywords=[],
                         ),
                         attr="__init__",
                         ctx=ast.Load(),
@@ -649,11 +672,13 @@ class NodeClassesGenerator(BaseGenerator):
                 )
             ),
             ast.Assign(
-              targets=[ast.Attribute(
-                  value=ast.Name(id="self", ctx=ast.Load()),
-                  attr="concept",
-                  ctx=ast.Load(),
-              )],
+                targets=[
+                    ast.Attribute(
+                        value=ast.Name(id="self", ctx=ast.Load()),
+                        attr="concept",
+                        ctx=ast.Load(),
+                    )
+                ],
                 value=ast.Call(
                     func=ast.Name(
                         id=f"get_{cast(str, concept.get_name()).lower()}",
@@ -661,10 +686,9 @@ class NodeClassesGenerator(BaseGenerator):
                     ),
                     args=[],
                     keywords=[],
-                )
-            )
+                ),
+            ),
         ]
-
 
         init_func = make_function_def(
             name="__init__",
@@ -718,18 +742,27 @@ class NodeClassesGenerator(BaseGenerator):
                 feature_type = cast(Classifier, feature.get_type())
                 prop_type = cast(str, feature_type.get_name())
                 if feature.is_multiple():
-                    methods.append(self._generate_multiple_reference_getter(feature, prop_type))
-                    methods.append(self._generate_multiple_reference_adder(feature, prop_type))
+                    methods.append(
+                        self._generate_multiple_reference_getter(feature, prop_type)
+                    )
+                    methods.append(
+                        self._generate_multiple_reference_adder(feature, prop_type)
+                    )
                 else:
                     methods.append(_generate_reference_getter(feature, prop_type))
                     methods.append(_generate_reference_setter(feature, prop_type))
             else:
                 raise ValueError()
 
-        bases : list[expr] = [ast.Name(id="DynamicNode", ctx=ast.Load())]
+        bases: list[expr] = [ast.Name(id="DynamicNode", ctx=ast.Load())]
         extended_concept = concept.get_extended_concept()
         if extended_concept is not None:
-            bases = [ast.Name(id=cast(str, to_type_name(extended_concept.get_name())), ctx=ast.Load())]
+            bases = [
+                ast.Name(
+                    id=cast(str, to_type_name(extended_concept.get_name())),
+                    ctx=ast.Load(),
+                )
+            ]
 
         return make_class_def(
             name=cast(str, to_type_name(concept.get_name())),
