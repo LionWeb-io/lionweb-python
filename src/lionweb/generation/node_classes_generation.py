@@ -421,7 +421,7 @@ class NodeClassesGenerator(BaseGenerator):
         return_stmt = ast.Return(value=list_comp)
 
         # def filterConditions(self) -> List['Expression']:
-        prop_func = ast.FunctionDef(
+        return ast.FunctionDef(
             name=feature.name,
             args=ast.arguments(
                 posonlyargs=[],
@@ -508,6 +508,7 @@ class NodeClassesGenerator(BaseGenerator):
                 names=[
                     ast.alias(name="Optional", asname=None),
                     ast.alias(name="cast", asname=None),
+                    ast.alias(name="List", asname=None)
                 ],
                 level=0,
             ),
@@ -647,7 +648,7 @@ class NodeClassesGenerator(BaseGenerator):
                     keywords=[],
                 )
             ),
-            ast.Expr(ast.Assign(
+            ast.Assign(
               targets=[ast.Attribute(
                   value=ast.Name(id="self", ctx=ast.Load()),
                   attr="concept",
@@ -661,7 +662,7 @@ class NodeClassesGenerator(BaseGenerator):
                     args=[],
                     keywords=[],
                 )
-            ))
+            )
         ]
 
 
@@ -725,9 +726,10 @@ class NodeClassesGenerator(BaseGenerator):
             else:
                 raise ValueError()
 
-        bases = [ast.Name(id="DynamicNode", ctx=ast.Load())]
-        if concept.get_extended_concept() is not None:
-            bases = [ast.Name(id=cast(str, to_type_name(concept.get_extended_concept().get_name())), ctx=ast.Load())]
+        bases : list[expr] = [ast.Name(id="DynamicNode", ctx=ast.Load())]
+        extended_concept = concept.get_extended_concept()
+        if extended_concept is not None:
+            bases = [ast.Name(id=cast(str, to_type_name(extended_concept.get_name())), ctx=ast.Load())]
 
         return make_class_def(
             name=cast(str, to_type_name(concept.get_name())),

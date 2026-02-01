@@ -2,7 +2,6 @@ import ast
 from typing import Optional
 
 from lionweb.generation.configuration import LanguageMappingSpec, PrimitiveTypeMappingSpec
-from lionweb.generation.utils import dotted_name_expr
 from lionweb.language import Language, DataType
 
 
@@ -40,6 +39,8 @@ class BaseGenerator:
             self.language_to_imports[package_str] = new_import
             existing_import = new_import
         alias = existing_import.names[-1].asname
+        if alias is None:
+            raise ValueError("Language package must be imported with an alias")
 
         # my.package.name.language.get_language()
         get_lang_call = ast.Call(

@@ -46,6 +46,8 @@ def to_var_name(name: Optional[str]) -> str:
 
 def to_type_name(name: Optional[str]) -> str:
     """Convert a name to snake_case while avoiding Python keywords."""
+    if name is None:
+        raise ValueError("Name should not be None")
     return name[0].upper() + name[1:]
 
 

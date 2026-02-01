@@ -1,9 +1,4 @@
-import ast
 from dataclasses import dataclass
-from typing import Optional
-
-from lionweb.generation.utils import dotted_name_expr
-from lionweb.language import Language, DataType
 
 
 @dataclass(frozen=True)
