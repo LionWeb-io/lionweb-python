@@ -6,11 +6,12 @@ from typing import List, cast
 import astor  # type: ignore
 
 from lionweb.generation.base_generator import BaseGenerator
-from lionweb.generation.configuration import LanguageMappingSpec, PrimitiveTypeMappingSpec
+from lionweb.generation.configuration import (LanguageMappingSpec,
+                                              PrimitiveTypeMappingSpec)
 from lionweb.generation.utils import make_function_def, to_var_name
-from lionweb.language import (Concept, Containment, DataType, Language,
-                              LionCoreBuiltins, Property, Enumeration, Interface)
-from lionweb.language import PrimitiveType
+from lionweb.language import (Concept, Containment, DataType, Enumeration,
+                              Interface, Language, LionCoreBuiltins,
+                              PrimitiveType, Property)
 from lionweb.language.reference import Reference
 
 
@@ -46,11 +47,16 @@ def _generate_language(language: Language) -> ast.Assign:
 
 class LanguageGenerator(BaseGenerator):
 
-    def __init__(self, language_packages: tuple[LanguageMappingSpec, ...] = (),
-                 primitive_types: tuple[PrimitiveTypeMappingSpec, ...]=()):
+    def __init__(
+        self,
+        language_packages: tuple[LanguageMappingSpec, ...] = (),
+        primitive_types: tuple[PrimitiveTypeMappingSpec, ...] = (),
+    ):
         super().__init__(language_packages, primitive_types)
 
-    def _create_concept_in_language(self, concept: Concept, get_language_body: List[stmt]):
+    def _create_concept_in_language(
+        self, concept: Concept, get_language_body: List[stmt]
+    ):
         language = concept.language
         if language is None:
             raise ValueError(f"Concept {concept.get_name()} has no language")
@@ -64,12 +70,8 @@ class LanguageGenerator(BaseGenerator):
                     args=[],
                     keywords=[
                         _set_lw_version(language),
-                        ast.keyword(
-                            arg="id", value=ast.Constant(value=concept.id)
-                        ),
-                        ast.keyword(
-                            arg="name", value=ast.Constant(value=concept_name)
-                        ),
+                        ast.keyword(arg="id", value=ast.Constant(value=concept.id)),
+                        ast.keyword(arg="name", value=ast.Constant(value=concept_name)),
                         ast.keyword(
                             arg="key",
                             value=ast.Constant(value=concept.key),
@@ -78,27 +80,31 @@ class LanguageGenerator(BaseGenerator):
                 ),
             )
         )
-        get_language_body.append(ast.Assign(
-            targets=[
-                ast.Attribute(
-                    value=ast.Name(id=var_name, ctx=ast.Load()),
-                    attr="abstract",
-                    ctx=ast.Store(),
-                )
-            ],
-            value=ast.Constant(value=concept.is_abstract()),
-        ))
+        get_language_body.append(
+            ast.Assign(
+                targets=[
+                    ast.Attribute(
+                        value=ast.Name(id=var_name, ctx=ast.Load()),
+                        attr="abstract",
+                        ctx=ast.Store(),
+                    )
+                ],
+                value=ast.Constant(value=concept.is_abstract()),
+            )
+        )
 
-        get_language_body.append(ast.Assign(
-            targets=[
-                ast.Attribute(
-                    value=ast.Name(id=var_name, ctx=ast.Load()),
-                    attr="partition",
-                    ctx=ast.Store(),
-                )
-            ],
-            value=ast.Constant(value=concept.is_partition()),
-        ))
+        get_language_body.append(
+            ast.Assign(
+                targets=[
+                    ast.Attribute(
+                        value=ast.Name(id=var_name, ctx=ast.Load()),
+                        attr="partition",
+                        ctx=ast.Store(),
+                    )
+                ],
+                value=ast.Constant(value=concept.is_partition()),
+            )
+        )
 
         # language.add_element(concept1)
         get_language_body.append(
@@ -115,7 +121,9 @@ class LanguageGenerator(BaseGenerator):
             )
         )
 
-    def _create_interface_in_language(self, interface: Interface, get_language_body: List[stmt]):
+    def _create_interface_in_language(
+        self, interface: Interface, get_language_body: List[stmt]
+    ):
         language = interface.language
         if language is None:
             raise ValueError(f"Interface {interface.get_name()} has no language")
@@ -129,12 +137,8 @@ class LanguageGenerator(BaseGenerator):
                     args=[],
                     keywords=[
                         _set_lw_version(language),
-                        ast.keyword(
-                            arg="id", value=ast.Constant(value=interface.id)
-                        ),
-                        ast.keyword(
-                            arg="name", value=ast.Constant(value=concept_name)
-                        ),
+                        ast.keyword(arg="id", value=ast.Constant(value=interface.id)),
+                        ast.keyword(arg="name", value=ast.Constant(value=concept_name)),
                         ast.keyword(
                             arg="key",
                             value=ast.Constant(value=interface.key),
@@ -158,7 +162,9 @@ class LanguageGenerator(BaseGenerator):
             )
         )
 
-    def _populate_concept_in_language(self, concept: Concept, get_language_body: List[stmt]):
+    def _populate_concept_in_language(
+        self, concept: Concept, get_language_body: List[stmt]
+    ):
         """
         add to the get_language() function the definition of the concept
         """
@@ -194,7 +200,9 @@ class LanguageGenerator(BaseGenerator):
                             attr="add_implemented_interface",
                             ctx=ast.Load(),
                         ),
-                        args=[ast.Name(id=to_var_name(interf.get_name()), ctx=ast.Load())],
+                        args=[
+                            ast.Name(id=to_var_name(interf.get_name()), ctx=ast.Load())
+                        ],
                         keywords=[],
                     )
                 )
@@ -211,9 +219,7 @@ class LanguageGenerator(BaseGenerator):
                         ast.keyword(
                             arg="name", value=ast.Constant(value=feature.get_name())
                         ),
-                        ast.keyword(
-                            arg="key", value=ast.Constant(value=feature.key)
-                        ),
+                        ast.keyword(arg="key", value=ast.Constant(value=feature.key)),
                     ],
                 )
                 get_language_body.append(
@@ -254,16 +260,24 @@ class LanguageGenerator(BaseGenerator):
                     )
                 elif language == pt.language:
                     # We have declared the property above
-                    property_type = ast.Name(id=to_var_name(pt.get_name()), ctx=ast.Load())
+                    property_type = ast.Name(
+                        id=to_var_name(pt.get_name()), ctx=ast.Load()
+                    )
                 else:
                     package = self._package_lookup(cast(Language, pt.language))
                     if package is not None:
-                        property_type = self._primitive_type_lookup_exp(package, pt.get_name())
+                        property_type = self._primitive_type_lookup_exp(
+                            package, pt.get_name()
+                        )
                     else:
                         pt_language = pt.language
                         if pt_language is None:
-                            raise ValueError(f"Property {feature.get_name()} has no language")
-                        raise ValueError(f"We need to load {cast(str, pt.get_name())} from language {pt_language.get_name()} but no mapping was found")
+                            raise ValueError(
+                                f"Property {feature.get_name()} has no language"
+                            )
+                        raise ValueError(
+                            f"We need to load {cast(str, pt.get_name())} from language {pt_language.get_name()} but no mapping was found"
+                        )
                 feature_creation = ast.Call(
                     func=ast.Name(id="Property", ctx=ast.Load()),
                     args=[],
@@ -273,9 +287,7 @@ class LanguageGenerator(BaseGenerator):
                         ast.keyword(
                             arg="name", value=ast.Constant(value=feature.get_name())
                         ),
-                        ast.keyword(
-                            arg="key", value=ast.Constant(value=feature.key)
-                        ),
+                        ast.keyword(arg="key", value=ast.Constant(value=feature.key)),
                         ast.keyword(arg="type", value=property_type),
                     ],
                 )
@@ -302,9 +314,7 @@ class LanguageGenerator(BaseGenerator):
                         ast.keyword(
                             arg="name", value=ast.Constant(value=feature.get_name())
                         ),
-                        ast.keyword(
-                            arg="key", value=ast.Constant(value=feature.key)
-                        ),
+                        ast.keyword(arg="key", value=ast.Constant(value=feature.key)),
                     ],
                 )
                 get_language_body.append(
@@ -321,7 +331,9 @@ class LanguageGenerator(BaseGenerator):
                     )
                 )
 
-    def _populate_interface_in_language(self, interface: Interface, get_language_body: List[stmt]):
+    def _populate_interface_in_language(
+        self, interface: Interface, get_language_body: List[stmt]
+    ):
         """
         add to the get_language() function the definition of the interface
         """
@@ -340,7 +352,9 @@ class LanguageGenerator(BaseGenerator):
                             attr="add_extended_interface",
                             ctx=ast.Load(),
                         ),
-                        args=[ast.Name(id=to_var_name(interf.get_name()), ctx=ast.Load())],
+                        args=[
+                            ast.Name(id=to_var_name(interf.get_name()), ctx=ast.Load())
+                        ],
                         keywords=[],
                     )
                 )
@@ -357,9 +371,7 @@ class LanguageGenerator(BaseGenerator):
                         ast.keyword(
                             arg="name", value=ast.Constant(value=feature.get_name())
                         ),
-                        ast.keyword(
-                            arg="key", value=ast.Constant(value=feature.key)
-                        ),
+                        ast.keyword(arg="key", value=ast.Constant(value=feature.key)),
                     ],
                 )
                 get_language_body.append(
@@ -400,16 +412,24 @@ class LanguageGenerator(BaseGenerator):
                     )
                 elif language == pt.language:
                     # We have declared the property above
-                    property_type = ast.Name(id=to_var_name(pt.get_name()), ctx=ast.Load())
+                    property_type = ast.Name(
+                        id=to_var_name(pt.get_name()), ctx=ast.Load()
+                    )
                 else:
                     package = self._package_lookup(cast(Language, pt.language))
                     if package is not None:
-                        property_type = self._primitive_type_lookup_exp(package, pt.get_name())
+                        property_type = self._primitive_type_lookup_exp(
+                            package, pt.get_name()
+                        )
                     else:
                         pt_language = pt.language
                         if pt_language is None:
-                            raise ValueError(f"Property {feature.get_name()} has no language")
-                        raise ValueError(f"We need to load {cast(str, pt.get_name())} from language {pt_language.get_name()} but no mapping was found")
+                            raise ValueError(
+                                f"Property {feature.get_name()} has no language"
+                            )
+                        raise ValueError(
+                            f"We need to load {cast(str, pt.get_name())} from language {pt_language.get_name()} but no mapping was found"
+                        )
                 feature_creation = ast.Call(
                     func=ast.Name(id="Property", ctx=ast.Load()),
                     args=[],
@@ -419,9 +439,7 @@ class LanguageGenerator(BaseGenerator):
                         ast.keyword(
                             arg="name", value=ast.Constant(value=feature.get_name())
                         ),
-                        ast.keyword(
-                            arg="key", value=ast.Constant(value=feature.key)
-                        ),
+                        ast.keyword(arg="key", value=ast.Constant(value=feature.key)),
                         ast.keyword(arg="type", value=property_type),
                     ],
                 )
@@ -448,9 +466,7 @@ class LanguageGenerator(BaseGenerator):
                         ast.keyword(
                             arg="name", value=ast.Constant(value=feature.get_name())
                         ),
-                        ast.keyword(
-                            arg="key", value=ast.Constant(value=feature.key)
-                        ),
+                        ast.keyword(arg="key", value=ast.Constant(value=feature.key)),
                     ],
                 )
                 get_language_body.append(
@@ -467,7 +483,9 @@ class LanguageGenerator(BaseGenerator):
                     )
                 )
 
-    def _define_primitive_type_in_language(self, primitive_type: PrimitiveType, get_language_body: List[stmt]):
+    def _define_primitive_type_in_language(
+        self, primitive_type: PrimitiveType, get_language_body: List[stmt]
+    ):
         primitive_type_name = cast(str, primitive_type.get_name())
         language = primitive_type.language
         if language is None:
@@ -509,7 +527,9 @@ class LanguageGenerator(BaseGenerator):
             )
         )
 
-    def _define_enumeration_in_language(self, enumeration: Enumeration, get_language_body: List[stmt]):
+    def _define_enumeration_in_language(
+        self, enumeration: Enumeration, get_language_body: List[stmt]
+    ):
         enumeration_name = cast(str, enumeration.get_name())
         language = enumeration.language
         if language is None:
@@ -523,9 +543,7 @@ class LanguageGenerator(BaseGenerator):
                     args=[],
                     keywords=[
                         _set_lw_version(language),
-                        ast.keyword(
-                            arg="id", value=ast.Constant(value=enumeration.id)
-                        ),
+                        ast.keyword(arg="id", value=ast.Constant(value=enumeration.id)),
                         ast.keyword(
                             arg="name", value=ast.Constant(value=enumeration_name)
                         ),
@@ -659,7 +677,9 @@ class LanguageGenerator(BaseGenerator):
                                         attr="get_concept_by_name",
                                         ctx=ast.Load(),
                                     ),
-                                    args=[ast.Constant(value=language_element.get_name())],
+                                    args=[
+                                        ast.Constant(value=language_element.get_name())
+                                    ],
                                     keywords=[],
                                 )
                             )
@@ -694,7 +714,9 @@ class LanguageGenerator(BaseGenerator):
                                         attr="get_primitive_type_by_name",
                                         ctx=ast.Load(),
                                     ),
-                                    args=[ast.Constant(value=language_element.get_name())],
+                                    args=[
+                                        ast.Constant(value=language_element.get_name())
+                                    ],
                                     keywords=[],
                                 )
                             )
@@ -717,5 +739,5 @@ class LanguageGenerator(BaseGenerator):
         output_path = Path(output)
         output_path.mkdir(parents=True, exist_ok=True)
 
-        with Path(f"{output}/language.py").open("w", encoding="utf-8") as f:
-            f.write(generated_code)
+        with Path(f"{output}/language.py").open("w", encoding="utf-8") as file:
+            file.write(generated_code)
