@@ -502,6 +502,10 @@ class NodeClassesGenerator(BaseGenerator):
         )
 
     def node_classes_generation(self, click, language: Language, output):
+        classifiers = [e for e in language.get_elements() if isinstance(e, Classifier)]
+        if len(classifiers) == 0:
+            # Nothing to generate
+            return
         imports: list[stmt] = [
             ast.ImportFrom(
                 module="abc", names=[ast.alias(name="ABC", asname=None)], level=0

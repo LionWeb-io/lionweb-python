@@ -13,28 +13,28 @@ def deserializer_generation(click, language: Language, output):
     module_body = []
 
     # Import statements
-    module_body.append(
-        ast.ImportFrom(
-            module="gen.language",
-            names=[
-                ast.alias(name=f"get_{cast(str, c.get_name()).lower()}", asname=None)
-                for c in language.get_elements()
-                if isinstance(c, Concept)
-            ],
-            level=0,
+    concepts = [e for e in language.get_elements() if isinstance(e, Concept)]
+    if len(concepts) > 0:
+        module_body.append(
+            ast.ImportFrom(
+                module=".language",
+                names=[
+                    ast.alias(name=f"get_{cast(str, c.get_name()).lower()}", asname=None)
+                    for c in concepts
+                ],
+                level=0,
+            )
         )
-    )
-    module_body.append(
-        ast.ImportFrom(
-            module="gen.node_classes",
-            names=[
-                ast.alias(name=cast(str, c.get_name()), asname=None)
-                for c in language.get_elements()
-                if isinstance(c, Concept)
-            ],
-            level=0,
+        module_body.append(
+            ast.ImportFrom(
+                module=".node_classes",
+                names=[
+                    ast.alias(name=cast(str, c.get_name()), asname=None)
+                    for c in concepts
+                ],
+                level=0,
+            )
         )
-    )
     module_body.append(
         ast.ImportFrom(
             module="lionweb.serialization",
@@ -136,6 +136,8 @@ def deserializer_generation(click, language: Language, output):
                 )
             )
 
+    if len(register_func_body) == 0:
+        register_func_body.append(ast.Pass())
     register_func = make_function_def(
         name="register_deserializers",
         args=ast.arguments(

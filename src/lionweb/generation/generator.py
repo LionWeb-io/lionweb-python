@@ -112,9 +112,8 @@ PRIMITIVE_TYPE_MAPPING = PrimitiveTypeMappingSpecMappingType()
     multiple=False,
 )
 @click.argument(
-    "lionweb-language",
+    "lionweb_language",
     type=click.Path(exists=True, dir_okay=False, readable=True),
-    help="Path to the LionWeb language file that needs processing. Must be a readable file and exists.",
 )
 @click.option(
     "--language-packages",

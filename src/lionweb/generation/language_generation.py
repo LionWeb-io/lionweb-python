@@ -9,7 +9,7 @@ from lionweb.generation.base_generator import BaseGenerator
 from lionweb.generation.configuration import (LanguageMappingSpec,
                                               PrimitiveTypeMappingSpec)
 from lionweb.generation.generation_utils import make_function_def
-from lionweb.generation.naming_utils import to_var_name
+from lionweb.generation.naming_utils import to_var_name, getter_name
 from lionweb.language import (Concept, Containment, DataType, Enumeration,
                               Interface, Language, LionCoreBuiltins,
                               PrimitiveType, Property)
@@ -656,7 +656,7 @@ class LanguageGenerator(BaseGenerator):
                 concept_name = cast(str, language_element.get_name())
                 self.functions.append(
                     make_function_def(
-                        name=f"get_{concept_name.lower()}",
+                        name=getter_name(concept_name),
                         args=ast.arguments(
                             posonlyargs=[],
                             args=[],
@@ -693,7 +693,7 @@ class LanguageGenerator(BaseGenerator):
                 element_name = cast(str, language_element.get_name())
                 self.functions.append(
                     make_function_def(
-                        name=f"get_{element_name.lower()}",
+                        name=getter_name(element_name),
                         args=ast.arguments(
                             posonlyargs=[],
                             args=[],
