@@ -142,6 +142,12 @@ class Classifier(LanguageEntity[T], NamespaceProvider):
             None,
         )
 
+    def require_reference_by_name(self, reference_name: str) -> "Reference":
+        reference = self.get_reference_by_name(reference_name)
+        if not reference:
+            raise ValueError(f"Reference named {reference_name} was not found")
+        return reference
+
     def get_containment_by_name(self, containment_name: str) -> Optional["Containment"]:
         if containment_name is None:
             raise ValueError("containment_name should not be null")

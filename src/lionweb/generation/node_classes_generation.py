@@ -83,7 +83,7 @@ def _expr_to_get_property(feature: Property):
         ),
         args=[ast.Constant(value=feature.get_name())],
         keywords=[],
-    ),
+    )
 
 def _expr_to_get_reference(feature: Reference):
     return ast.Call(
@@ -102,7 +102,7 @@ def _expr_to_get_reference(feature: Reference):
         ),
         args=[ast.Constant(value=feature.get_name())],
         keywords=[],
-    ),
+    )
 
 def _generate_property_setter(feature, prop_type):
     return make_function_def(
