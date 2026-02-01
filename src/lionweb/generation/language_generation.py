@@ -8,7 +8,8 @@ import astor  # type: ignore
 from lionweb.generation.base_generator import BaseGenerator
 from lionweb.generation.configuration import (LanguageMappingSpec,
                                               PrimitiveTypeMappingSpec)
-from lionweb.generation.utils import make_function_def, to_var_name
+from lionweb.generation.generation_utils import make_function_def
+from lionweb.generation.naming_utils import to_var_name
 from lionweb.language import (Concept, Containment, DataType, Enumeration,
                               Interface, Language, LionCoreBuiltins,
                               PrimitiveType, Property)

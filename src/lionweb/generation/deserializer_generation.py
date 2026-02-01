@@ -5,7 +5,7 @@ from typing import List, cast
 
 import astor  # type: ignore
 
-from lionweb.generation.utils import make_function_def
+from lionweb.generation.generation_utils import make_function_def
 from lionweb.language import Concept, Language
 
 

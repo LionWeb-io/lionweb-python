@@ -5,7 +5,9 @@ This module provides a command-line interface for processing LionWeb language fi
 and generating corresponding Python classes, including language definitions, node classes,
 and deserializers.
 """
-from typing import cast, List
+
+from pathlib import Path
+from typing import List, cast
 
 import click
 
@@ -27,6 +29,7 @@ class LanguageMappingSpecMappingType(click.ParamType):
 
     Example: "MyLionWebLanguageName=myapp.lang.foo"
     """
+
     name = "LANG=PACKAGE"
 
     def convert(self, value, param, ctx) -> LanguageMappingSpec:
@@ -62,6 +65,7 @@ class PrimitiveTypeMappingSpecMappingType(click.ParamType):
 
     Example: "date=myapp.foo.Date"
     """
+
     name = "PRIMITIVE_TYPE=QUALIFIED_NAME"
 
     def convert(self, value, param, ctx) -> PrimitiveTypeMappingSpec:
@@ -96,7 +100,7 @@ PRIMITIVE_TYPE_MAPPING = PrimitiveTypeMappingSpecMappingType()
     "--dependencies",
     type=click.Path(exists=True, dir_okay=False, readable=True),
     help="Path to a LionWeb language files necessary to use as dependencies to open the target languages. "
-         "Can be specified multiple times.",
+    "Can be specified multiple times.",
     multiple=True,
 )
 @click.option(
@@ -108,8 +112,9 @@ PRIMITIVE_TYPE_MAPPING = PrimitiveTypeMappingSpecMappingType()
     multiple=False,
 )
 @click.argument(
-    "lionweb-language", type=click.Path(exists=True, dir_okay=False, readable=True),
-    help="Path to the LionWeb language file that needs processing. Must be a readable file and exists."
+    "lionweb-language",
+    type=click.Path(exists=True, dir_okay=False, readable=True),
+    help="Path to the LionWeb language file that needs processing. Must be a readable file and exists.",
 )
 @click.option(
     "--language-packages",
@@ -131,9 +136,9 @@ PRIMITIVE_TYPE_MAPPING = PrimitiveTypeMappingSpecMappingType()
 )
 @click.argument("output", type=click.Path(exists=False, file_okay=False, writable=True))
 def main(
-    dependencies: List[click.Path],
+    dependencies: List[Path],
     lionweb_version: LionWebVersion,
-    lionweb_language: click.Path,
+    lionweb_language: Path,
     language_packages: tuple[LanguageMappingSpec, ...],
     primitive_types: tuple[PrimitiveTypeMappingSpec, ...],
     output,
@@ -172,7 +177,7 @@ def main(
 
     for dep in dependencies:
         click.echo(f"Processing dependency {dep}")
-        with open(dep, "r", encoding="utf-8") as f:
+        with open(file=dep, mode="r", encoding="utf-8") as f:
             content = f.read()
             language = cast(
                 Language, serialization.deserialize_string_to_nodes(content)[0]
