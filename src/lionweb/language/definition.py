@@ -57,7 +57,7 @@ class PropertyData(TypedDict):
 
 class LinkData(TypedDict):
     name: str
-    type: "ClassifierFactory"
+    type: "ClassifierFactory | Classifier"
     multiplicity: Multiplicity
     id: Optional[str]
     key: Optional[str]
@@ -130,7 +130,7 @@ class ClassifierFactory:
     def reference(
         self,
         name: str,
-        type: "ClassifierFactory",
+        type: "ClassifierFactory | Classifier",
         multiplicity: Multiplicity = Multiplicity.REQUIRED,
         id: Optional[str] = None,
         key: Optional[str] = None,
@@ -207,7 +207,7 @@ class ClassifierFactory:
             )
             reference.set_optional(not data["multiplicity"].value["required"])
             reference.set_multiple(data["multiplicity"].value["many"])
-            type_name = data["type"].name
+            type_name = cast(str, data["type"].name)
             link_type = language.require_classifier_by_name(type_name)
             if link_type is None:
                 raise ValueError(f"Type {type_name} not found")
@@ -223,7 +223,7 @@ class ClassifierFactory:
             )
             containment.set_optional(not data["multiplicity"].value["required"])
             containment.set_multiple(data["multiplicity"].value["many"])
-            type_name = data["type"].name
+            type_name = cast(str, data["type"].name)
             link_type = language.require_classifier_by_name(type_name)
             if link_type is None:
                 raise ValueError(f"Type {type_name} not found")
@@ -278,8 +278,17 @@ class ClassifierFactory:
         else:
             raise ValueError(f"Invalid classifier type: {self.type}")
 
-    def set_annotates(self, annotates: "Classifier | ClassifierFactory"):
+    def set_extends(
+        self, extends: "Classifier | ClassifierFactory"
+    ) -> "ClassifierFactory":
+        self.extends = [extends]
+        return self
+
+    def set_annotates(
+        self, annotates: "Classifier | ClassifierFactory"
+    ) -> "ClassifierFactory":
         self.annotates = annotates
+        return self
 
 
 class PrimitiveTypeFactory:
