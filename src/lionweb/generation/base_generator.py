@@ -35,7 +35,7 @@ class BaseGenerator:
         existing_import = self.language_to_imports.get(package_str)
         if existing_import is None:
             clean_language_name = package_str.split(".")[-1]
-            new_import = ast.ImportFrom(module=package_str, names=[ast.alias(name="get_language", asname=f"get_{clean_language_name}_language")], level=0)
+            new_import = ast.ImportFrom(module=f"{package_str}.language", names=[ast.alias(name="get_language", asname=f"get_{clean_language_name}_language")], level=0)
             self.imports.append(new_import)
             self.language_to_imports[package_str] = new_import
             existing_import = new_import

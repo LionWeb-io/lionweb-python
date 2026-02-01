@@ -121,6 +121,12 @@ class Classifier(LanguageEntity[T], NamespaceProvider):
             None,
         )
 
+    def require_property_by_name(self, property_name: str) -> "Property":
+        property = self.get_property_by_name(property_name)
+        if not property:
+            raise ValueError(f"Property named {property_name} was not found")
+        return property
+
     def get_reference_by_name(self, reference_name: str) -> Optional["Reference"]:
         if reference_name is None:
             raise ValueError("reference_name should not be null")

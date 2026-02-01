@@ -9,7 +9,7 @@ from lionweb.generation.base_generator import BaseGenerator
 from lionweb.generation.configuration import LanguageMappingSpec, PrimitiveTypeMappingSpec
 from lionweb.generation.utils import make_function_def, to_var_name
 from lionweb.language import (Concept, Containment, DataType, Language,
-                              LionCoreBuiltins, Property, Enumeration)
+                              LionCoreBuiltins, Property, Enumeration, Interface)
 from lionweb.language import PrimitiveType
 from lionweb.language.reference import Reference
 
@@ -78,6 +78,71 @@ class LanguageGenerator(BaseGenerator):
                 ),
             )
         )
+        get_language_body.append(ast.Assign(
+            targets=[
+                ast.Attribute(
+                    value=ast.Name(id=var_name, ctx=ast.Load()),
+                    attr="abstract",
+                    ctx=ast.Store(),
+                )
+            ],
+            value=ast.Constant(value=concept.is_abstract()),
+        ))
+
+        get_language_body.append(ast.Assign(
+            targets=[
+                ast.Attribute(
+                    value=ast.Name(id=var_name, ctx=ast.Load()),
+                    attr="partition",
+                    ctx=ast.Store(),
+                )
+            ],
+            value=ast.Constant(value=concept.is_partition()),
+        ))
+
+        # language.add_element(concept1)
+        get_language_body.append(
+            ast.Expr(
+                value=ast.Call(
+                    func=ast.Attribute(
+                        value=ast.Name(id="language", ctx=ast.Load()),
+                        attr="add_element",
+                        ctx=ast.Load(),
+                    ),
+                    args=[ast.Name(id=var_name, ctx=ast.Load())],
+                    keywords=[],
+                )
+            )
+        )
+
+    def _create_interface_in_language(self, interface: Interface, get_language_body: List[stmt]):
+        language = interface.language
+        if language is None:
+            raise ValueError(f"Interface {interface.get_name()} has no language")
+        concept_name = cast(str, interface.get_name())
+        var_name = to_var_name(concept_name)
+        get_language_body.append(
+            ast.Assign(
+                targets=[ast.Name(id=var_name, ctx=ast.Store())],
+                value=ast.Call(
+                    func=ast.Name(id="Interface", ctx=ast.Load()),
+                    args=[],
+                    keywords=[
+                        _set_lw_version(language),
+                        ast.keyword(
+                            arg="id", value=ast.Constant(value=interface.id)
+                        ),
+                        ast.keyword(
+                            arg="name", value=ast.Constant(value=concept_name)
+                        ),
+                        ast.keyword(
+                            arg="key",
+                            value=ast.Constant(value=interface.key),
+                        ),
+                    ],
+                ),
+            )
+        )
         # language.add_element(concept1)
         get_language_body.append(
             ast.Expr(
@@ -126,16 +191,162 @@ class LanguageGenerator(BaseGenerator):
                     ast.Call(
                         func=ast.Attribute(
                             value=ast.Name(id=var_name, ctx=ast.Load()),
-                            attr="add_implemented",
+                            attr="add_implemented_interface",
                             ctx=ast.Load(),
                         ),
-                        args=[],
+                        args=[ast.Name(id=to_var_name(interf.get_name()), ctx=ast.Load())],
                         keywords=[],
                     )
                 )
             )
 
         for feature in concept.get_features():
+            if isinstance(feature, Reference):
+                feature_creation = ast.Call(
+                    func=ast.Name(id="Reference", ctx=ast.Load()),
+                    args=[],
+                    keywords=[
+                        _set_lw_version(language),
+                        ast.keyword(arg="id", value=ast.Constant(value=feature.id)),
+                        ast.keyword(
+                            arg="name", value=ast.Constant(value=feature.get_name())
+                        ),
+                        ast.keyword(
+                            arg="key", value=ast.Constant(value=feature.key)
+                        ),
+                    ],
+                )
+                get_language_body.append(
+                    ast.Expr(
+                        value=ast.Call(
+                            func=ast.Attribute(
+                                value=ast.Name(id=var_name, ctx=ast.Load()),
+                                attr="add_feature",
+                                ctx=ast.Load(),
+                            ),
+                            args=[feature_creation],
+                            keywords=[],
+                        )
+                    )
+                )
+            elif isinstance(feature, Property):
+                pt = cast(DataType, feature.type)
+                property_type: expr
+                if pt == LionCoreBuiltins.get_string(feature.lion_web_version):
+                    property_type = ast.Call(
+                        func=ast.Attribute(
+                            value=ast.Name(id="LionCoreBuiltins", ctx=ast.Load()),
+                            attr="get_string",
+                            ctx=ast.Load(),
+                        ),
+                        args=[],
+                        keywords=[_set_lw_version(language)],
+                    )
+                elif pt == LionCoreBuiltins.get_integer(feature.lion_web_version):
+                    property_type = ast.Call(
+                        func=ast.Attribute(
+                            value=ast.Name(id="LionCoreBuiltins", ctx=ast.Load()),
+                            attr="get_integer",
+                            ctx=ast.Load(),
+                        ),
+                        args=[],
+                        keywords=[_set_lw_version(language)],
+                    )
+                elif language == pt.language:
+                    # We have declared the property above
+                    property_type = ast.Name(id=to_var_name(pt.get_name()), ctx=ast.Load())
+                else:
+                    package = self._package_lookup(cast(Language, pt.language))
+                    if package is not None:
+                        property_type = self._primitive_type_lookup_exp(package, pt.get_name())
+                    else:
+                        pt_language = pt.language
+                        if pt_language is None:
+                            raise ValueError(f"Property {feature.get_name()} has no language")
+                        raise ValueError(f"We need to load {cast(str, pt.get_name())} from language {pt_language.get_name()} but no mapping was found")
+                feature_creation = ast.Call(
+                    func=ast.Name(id="Property", ctx=ast.Load()),
+                    args=[],
+                    keywords=[
+                        _set_lw_version(language),
+                        ast.keyword(arg="id", value=ast.Constant(value=feature.id)),
+                        ast.keyword(
+                            arg="name", value=ast.Constant(value=feature.get_name())
+                        ),
+                        ast.keyword(
+                            arg="key", value=ast.Constant(value=feature.key)
+                        ),
+                        ast.keyword(arg="type", value=property_type),
+                    ],
+                )
+                get_language_body.append(
+                    ast.Expr(
+                        value=ast.Call(
+                            func=ast.Attribute(
+                                value=ast.Name(id=var_name, ctx=ast.Load()),
+                                attr="add_feature",
+                                ctx=ast.Load(),
+                            ),
+                            args=[feature_creation],
+                            keywords=[],
+                        )
+                    )
+                )
+            elif isinstance(feature, Containment):
+                feature_creation = ast.Call(
+                    func=ast.Name(id="Containment", ctx=ast.Load()),
+                    args=[],
+                    keywords=[
+                        _set_lw_version(language),
+                        ast.keyword(arg="id", value=ast.Constant(value=feature.id)),
+                        ast.keyword(
+                            arg="name", value=ast.Constant(value=feature.get_name())
+                        ),
+                        ast.keyword(
+                            arg="key", value=ast.Constant(value=feature.key)
+                        ),
+                    ],
+                )
+                get_language_body.append(
+                    ast.Expr(
+                        value=ast.Call(
+                            func=ast.Attribute(
+                                value=ast.Name(id=var_name, ctx=ast.Load()),
+                                attr="add_feature",
+                                ctx=ast.Load(),
+                            ),
+                            args=[feature_creation],
+                            keywords=[],
+                        )
+                    )
+                )
+
+    def _populate_interface_in_language(self, interface: Interface, get_language_body: List[stmt]):
+        """
+        add to the get_language() function the definition of the interface
+        """
+        language = interface.language
+        if language is None:
+            raise ValueError(f"Interface {interface.get_name()} has no language")
+        interface_name = cast(str, interface.get_name())
+        var_name = to_var_name(interface_name)
+
+        for interf in interface.get_extended_interfaces():
+            get_language_body.append(
+                ast.Expr(
+                    ast.Call(
+                        func=ast.Attribute(
+                            value=ast.Name(id=var_name, ctx=ast.Load()),
+                            attr="add_extended_interface",
+                            ctx=ast.Load(),
+                        ),
+                        args=[ast.Name(id=to_var_name(interf.get_name()), ctx=ast.Load())],
+                        keywords=[],
+                    )
+                )
+            )
+
+        for feature in interface.get_features():
             if isinstance(feature, Reference):
                 feature_creation = ast.Call(
                     func=ast.Name(id="Reference", ctx=ast.Load()),
@@ -350,6 +561,7 @@ class LanguageGenerator(BaseGenerator):
                     ast.alias(name="Concept", asname=None),
                     ast.alias(name="Containment", asname=None),
                     ast.alias(name="Enumeration", asname=None),
+                    ast.alias(name="Interface", asname=None),
                     ast.alias(name="PrimitiveType", asname=None),
                     ast.alias(name="Property", asname=None),
                     ast.alias(name="Reference", asname=None),
@@ -387,6 +599,9 @@ class LanguageGenerator(BaseGenerator):
             if isinstance(language_element, Concept):
                 self._create_concept_in_language(language_element, function_body)
 
+            if isinstance(language_element, Interface):
+                self._create_interface_in_language(language_element, function_body)
+
             if isinstance(language_element, PrimitiveType):
                 self._define_primitive_type_in_language(language_element, function_body)
 
@@ -396,6 +611,9 @@ class LanguageGenerator(BaseGenerator):
         for language_element in language.get_elements():
             if isinstance(language_element, Concept):
                 self._populate_concept_in_language(language_element, function_body)
+
+            if isinstance(language_element, Interface):
+                self._populate_interface_in_language(language_element, function_body)
 
         # return language
         function_body.append(ast.Return(value=ast.Name(id="language", ctx=ast.Load())))
