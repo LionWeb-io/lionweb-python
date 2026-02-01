@@ -1,4 +1,11 @@
-from typing import cast
+"""
+CLI tool for generating Python code from LionWeb language definitions.
+
+This module provides a command-line interface for processing LionWeb language files
+and generating corresponding Python classes, including language definitions, node classes,
+and deserializers.
+"""
+from typing import cast, List
 
 import click
 
@@ -12,12 +19,20 @@ from lionweb.serialization import create_standard_json_serialization
 
 
 class LanguageMappingSpecMappingType(click.ParamType):
+    """
+    Click parameter type for parsing language mapping specifications.
+
+    Accepts string input in the format "LANG=PACKAGE" where LANG is either a
+    LionWeb language name or ID, and PACKAGE is the Python package path.
+
+    Example: "MyLionWebLanguageName=myapp.lang.foo"
+    """
     name = "LANG=PACKAGE"
 
     def convert(self, value, param, ctx) -> LanguageMappingSpec:
         # Accept forms like:
-        #   "en=myapp.lang.en"
-        #   "English = myapp.lang.en"  (spaces trimmed)
+        #   "MyLionWebLanguageName=myapp.lang.foo"
+        #   "my_lionweb_language_id=myapp.lang.foo"
         if not isinstance(value, str):
             self.fail("Expected a string.", param, ctx)
 
@@ -38,12 +53,18 @@ class LanguageMappingSpecMappingType(click.ParamType):
 
 
 class PrimitiveTypeMappingSpecMappingType(click.ParamType):
+    """
+    Click parameter type for parsing primitive type mapping specifications.
+
+    Accepts string input in the format "PRIMITIVE_TYPE=QUALIFIED_NAME" where
+    PRIMITIVE_TYPE is a LionWeb primitive type name or ID, and QUALIFIED_NAME
+    is the fully qualified Python type name.
+
+    Example: "date=myapp.foo.Date"
+    """
     name = "PRIMITIVE_TYPE=QUALIFIED_NAME"
 
     def convert(self, value, param, ctx) -> PrimitiveTypeMappingSpec:
-        # Accept forms like:
-        #   "en=myapp.lang.en"
-        #   "English = myapp.lang.en"  (spaces trimmed)
         if not isinstance(value, str):
             self.fail("Expected a string.", param, ctx)
 
@@ -74,6 +95,8 @@ PRIMITIVE_TYPE_MAPPING = PrimitiveTypeMappingSpecMappingType()
     "-d",
     "--dependencies",
     type=click.Path(exists=True, dir_okay=False, readable=True),
+    help="Path to a LionWeb language files necessary to use as dependencies to open the target languages. "
+         "Can be specified multiple times.",
     multiple=True,
 )
 @click.option(
@@ -85,7 +108,8 @@ PRIMITIVE_TYPE_MAPPING = PrimitiveTypeMappingSpecMappingType()
     multiple=False,
 )
 @click.argument(
-    "lionweb-language", type=click.Path(exists=True, dir_okay=False, readable=True)
+    "lionweb-language", type=click.Path(exists=True, dir_okay=False, readable=True),
+    help="Path to the LionWeb language file that needs processing. Must be a readable file and exists."
 )
 @click.option(
     "--language-packages",
@@ -107,39 +131,43 @@ PRIMITIVE_TYPE_MAPPING = PrimitiveTypeMappingSpecMappingType()
 )
 @click.argument("output", type=click.Path(exists=False, file_okay=False, writable=True))
 def main(
-    dependencies,
+    dependencies: List[click.Path],
     lionweb_version: LionWebVersion,
-    lionweb_language,
+    lionweb_language: click.Path,
     language_packages: tuple[LanguageMappingSpec, ...],
     primitive_types: tuple[PrimitiveTypeMappingSpec, ...],
     output,
 ):
     """
-    Simple CLI command for processing LionWeb language files and generate corresponding classes to a specified
-    output directory. The CLI can also consider multiple dependency files for language registration prior to handling the main
-    language file.
+    Process LionWeb language files and generate corresponding Python classes.
 
-    Arguments:
-        lionweb_language (Path): Path to the LionWeb language file that needs
-            processing. Must be a readable file and exists.
-        output (Path): Path to the output directory where the results will be
-            written. Must not exist before execution.
+    This CLI command reads a LionWeb language definition file and generates Python code
+    including language definitions, node classes, and deserializers. Dependency files can
+    be provided to register additional languages before processing the main language file.
 
-    Options:
-        -d, --dependencies (Path): Paths to dependency files. Each file must
-            exist, be readable, and not a directory. Can be specified multiple
-            times.
+    Args:
+        dependencies: List of paths to dependency LionWeb language files. Each file is
+            processed and registered before the main language file.
+        lionweb_version: The LionWeb version to use for deserialization (defaults to 2023.1).
+        lionweb_language: Path to the main LionWeb language file to process.
+        language_packages: Tuple of language mapping specifications that map language IDs or names
+            to Python package paths (e.g., "MyLanguage=myapp.lang.mylang").
+        primitive_types: Tuple of primitive type mapping specifications that map primitive type
+            IDs or names to Python type paths (e.g., "date=myapp.types.Date").
+        output: Path to the output directory where generated Python files will be written.
 
     Raises:
-        IOError: If there is an issue reading the provided files or writing
-            results to the output directory.
+        IOError: If there is an issue reading the provided files or writing results to the
+            output directory.
         Exception: For any internal error encountered during processing.
 
+    Examples:
+        $ python -m lionweb.generation.generator -d deps.json input.json output/
+        $ python -m lionweb.generation.generator --lp "MyLang=myapp.lang" input.json output/
     """
     from lionweb.generation.deserializer_generation import \
         deserializer_generation
 
-    """Simple CLI that processes a file and writes results to a directory."""
     serialization = create_standard_json_serialization(lionweb_version)
 
     for dep in dependencies:

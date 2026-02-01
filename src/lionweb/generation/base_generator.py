@@ -7,6 +7,28 @@ from lionweb.language import DataType, Language
 
 
 class BaseGenerator:
+    """
+    Represents a base generator for managing mappings, imports, and function definitions.
+
+    This class provides functionality for looking up language-specific packages, mapping
+    primitive types to their qualified names, and managing abstract syntax tree (AST)
+    imports and function definitions. It is designed to handle the relationships
+    between languages, packages, and primitive types efficiently.
+
+    Attributes:
+        language_packages (tuple[LanguageMappingSpec, ...]): A tuple of mappings
+            defining relationships between programming languages and their package
+            specifications.
+        primitive_types (tuple[PrimitiveTypeMappingSpec, ...]): A tuple of mappings
+            defining relationships between primitive types and corresponding qualified
+            names.
+        imports (list[ast.ImportFrom]): A list of `ast.ImportFrom` objects representing
+            the imports added during processing.
+        language_to_imports (dict[str, ast.ImportFrom]): A dictionary mapping package
+            strings to their respective `ast.ImportFrom` objects.
+        functions (list[ast.FunctionDef]): A list of `ast.FunctionDef` objects representing
+            function definitions handled by the generator.
+    """
 
     def __init__(
         self,
