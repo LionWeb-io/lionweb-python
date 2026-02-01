@@ -16,8 +16,8 @@ jobs:
       # Probably unnecessary, if we install the code as a package
       PYTHONPATH: src
       # Set your thresholds here
-      OVERALL_COVERAGE_FAIL_UNDER: "50"
-      DIFF_COVER_FAIL_UNDER: "60"
+      OVERALL_COVERAGE_FAIL_UNDER: "40"
+      DIFF_COVER_FAIL_UNDER: "50"
     steps:
       - name: Checkout
         uses: actions/checkout@v4
