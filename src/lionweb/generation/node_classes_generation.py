@@ -5,7 +5,9 @@ from typing import Dict, List, Optional, cast
 
 import astor  # type: ignore
 
-from lionweb.generation.configuration import LanguageMappingSpec, PrimitiveTypeMappingSpec, BaseGenerator
+from lionweb.generation.utils import to_var_name
+from lionweb.generation.base_generator import BaseGenerator
+from lionweb.generation.configuration import LanguageMappingSpec, PrimitiveTypeMappingSpec
 from lionweb.generation.utils import make_class_def, make_function_def, to_type_name
 from lionweb.language import (Concept, Containment, Interface, Language,
                               LionCoreBuiltins, Property)
@@ -387,7 +389,7 @@ class NodeClassesGenerator(BaseGenerator):
         module = ast.Module(body=imports, type_ignores=[])
 
         for element in language.get_elements():
-            e_name = cast(str, element.get_name())
+            e_name = to_type_name(cast(str, element.get_name()))
             if isinstance(element, Concept):
                 pass
             elif isinstance(element, Interface):
@@ -398,7 +400,7 @@ class NodeClassesGenerator(BaseGenerator):
                 members: List[stmt] = [
                     ast.Assign(
                         targets=[
-                            ast.Name(id=cast(str, literal.get_name()), ctx=ast.Store())
+                            ast.Name(id=cast(str, to_var_name(literal.get_name())), ctx=ast.Store())
                         ],
                         value=ast.Constant(value=cast(str, literal.get_name())),
                     )

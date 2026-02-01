@@ -5,10 +5,11 @@ from typing import List, cast
 
 import astor  # type: ignore
 
-from lionweb.generation.configuration import LanguageMappingSpec, PrimitiveTypeMappingSpec, BaseGenerator
+from lionweb.generation.base_generator import BaseGenerator
+from lionweb.generation.configuration import LanguageMappingSpec, PrimitiveTypeMappingSpec
 from lionweb.generation.utils import make_function_def, to_var_name
 from lionweb.language import (Concept, Containment, DataType, Language,
-                              LionCoreBuiltins, Property)
+                              LionCoreBuiltins, Property, Enumeration)
 from lionweb.language import PrimitiveType
 from lionweb.language.reference import Reference
 
@@ -297,6 +298,48 @@ class LanguageGenerator(BaseGenerator):
             )
         )
 
+    def _define_enumeration_in_language(self, enumeration: Enumeration, get_language_body: List[stmt]):
+        enumeration_name = cast(str, enumeration.get_name())
+        language = enumeration.language
+        if language is None:
+            raise ValueError(f"Enumeration {enumeration_name} has no language")
+        var_name = to_var_name(enumeration_name)
+        get_language_body.append(
+            ast.Assign(
+                targets=[ast.Name(id=var_name, ctx=ast.Store())],
+                value=ast.Call(
+                    func=ast.Name(id="Enumeration", ctx=ast.Load()),
+                    args=[],
+                    keywords=[
+                        _set_lw_version(language),
+                        ast.keyword(
+                            arg="id", value=ast.Constant(value=enumeration.id)
+                        ),
+                        ast.keyword(
+                            arg="name", value=ast.Constant(value=enumeration_name)
+                        ),
+                        ast.keyword(
+                            arg="key",
+                            value=ast.Constant(value=enumeration.key),
+                        ),
+                    ],
+                ),
+            )
+        )
+        get_language_body.append(
+            ast.Expr(
+                value=ast.Call(
+                    func=ast.Attribute(
+                        value=ast.Name(id="language", ctx=ast.Load()),
+                        attr="add_element",
+                        ctx=ast.Load(),
+                    ),
+                    args=[ast.Name(id=var_name, ctx=ast.Load())],
+                    keywords=[],
+                )
+            )
+        )
+
     def language_generation(self, click, language: Language, output):
         body: List[stmt] = []
         body.append(
@@ -305,9 +348,10 @@ class LanguageGenerator(BaseGenerator):
                 names=[
                     ast.alias(name="Language", asname=None),
                     ast.alias(name="Concept", asname=None),
-                    ast.alias(name="Property", asname=None),
                     ast.alias(name="Containment", asname=None),
+                    ast.alias(name="Enumeration", asname=None),
                     ast.alias(name="PrimitiveType", asname=None),
+                    ast.alias(name="Property", asname=None),
                     ast.alias(name="Reference", asname=None),
                     ast.alias(name="LionCoreBuiltins", asname=None),
                 ],
@@ -346,6 +390,9 @@ class LanguageGenerator(BaseGenerator):
             if isinstance(language_element, PrimitiveType):
                 self._define_primitive_type_in_language(language_element, function_body)
 
+            if isinstance(language_element, Enumeration):
+                self._define_enumeration_in_language(language_element, function_body)
+
         for language_element in language.get_elements():
             if isinstance(language_element, Concept):
                 self._populate_concept_in_language(language_element, function_body)
@@ -365,12 +412,12 @@ class LanguageGenerator(BaseGenerator):
         )
 
         # Wrap function in module
-        body.append(get_language_def)
+        self.functions.append(get_language_def)
 
         for language_element in language.get_elements():
             if isinstance(language_element, Concept):
                 concept_name = cast(str, language_element.get_name())
-                body.append(
+                self.functions.append(
                     make_function_def(
                         name=f"get_{concept_name.lower()}",
                         args=ast.arguments(
@@ -405,7 +452,7 @@ class LanguageGenerator(BaseGenerator):
                 )
             if isinstance(language_element, PrimitiveType):
                 element_name = cast(str, language_element.get_name())
-                body.append(
+                self.functions.append(
                     make_function_def(
                         name=f"get_{element_name.lower()}",
                         args=ast.arguments(
@@ -438,6 +485,12 @@ class LanguageGenerator(BaseGenerator):
                         returns=ast.Name(id="PrimitiveType", ctx=ast.Load()),
                     )
                 )
+
+        for i in self.imports:
+            body.append(i)
+
+        for f in self.functions:
+            body.append(f)
 
         module = ast.Module(body=body, type_ignores=[])
 
