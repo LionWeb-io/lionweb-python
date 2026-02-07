@@ -154,7 +154,7 @@ def get_only_reference_value_by_reference_name(
     if instance is None:
         raise ValueError("_this should not be null")
     if reference_name is None:
-        raise ValueError("referenceName should not be null")
+        raise ValueError("reference_name should not be null")
 
     reference_values: List["ReferenceValue"] = get_reference_value_by_name(
         instance, reference_name
@@ -165,6 +165,22 @@ def get_only_reference_value_by_reference_name(
         return None
     else:
         return reference_values[0]
+
+def get_only_child_by_reference_name(
+        instance, containment_name: str
+) -> Optional["Node"]:
+    if instance is None:
+        raise ValueError("_this should not be null")
+    if containment_name is None:
+        raise ValueError("containment_name should not be null")
+
+    children: List["Node"] = instance.get_children(containment_name)
+    if len(children) > 1:
+        raise RuntimeError("More than one child found")
+    elif len(children) == 0:
+        return None
+    else:
+        return children[0]
 
 
 def get_root(nodes: List["Node"]) -> "Node":

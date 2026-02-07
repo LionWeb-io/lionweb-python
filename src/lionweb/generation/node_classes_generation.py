@@ -457,6 +457,159 @@ class NodeClassesGenerator(BaseGenerator, ASTBuilder):
             returns=None,
         )
 
+    def _generate_containment_getter(self, feature: Containment, prop_type: str):
+        # Use string annotation for forward reference
+        return make_function_def(
+            name=feature.get_name(),
+            args=ast.arguments(
+                posonlyargs=[],
+                args=[ast.arg(arg="self")],
+                kwonlyargs=[],
+                kw_defaults=[],
+                defaults=[],
+            ),
+            body=[
+                self.assign(
+                    "res",
+                    self.call(
+                        "get_only_child_by_containment_name",
+                        args=[self.name("self"), self.const(feature.get_name())],
+                    ),
+                ),
+                ast.If(
+                    test=self.name("res"),
+                    body=[
+                        ast.Return(
+                            self.call(
+                                "cast",
+                                args=[
+                                    self.const(prop_type),  # Use string for cast
+                                    self.attr("res", "referred"),
+                                ],
+                            )
+                        )
+                    ],
+                    orelse=[ast.Return(value=self.const(None))],
+                ),
+            ],
+            decorator_list=[self.name("property")],
+            returns=self.const(f'Optional["{prop_type}"]'),  # String annotation
+        )
+
+    def _generate_containment_setter(self, feature: Containment, prop_type: str):
+        # Use string annotation for forward reference
+        return make_function_def(
+            name=feature.get_name(),
+            args=ast.arguments(
+                posonlyargs=[],
+                args=[
+                    ast.arg(arg="self"),
+                    ast.arg(
+                        arg=cast(str, feature.get_name()),
+                        annotation=self.const(f'"{prop_type}"'),  # String annotation
+                    ),
+                ],
+                kwonlyargs=[],
+                kw_defaults=[],
+                defaults=[],
+            ),
+            body=[
+                self.assign(
+                    "containment",
+                    self._get_feature_by_name(feature, "get_containment_by_name"),
+                ),
+                ast.If(
+                    test=self.attr("self", feature.get_name()),
+                    body=[
+                        ast.Expr(
+                            self.call(
+                                self.attr("self", "remove_child_by_index"),
+                                args=[self.name("containment"), self.const(0)],
+                            )
+                        )
+                    ],
+                    orelse=[],
+                ),
+                ast.Expr(
+                    self.call(
+                        self.attr("self", "add_child"),
+                        args=[
+                            self.name("containment"),
+                            self.call(
+                                "ReferenceValue",
+                                args=[
+                                    self.name(feature.get_name()),
+                                    self.attr(feature.get_name(), "name"),
+                                ],
+                            ),
+                        ],
+                    )
+                ),
+            ],
+            decorator_list=[self.attr(feature.get_name(), "setter")],
+            returns=None,
+        )
+
+    def _generate_multiple_containment_getter(self, feature: Containment, prop_type: str):
+        # Use string annotation for forward reference
+        return make_function_def(
+            name=feature.name,
+            args=ast.arguments(
+                posonlyargs=[],
+                args=[ast.arg(arg="self")],
+                kwonlyargs=[],
+                kw_defaults=[],
+                defaults=[],
+            ),
+            body=[
+                self.assign(
+                    "res",
+                    self.call(
+                        self.attr("self", "get_children"),
+                        args=[self.const(feature.name)],
+                    ),
+                ),
+                ast.Return(
+                    value=self.name("res")
+                )
+            ],
+            decorator_list=[self.name("property")],
+            returns=self.const(f'List["{prop_type}"]'),  # String annotation
+        )
+
+    def _generate_multiple_containment_adder(self, feature: Containment, prop_type: str):
+        # Use string annotation for forward reference
+        return make_function_def(
+            name=f"add_to_{to_snake_case(feature.name)}",
+            args=ast.arguments(
+                posonlyargs=[],
+                args=[
+                    ast.arg(arg="self"),
+                    ast.arg(
+                        arg="new_element", annotation=self.const(f'"{prop_type}"')
+                    ),  # String annotation
+                ],
+                kwonlyargs=[],
+                kw_defaults=[],
+                defaults=[],
+            ),
+            body=[
+                ast.Expr(
+                    self.call(
+                        self.attr("self", "add_child"),
+                        args=[
+                            self._get_feature_by_name(
+                                feature, "require_containment_by_name"
+                            ),
+                            self.name("new_element"),
+                        ],
+                    )
+                )
+            ],
+            decorator_list=[],
+            returns=None,
+        )
+
     def node_classes_generation(self, click, language: Language, output):
         output_path = Path(output)
         output_path.mkdir(parents=True, exist_ok=True)
@@ -637,7 +790,18 @@ class NodeClassesGenerator(BaseGenerator, ASTBuilder):
                 methods.append(self._generate_property_getter(feature, prop_type))
                 methods.append(self._generate_property_setter(feature, prop_type))
             elif isinstance(feature, Containment):
-                pass  # Containment not yet implemented
+                feature_type = cast(Classifier, feature.get_type())
+                prop_type = cast(str, feature_type.get_name())
+                if feature.is_multiple():
+                    methods.append(
+                        self._generate_multiple_containment_getter(feature, prop_type)
+                    )
+                    methods.append(
+                        self._generate_multiple_containment_adder(feature, prop_type)
+                    )
+                else:
+                    methods.append(self._generate_containment_getter(feature, prop_type))
+                    methods.append(self._generate_containment_setter(feature, prop_type))
             elif isinstance(feature, Reference):
                 feature_type = cast(Classifier, feature.get_type())
                 prop_type = cast(str, feature_type.get_name())
