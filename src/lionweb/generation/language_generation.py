@@ -17,36 +17,6 @@ from lionweb.language import (Classifier, Concept, Containment, DataType,
 from lionweb.language.reference import Reference
 
 
-def _set_lw_version(language: Language):
-    return ast.keyword(
-        arg="lion_web_version",
-        value=ast.Attribute(
-            value=ast.Name(id="LionWebVersion", ctx=ast.Load()),
-            attr=language.get_lionweb_version().name,
-            ctx=ast.Load(),
-        ),
-    )
-
-
-def _generate_language(language: Language) -> ast.Assign:
-    return ast.Assign(
-        targets=[ast.Name(id="language", ctx=ast.Store())],
-        value=ast.Call(
-            func=ast.Name(id="Language", ctx=ast.Load()),
-            args=[],
-            keywords=[
-                _set_lw_version(language),
-                ast.keyword(arg="id", value=ast.Constant(value=language.id)),
-                ast.keyword(arg="name", value=ast.Constant(value=language.get_name())),
-                ast.keyword(arg="key", value=ast.Constant(value=language.key)),
-                ast.keyword(
-                    arg="version", value=ast.Constant(value=language.get_version())
-                ),
-            ],
-        ),
-    )
-
-
 class LanguageGenerator(BaseGenerator, ASTBuilder):
 
     def __init__(
@@ -55,6 +25,36 @@ class LanguageGenerator(BaseGenerator, ASTBuilder):
         primitive_types: tuple[PrimitiveTypeMappingSpec, ...] = (),
     ):
         super().__init__(language_packages, primitive_types)
+
+    def _set_lw_version(self, language: Language):
+        return ast.keyword(
+            arg="lion_web_version",
+            value=ast.Attribute(
+                value=ast.Name(id="LionWebVersion", ctx=ast.Load()),
+                attr=language.get_lionweb_version().name,
+                ctx=ast.Load(),
+            ),
+        )
+
+
+    def _generate_language(self, language: Language) -> ast.Assign:
+        return ast.Assign(
+            targets=[ast.Name(id="language", ctx=ast.Store())],
+            value=ast.Call(
+                func=ast.Name(id="Language", ctx=ast.Load()),
+                args=[],
+                keywords=[
+                    self._set_lw_version(language),
+                    ast.keyword(arg="id", value=ast.Constant(value=language.id)),
+                    ast.keyword(arg="name", value=ast.Constant(value=language.get_name())),
+                    ast.keyword(arg="key", value=ast.Constant(value=language.key)),
+                    ast.keyword(
+                        arg="version", value=ast.Constant(value=language.get_version())
+                    ),
+                ],
+            ),
+        )
+
 
     def _add_to_language(self, var_name: str) -> ast.Expr:
         return ast.Expr(
@@ -342,174 +342,94 @@ class LanguageGenerator(BaseGenerator, ASTBuilder):
         get_language_body.append(self._add_to_language(var_name))
 
     def language_generation(self, click, language: Language, output):
-        body: List[stmt] = []
-        body.append(
-            ast.ImportFrom(
-                module="lionweb.language",
-                names=[
-                    ast.alias(name="Language", asname=None),
-                    ast.alias(name="Concept", asname=None),
-                    ast.alias(name="Containment", asname=None),
-                    ast.alias(name="Enumeration", asname=None),
-                    ast.alias(name="Interface", asname=None),
-                    ast.alias(name="PrimitiveType", asname=None),
-                    ast.alias(name="Property", asname=None),
-                    ast.alias(name="Reference", asname=None),
-                    ast.alias(name="LionCoreBuiltins", asname=None),
+        # 1. Clean Static Imports
+        # Instead of building nodes manually, parse a string. It's readable and standard.
+        body = ast.parse(
+            "from lionweb.language import Language, Concept, Containment, Enumeration, "
+            "Interface, PrimitiveType, Property, Reference, LionCoreBuiltins\n"
+            "from lionweb.lionweb_version import LionWebVersion\n"
+            "from functools import lru_cache"
+        ).body
+
+        func_body: List[stmt] = []
+
+        func_body.append(self._generate_language(language))
+
+        # Creation Loop
+        for el in language.get_elements():
+            if isinstance(el, Concept):
+                self._create_concept_in_language(el, func_body)
+            elif isinstance(el, Interface):
+                self._create_interface_in_language(el, func_body)
+            elif isinstance(el, PrimitiveType):
+                self._define_primitive_type_in_language(el, func_body)
+            elif isinstance(el, Enumeration):
+                self._define_enumeration_in_language(el, func_body)
+
+        # Population Loop
+        for el in language.get_elements():
+            if isinstance(el, Concept):
+                self._populate_concept_in_language(el, func_body)
+            elif isinstance(el, Interface):
+                self._populate_interface_in_language(el, func_body)
+
+        # Return statement
+        func_body.append(ast.Return(value=self.name("language")))
+
+        # 3. Create get_language() Definition
+        self.functions.append(
+            make_function_def(
+                name="get_language",
+                args=ast.arguments(posonlyargs=[], args=[], kwonlyargs=[], kw_defaults=[], defaults=[]),
+                body=func_body,
+                decorator_list=[
+                    self.call("lru_cache", keywords={"maxsize": self.const(1)})
                 ],
-                level=0,
+                returns=self.name("Language"),
             )
         )
-        body.append(
-            ast.ImportFrom(
-                module="lionweb.lionweb_version",
-                names=[ast.alias(name="LionWebVersion", asname=None)],
-                level=0,
-            )
-        )
-        body.append(
-            ast.ImportFrom(
-                module="functools",
-                names=[ast.alias(name="lru_cache", asname=None)],
-                level=0,
-            )
-        )
-        # Decorator: @lru_cache(maxsize=1)
-        decorator = ast.Call(
-            func=ast.Name(id="lru_cache", ctx=ast.Load()),
-            args=[],
-            keywords=[ast.keyword(arg="maxsize", value=ast.Constant(value=1))],
-        )
 
-        # Function body for get_language()
-        function_body: List[stmt] = []
-        function_body.append(_generate_language(language))
+        # 4. Generate Getters (Refactored duplication)
+        for el in language.get_elements():
+            if isinstance(el, Concept):
+                self._add_getter_method(el, "get_concept_by_name", "Concept")
+            elif isinstance(el, PrimitiveType):
+                self._add_getter_method(el, "get_primitive_type_by_name", "PrimitiveType")
 
-        for language_element in language.get_elements():
-            if isinstance(language_element, Concept):
-                self._create_concept_in_language(language_element, function_body)
-
-            if isinstance(language_element, Interface):
-                self._create_interface_in_language(language_element, function_body)
-
-            if isinstance(language_element, PrimitiveType):
-                self._define_primitive_type_in_language(language_element, function_body)
-
-            if isinstance(language_element, Enumeration):
-                self._define_enumeration_in_language(language_element, function_body)
-
-        for language_element in language.get_elements():
-            if isinstance(language_element, Concept):
-                self._populate_concept_in_language(language_element, function_body)
-
-            if isinstance(language_element, Interface):
-                self._populate_interface_in_language(language_element, function_body)
-
-        # return language
-        function_body.append(ast.Return(value=ast.Name(id="language", ctx=ast.Load())))
-
-        # Define get_language function
-        get_language_def = make_function_def(
-            name="get_language",
-            args=ast.arguments(
-                posonlyargs=[], args=[], kwonlyargs=[], kw_defaults=[], defaults=[]
-            ),
-            body=function_body,
-            decorator_list=[decorator],
-            returns=ast.Name(id="Language", ctx=ast.Load()),
-        )
-
-        # Wrap function in module
-        self.functions.append(get_language_def)
-
-        for language_element in language.get_elements():
-            if isinstance(language_element, Concept):
-                concept_name = cast(str, language_element.get_name())
-                self.functions.append(
-                    make_function_def(
-                        name=getter_name(concept_name),
-                        args=ast.arguments(
-                            posonlyargs=[],
-                            args=[],
-                            kwonlyargs=[],
-                            kw_defaults=[],
-                            defaults=[],
-                        ),
-                        body=[
-                            ast.Return(
-                                value=ast.Call(
-                                    func=ast.Attribute(
-                                        value=ast.Call(
-                                            func=ast.Name(
-                                                id="get_language", ctx=ast.Load()
-                                            ),
-                                            args=[],
-                                            keywords=[],
-                                        ),
-                                        attr="get_concept_by_name",
-                                        ctx=ast.Load(),
-                                    ),
-                                    args=[
-                                        ast.Constant(value=language_element.get_name())
-                                    ],
-                                    keywords=[],
-                                )
-                            )
-                        ],
-                        decorator_list=[],
-                        returns=ast.Name(id="Concept", ctx=ast.Load()),
-                    )
-                )
-            if isinstance(language_element, PrimitiveType):
-                element_name = cast(str, language_element.get_name())
-                self.functions.append(
-                    make_function_def(
-                        name=getter_name(element_name),
-                        args=ast.arguments(
-                            posonlyargs=[],
-                            args=[],
-                            kwonlyargs=[],
-                            kw_defaults=[],
-                            defaults=[],
-                        ),
-                        body=[
-                            ast.Return(
-                                value=ast.Call(
-                                    func=ast.Attribute(
-                                        value=ast.Call(
-                                            func=ast.Name(
-                                                id="get_language", ctx=ast.Load()
-                                            ),
-                                            args=[],
-                                            keywords=[],
-                                        ),
-                                        attr="get_primitive_type_by_name",
-                                        ctx=ast.Load(),
-                                    ),
-                                    args=[
-                                        ast.Constant(value=language_element.get_name())
-                                    ],
-                                    keywords=[],
-                                )
-                            )
-                        ],
-                        decorator_list=[],
-                        returns=ast.Name(id="PrimitiveType", ctx=ast.Load()),
-                    )
-                )
-
-        for i in self.imports:
-            body.append(i)
-
-        for f in self.functions:
-            body.append(f)
+        # 5. Final Assembly
+        body.extend(self.imports)
+        body.extend(self.functions)
 
         module = ast.Module(body=body, type_ignores=[])
 
+        # 6. Write File
         click.echo(f"📂 Saving language to: {output}")
-        generated_code = astor.to_source(module)
         output_path = Path(output)
         output_path.mkdir(parents=True, exist_ok=True)
 
-        with Path(f"{output}/language.py").open("w", encoding="utf-8") as file:
-            file.write(generated_code)
+        with (output_path / "language.py").open("w", encoding="utf-8") as file:
+            file.write(astor.to_source(module))
+
+    def _add_getter_method(self, element, lookup_method: str, return_type: str):
+        """Helper to generate specific getter functions (e.g. get_my_concept)."""
+        element_name = cast(str, element.get_name())
+
+        # Body: return get_language().lookup_method("element_name")
+        body = [
+            ast.Return(
+                value=self.call(
+                    self.attr(self.call("get_language"), lookup_method),
+                    args=[self.const(element_name)]
+                )
+            )
+        ]
+
+        self.functions.append(
+            make_function_def(
+                name=getter_name(element_name),
+                args=ast.arguments(posonlyargs=[], args=[], kwonlyargs=[], kw_defaults=[], defaults=[]),
+                body=body,
+                decorator_list=[],
+                returns=self.name(return_type),
+            )
+        )
