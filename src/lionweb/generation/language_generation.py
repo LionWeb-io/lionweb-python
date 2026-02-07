@@ -12,7 +12,7 @@ from lionweb.generation.generation_utils import make_function_def
 from lionweb.generation.naming_utils import getter_name, to_var_name
 from lionweb.language import (Classifier, Concept, Containment, DataType,
                               Enumeration, Interface, Language,
-                              LionCoreBuiltins, PrimitiveType, Property)
+                              LionCoreBuiltins, PrimitiveType, Property, Feature)
 from lionweb.language.reference import Reference
 
 
@@ -139,6 +139,150 @@ class LanguageGenerator(BaseGenerator):
         )
         get_language_body.append(self._add_to_language(var_name))
 
+    def _process_feature(self, container_name: str, feature: Feature) -> ast.Expr:
+        language = cast(Language, feature.parent.parent)
+        if isinstance(feature, Reference):
+            feature_creation = ast.Call(
+                func=ast.Name(id="Reference", ctx=ast.Load()),
+                args=[],
+                keywords=[
+                    _set_lw_version(language),
+                    ast.keyword(arg="id", value=ast.Constant(value=feature.id)),
+                    ast.keyword(
+                        arg="name", value=ast.Constant(value=feature.get_name())
+                    ),
+                    ast.keyword(arg="key", value=ast.Constant(value=feature.key)),
+                    ast.keyword(
+                        arg="type",
+                        value=ast.Name(
+                            id=to_var_name(cast(Classifier, feature.type).name),
+                            ctx=ast.Load(),
+                        ),
+                    ),
+                    ast.keyword(
+                        arg="multiple", value=ast.Constant(value=feature.multiple)
+                    ),
+                    ast.keyword(
+                        arg="optional", value=ast.Constant(value=feature.optional)
+                    ),
+                ],
+            )
+            return ast.Expr(
+                    value=ast.Call(
+                        func=ast.Attribute(
+                            value=ast.Name(id=container_name, ctx=ast.Load()),
+                            attr="add_feature",
+                            ctx=ast.Load(),
+                        ),
+                        args=[feature_creation],
+                        keywords=[],
+                    )
+                )
+        elif isinstance(feature, Property):
+            pt = cast(DataType, feature.type)
+            property_type: expr
+            if pt == LionCoreBuiltins.get_string(feature.lion_web_version):
+                property_type = ast.Call(
+                    func=ast.Attribute(
+                        value=ast.Name(id="LionCoreBuiltins", ctx=ast.Load()),
+                        attr="get_string",
+                        ctx=ast.Load(),
+                    ),
+                    args=[],
+                    keywords=[_set_lw_version(language)],
+                )
+            elif pt == LionCoreBuiltins.get_integer(feature.lion_web_version):
+                property_type = ast.Call(
+                    func=ast.Attribute(
+                        value=ast.Name(id="LionCoreBuiltins", ctx=ast.Load()),
+                        attr="get_integer",
+                        ctx=ast.Load(),
+                    ),
+                    args=[],
+                    keywords=[_set_lw_version(language)],
+                )
+            elif language == pt.language:
+                # We have declared the property above
+                property_type = ast.Name(
+                    id=to_var_name(pt.get_name()), ctx=ast.Load()
+                )
+            else:
+                package = self._package_lookup(cast(Language, pt.language))
+                if package is not None:
+                    property_type = self._primitive_type_lookup_exp(
+                        package, pt.get_name()
+                    )
+                else:
+                    pt_language = pt.language
+                    if pt_language is None:
+                        raise ValueError(
+                            f"Property {feature.get_name()} has no language"
+                        )
+                    raise ValueError(
+                        f"We need to load {cast(str, pt.get_name())} from language {pt_language.get_name()} but no mapping was found"
+                    )
+            feature_creation = ast.Call(
+                func=ast.Name(id="Property", ctx=ast.Load()),
+                args=[],
+                keywords=[
+                    _set_lw_version(language),
+                    ast.keyword(arg="id", value=ast.Constant(value=feature.id)),
+                    ast.keyword(
+                        arg="name", value=ast.Constant(value=feature.get_name())
+                    ),
+                    ast.keyword(arg="key", value=ast.Constant(value=feature.key)),
+                    ast.keyword(arg="type", value=property_type),
+                ],
+            )
+            return ast.Expr(
+                    value=ast.Call(
+                        func=ast.Attribute(
+                            value=ast.Name(id=container_name, ctx=ast.Load()),
+                            attr="add_feature",
+                            ctx=ast.Load(),
+                        ),
+                        args=[feature_creation],
+                        keywords=[],
+                    )
+                )
+        elif isinstance(feature, Containment):
+            feature_creation = ast.Call(
+                func=ast.Name(id="Containment", ctx=ast.Load()),
+                args=[],
+                keywords=[
+                    _set_lw_version(language),
+                    ast.keyword(arg="id", value=ast.Constant(value=feature.id)),
+                    ast.keyword(
+                        arg="name", value=ast.Constant(value=feature.get_name())
+                    ),
+                    ast.keyword(arg="key", value=ast.Constant(value=feature.key)),
+                    ast.keyword(
+                        arg="type",
+                        value=ast.Name(
+                            id=to_var_name(cast(Classifier, feature.type).name),
+                            ctx=ast.Load(),
+                        ),
+                    ),
+                    ast.keyword(
+                        arg="multiple", value=ast.Constant(value=feature.multiple)
+                    ),
+                    ast.keyword(
+                        arg="optional", value=ast.Constant(value=feature.optional)
+                    ),
+                ],
+            )
+            return ast.Expr(
+                    value=ast.Call(
+                        func=ast.Attribute(
+                            value=ast.Name(id=container_name, ctx=ast.Load()),
+                            attr="add_feature",
+                            ctx=ast.Load(),
+                        ),
+                        args=[feature_creation],
+                        keywords=[],
+                    )
+                )
+
     def _populate_concept_in_language(
         self, concept: Concept, get_language_body: List[stmt]
     ):
@@ -186,153 +330,7 @@ class LanguageGenerator(BaseGenerator):
             )
 
         for feature in concept.get_features():
-            if isinstance(feature, Reference):
-                feature_creation = ast.Call(
-                    func=ast.Name(id="Reference", ctx=ast.Load()),
-                    args=[],
-                    keywords=[
-                        _set_lw_version(language),
-                        ast.keyword(arg="id", value=ast.Constant(value=feature.id)),
-                        ast.keyword(
-                            arg="name", value=ast.Constant(value=feature.get_name())
-                        ),
-                        ast.keyword(arg="key", value=ast.Constant(value=feature.key)),
-                        ast.keyword(
-                            arg="type",
-                            value=ast.Name(
-                                id=to_var_name(cast(Classifier, feature.type).name),
-                                ctx=ast.Load(),
-                            ),
-                        ),
-                        ast.keyword(
-                            arg="multiple", value=ast.Constant(value=feature.multiple)
-                        ),
-                        ast.keyword(
-                            arg="optional", value=ast.Constant(value=feature.optional)
-                        ),
-                    ],
-                )
-                get_language_body.append(
-                    ast.Expr(
-                        value=ast.Call(
-                            func=ast.Attribute(
-                                value=ast.Name(id=var_name, ctx=ast.Load()),
-                                attr="add_feature",
-                                ctx=ast.Load(),
-                            ),
-                            args=[feature_creation],
-                            keywords=[],
-                        )
-                    )
-                )
-            elif isinstance(feature, Property):
-                pt = cast(DataType, feature.type)
-                property_type: expr
-                if pt == LionCoreBuiltins.get_string(feature.lion_web_version):
-                    property_type = ast.Call(
-                        func=ast.Attribute(
-                            value=ast.Name(id="LionCoreBuiltins", ctx=ast.Load()),
-                            attr="get_string",
-                            ctx=ast.Load(),
-                        ),
-                        args=[],
-                        keywords=[_set_lw_version(language)],
-                    )
-                elif pt == LionCoreBuiltins.get_integer(feature.lion_web_version):
-                    property_type = ast.Call(
-                        func=ast.Attribute(
-                            value=ast.Name(id="LionCoreBuiltins", ctx=ast.Load()),
-                            attr="get_integer",
-                            ctx=ast.Load(),
-                        ),
-                        args=[],
-                        keywords=[_set_lw_version(language)],
-                    )
-                elif language == pt.language:
-                    # We have declared the property above
-                    property_type = ast.Name(
-                        id=to_var_name(pt.get_name()), ctx=ast.Load()
-                    )
-                else:
-                    package = self._package_lookup(cast(Language, pt.language))
-                    if package is not None:
-                        property_type = self._primitive_type_lookup_exp(
-                            package, pt.get_name()
-                        )
-                    else:
-                        pt_language = pt.language
-                        if pt_language is None:
-                            raise ValueError(
-                                f"Property {feature.get_name()} has no language"
-                            )
-                        raise ValueError(
-                            f"We need to load {cast(str, pt.get_name())} from language {pt_language.get_name()} but no mapping was found"
-                        )
-                feature_creation = ast.Call(
-                    func=ast.Name(id="Property", ctx=ast.Load()),
-                    args=[],
-                    keywords=[
-                        _set_lw_version(language),
-                        ast.keyword(arg="id", value=ast.Constant(value=feature.id)),
-                        ast.keyword(
-                            arg="name", value=ast.Constant(value=feature.get_name())
-                        ),
-                        ast.keyword(arg="key", value=ast.Constant(value=feature.key)),
-                        ast.keyword(arg="type", value=property_type),
-                    ],
-                )
-                get_language_body.append(
-                    ast.Expr(
-                        value=ast.Call(
-                            func=ast.Attribute(
-                                value=ast.Name(id=var_name, ctx=ast.Load()),
-                                attr="add_feature",
-                                ctx=ast.Load(),
-                            ),
-                            args=[feature_creation],
-                            keywords=[],
-                        )
-                    )
-                )
-            elif isinstance(feature, Containment):
-                feature_creation = ast.Call(
-                    func=ast.Name(id="Containment", ctx=ast.Load()),
-                    args=[],
-                    keywords=[
-                        _set_lw_version(language),
-                        ast.keyword(arg="id", value=ast.Constant(value=feature.id)),
-                        ast.keyword(
-                            arg="name", value=ast.Constant(value=feature.get_name())
-                        ),
-                        ast.keyword(arg="key", value=ast.Constant(value=feature.key)),
-                        ast.keyword(
-                            arg="type",
-                            value=ast.Name(
-                                id=to_var_name(cast(Classifier, feature.type).name),
-                                ctx=ast.Load(),
-                            ),
-                        ),
-                        ast.keyword(
-                            arg="multiple", value=ast.Constant(value=feature.multiple)
-                        ),
-                        ast.keyword(
-                            arg="optional", value=ast.Constant(value=feature.optional)
-                        ),
-                    ],
-                )
-                get_language_body.append(
-                    ast.Expr(
-                        value=ast.Call(
-                            func=ast.Attribute(
-                                value=ast.Name(id=var_name, ctx=ast.Load()),
-                                attr="add_feature",
-                                ctx=ast.Load(),
-                            ),
-                            args=[feature_creation],
-                            keywords=[],
-                        )
-                    )
-                )
+            get_language_body.append(self._process_feature(var_name, feature))
 
     def _populate_interface_in_language(
         self, interface: Interface, get_language_body: List[stmt]
@@ -364,153 +362,7 @@ class LanguageGenerator(BaseGenerator):
             )
 
         for feature in interface.get_features():
-            if isinstance(feature, Reference):
-                feature_creation = ast.Call(
-                    func=ast.Name(id="Reference", ctx=ast.Load()),
-                    args=[],
-                    keywords=[
-                        _set_lw_version(language),
-                        ast.keyword(arg="id", value=ast.Constant(value=feature.id)),
-                        ast.keyword(
-                            arg="name", value=ast.Constant(value=feature.get_name())
-                        ),
-                        ast.keyword(arg="key", value=ast.Constant(value=feature.key)),
-                        ast.keyword(
-                            arg="type",
-                            value=ast.Name(
-                                id=to_var_name(cast(Classifier, feature.type).name),
-                                ctx=ast.Load(),
-                            ),
-                        ),
-                        ast.keyword(
-                            arg="multiple", value=ast.Constant(value=feature.multiple)
-                        ),
-                        ast.keyword(
-                            arg="optional", value=ast.Constant(value=feature.optional)
-                        ),
-                    ],
-                )
-                get_language_body.append(
-                    ast.Expr(
-                        value=ast.Call(
-                            func=ast.Attribute(
-                                value=ast.Name(id=var_name, ctx=ast.Load()),
-                                attr="add_feature",
-                                ctx=ast.Load(),
-                            ),
-                            args=[feature_creation],
-                            keywords=[],
-                        )
-                    )
-                )
-            elif isinstance(feature, Property):
-                pt = cast(DataType, feature.type)
-                property_type: expr
-                if pt == LionCoreBuiltins.get_string(feature.lion_web_version):
-                    property_type = ast.Call(
-                        func=ast.Attribute(
-                            value=ast.Name(id="LionCoreBuiltins", ctx=ast.Load()),
-                            attr="get_string",
-                            ctx=ast.Load(),
-                        ),
-                        args=[],
-                        keywords=[_set_lw_version(language)],
-                    )
-                elif pt == LionCoreBuiltins.get_integer(feature.lion_web_version):
-                    property_type = ast.Call(
-                        func=ast.Attribute(
-                            value=ast.Name(id="LionCoreBuiltins", ctx=ast.Load()),
-                            attr="get_integer",
-                            ctx=ast.Load(),
-                        ),
-                        args=[],
-                        keywords=[_set_lw_version(language)],
-                    )
-                elif language == pt.language:
-                    # We have declared the property above
-                    property_type = ast.Name(
-                        id=to_var_name(pt.get_name()), ctx=ast.Load()
-                    )
-                else:
-                    package = self._package_lookup(cast(Language, pt.language))
-                    if package is not None:
-                        property_type = self._primitive_type_lookup_exp(
-                            package, pt.get_name()
-                        )
-                    else:
-                        pt_language = pt.language
-                        if pt_language is None:
-                            raise ValueError(
-                                f"Property {feature.get_name()} has no language"
-                            )
-                        raise ValueError(
-                            f"We need to load {cast(str, pt.get_name())} from language {pt_language.get_name()} but no mapping was found"
-                        )
-                feature_creation = ast.Call(
-                    func=ast.Name(id="Property", ctx=ast.Load()),
-                    args=[],
-                    keywords=[
-                        _set_lw_version(language),
-                        ast.keyword(arg="id", value=ast.Constant(value=feature.id)),
-                        ast.keyword(
-                            arg="name", value=ast.Constant(value=feature.get_name())
-                        ),
-                        ast.keyword(arg="key", value=ast.Constant(value=feature.key)),
-                        ast.keyword(arg="type", value=property_type),
-                    ],
-                )
-                get_language_body.append(
-                    ast.Expr(
-                        value=ast.Call(
-                            func=ast.Attribute(
-                                value=ast.Name(id=var_name, ctx=ast.Load()),
-                                attr="add_feature",
-                                ctx=ast.Load(),
-                            ),
-                            args=[feature_creation],
-                            keywords=[],
-                        )
-                    )
-                )
-            elif isinstance(feature, Containment):
-                feature_creation = ast.Call(
-                    func=ast.Name(id="Containment", ctx=ast.Load()),
-                    args=[],
-                    keywords=[
-                        _set_lw_version(language),
-                        ast.keyword(arg="id", value=ast.Constant(value=feature.id)),
-                        ast.keyword(
-                            arg="name", value=ast.Constant(value=feature.get_name())
-                        ),
-                        ast.keyword(arg="key", value=ast.Constant(value=feature.key)),
-                        ast.keyword(
-                            arg="type",
-                            value=ast.Name(
-                                id=to_var_name(cast(Classifier, feature.type).name),
-                                ctx=ast.Load(),
-                            ),
-                        ),
-                        ast.keyword(
-                            arg="multiple", value=ast.Constant(value=feature.multiple)
-                        ),
-                        ast.keyword(
-                            arg="optional", value=ast.Constant(value=feature.optional)
-                        ),
-                    ],
-                )
-                get_language_body.append(
-                    ast.Expr(
-                        value=ast.Call(
-                            func=ast.Attribute(
-                                value=ast.Name(id=var_name, ctx=ast.Load()),
-                                attr="add_feature",
-                                ctx=ast.Load(),
-                            ),
-                            args=[feature_creation],
-                            keywords=[],
-                        )
-                    )
-                )
+            get_language_body.append(self._process_feature(var_name, feature))
 
     def _define_primitive_type_in_language(
         self, primitive_type: PrimitiveType, get_language_body: List[stmt]
@@ -542,19 +394,7 @@ class LanguageGenerator(BaseGenerator):
                 ),
             )
         )
-        get_language_body.append(
-            ast.Expr(
-                value=ast.Call(
-                    func=ast.Attribute(
-                        value=ast.Name(id="language", ctx=ast.Load()),
-                        attr="add_element",
-                        ctx=ast.Load(),
-                    ),
-                    args=[ast.Name(id=var_name, ctx=ast.Load())],
-                    keywords=[],
-                )
-            )
-        )
+        get_language_body.append(self._add_to_language(var_name))
 
     def _define_enumeration_in_language(
         self, enumeration: Enumeration, get_language_body: List[stmt]
@@ -584,19 +424,7 @@ class LanguageGenerator(BaseGenerator):
                 ),
             )
         )
-        get_language_body.append(
-            ast.Expr(
-                value=ast.Call(
-                    func=ast.Attribute(
-                        value=ast.Name(id="language", ctx=ast.Load()),
-                        attr="add_element",
-                        ctx=ast.Load(),
-                    ),
-                    args=[ast.Name(id=var_name, ctx=ast.Load())],
-                    keywords=[],
-                )
-            )
-        )
+        get_language_body.append(self._add_to_language(var_name))
 
     def language_generation(self, click, language: Language, output):
         body: List[stmt] = []
