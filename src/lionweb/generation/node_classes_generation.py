@@ -57,6 +57,135 @@ class NodeClassesGenerator(BaseGenerator, ASTBuilder):
             body=[ast.Pass()],
         )
 
+    def _get_safe_filename(self, element) -> str:
+        """
+        Generate a safe filename for an element, avoiding Python reserved keywords.
+        Uses to_var_name which already handles keywords by appending underscore.
+        """
+        import keyword
+
+        base_name = to_snake_case(element.get_name())
+
+        # Check if the base name is a Python keyword or built-in
+        if keyword.iskeyword(base_name) or base_name in dir(__builtins__):
+            base_name = f"{base_name}_"
+
+        return f"{base_name}.py"
+
+    def _get_imports_for_enumeration(self) -> List[stmt]:
+        """Get standard imports needed for enumerations."""
+        return ast.parse("from enum import Enum").body
+
+    def _get_imports_for_interface(self) -> List[stmt]:
+        """Get standard imports needed for interfaces."""
+        return ast.parse(
+            "from abc import ABC\n"
+            "from lionweb.model import Node"
+        ).body
+
+    def _get_imports_for_concept(self, concept: Concept, language: Language) -> List[stmt]:
+        """Get imports needed for a specific concept."""
+        # Standard runtime imports
+        imports = ast.parse(
+            "from typing import TYPE_CHECKING, Optional, cast, List\n"
+            "from lionweb.model.classifier_instance_utils import (\n"
+            "    get_only_reference_value_by_reference_name,\n"
+            "    get_property_value_by_name,\n"
+            "    get_reference_value_by_name\n"
+            ")\n"
+            "from lionweb.model.reference_value import ReferenceValue"
+        ).body
+
+        # Import the concept getter from language module (runtime needed)
+        imports.append(
+            ast.ImportFrom(
+                module=".language",
+                names=[ast.alias(name=getter_name(concept.name), asname=None)],
+                level=0,
+            )
+        )
+
+        # Determine base class import (runtime needed for inheritance)
+        extended_concept = concept.get_extended_concept()
+        if extended_concept:
+            # Import parent concept using safe filename
+            module_name = self._get_safe_filename(extended_concept)[:-3]  # Remove .py
+            imports.append(
+                ast.ImportFrom(
+                    module=f".{module_name}",
+                    names=[ast.alias(name=to_type_name(extended_concept.get_name()), asname=None)],
+                    level=0,
+                )
+            )
+        else:
+            # Import DynamicNode
+            imports.append(
+                ast.ImportFrom(
+                    module="lionweb.model.impl.dynamic_node",
+                    names=[ast.alias(name="DynamicNode", asname=None)],
+                    level=0,
+                )
+            )
+
+        # Collect type-checking-only imports (for type hints that could cause circular imports)
+        type_checking_imports = []
+        imported_types = set()
+
+        for feature in self._relevant_features(concept):
+            if isinstance(feature, Property):
+                # If it's a local enumeration, import at runtime (needed for isinstance checks)
+                if feature.type and feature.type.language == concept.language:
+                    if isinstance(feature.type, Enumeration) and feature.type.name not in imported_types:
+                        module_name = self._get_safe_filename(feature.type)[:-3]  # Remove .py
+                        imports.append(
+                            ast.ImportFrom(
+                                module=f".{module_name}",
+                                names=[ast.alias(name=to_type_name(feature.type.name), asname=None)],
+                                level=0,
+                            )
+                        )
+                        imported_types.add(feature.type.name)
+            elif isinstance(feature, Reference):
+                feature_type = cast(Classifier, feature.get_type())
+                type_name = feature_type.get_name()
+                # Import referenced classifiers only for type checking
+                if feature_type.language == concept.language and type_name not in imported_types:
+                    module_name = self._get_safe_filename(feature_type)[:-3]  # Remove .py
+                    type_checking_imports.append(
+                        ast.ImportFrom(
+                            module=f".{module_name}",
+                            names=[ast.alias(name=to_type_name(type_name), asname=None)],
+                            level=0,
+                        )
+                    )
+                    imported_types.add(type_name)
+
+        # Add TYPE_CHECKING block if we have type-only imports
+        if type_checking_imports:
+            # Create: if TYPE_CHECKING:
+            type_checking_block = ast.If(
+                test=self.name("TYPE_CHECKING"),
+                body=type_checking_imports,
+                orelse=[]
+            )
+            imports.append(type_checking_block)
+
+        return imports
+
+    def _should_quote_type(self, type_name: str, feature, concept: Concept) -> bool:
+        """
+        Determine if a type annotation should be quoted (forward reference).
+        Types under TYPE_CHECKING need to be quoted.
+        """
+        # References to other concepts should be quoted (they're under TYPE_CHECKING)
+        if isinstance(feature, Reference):
+            feature_type = cast(Classifier, feature.get_type())
+            # Same language references are under TYPE_CHECKING
+            return feature_type.language == concept.language
+
+        # Enumerations and built-in types don't need quoting
+        return False
+
     def _resolve_property_type_for_node_class(
         self, feature: Property, concept: Concept
     ) -> str:
@@ -147,6 +276,7 @@ class NodeClassesGenerator(BaseGenerator, ASTBuilder):
         )
 
     def _generate_reference_getter(self, feature: Reference, prop_type: str):
+        # Use string annotation for forward reference
         return make_function_def(
             name=feature.get_name(),
             args=ast.arguments(
@@ -171,7 +301,7 @@ class NodeClassesGenerator(BaseGenerator, ASTBuilder):
                             self.call(
                                 "cast",
                                 args=[
-                                    self.name(prop_type.strip('"')),
+                                    self.const(prop_type),  # Use string for cast
                                     self.attr("res", "referred"),
                                 ],
                             )
@@ -181,14 +311,11 @@ class NodeClassesGenerator(BaseGenerator, ASTBuilder):
                 ),
             ],
             decorator_list=[self.name("property")],
-            returns=ast.Subscript(
-                value=self.name("Optional"),
-                slice=self.const(prop_type.strip('"')),
-                ctx=ast.Load(),
-            ),
+            returns=self.const(f'Optional["{prop_type}"]'),  # String annotation
         )
 
     def _generate_reference_setter(self, feature: Reference, prop_type: str):
+        # Use string annotation for forward reference
         return make_function_def(
             name=feature.get_name(),
             args=ast.arguments(
@@ -197,7 +324,7 @@ class NodeClassesGenerator(BaseGenerator, ASTBuilder):
                     ast.arg(arg="self"),
                     ast.arg(
                         arg=cast(str, feature.get_name()),
-                        annotation=self.const(prop_type.strip('"')),
+                        annotation=self.const(f'"{prop_type}"'),  # String annotation
                     ),
                 ],
                 kwonlyargs=[],
@@ -242,6 +369,7 @@ class NodeClassesGenerator(BaseGenerator, ASTBuilder):
         )
 
     def _generate_multiple_reference_getter(self, feature: Reference, prop_type: str):
+        # Use string annotation for forward reference
         return make_function_def(
             name=feature.name,
             args=ast.arguments(
@@ -265,7 +393,7 @@ class NodeClassesGenerator(BaseGenerator, ASTBuilder):
                             test=self.name("r"),
                             body=self.call(
                                 "cast",
-                                args=[self.name(prop_type), self.attr("r", "referred")],
+                                args=[self.const(prop_type), self.attr("r", "referred")],  # String for cast
                             ),
                             orelse=self.const(None),
                         ),
@@ -281,21 +409,18 @@ class NodeClassesGenerator(BaseGenerator, ASTBuilder):
                 ),
             ],
             decorator_list=[self.name("property")],
-            returns=ast.Subscript(
-                value=self.name("List"),
-                slice=self.const(prop_type),
-                ctx=ast.Load(),
-            ),
+            returns=self.const(f'List["{prop_type}"]'),  # String annotation
         )
 
     def _generate_multiple_reference_adder(self, feature: Reference, prop_type: str):
+        # Use string annotation for forward reference
         return make_function_def(
             name=f"add_to_{to_snake_case(feature.name)}",
             args=ast.arguments(
                 posonlyargs=[],
                 args=[
                     ast.arg(arg="self"),
-                    ast.arg(arg="new_element", annotation=self.const(prop_type)),
+                    ast.arg(arg="new_element", annotation=self.const(f'"{prop_type}"')),  # String annotation
                 ],
                 kwonlyargs=[],
                 kw_defaults=[],
@@ -326,58 +451,121 @@ class NodeClassesGenerator(BaseGenerator, ASTBuilder):
 
     def node_classes_generation(self, click, language: Language, output):
         classifiers = [e for e in language.get_elements() if isinstance(e, Classifier)]
-        if len(classifiers) == 0:
-            # Nothing to generate
-            return
 
-        # Use ast.parse for cleaner import generation, similar to language_generation.py
-        body = ast.parse(
-            "from abc import ABC\n"
-            "from dataclasses import dataclass\n"
-            "from enum import Enum\n"
-            "from typing import Optional, cast, List\n"
-            "from lionweb.model.classifier_instance_utils import (\n"
-            "    get_only_reference_value_by_reference_name,\n"
-            "    get_property_value_by_name,\n"
-            "    get_reference_value_by_name\n"
-            ")\n"
-            "from lionweb.model.impl.dynamic_node import DynamicNode\n"
-            "from lionweb.model.reference_value import ReferenceValue\n"
-            "from lionweb.model import Node"
-        ).body
-
-        # Add language-specific imports
-        language_imports = [ast.alias(name="get_language", asname=None)] + [
-            ast.alias(name=getter_name(c.name), asname=None)
-            for c in language.get_elements()
-            if isinstance(c, Concept)
-        ]
-        body.append(ast.ImportFrom(module=".language", names=language_imports, level=0))
-
-        module = ast.Module(body=body, type_ignores=[])
-
-        # Generate enumerations first
-        for element in language.get_elements():
-            if isinstance(element, Enumeration):
-                module.body.append(self._generate_enumeration_class(element))
-
-        sorted_classifier = topological_classifiers_sort(
-            [c for c in language.get_elements() if isinstance(c, Classifier)]
-        )
-
-        # Generate classifiers (concepts and interfaces)
-        for classifier in sorted_classifier:
-            if isinstance(classifier, Concept):
-                module.body.append(self._generate_concept_class(classifier))
-            elif isinstance(classifier, Interface):
-                module.body.append(self._generate_interface_class(classifier))
-
-        click.echo(f"📂 Saving ast to: {output}")
-        generated_code = astor.to_source(module)
         output_path = Path(output)
         output_path.mkdir(parents=True, exist_ok=True)
-        with Path(f"{output}/node_classes.py").open("w", encoding="utf-8") as f:
+        click.echo(f"📂 Generating node classes to: {output}")
+
+        # Track all elements to generate (for avoiding duplicates across languages)
+        generated_files = set()
+
+        # Generate enumerations first (they have no dependencies)
+        for element in language.get_elements():
+            if isinstance(element, Enumeration):
+                file_name = self._get_safe_filename(element)
+                if file_name not in generated_files:
+                    self._write_enumeration_file(element, output_path, click)
+                    generated_files.add(file_name)
+
+        # Generate interfaces (may have dependencies on each other but simpler)
+        for element in language.get_elements():
+            if isinstance(element, Interface):
+                file_name = self._get_safe_filename(element)
+                if file_name not in generated_files:
+                    self._write_interface_file(element, output_path, click)
+                    generated_files.add(file_name)
+
+        # Generate concepts in topological order (respects inheritance)
+        sorted_classifiers = topological_classifiers_sort(
+            [c for c in language.get_elements() if isinstance(c, Concept)]
+        )
+
+        for concept in sorted_classifiers:
+            file_name = self._get_safe_filename(concept)
+            if file_name not in generated_files:
+                self._write_concept_file(concept, language, output_path, click)
+                generated_files.add(file_name)
+
+        # Generate __init__.py to export all classes (always, even if empty)
+        self._write_init_file(language, output_path, click)
+
+    def _write_enumeration_file(self, enumeration: Enumeration, output_path: Path, click):
+        """Write a single enumeration to its own file."""
+        imports = self._get_imports_for_enumeration()
+        class_def = self._generate_enumeration_class(enumeration)
+
+        module = ast.Module(body=imports + [class_def], type_ignores=[])
+        generated_code = astor.to_source(module)
+
+        file_name = self._get_safe_filename(enumeration)
+        file_path = output_path / file_name
+
+        with file_path.open("w", encoding="utf-8") as f:
             f.write(generated_code)
+
+        click.echo(f"  ✓ {file_name}")
+
+    def _write_interface_file(self, interface: Interface, output_path: Path, click):
+        """Write a single interface to its own file."""
+        imports = self._get_imports_for_interface()
+        class_def = self._generate_interface_class(interface)
+
+        module = ast.Module(body=imports + [class_def], type_ignores=[])
+        generated_code = astor.to_source(module)
+
+        file_name = self._get_safe_filename(interface)
+        file_path = output_path / file_name
+
+        with file_path.open("w", encoding="utf-8") as f:
+            f.write(generated_code)
+
+        click.echo(f"  ✓ {file_name}")
+
+    def _write_concept_file(self, concept: Concept, language: Language, output_path: Path, click):
+        """Write a single concept to its own file."""
+        imports = self._get_imports_for_concept(concept, language)
+        class_def = self._generate_concept_class(concept)
+
+        module = ast.Module(body=imports + [class_def], type_ignores=[])
+        generated_code = astor.to_source(module)
+
+        file_name = self._get_safe_filename(concept)
+        file_path = output_path / file_name
+
+        with file_path.open("w", encoding="utf-8") as f:
+            f.write(generated_code)
+
+        click.echo(f"  ✓ {file_name}")
+
+    def _write_init_file(self, language: Language, output_path: Path, click):
+        """Write __init__.py to export all generated classes."""
+        import keyword
+
+        exports = []
+        all_exports = []
+
+        for element in language.get_elements():
+            if isinstance(element, (Enumeration, Interface, Concept)):
+                class_name = to_type_name(element.get_name())
+                # Get safe module name (without .py extension)
+                module_name = self._get_safe_filename(element)[:-3]  # Remove .py
+                exports.append(f"from .{module_name} import {class_name}")
+                all_exports.append(class_name)
+
+        # Always create __init__.py, even if empty
+        if exports:
+            init_content = "\n".join(exports) + "\n\n__all__ = [\n"
+            init_content += ",\n".join(f'    "{name}"' for name in all_exports)
+            init_content += "\n]\n"
+        else:
+            # Empty __init__.py with just an empty __all__
+            init_content = "__all__ = []\n"
+
+        file_path = output_path / "__init__.py"
+        with file_path.open("w", encoding="utf-8") as f:
+            f.write(init_content)
+
+        click.echo(f"  ✓ __init__.py")
 
     def _relevant_features(self, concept: Concept) -> List[Feature]:
         """
