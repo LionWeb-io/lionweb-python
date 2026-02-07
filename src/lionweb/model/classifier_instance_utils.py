@@ -166,8 +166,9 @@ def get_only_reference_value_by_reference_name(
     else:
         return reference_values[0]
 
+
 def get_only_child_by_reference_name(
-        instance, containment_name: str
+    instance, containment_name: str
 ) -> Optional["Node"]:
     if instance is None:
         raise ValueError("_this should not be null")

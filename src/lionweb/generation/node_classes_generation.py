@@ -550,7 +550,9 @@ class NodeClassesGenerator(BaseGenerator, ASTBuilder):
             returns=None,
         )
 
-    def _generate_multiple_containment_getter(self, feature: Containment, prop_type: str):
+    def _generate_multiple_containment_getter(
+        self, feature: Containment, prop_type: str
+    ):
         # Use string annotation for forward reference
         return make_function_def(
             name=feature.name,
@@ -569,15 +571,15 @@ class NodeClassesGenerator(BaseGenerator, ASTBuilder):
                         args=[self.const(feature.name)],
                     ),
                 ),
-                ast.Return(
-                    value=self.name("res")
-                )
+                ast.Return(value=self.name("res")),
             ],
             decorator_list=[self.name("property")],
             returns=self.const(f'List["{prop_type}"]'),  # String annotation
         )
 
-    def _generate_multiple_containment_adder(self, feature: Containment, prop_type: str):
+    def _generate_multiple_containment_adder(
+        self, feature: Containment, prop_type: str
+    ):
         # Use string annotation for forward reference
         return make_function_def(
             name=f"add_to_{to_snake_case(feature.name)}",
@@ -800,8 +802,12 @@ class NodeClassesGenerator(BaseGenerator, ASTBuilder):
                         self._generate_multiple_containment_adder(feature, prop_type)
                     )
                 else:
-                    methods.append(self._generate_containment_getter(feature, prop_type))
-                    methods.append(self._generate_containment_setter(feature, prop_type))
+                    methods.append(
+                        self._generate_containment_getter(feature, prop_type)
+                    )
+                    methods.append(
+                        self._generate_containment_setter(feature, prop_type)
+                    )
             elif isinstance(feature, Reference):
                 feature_type = cast(Classifier, feature.get_type())
                 prop_type = cast(str, feature_type.get_name())
