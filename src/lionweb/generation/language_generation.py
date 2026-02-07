@@ -55,6 +55,32 @@ class LanguageGenerator(BaseGenerator):
     ):
         super().__init__(language_packages, primitive_types)
 
+    def _add_to_language(self, var_name: str) -> ast.Expr:
+        return ast.Expr(
+            value=ast.Call(
+                func=ast.Attribute(
+                    value=ast.Name(id="language", ctx=ast.Load()),
+                    attr="add_element",
+                    ctx=ast.Load(),
+                ),
+                args=[ast.Name(id=var_name, ctx=ast.Load())],
+                keywords=[],
+            )
+        )
+
+    def _set_attribute(self, container: str, attribute: str, value: bool) -> ast.stmt:
+        ast.Assign(
+            targets=[
+                ast.Attribute(
+                    value=ast.Name(id=container, ctx=ast.Load()),
+                    attr=attribute,
+                    ctx=ast.Store(),
+                )
+            ],
+            value=ast.Constant(value=attribute),
+        )
+
+
     def _create_concept_in_language(
         self, concept: Concept, get_language_body: List[stmt]
     ):
@@ -81,46 +107,9 @@ class LanguageGenerator(BaseGenerator):
                 ),
             )
         )
-        get_language_body.append(
-            ast.Assign(
-                targets=[
-                    ast.Attribute(
-                        value=ast.Name(id=var_name, ctx=ast.Load()),
-                        attr="abstract",
-                        ctx=ast.Store(),
-                    )
-                ],
-                value=ast.Constant(value=concept.is_abstract()),
-            )
-        )
-
-        get_language_body.append(
-            ast.Assign(
-                targets=[
-                    ast.Attribute(
-                        value=ast.Name(id=var_name, ctx=ast.Load()),
-                        attr="partition",
-                        ctx=ast.Store(),
-                    )
-                ],
-                value=ast.Constant(value=concept.is_partition()),
-            )
-        )
-
-        # language.add_element(concept1)
-        get_language_body.append(
-            ast.Expr(
-                value=ast.Call(
-                    func=ast.Attribute(
-                        value=ast.Name(id="language", ctx=ast.Load()),
-                        attr="add_element",
-                        ctx=ast.Load(),
-                    ),
-                    args=[ast.Name(id=var_name, ctx=ast.Load())],
-                    keywords=[],
-                )
-            )
-        )
+        get_language_body.append(self._set_attribute(var_name, "abstract", concept.is_abstract()))
+        get_language_body.append(self._set_attribute(var_name, "partition", concept.is_partition()))
+        get_language_body.append(self._add_to_language(var_name))
 
     def _create_interface_in_language(
         self, interface: Interface, get_language_body: List[stmt]
@@ -148,20 +137,7 @@ class LanguageGenerator(BaseGenerator):
                 ),
             )
         )
-        # language.add_element(concept1)
-        get_language_body.append(
-            ast.Expr(
-                value=ast.Call(
-                    func=ast.Attribute(
-                        value=ast.Name(id="language", ctx=ast.Load()),
-                        attr="add_element",
-                        ctx=ast.Load(),
-                    ),
-                    args=[ast.Name(id=var_name, ctx=ast.Load())],
-                    keywords=[],
-                )
-            )
-        )
+        get_language_body.append(self._add_to_language(var_name))
 
     def _populate_concept_in_language(
         self, concept: Concept, get_language_body: List[stmt]

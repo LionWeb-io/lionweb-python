@@ -42,6 +42,19 @@ class BaseGenerator:
         self.functions: list[ast.FunctionDef] = []
 
     def _package_lookup(self, language: Language) -> str | None:
+        """
+        Determines the package name for a given language based on mappings.
+
+        Iterates through the list of language-package mappings to find a match
+        using either the language ID or name. If a match is found, the corresponding
+        package name is returned. If no match is found, returns None.
+
+        Parameters:
+        language (Language): The language object to locate the corresponding package for.
+
+        Returns:
+        str | None: The package name if a match is found; otherwise, None.
+        """
         for mapping in self.language_packages:
             if language.id == mapping.lang or language.name == mapping.lang:
                 return mapping.package
@@ -59,6 +72,27 @@ class BaseGenerator:
     def _primitive_type_lookup_exp(
         self, package_str: str, primitive_type_name: Optional[str]
     ) -> ast.expr:
+        """
+        Looks up an expression to retrieve a primitive type based on the provided package name and primitive type name.
+
+        This method facilitates the import of the corresponding language module if it is not already imported,
+        and constructs a call to retrieve the specified primitive type by its name from the language package.
+
+        Parameters:
+        package_str: str
+            The dotted string representing the package containing the language module.
+        primitive_type_name: Optional[str]
+            The name of the primitive type to look up. Must not be None.
+
+        Returns:
+        ast.expr
+            An AST expression representing a method call to retrieve the primitive type by name from the relevant
+            language package.
+
+        Raises:
+        ValueError
+            If `primitive_type_name` is None or if the language package is not imported with an alias.
+        """
         if primitive_type_name is None:
             raise ValueError("Primitive type name must be specified")
 
@@ -101,3 +135,4 @@ class BaseGenerator:
         )
 
         return full_call
+
