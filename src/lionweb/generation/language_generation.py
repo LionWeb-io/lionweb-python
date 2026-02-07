@@ -79,7 +79,7 @@ class LanguageGenerator(BaseGenerator, ASTBuilder):
                     ctx=ast.Store(),
                 )
             ],
-            value=ast.Constant(value=attribute),
+            value=ast.Constant(value=value),
         )
 
     def _instantiate_lw_node(self, cls_name: str, node, extra_kws: dict = {}):

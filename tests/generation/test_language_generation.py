@@ -61,11 +61,11 @@ class LanguageGenerationTest(unittest.TestCase):
                     return language
                 
                 
-                def get_myconcept() ->Concept:
+                def get_my_concept() ->Concept:
                     return get_language().get_concept_by_name('MyConcept')
                 
                 
-                def get_myotherconcept() ->Concept:
+                def get_my_other_concept() ->Concept:
                     return get_language().get_concept_by_name('MyOtherConcept')
             """
             )
