@@ -22,12 +22,15 @@ def make_class_def(
 
 
 def make_function_def(
-    name: str,
+    name: Optional[str],
     args: ast.arguments,
     body: List[ast.stmt],
     decorator_list: Optional[List[ast.expr]] = None,
     returns: Optional[ast.expr] = None,
 ) -> ast.FunctionDef:
+    if name is None:
+        raise ValueError("Name should not be None")
+
     decorator_list = decorator_list or []
 
     if sys.version_info >= (3, 12):

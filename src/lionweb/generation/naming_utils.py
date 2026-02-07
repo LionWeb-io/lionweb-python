@@ -62,3 +62,9 @@ def to_type_name(name: Optional[str]) -> str:
     if name is None:
         raise ValueError("Name should not be None")
     return name[0].upper() + name[1:]
+
+
+def getter_name(name: Optional[str]) -> str:
+    if name is None:
+        raise ValueError("Name should not be None")
+    return f"get_{to_snake_case(name)}"

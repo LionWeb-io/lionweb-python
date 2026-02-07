@@ -1,367 +1,27 @@
 import ast
-from _ast import expr, stmt
+from _ast import stmt
 from pathlib import Path
-from typing import Dict, List, Optional, Set, cast
+from typing import List, Set, cast
 
 import astor  # type: ignore
 
+from lionweb.generation.ASTBuilder import ASTBuilder
 from lionweb.generation.base_generator import BaseGenerator
 from lionweb.generation.configuration import (LanguageMappingSpec,
                                               PrimitiveTypeMappingSpec)
 from lionweb.generation.generation_utils import (make_class_def,
                                                  make_function_def)
-from lionweb.generation.naming_utils import (to_snake_case, to_type_name,
-                                             to_var_name)
+from lionweb.generation.naming_utils import (getter_name, to_snake_case,
+                                             to_type_name, to_var_name)
+from lionweb.generation.topological_sorting import topological_classifiers_sort
 from lionweb.language import (Concept, Containment, Feature, Interface,
                               Language, LionCoreBuiltins, Property)
 from lionweb.language.classifier import Classifier
 from lionweb.language.enumeration import Enumeration
-from lionweb.language.primitive_type import PrimitiveType
 from lionweb.language.reference import Reference
 
 
-def _identify_topological_deps(
-    classifiers: List[Classifier], id_to_concept
-) -> Dict[str, List[str]]:
-    graph: Dict[str, List[str]] = {cast(str, el.get_id()): [] for el in classifiers}
-    for c in classifiers:
-        if isinstance(c, Concept):
-            c_id = cast(str, c.get_id())
-            ec = c.get_extended_concept()
-            if ec and cast(str, ec.get_id()) in id_to_concept:
-                graph[c_id].append(cast(str, ec.get_id()))
-            for i in c.get_implemented():
-                graph[c_id].append(cast(str, i.get_id()))
-            for f in c.get_features():
-                if isinstance(f, Containment):
-                    f_type = f.get_type()
-                    if f_type and cast(str, f_type.get_id()) in id_to_concept:
-                        graph[cast(str, c_id)].append(cast(str, f_type.get_id()))
-        elif isinstance(c, Interface):
-            c_id = cast(str, c.get_id())
-            for i in c.get_extended_interfaces():
-                graph[c_id].append(cast(str, i.get_id()))
-            for f in c.get_features():
-                if isinstance(f, Containment):
-                    f_type = f.get_type()
-                    if f_type and cast(str, f_type.get_id()) in id_to_concept:
-                        graph[cast(str, c_id)].append(cast(str, f_type.get_id()))
-        else:
-            raise ValueError()
-    return graph
-
-
-def topological_classifiers_sort(classifiers: List[Classifier]) -> List[Classifier]:
-    id_to_concept = {el.get_id(): el for el in classifiers}
-
-    # Build graph edges: child -> [parents]
-    graph: Dict[str, List[str]] = _identify_topological_deps(classifiers, id_to_concept)
-
-    visited = set()
-    sorted_list = []
-
-    def visit(name: str):
-        if name in visited:
-            return
-        visited.add(name)
-        if name in graph:
-            for dep in graph[name]:
-                visit(dep)
-        if name in id_to_concept:
-            sorted_list.append(id_to_concept[name])
-
-    for c in classifiers:
-        visit(cast(str, c.get_id()))
-
-    return sorted_list
-
-
-def _expr_to_get_property(feature: Property):
-    return ast.Call(
-        func=ast.Attribute(
-            value=ast.Call(
-                func=ast.Attribute(
-                    value=ast.Name(id="self", ctx=ast.Load()),
-                    attr="get_classifier",
-                    ctx=ast.Load(),
-                ),
-                args=[],
-                keywords=[],
-            ),
-            attr="require_property_by_name",
-            ctx=ast.Load(),
-        ),
-        args=[ast.Constant(value=feature.get_name())],
-        keywords=[],
-    )
-
-
-def _expr_to_get_reference(feature: Reference):
-    return ast.Call(
-        func=ast.Attribute(
-            value=ast.Call(
-                func=ast.Attribute(
-                    value=ast.Name(id="self", ctx=ast.Load()),
-                    attr="get_classifier",
-                    ctx=ast.Load(),
-                ),
-                args=[],
-                keywords=[],
-            ),
-            attr="require_reference_by_name",
-            ctx=ast.Load(),
-        ),
-        args=[ast.Constant(value=feature.get_name())],
-        keywords=[],
-    )
-
-
-def _generate_property_setter(feature, prop_type):
-    return make_function_def(
-        name=feature.get_name(),
-        args=ast.arguments(
-            posonlyargs=[],
-            args=[
-                ast.arg(arg="self"),
-                ast.arg(
-                    arg="value",
-                    annotation=ast.Name(id=prop_type.strip('"'), ctx=ast.Load()),
-                ),
-            ],
-            kwonlyargs=[],
-            kw_defaults=[],
-            defaults=[],
-            type_comment=None,
-        ),
-        body=[
-            ast.Assign(
-                targets=[ast.Name(id="property_", ctx=ast.Store())],
-                value=_expr_to_get_property(feature),
-            ),
-            ast.Expr(
-                value=ast.Call(
-                    func=ast.Attribute(
-                        value=ast.Name(id="self", ctx=ast.Load()),
-                        attr="set_property_value",
-                        ctx=ast.Load(),
-                    ),
-                    args=[],
-                    keywords=[
-                        ast.keyword(
-                            arg="property",
-                            value=ast.Name(id="property_", ctx=ast.Load()),
-                        ),
-                        ast.keyword(
-                            arg="value", value=ast.Name(id="value", ctx=ast.Load())
-                        ),
-                    ],
-                )
-            ),
-        ],
-        decorator_list=[
-            ast.Attribute(
-                value=ast.Name(id=feature.get_name(), ctx=ast.Load()),
-                attr="setter",
-                ctx=ast.Load(),
-            )
-        ],
-        returns=None,
-    )
-
-
-def _generate_property_getter(feature, prop_type):
-    getter = make_function_def(
-        name=feature.get_name(),
-        args=ast.arguments(
-            posonlyargs=[],
-            args=[ast.arg(arg="self")],
-            kwonlyargs=[],
-            kw_defaults=[],
-            defaults=[],
-        ),
-        body=[
-            ast.Return(
-                value=ast.Call(
-                    func=ast.Name(id="cast", ctx=ast.Load()),
-                    args=[
-                        ast.Name(id=prop_type.strip('"'), ctx=ast.Load()),
-                        ast.Call(
-                            func=ast.Name(
-                                id="get_property_value_by_name",
-                                ctx=ast.Load(),
-                            ),
-                            args=[
-                                ast.Name(id="self", ctx=ast.Load()),
-                                ast.Constant(value=feature.get_name()),
-                            ],
-                            keywords=[],
-                        ),
-                    ],
-                    keywords=[],
-                )
-            )
-        ],
-        decorator_list=[ast.Name(id="property", ctx=ast.Load())],
-        returns=ast.Name(id=prop_type.strip('"'), ctx=ast.Load()),
-    )
-    return getter
-
-
-def _generate_reference_getter(feature, prop_type):
-    return make_function_def(
-        name=feature.get_name(),
-        args=ast.arguments(
-            posonlyargs=[],
-            args=[ast.arg(arg="self")],
-            kwonlyargs=[],
-            kw_defaults=[],
-            defaults=[],
-        ),
-        body=[
-            ast.Assign(
-                targets=[ast.Name(id="res", ctx=ast.Store())],
-                value=ast.Call(
-                    func=ast.Name(
-                        id="get_only_reference_value_by_reference_name", ctx=ast.Load()
-                    ),
-                    args=[
-                        ast.Name(id="self", ctx=ast.Load()),
-                        ast.Constant(value=feature.get_name()),
-                    ],
-                    keywords=[],
-                ),
-            ),
-            ast.If(
-                test=ast.Name(id="res", ctx=ast.Load()),
-                body=[
-                    ast.Return(
-                        value=ast.Call(
-                            func=ast.Name(id="cast", ctx=ast.Load()),
-                            args=[
-                                ast.Name(id=prop_type.strip('"'), ctx=ast.Load()),
-                                ast.Attribute(
-                                    value=ast.Name(id="res", ctx=ast.Load()),
-                                    attr="referred",
-                                    ctx=ast.Load(),
-                                ),
-                            ],
-                            keywords=[],
-                        )
-                    )
-                ],
-                orelse=[ast.Return(value=ast.Constant(value=None))],
-            ),
-        ],
-        decorator_list=[ast.Name(id="property", ctx=ast.Load())],
-        returns=ast.Subscript(
-            value=ast.Name(id="Optional", ctx=ast.Load()),
-            slice=ast.Constant(value=prop_type.strip('"'), ctx=ast.Load()),
-            ctx=ast.Load(),
-        ),
-    )
-
-
-def _generate_reference_setter(feature, prop_type):
-    return make_function_def(
-        name=feature.get_name(),
-        args=ast.arguments(
-            posonlyargs=[],
-            args=[
-                ast.arg(arg="self"),
-                ast.arg(
-                    arg=feature.get_name(),
-                    annotation=ast.Constant(value=prop_type.strip('"'), ctx=ast.Load()),
-                ),
-            ],
-            kwonlyargs=[],
-            kw_defaults=[],
-            defaults=[],
-        ),
-        body=[
-            ast.Assign(
-                targets=[ast.Name(id="reference", ctx=ast.Store())],
-                value=ast.Call(
-                    func=ast.Attribute(
-                        value=ast.Call(
-                            func=ast.Attribute(
-                                value=ast.Name(id="self", ctx=ast.Load()),
-                                attr="get_classifier",
-                                ctx=ast.Load(),
-                            ),
-                            args=[],
-                            keywords=[],
-                        ),
-                        attr="get_reference_by_name",
-                        ctx=ast.Load(),
-                    ),
-                    args=[ast.Constant(value=feature.get_name())],
-                    keywords=[],
-                ),
-            ),
-            ast.If(
-                test=ast.Attribute(
-                    value=ast.Name(id="self", ctx=ast.Load()),
-                    attr=feature.get_name(),
-                    ctx=ast.Load(),
-                ),
-                body=[
-                    ast.Expr(
-                        value=ast.Call(
-                            func=ast.Attribute(
-                                value=ast.Name(id="self", ctx=ast.Load()),
-                                attr="remove_reference_value_by_index",
-                                ctx=ast.Load(),
-                            ),
-                            args=[
-                                ast.Name(id="reference", ctx=ast.Load()),
-                                ast.Constant(value=0),
-                            ],
-                            keywords=[],
-                        )
-                    )
-                ],
-                orelse=[],
-            ),
-            ast.Expr(
-                value=ast.Call(
-                    func=ast.Attribute(
-                        value=ast.Name(id="self", ctx=ast.Load()),
-                        attr="add_reference_value",
-                        ctx=ast.Load(),
-                    ),
-                    args=[
-                        ast.Name(id="reference", ctx=ast.Load()),
-                        ast.Call(
-                            func=ast.Name(id="ReferenceValue", ctx=ast.Load()),
-                            args=[
-                                ast.Name(id=feature.get_name(), ctx=ast.Load()),
-                                ast.Attribute(
-                                    value=ast.Name(
-                                        id=feature.get_name(), ctx=ast.Load()
-                                    ),
-                                    attr="name",
-                                    ctx=ast.Load(),
-                                ),
-                            ],
-                            keywords=[],
-                        ),
-                    ],
-                    keywords=[],
-                )
-            ),
-        ],
-        decorator_list=[
-            ast.Attribute(
-                value=ast.Name(id=feature.get_name(), ctx=ast.Load()),
-                attr="setter",
-                ctx=ast.Load(),
-            )
-        ],
-        returns=None,
-    )
-
-
-class NodeClassesGenerator(BaseGenerator):
+class NodeClassesGenerator(BaseGenerator, ASTBuilder):
 
     def __init__(
         self,
@@ -370,259 +30,708 @@ class NodeClassesGenerator(BaseGenerator):
     ):
         super().__init__(language_packages, primitive_types)
 
-    def _generate_multiple_reference_getter(self, feature, prop_type):
-        # @property
-        decorator_property = ast.Name(id="property", ctx=ast.Load())
-
-        # -> List['Expression']
-        returns_annotation = ast.Subscript(
-            value=ast.Name(id="List", ctx=ast.Load()),
-            slice=ast.Constant(value=prop_type),
-            ctx=ast.Load(),
+    def _get_feature_by_name(self, feature: Feature, method: str):
+        """Helper to generate self.get_classifier().method(feature_name)"""
+        return self.call(
+            self.attr(self.call(self.attr("self", "get_classifier")), method),
+            args=[self.const(feature.get_name())],
         )
 
-        # res = get_reference_value_by_name(self, 'filterCondition')
-        assign_res = ast.Assign(
-            targets=[ast.Name(id="res", ctx=ast.Store())],
-            value=ast.Call(
-                func=ast.Name(id="get_reference_value_by_name", ctx=ast.Load()),
+    def _generate_enumeration_class(self, enumeration: Enumeration):
+        """Generate an Enum class definition."""
+        members: list[stmt] = [
+            self.assign(to_var_name(literal.get_name()), self.const(literal.get_name()))
+            for literal in enumeration.literals
+        ]
+        return make_class_def(
+            name=to_type_name(enumeration.get_name()),
+            bases=[self.name("Enum")],
+            body=members,
+        )
+
+    def _generate_interface_class(self, interface: Interface):
+        """Generate an interface class definition."""
+        return make_class_def(
+            name=to_type_name(interface.get_name()),
+            bases=[self.name("Node"), self.name("ABC")],
+            body=[ast.Pass()],
+        )
+
+    def _get_imports_for_enumeration(self) -> List[stmt]:
+        """Get standard imports needed for enumerations."""
+        return ast.parse("from enum import Enum").body
+
+    def _get_imports_for_interface(self) -> List[stmt]:
+        """Get standard imports needed for interfaces."""
+        return ast.parse("from abc import ABC\n" "from lionweb.model import Node").body
+
+    def _get_imports_for_concept(
+        self, concept: Concept, language: Language
+    ) -> List[stmt]:
+        """Get imports needed for a specific concept."""
+        # Standard runtime imports
+        imports = ast.parse(
+            "from typing import TYPE_CHECKING, Optional, cast, List\n"
+            "from lionweb.model.classifier_instance_utils import (\n"
+            "    get_only_reference_value_by_reference_name,\n"
+            "    get_property_value_by_name,\n"
+            "    get_reference_value_by_name\n"
+            ")\n"
+            "from lionweb.model.reference_value import ReferenceValue"
+        ).body
+
+        # Import the concept getter from language module (runtime needed)
+        imports.append(
+            ast.ImportFrom(
+                module=".language",
+                names=[ast.alias(name=getter_name(concept.name), asname=None)],
+                level=0,
+            )
+        )
+
+        # Determine base class import (runtime needed for inheritance)
+        extended_concept = concept.get_extended_concept()
+        if extended_concept:
+            # Import parent concept using safe filename
+            module_name = self._get_safe_filename(extended_concept)[:-3]  # Remove .py
+            imports.append(
+                ast.ImportFrom(
+                    module=f".{module_name}",
+                    names=[
+                        ast.alias(
+                            name=to_type_name(extended_concept.get_name()), asname=None
+                        )
+                    ],
+                    level=0,
+                )
+            )
+        else:
+            # Import DynamicNode
+            imports.append(
+                ast.ImportFrom(
+                    module="lionweb.model.impl.dynamic_node",
+                    names=[ast.alias(name="DynamicNode", asname=None)],
+                    level=0,
+                )
+            )
+
+        # Collect type-checking-only imports (for type hints that could cause circular imports)
+        type_checking_imports: list[stmt] = []
+        imported_types = set()
+
+        for feature in self._relevant_features(concept):
+            if isinstance(feature, Property):
+                # If it's a local enumeration, import at runtime (needed for isinstance checks)
+                if feature.type and feature.type.language == concept.language:
+                    if (
+                        isinstance(feature.type, Enumeration)
+                        and feature.type.name not in imported_types
+                    ):
+                        module_name = self._get_safe_filename(feature.type)[
+                            :-3
+                        ]  # Remove .py
+                        imports.append(
+                            ast.ImportFrom(
+                                module=f".{module_name}",
+                                names=[
+                                    ast.alias(
+                                        name=to_type_name(feature.type.name),
+                                        asname=None,
+                                    )
+                                ],
+                                level=0,
+                            )
+                        )
+                        imported_types.add(feature.type.name)
+            elif isinstance(feature, Reference):
+                feature_type = cast(Classifier, feature.get_type())
+                type_name = feature_type.get_name()
+                # Import referenced classifiers only for type checking
+                if (
+                    feature_type.language == concept.language
+                    and type_name not in imported_types
+                ):
+                    module_name = self._get_safe_filename(feature_type)[
+                        :-3
+                    ]  # Remove .py
+                    type_checking_imports.append(
+                        ast.ImportFrom(
+                            module=f".{module_name}",
+                            names=[
+                                ast.alias(name=to_type_name(type_name), asname=None)
+                            ],
+                            level=0,
+                        )
+                    )
+                    imported_types.add(type_name)
+
+        # Add TYPE_CHECKING block if we have type-only imports
+        if type_checking_imports:
+            # Create: if TYPE_CHECKING:
+            type_checking_block = ast.If(
+                test=self.name("TYPE_CHECKING"), body=type_checking_imports, orelse=[]
+            )
+            imports.append(type_checking_block)
+
+        return imports
+
+    def _should_quote_type(self, type_name: str, feature, concept: Concept) -> bool:
+        """
+        Determine if a type annotation should be quoted (forward reference).
+        Types under TYPE_CHECKING need to be quoted.
+        """
+        # References to other concepts should be quoted (they're under TYPE_CHECKING)
+        if isinstance(feature, Reference):
+            feature_type = cast(Classifier, feature.get_type())
+            # Same language references are under TYPE_CHECKING
+            return feature_type.language == concept.language
+
+        # Enumerations and built-in types don't need quoting
+        return False
+
+    def _resolve_property_type_for_node_class(
+        self, feature: Property, concept: Concept
+    ) -> str:
+        """Resolve the Python type string for a property in node class generation."""
+        f_type = feature.type
+        if f_type is None:
+            raise ValueError("feature type is None")
+
+        if f_type == LionCoreBuiltins.get_boolean(concept.lion_web_version):
+            return "bool"
+        elif f_type == LionCoreBuiltins.get_string(concept.lion_web_version):
+            return "str"
+        elif f_type == LionCoreBuiltins.get_integer(concept.lion_web_version):
+            return "int"
+        elif f_type.language == concept.language:
+            if isinstance(f_type, Enumeration):
+                return to_type_name(f_type.name)
+            else:
+                raise ValueError("using type that we are generating")
+        else:
+            qualified_name = self._data_type_lookup(f_type)
+            if qualified_name is not None:
+                return qualified_name
+            else:
+                raise ValueError(f"type: {f_type}")
+
+    def _generate_property_setter(self, feature: Property, prop_type: str):
+        return make_function_def(
+            name=feature.get_name(),
+            args=ast.arguments(
+                posonlyargs=[],
                 args=[
-                    ast.Name(id="self", ctx=ast.Load()),
-                    ast.Constant(value=feature.name),
+                    ast.arg(arg="self"),
+                    ast.arg(arg="value", annotation=self.name(prop_type.strip('"'))),
                 ],
-                keywords=[],
+                kwonlyargs=[],
+                kw_defaults=[],
+                defaults=[],
             ),
-        )
-
-        # cast(Expression, r.referred)
-        cast_expr = ast.Call(
-            func=ast.Name(id="cast", ctx=ast.Load()),
-            args=[
-                ast.Name(id=prop_type, ctx=ast.Load()),
-                ast.Attribute(
-                    value=ast.Name(id="r", ctx=ast.Load()),
-                    attr="referred",
-                    ctx=ast.Load(),
+            body=[
+                self.assign(
+                    "property_",
+                    self._get_feature_by_name(feature, "require_property_by_name"),
+                ),
+                ast.Expr(
+                    self.call(
+                        self.attr("self", "set_property_value"),
+                        keywords={
+                            "property": self.name("property_"),
+                            "value": self.name("value"),
+                        },
+                    )
                 ),
             ],
-            keywords=[],
+            decorator_list=[self.attr(feature.get_name(), "setter")],
+            returns=None,
         )
 
-        # cast(Expression, r.referred) if r else None
-        ifexp = ast.IfExp(
-            test=ast.Name(id="r", ctx=ast.Load()),
-            body=cast_expr,
-            orelse=ast.Constant(value=None),
-        )
-
-        # [cast(Expression, r.referred) if r else None for r in res]
-        list_comp = ast.ListComp(
-            elt=ifexp,
-            generators=[
-                ast.comprehension(
-                    target=ast.Name(id="r", ctx=ast.Store()),
-                    iter=ast.Name(id="res", ctx=ast.Load()),
-                    ifs=[],
-                    is_async=0,
+    def _generate_property_getter(self, feature: Property, prop_type: str):
+        return make_function_def(
+            name=feature.get_name(),
+            args=ast.arguments(
+                posonlyargs=[],
+                args=[ast.arg(arg="self")],
+                kwonlyargs=[],
+                kw_defaults=[],
+                defaults=[],
+            ),
+            body=[
+                ast.Return(
+                    self.call(
+                        "cast",
+                        args=[
+                            self.name(prop_type.strip('"')),
+                            self.call(
+                                "get_property_value_by_name",
+                                args=[
+                                    self.name("self"),
+                                    self.const(feature.get_name()),
+                                ],
+                            ),
+                        ],
+                    )
                 )
             ],
+            decorator_list=[self.name("property")],
+            returns=self.name(prop_type.strip('"')),
         )
 
-        # return [...]
-        return_stmt = ast.Return(value=list_comp)
+    def _generate_reference_getter(self, feature: Reference, prop_type: str):
+        # Use string annotation for forward reference
+        return make_function_def(
+            name=feature.get_name(),
+            args=ast.arguments(
+                posonlyargs=[],
+                args=[ast.arg(arg="self")],
+                kwonlyargs=[],
+                kw_defaults=[],
+                defaults=[],
+            ),
+            body=[
+                self.assign(
+                    "res",
+                    self.call(
+                        "get_only_reference_value_by_reference_name",
+                        args=[self.name("self"), self.const(feature.get_name())],
+                    ),
+                ),
+                ast.If(
+                    test=self.name("res"),
+                    body=[
+                        ast.Return(
+                            self.call(
+                                "cast",
+                                args=[
+                                    self.const(prop_type),  # Use string for cast
+                                    self.attr("res", "referred"),
+                                ],
+                            )
+                        )
+                    ],
+                    orelse=[ast.Return(value=self.const(None))],
+                ),
+            ],
+            decorator_list=[self.name("property")],
+            returns=self.const(f'Optional["{prop_type}"]'),  # String annotation
+        )
 
-        # def filterConditions(self) -> List['Expression']:
-        return ast.FunctionDef(
+    def _generate_reference_setter(self, feature: Reference, prop_type: str):
+        # Use string annotation for forward reference
+        return make_function_def(
+            name=feature.get_name(),
+            args=ast.arguments(
+                posonlyargs=[],
+                args=[
+                    ast.arg(arg="self"),
+                    ast.arg(
+                        arg=cast(str, feature.get_name()),
+                        annotation=self.const(f'"{prop_type}"'),  # String annotation
+                    ),
+                ],
+                kwonlyargs=[],
+                kw_defaults=[],
+                defaults=[],
+            ),
+            body=[
+                self.assign(
+                    "reference",
+                    self._get_feature_by_name(feature, "get_reference_by_name"),
+                ),
+                ast.If(
+                    test=self.attr("self", feature.get_name()),
+                    body=[
+                        ast.Expr(
+                            self.call(
+                                self.attr("self", "remove_reference_value_by_index"),
+                                args=[self.name("reference"), self.const(0)],
+                            )
+                        )
+                    ],
+                    orelse=[],
+                ),
+                ast.Expr(
+                    self.call(
+                        self.attr("self", "add_reference_value"),
+                        args=[
+                            self.name("reference"),
+                            self.call(
+                                "ReferenceValue",
+                                args=[
+                                    self.name(feature.get_name()),
+                                    self.attr(feature.get_name(), "name"),
+                                ],
+                            ),
+                        ],
+                    )
+                ),
+            ],
+            decorator_list=[self.attr(feature.get_name(), "setter")],
+            returns=None,
+        )
+
+    def _generate_multiple_reference_getter(self, feature: Reference, prop_type: str):
+        # Use string annotation for forward reference
+        return make_function_def(
             name=feature.name,
             args=ast.arguments(
                 posonlyargs=[],
                 args=[ast.arg(arg="self")],
-                vararg=None,
                 kwonlyargs=[],
                 kw_defaults=[],
-                kwarg=None,
                 defaults=[],
             ),
-            body=[assign_res, return_stmt],
-            decorator_list=[decorator_property],
-            returns=returns_annotation,
-            type_comment=None,
-        )
-
-    def _generate_multiple_reference_adder(self, feature, prop_type):
-        # new_element: 'Expression'
-        new_element_arg = ast.arg(
-            arg="new_element",
-            annotation=ast.Constant(prop_type),  # forward ref: 'Expression'
-        )
-
-        # ReferenceValue(new_element, new_element.name)
-        reference_value_call = ast.Call(
-            func=ast.Name(id="ReferenceValue", ctx=ast.Load()),
-            args=[
-                ast.Name(id="new_element", ctx=ast.Load()),
-                ast.Attribute(
-                    value=ast.Name(id="new_element", ctx=ast.Load()),
-                    attr="name",
-                    ctx=ast.Load(),
+            body=[
+                self.assign(
+                    "res",
+                    self.call(
+                        "get_reference_value_by_name",
+                        args=[self.name("self"), self.const(feature.name)],
+                    ),
+                ),
+                ast.Return(
+                    value=ast.ListComp(
+                        elt=ast.IfExp(
+                            test=self.name("r"),
+                            body=self.call(
+                                "cast",
+                                args=[
+                                    self.const(prop_type),
+                                    self.attr("r", "referred"),
+                                ],  # String for cast
+                            ),
+                            orelse=self.const(None),
+                        ),
+                        generators=[
+                            ast.comprehension(
+                                target=ast.Name(id="r", ctx=ast.Store()),
+                                iter=self.name("res"),
+                                ifs=[],
+                                is_async=0,
+                            )
+                        ],
+                    )
                 ),
             ],
-            keywords=[],
+            decorator_list=[self.name("property")],
+            returns=self.const(f'List["{prop_type}"]'),  # String annotation
         )
 
-        # self.add_reference_value(reference, ReferenceValue(...))
-        call_add_reference_value = ast.Call(
-            func=ast.Attribute(
-                value=ast.Name(id="self", ctx=ast.Load()),
-                attr="add_reference_value",
-                ctx=ast.Load(),
-            ),
-            args=[
-                _expr_to_get_reference(feature),
-                reference_value_call,
-            ],
-            keywords=[],
-        )
-
-        return ast.FunctionDef(
+    def _generate_multiple_reference_adder(self, feature: Reference, prop_type: str):
+        # Use string annotation for forward reference
+        return make_function_def(
             name=f"add_to_{to_snake_case(feature.name)}",
             args=ast.arguments(
                 posonlyargs=[],
-                args=[ast.arg(arg="self"), new_element_arg],
-                vararg=None,
+                args=[
+                    ast.arg(arg="self"),
+                    ast.arg(
+                        arg="new_element", annotation=self.const(f'"{prop_type}"')
+                    ),  # String annotation
+                ],
                 kwonlyargs=[],
                 kw_defaults=[],
-                kwarg=None,
                 defaults=[],
             ),
-            body=[ast.Expr(value=call_add_reference_value)],
+            body=[
+                ast.Expr(
+                    self.call(
+                        self.attr("self", "add_reference_value"),
+                        args=[
+                            self._get_feature_by_name(
+                                feature, "require_reference_by_name"
+                            ),
+                            self.call(
+                                "ReferenceValue",
+                                args=[
+                                    self.name("new_element"),
+                                    self.attr("new_element", "name"),
+                                ],
+                            ),
+                        ],
+                    )
+                )
+            ],
             decorator_list=[],
             returns=None,
-            type_comment=None,
+        )
+
+    def _generate_containment_getter(self, feature: Containment, prop_type: str):
+        # Use string annotation for forward reference
+        return make_function_def(
+            name=feature.get_name(),
+            args=ast.arguments(
+                posonlyargs=[],
+                args=[ast.arg(arg="self")],
+                kwonlyargs=[],
+                kw_defaults=[],
+                defaults=[],
+            ),
+            body=[
+                self.assign(
+                    "res",
+                    self.call(
+                        "get_only_child_by_containment_name",
+                        args=[self.name("self"), self.const(feature.get_name())],
+                    ),
+                ),
+                ast.If(
+                    test=self.name("res"),
+                    body=[
+                        ast.Return(
+                            self.call(
+                                "cast",
+                                args=[
+                                    self.const(prop_type),  # Use string for cast
+                                    self.attr("res", "referred"),
+                                ],
+                            )
+                        )
+                    ],
+                    orelse=[ast.Return(value=self.const(None))],
+                ),
+            ],
+            decorator_list=[self.name("property")],
+            returns=self.const(f'Optional["{prop_type}"]'),  # String annotation
+        )
+
+    def _generate_containment_setter(self, feature: Containment, prop_type: str):
+        # Use string annotation for forward reference
+        return make_function_def(
+            name=feature.get_name(),
+            args=ast.arguments(
+                posonlyargs=[],
+                args=[
+                    ast.arg(arg="self"),
+                    ast.arg(
+                        arg=cast(str, feature.get_name()),
+                        annotation=self.const(f'"{prop_type}"'),  # String annotation
+                    ),
+                ],
+                kwonlyargs=[],
+                kw_defaults=[],
+                defaults=[],
+            ),
+            body=[
+                self.assign(
+                    "containment",
+                    self._get_feature_by_name(feature, "get_containment_by_name"),
+                ),
+                ast.If(
+                    test=self.attr("self", feature.get_name()),
+                    body=[
+                        ast.Expr(
+                            self.call(
+                                self.attr("self", "remove_child_by_index"),
+                                args=[self.name("containment"), self.const(0)],
+                            )
+                        )
+                    ],
+                    orelse=[],
+                ),
+                ast.Expr(
+                    self.call(
+                        self.attr("self", "add_child"),
+                        args=[
+                            self.name("containment"),
+                            self.call(
+                                "ReferenceValue",
+                                args=[
+                                    self.name(feature.get_name()),
+                                    self.attr(feature.get_name(), "name"),
+                                ],
+                            ),
+                        ],
+                    )
+                ),
+            ],
+            decorator_list=[self.attr(feature.get_name(), "setter")],
+            returns=None,
+        )
+
+    def _generate_multiple_containment_getter(
+        self, feature: Containment, prop_type: str
+    ):
+        # Use string annotation for forward reference
+        return make_function_def(
+            name=feature.name,
+            args=ast.arguments(
+                posonlyargs=[],
+                args=[ast.arg(arg="self")],
+                kwonlyargs=[],
+                kw_defaults=[],
+                defaults=[],
+            ),
+            body=[
+                self.assign(
+                    "res",
+                    self.call(
+                        self.attr("self", "get_children"),
+                        args=[self.const(feature.name)],
+                    ),
+                ),
+                ast.Return(value=self.name("res")),
+            ],
+            decorator_list=[self.name("property")],
+            returns=self.const(f'List["{prop_type}"]'),  # String annotation
+        )
+
+    def _generate_multiple_containment_adder(
+        self, feature: Containment, prop_type: str
+    ):
+        # Use string annotation for forward reference
+        return make_function_def(
+            name=f"add_to_{to_snake_case(feature.name)}",
+            args=ast.arguments(
+                posonlyargs=[],
+                args=[
+                    ast.arg(arg="self"),
+                    ast.arg(
+                        arg="new_element", annotation=self.const(f'"{prop_type}"')
+                    ),  # String annotation
+                ],
+                kwonlyargs=[],
+                kw_defaults=[],
+                defaults=[],
+            ),
+            body=[
+                ast.Expr(
+                    self.call(
+                        self.attr("self", "add_child"),
+                        args=[
+                            self._get_feature_by_name(
+                                feature, "require_containment_by_name"
+                            ),
+                            self.name("new_element"),
+                        ],
+                    )
+                )
+            ],
+            decorator_list=[],
+            returns=None,
         )
 
     def node_classes_generation(self, click, language: Language, output):
-        imports: list[stmt] = [
-            ast.ImportFrom(
-                module="abc", names=[ast.alias(name="ABC", asname=None)], level=0
-            ),
-            ast.ImportFrom(
-                module="dataclasses",
-                names=[ast.alias(name="dataclass", asname=None)],
-                level=0,
-            ),
-            ast.ImportFrom(
-                module="enum", names=[ast.alias(name="Enum", asname=None)], level=0
-            ),
-            ast.ImportFrom(
-                module="typing",
-                names=[
-                    ast.alias(name="Optional", asname=None),
-                    ast.alias(name="cast", asname=None),
-                    ast.alias(name="List", asname=None),
-                ],
-                level=0,
-            ),
-            ast.ImportFrom(
-                module="lionweb.model.classifier_instance_utils",
-                names=[
-                    ast.alias(
-                        name="get_only_reference_value_by_reference_name", asname=None
-                    ),
-                    ast.alias(name="get_property_value_by_name", asname=None),
-                ],
-                level=0,
-            ),
-            ast.ImportFrom(
-                module="lionweb.model.impl.dynamic_node",
-                names=[ast.alias(name="DynamicNode", asname=None)],
-                level=0,
-            ),
-            ast.ImportFrom(
-                module=".language",
-                names=[ast.alias(name="get_language", asname=None)]
-                + [
-                    ast.alias(
-                        name=f"get_{cast(str, c.get_name()).lower()}", asname=None
-                    )
-                    for c in language.get_elements()
-                    if isinstance(c, Concept)
-                ],
-                level=0,
-            ),
-            ast.ImportFrom(
-                module="lionweb.model.reference_value",
-                names=[ast.alias(name="ReferenceValue", asname=None)],
-                level=0,
-            ),
-            ast.ImportFrom(
-                module="lionweb.model",
-                names=[ast.alias(name="Node", asname=None)],
-                level=0,
-            ),
-        ]
-        module = ast.Module(body=imports, type_ignores=[])
-
-        for element in language.get_elements():
-            e_name = to_type_name(cast(str, element.get_name()))
-            if isinstance(element, Concept):
-                pass
-            elif isinstance(element, Interface):
-                pass
-            elif isinstance(element, PrimitiveType):
-                pass
-            elif isinstance(element, Enumeration):
-                members: List[stmt] = [
-                    ast.Assign(
-                        targets=[
-                            ast.Name(
-                                id=cast(str, to_var_name(literal.get_name())),
-                                ctx=ast.Store(),
-                            )
-                        ],
-                        value=ast.Constant(value=cast(str, literal.get_name())),
-                    )
-                    for literal in element.literals
-                ]
-
-                enum_class = make_class_def(
-                    name=e_name,
-                    bases=[ast.Name(id="Enum", ctx=ast.Load())],
-                    body=members,
-                )
-                module.body.append(enum_class)
-            else:
-                raise ValueError(f"Unsupported {element}")
-
-        sorted_classifier = topological_classifiers_sort(
-            [c for c in language.get_elements() if isinstance(c, Classifier)]
-        )
-
-        for classifier in sorted_classifier:
-            c_name = cast(str, classifier.get_name())
-            if isinstance(classifier, Concept):
-                module.body.append(self._generate_concept_class(classifier))
-            elif isinstance(classifier, Interface):
-                bases: list[expr] = [
-                    ast.Name(id="Node", ctx=ast.Load()),
-                    ast.Name(id="ABC", ctx=ast.Load()),
-                ]
-
-                classdef = make_class_def(
-                    c_name,
-                    bases=bases,
-                    body=[ast.Pass()],
-                )
-                module.body.append(classdef)
-            else:
-                raise ValueError()
-
-        click.echo(f"📂 Saving ast to: {output}")
-        generated_code = astor.to_source(module)
         output_path = Path(output)
         output_path.mkdir(parents=True, exist_ok=True)
-        with Path(f"{output}/node_classes.py").open("w", encoding="utf-8") as f:
+        click.echo(f"📂 Generating node classes to: {output}")
+
+        # Track all elements to generate (for avoiding duplicates across languages)
+        generated_files = set()
+
+        # Generate enumerations first (they have no dependencies)
+        for element in language.get_elements():
+            if isinstance(element, Enumeration):
+                file_name = self._get_safe_filename(element)
+                if file_name not in generated_files:
+                    self._write_enumeration_file(element, output_path, click)
+                    generated_files.add(file_name)
+
+        # Generate interfaces (may have dependencies on each other but simpler)
+        for element in language.get_elements():
+            if isinstance(element, Interface):
+                file_name = self._get_safe_filename(element)
+                if file_name not in generated_files:
+                    self._write_interface_file(element, output_path, click)
+                    generated_files.add(file_name)
+
+        # Generate concepts in topological order (respects inheritance)
+        sorted_classifiers = cast(
+            list[Concept],
+            topological_classifiers_sort(
+                [c for c in language.get_elements() if isinstance(c, Concept)]
+            ),
+        )
+
+        for concept in sorted_classifiers:
+            file_name = self._get_safe_filename(concept)
+            if file_name not in generated_files:
+                self._write_concept_file(concept, language, output_path, click)
+                generated_files.add(file_name)
+
+        # Generate __init__.py to export all classes (always, even if empty)
+        self._write_init_file(language, output_path, click)
+
+    def _write_enumeration_file(
+        self, enumeration: Enumeration, output_path: Path, click
+    ):
+        """Write a single enumeration to its own file."""
+        imports = self._get_imports_for_enumeration()
+        class_def = self._generate_enumeration_class(enumeration)
+
+        module = ast.Module(body=imports + [class_def], type_ignores=[])
+        generated_code = astor.to_source(module)
+
+        file_name = self._get_safe_filename(enumeration)
+        file_path = output_path / file_name
+
+        with file_path.open("w", encoding="utf-8") as f:
             f.write(generated_code)
+
+        click.echo(f"  ✓ {file_name}")
+
+    def _write_interface_file(self, interface: Interface, output_path: Path, click):
+        """Write a single interface to its own file."""
+        imports = self._get_imports_for_interface()
+        class_def = self._generate_interface_class(interface)
+
+        module = ast.Module(body=imports + [class_def], type_ignores=[])
+        generated_code = astor.to_source(module)
+
+        file_name = self._get_safe_filename(interface)
+        file_path = output_path / file_name
+
+        with file_path.open("w", encoding="utf-8") as f:
+            f.write(generated_code)
+
+        click.echo(f"  ✓ {file_name}")
+
+    def _write_concept_file(
+        self, concept: Concept, language: Language, output_path: Path, click
+    ):
+        """Write a single concept to its own file."""
+        imports = self._get_imports_for_concept(concept, language)
+        class_def = self._generate_concept_class(concept)
+
+        module = ast.Module(body=imports + [class_def], type_ignores=[])
+        generated_code = astor.to_source(module)
+
+        file_name = self._get_safe_filename(concept)
+        file_path = output_path / file_name
+
+        with file_path.open("w", encoding="utf-8") as f:
+            f.write(generated_code)
+
+        click.echo(f"  ✓ {file_name}")
+
+    def _write_init_file(self, language: Language, output_path: Path, click):
+        """Write __init__.py to export all generated classes."""
+        exports = []
+        all_exports = []
+
+        for element in language.get_elements():
+            if isinstance(element, (Enumeration, Interface, Concept)):
+                class_name = to_type_name(element.get_name())
+                # Get safe module name (without .py extension)
+                module_name = self._get_safe_filename(element)[:-3]  # Remove .py
+                exports.append(f"from .{module_name} import {class_name}")
+                all_exports.append(class_name)
+
+        # Always create __init__.py, even if empty
+        if exports:
+            init_content = "\n".join(exports) + "\n\n__all__ = [\n"
+            init_content += ",\n".join(f'    "{name}"' for name in all_exports)
+            init_content += "\n]\n"
+        else:
+            # Empty __init__.py with just an empty __all__
+            init_content = "__all__ = []\n"
+
+        file_path = output_path / "__init__.py"
+        with file_path.open("w", encoding="utf-8") as f:
+            f.write(init_content)
+
+        click.echo("  ✓ __init__.py")
 
     def _relevant_features(self, concept: Concept) -> List[Feature]:
         """
@@ -644,67 +753,32 @@ class NodeClassesGenerator(BaseGenerator):
         return relevant_features
 
     def _generate_concept_class(self, concept: Concept):
-        """
-        :param class_name: e.g. "Book"
-        :param concept_ref: e.g. "BOOK" (refers to LibraryLanguage.BOOK)
-        :param fields: list of tuples like [("title", "str"), ("author", '"Writer"')]
-        """
-        # __init__ method
-        init_args = [
-            ast.arg(arg="self"),
-            ast.arg(arg="id", annotation=ast.Name(id="str", ctx=ast.Load())),
-        ]
-
-        init_body: List[stmt] = [
-            ast.Expr(
-                value=ast.Call(
-                    func=ast.Attribute(
-                        value=ast.Call(
-                            func=ast.Name(id="super", ctx=ast.Load()),
-                            args=[],
-                            keywords=[],
-                        ),
-                        attr="__init__",
-                        ctx=ast.Load(),
-                    ),
-                    args=[
-                        ast.Name(id="id", ctx=ast.Load()),
-                    ],
-                    keywords=[],
-                )
-            ),
-            ast.Assign(
-                targets=[
-                    ast.Attribute(
-                        value=ast.Name(id="self", ctx=ast.Load()),
-                        attr="concept",
-                        ctx=ast.Load(),
-                    )
-                ],
-                value=ast.Call(
-                    func=ast.Name(
-                        id=f"get_{cast(str, concept.get_name()).lower()}",
-                        ctx=ast.Load(),
-                    ),
-                    args=[],
-                    keywords=[],
-                ),
-            ),
-        ]
-
+        """Generate a class definition for a concept."""
+        # Generate __init__ method
         init_func = make_function_def(
             name="__init__",
             args=ast.arguments(
-                posonlyargs=[],  # Python 3.8+
-                args=init_args,
-                vararg=None,
+                posonlyargs=[],
+                args=[
+                    ast.arg(arg="self"),
+                    ast.arg(arg="id", annotation=self.name("str")),
+                ],
                 kwonlyargs=[],
-                kw_defaults=cast(List[Optional[ast.expr]], []),
-                kwarg=None,
+                kw_defaults=[],
                 defaults=[],
             ),
-            # defaults=init_defaults),
-            body=init_body,
+            body=[
+                ast.Expr(
+                    self.call(
+                        self.attr(self.call("super"), "__init__"),
+                        args=[self.name("id")],
+                    )
+                ),
+                ast.Assign(
+                    targets=[self.attr("self", "concept")],
+                    value=self.call(getter_name(concept.name)),
+                ),
+            ],
             decorator_list=[],
             returns=None,
         )
@@ -714,32 +788,26 @@ class NodeClassesGenerator(BaseGenerator):
 
         for feature in self._relevant_features(concept):
             if isinstance(feature, Property):
-                f_type = feature.type
-                if f_type is None:
-                    raise ValueError("feature type is None")
-                if f_type == LionCoreBuiltins.get_boolean(concept.lion_web_version):
-                    prop_type = "bool"
-                elif f_type == LionCoreBuiltins.get_string(concept.lion_web_version):
-                    prop_type = "str"
-                elif f_type == LionCoreBuiltins.get_integer(concept.lion_web_version):
-                    prop_type = "int"
-                elif f_type.language == concept.language:
-                    if isinstance(f_type, Enumeration):
-                        # This should have been created in this file
-                        prop_type = to_type_name(f_type.name)
-                    else:
-                        raise ValueError("using type that we are generating")
-                else:
-                    qualified_name = self._data_type_lookup(f_type)
-                    if qualified_name is not None:
-                        prop_type = qualified_name
-                    else:
-                        raise ValueError(f"type: {f_type}")
-                methods.append(_generate_property_getter(feature, prop_type))
-                methods.append(_generate_property_setter(feature, prop_type))
+                prop_type = self._resolve_property_type_for_node_class(feature, concept)
+                methods.append(self._generate_property_getter(feature, prop_type))
+                methods.append(self._generate_property_setter(feature, prop_type))
             elif isinstance(feature, Containment):
-                # raise ValueError("Containment")
-                pass
+                feature_type = cast(Classifier, feature.get_type())
+                prop_type = cast(str, feature_type.get_name())
+                if feature.is_multiple():
+                    methods.append(
+                        self._generate_multiple_containment_getter(feature, prop_type)
+                    )
+                    methods.append(
+                        self._generate_multiple_containment_adder(feature, prop_type)
+                    )
+                else:
+                    methods.append(
+                        self._generate_containment_getter(feature, prop_type)
+                    )
+                    methods.append(
+                        self._generate_containment_setter(feature, prop_type)
+                    )
             elif isinstance(feature, Reference):
                 feature_type = cast(Classifier, feature.get_type())
                 prop_type = cast(str, feature_type.get_name())
@@ -751,23 +819,23 @@ class NodeClassesGenerator(BaseGenerator):
                         self._generate_multiple_reference_adder(feature, prop_type)
                     )
                 else:
-                    methods.append(_generate_reference_getter(feature, prop_type))
-                    methods.append(_generate_reference_setter(feature, prop_type))
+                    methods.append(self._generate_reference_getter(feature, prop_type))
+                    methods.append(self._generate_reference_setter(feature, prop_type))
             else:
-                raise ValueError()
+                raise ValueError(f"Unsupported feature type: {type(feature)}")
 
-        bases: list[expr] = [ast.Name(id="DynamicNode", ctx=ast.Load())]
+        # Determine base class
         extended_concept = concept.get_extended_concept()
-        if extended_concept is not None:
-            bases = [
-                ast.Name(
-                    id=cast(str, to_type_name(extended_concept.get_name())),
-                    ctx=ast.Load(),
-                )
-            ]
+        bases: list[ast.expr] = [
+            (
+                self.name(to_type_name(extended_concept.get_name()))
+                if extended_concept
+                else self.name("DynamicNode")
+            )
+        ]
 
         return make_class_def(
-            name=cast(str, to_type_name(concept.get_name())),
+            name=to_type_name(concept.get_name()),
             bases=bases,
             body=methods,
         )
