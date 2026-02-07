@@ -221,6 +221,9 @@ class LanguageGenerator(BaseGenerator):
                             arg="name", value=ast.Constant(value=feature.get_name())
                         ),
                         ast.keyword(arg="key", value=ast.Constant(value=feature.key)),
+                        ast.keyword(arg="type", value=ast.Name(id=to_var_name(feature.type.name), ctx=ast.Load())),
+                        ast.keyword(arg="multiple", value=ast.Constant(value=feature.multiple)),
+                        ast.keyword(arg="optional", value=ast.Constant(value=feature.optional)),
                     ],
                 )
                 get_language_body.append(
@@ -316,6 +319,9 @@ class LanguageGenerator(BaseGenerator):
                             arg="name", value=ast.Constant(value=feature.get_name())
                         ),
                         ast.keyword(arg="key", value=ast.Constant(value=feature.key)),
+                        ast.keyword(arg="type", value=ast.Name(id=to_var_name(feature.type.name), ctx=ast.Load())),
+                        ast.keyword(arg="multiple", value=ast.Constant(value=feature.multiple)),
+                        ast.keyword(arg="optional", value=ast.Constant(value=feature.optional)),
                     ],
                 )
                 get_language_body.append(
@@ -373,6 +379,9 @@ class LanguageGenerator(BaseGenerator):
                             arg="name", value=ast.Constant(value=feature.get_name())
                         ),
                         ast.keyword(arg="key", value=ast.Constant(value=feature.key)),
+                        ast.keyword(arg="type", value=ast.Name(id=to_var_name(feature.type.name), ctx=ast.Load())),
+                        ast.keyword(arg="multiple", value=ast.Constant(value=feature.multiple)),
+                        ast.keyword(arg="optional", value=ast.Constant(value=feature.optional)),
                     ],
                 )
                 get_language_body.append(
@@ -468,6 +477,9 @@ class LanguageGenerator(BaseGenerator):
                             arg="name", value=ast.Constant(value=feature.get_name())
                         ),
                         ast.keyword(arg="key", value=ast.Constant(value=feature.key)),
+                        ast.keyword(arg="type", value=ast.Name(id=to_var_name(feature.type.name), ctx=ast.Load())),
+                        ast.keyword(arg="multiple", value=ast.Constant(value=feature.multiple)),
+                        ast.keyword(arg="optional", value=ast.Constant(value=feature.optional)),
                     ],
                 )
                 get_language_body.append(

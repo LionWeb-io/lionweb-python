@@ -11,7 +11,7 @@ from lionweb.generation.configuration import (LanguageMappingSpec,
 from lionweb.generation.generation_utils import (make_class_def,
                                                  make_function_def)
 from lionweb.generation.naming_utils import (to_snake_case, to_type_name,
-                                             to_var_name)
+                                             to_var_name, getter_name)
 from lionweb.language import (Concept, Containment, Feature, Interface,
                               Language, LionCoreBuiltins, Property)
 from lionweb.language.classifier import Classifier
@@ -547,7 +547,7 @@ class NodeClassesGenerator(BaseGenerator):
                 names=[ast.alias(name="get_language", asname=None)]
                 + [
                     ast.alias(
-                        name=f"get_{cast(str, c.get_name()).lower()}", asname=None
+                        name=getter_name(c.name), asname=None
                     )
                     for c in language.get_elements()
                     if isinstance(c, Concept)
@@ -687,7 +687,7 @@ class NodeClassesGenerator(BaseGenerator):
                 ],
                 value=ast.Call(
                     func=ast.Name(
-                        id=f"get_{cast(str, concept.get_name()).lower()}",
+                        id=getter_name(concept.name),
                         ctx=ast.Load(),
                     ),
                     args=[],
