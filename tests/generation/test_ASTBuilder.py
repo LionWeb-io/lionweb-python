@@ -90,10 +90,13 @@ class ASTBuilderTest(unittest.TestCase):
         self.assertIs(result.args[1], arg2)
 
     def test_call_with_keywords(self):
-        result = self.builder.call("my_func", keywords={
-            "param1": self.builder.const(42),
-            "param2": self.builder.const("hello")
-        })
+        result = self.builder.call(
+            "my_func",
+            keywords={
+                "param1": self.builder.const(42),
+                "param2": self.builder.const("hello"),
+            },
+        )
         self.assertIsInstance(result, ast.Call)
         self.assertEqual(len(result.keywords), 2)
         self.assertEqual(result.keywords[0].arg, "param1")
@@ -102,11 +105,14 @@ class ASTBuilderTest(unittest.TestCase):
         self.assertEqual(result.keywords[1].value.value, "hello")
 
     def test_call_filters_none_keywords(self):
-        result = self.builder.call("my_func", keywords={
-            "param1": self.builder.const(42),
-            "param2": None,
-            "param3": self.builder.const("hello")
-        })
+        result = self.builder.call(
+            "my_func",
+            keywords={
+                "param1": self.builder.const(42),
+                "param2": None,
+                "param3": self.builder.const("hello"),
+            },
+        )
         self.assertIsInstance(result, ast.Call)
         self.assertEqual(len(result.keywords), 2)
         self.assertEqual(result.keywords[0].arg, "param1")
@@ -114,9 +120,9 @@ class ASTBuilderTest(unittest.TestCase):
 
     def test_call_with_args_and_keywords(self):
         arg = self.builder.const(1)
-        result = self.builder.call("my_func",
-                                   args=[arg],
-                                   keywords={"key": self.builder.const(2)})
+        result = self.builder.call(
+            "my_func", args=[arg], keywords={"key": self.builder.const(2)}
+        )
         self.assertIsInstance(result, ast.Call)
         self.assertEqual(len(result.args), 1)
         self.assertEqual(len(result.keywords), 1)
@@ -136,7 +142,7 @@ class ASTBuilderTest(unittest.TestCase):
         result = self.builder.call(
             self.builder.attr("obj", "method"),
             args=[self.builder.const(1), self.builder.const(2)],
-            keywords={"key": self.builder.const("value")}
+            keywords={"key": self.builder.const("value")},
         )
         self.assertIsInstance(result, ast.Call)
         self.assertIsInstance(result.func, ast.Attribute)

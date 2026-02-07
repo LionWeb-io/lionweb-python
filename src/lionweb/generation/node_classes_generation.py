@@ -78,12 +78,11 @@ class NodeClassesGenerator(BaseGenerator, ASTBuilder):
 
     def _get_imports_for_interface(self) -> List[stmt]:
         """Get standard imports needed for interfaces."""
-        return ast.parse(
-            "from abc import ABC\n"
-            "from lionweb.model import Node"
-        ).body
+        return ast.parse("from abc import ABC\n" "from lionweb.model import Node").body
 
-    def _get_imports_for_concept(self, concept: Concept, language: Language) -> List[stmt]:
+    def _get_imports_for_concept(
+        self, concept: Concept, language: Language
+    ) -> List[stmt]:
         """Get imports needed for a specific concept."""
         # Standard runtime imports
         imports = ast.parse(
@@ -113,7 +112,11 @@ class NodeClassesGenerator(BaseGenerator, ASTBuilder):
             imports.append(
                 ast.ImportFrom(
                     module=f".{module_name}",
-                    names=[ast.alias(name=to_type_name(extended_concept.get_name()), asname=None)],
+                    names=[
+                        ast.alias(
+                            name=to_type_name(extended_concept.get_name()), asname=None
+                        )
+                    ],
                     level=0,
                 )
             )
@@ -128,19 +131,29 @@ class NodeClassesGenerator(BaseGenerator, ASTBuilder):
             )
 
         # Collect type-checking-only imports (for type hints that could cause circular imports)
-        type_checking_imports = []
+        type_checking_imports: list[stmt] = []
         imported_types = set()
 
         for feature in self._relevant_features(concept):
             if isinstance(feature, Property):
                 # If it's a local enumeration, import at runtime (needed for isinstance checks)
                 if feature.type and feature.type.language == concept.language:
-                    if isinstance(feature.type, Enumeration) and feature.type.name not in imported_types:
-                        module_name = self._get_safe_filename(feature.type)[:-3]  # Remove .py
+                    if (
+                        isinstance(feature.type, Enumeration)
+                        and feature.type.name not in imported_types
+                    ):
+                        module_name = self._get_safe_filename(feature.type)[
+                            :-3
+                        ]  # Remove .py
                         imports.append(
                             ast.ImportFrom(
                                 module=f".{module_name}",
-                                names=[ast.alias(name=to_type_name(feature.type.name), asname=None)],
+                                names=[
+                                    ast.alias(
+                                        name=to_type_name(feature.type.name),
+                                        asname=None,
+                                    )
+                                ],
                                 level=0,
                             )
                         )
@@ -149,12 +162,19 @@ class NodeClassesGenerator(BaseGenerator, ASTBuilder):
                 feature_type = cast(Classifier, feature.get_type())
                 type_name = feature_type.get_name()
                 # Import referenced classifiers only for type checking
-                if feature_type.language == concept.language and type_name not in imported_types:
-                    module_name = self._get_safe_filename(feature_type)[:-3]  # Remove .py
+                if (
+                    feature_type.language == concept.language
+                    and type_name not in imported_types
+                ):
+                    module_name = self._get_safe_filename(feature_type)[
+                        :-3
+                    ]  # Remove .py
                     type_checking_imports.append(
                         ast.ImportFrom(
                             module=f".{module_name}",
-                            names=[ast.alias(name=to_type_name(type_name), asname=None)],
+                            names=[
+                                ast.alias(name=to_type_name(type_name), asname=None)
+                            ],
                             level=0,
                         )
                     )
@@ -164,9 +184,7 @@ class NodeClassesGenerator(BaseGenerator, ASTBuilder):
         if type_checking_imports:
             # Create: if TYPE_CHECKING:
             type_checking_block = ast.If(
-                test=self.name("TYPE_CHECKING"),
-                body=type_checking_imports,
-                orelse=[]
+                test=self.name("TYPE_CHECKING"), body=type_checking_imports, orelse=[]
             )
             imports.append(type_checking_block)
 
@@ -393,7 +411,10 @@ class NodeClassesGenerator(BaseGenerator, ASTBuilder):
                             test=self.name("r"),
                             body=self.call(
                                 "cast",
-                                args=[self.const(prop_type), self.attr("r", "referred")],  # String for cast
+                                args=[
+                                    self.const(prop_type),
+                                    self.attr("r", "referred"),
+                                ],  # String for cast
                             ),
                             orelse=self.const(None),
                         ),
@@ -420,7 +441,9 @@ class NodeClassesGenerator(BaseGenerator, ASTBuilder):
                 posonlyargs=[],
                 args=[
                     ast.arg(arg="self"),
-                    ast.arg(arg="new_element", annotation=self.const(f'"{prop_type}"')),  # String annotation
+                    ast.arg(
+                        arg="new_element", annotation=self.const(f'"{prop_type}"')
+                    ),  # String annotation
                 ],
                 kwonlyargs=[],
                 kw_defaults=[],
@@ -450,8 +473,6 @@ class NodeClassesGenerator(BaseGenerator, ASTBuilder):
         )
 
     def node_classes_generation(self, click, language: Language, output):
-        classifiers = [e for e in language.get_elements() if isinstance(e, Classifier)]
-
         output_path = Path(output)
         output_path.mkdir(parents=True, exist_ok=True)
         click.echo(f"📂 Generating node classes to: {output}")
@@ -476,8 +497,11 @@ class NodeClassesGenerator(BaseGenerator, ASTBuilder):
                     generated_files.add(file_name)
 
         # Generate concepts in topological order (respects inheritance)
-        sorted_classifiers = topological_classifiers_sort(
-            [c for c in language.get_elements() if isinstance(c, Concept)]
+        sorted_classifiers = cast(
+            list[Concept],
+            topological_classifiers_sort(
+                [c for c in language.get_elements() if isinstance(c, Concept)]
+            ),
         )
 
         for concept in sorted_classifiers:
@@ -489,7 +513,9 @@ class NodeClassesGenerator(BaseGenerator, ASTBuilder):
         # Generate __init__.py to export all classes (always, even if empty)
         self._write_init_file(language, output_path, click)
 
-    def _write_enumeration_file(self, enumeration: Enumeration, output_path: Path, click):
+    def _write_enumeration_file(
+        self, enumeration: Enumeration, output_path: Path, click
+    ):
         """Write a single enumeration to its own file."""
         imports = self._get_imports_for_enumeration()
         class_def = self._generate_enumeration_class(enumeration)
@@ -521,7 +547,9 @@ class NodeClassesGenerator(BaseGenerator, ASTBuilder):
 
         click.echo(f"  ✓ {file_name}")
 
-    def _write_concept_file(self, concept: Concept, language: Language, output_path: Path, click):
+    def _write_concept_file(
+        self, concept: Concept, language: Language, output_path: Path, click
+    ):
         """Write a single concept to its own file."""
         imports = self._get_imports_for_concept(concept, language)
         class_def = self._generate_concept_class(concept)
@@ -539,8 +567,6 @@ class NodeClassesGenerator(BaseGenerator, ASTBuilder):
 
     def _write_init_file(self, language: Language, output_path: Path, click):
         """Write __init__.py to export all generated classes."""
-        import keyword
-
         exports = []
         all_exports = []
 
@@ -565,7 +591,7 @@ class NodeClassesGenerator(BaseGenerator, ASTBuilder):
         with file_path.open("w", encoding="utf-8") as f:
             f.write(init_content)
 
-        click.echo(f"  ✓ __init__.py")
+        click.echo("  ✓ __init__.py")
 
     def _relevant_features(self, concept: Concept) -> List[Feature]:
         """
