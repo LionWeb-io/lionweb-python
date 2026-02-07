@@ -1,9 +1,10 @@
 import ast
-from typing import Optional
+from typing import Any, Optional
 
 from lionweb.generation.configuration import (LanguageMappingSpec,
                                               PrimitiveTypeMappingSpec)
-from lionweb.language import DataType, Language
+from lionweb.generation.naming_utils import to_snake_case
+from lionweb.language import Classifier, DataType, Enumeration, Language
 
 
 class BaseGenerator:
@@ -135,3 +136,18 @@ class BaseGenerator:
         )
 
         return full_call
+
+    def _get_safe_filename(self, element: Classifier[Any] | Enumeration) -> str:
+        """
+        Generate a safe filename for an element, avoiding Python reserved keywords.
+        Uses to_var_name which already handles keywords by appending underscore.
+        """
+        import keyword
+
+        base_name = to_snake_case(element.get_name())
+
+        # Check if the base name is a Python keyword or built-in
+        if keyword.iskeyword(base_name) or base_name in dir(__builtins__):
+            base_name = f"{base_name}_"
+
+        return f"{base_name}.py"

@@ -57,21 +57,6 @@ class NodeClassesGenerator(BaseGenerator, ASTBuilder):
             body=[ast.Pass()],
         )
 
-    def _get_safe_filename(self, element) -> str:
-        """
-        Generate a safe filename for an element, avoiding Python reserved keywords.
-        Uses to_var_name which already handles keywords by appending underscore.
-        """
-        import keyword
-
-        base_name = to_snake_case(element.get_name())
-
-        # Check if the base name is a Python keyword or built-in
-        if keyword.iskeyword(base_name) or base_name in dir(__builtins__):
-            base_name = f"{base_name}_"
-
-        return f"{base_name}.py"
-
     def _get_imports_for_enumeration(self) -> List[stmt]:
         """Get standard imports needed for enumerations."""
         return ast.parse("from enum import Enum").body

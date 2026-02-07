@@ -170,7 +170,7 @@ def main(
         $ python -m lionweb.generation.generator --lp "MyLang=myapp.lang" input.json output/
     """
     from lionweb.generation.deserializer_generation import \
-        deserializer_generation
+        DeserializerGenerator
 
     serialization = create_standard_json_serialization(lionweb_version)
 
@@ -195,7 +195,9 @@ def main(
     NodeClassesGenerator(language_packages, primitive_types).node_classes_generation(
         click, language, output
     )
-    deserializer_generation(click, language, output)
+    DeserializerGenerator(language_packages, primitive_types).deserializer_generation(
+        click, language, output
+    )
 
 
 if __name__ == "__main__":
