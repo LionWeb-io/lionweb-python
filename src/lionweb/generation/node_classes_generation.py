@@ -5,6 +5,9 @@ from typing import Dict, List, Optional, Set, cast
 
 import astor  # type: ignore
 
+from lionweb.generation.ASTBuilder import ASTBuilder
+from lionweb.generation.topological_sorting import topological_classifiers_sort
+
 from lionweb.generation.base_generator import BaseGenerator
 from lionweb.generation.configuration import (LanguageMappingSpec,
                                               PrimitiveTypeMappingSpec)
@@ -20,348 +23,7 @@ from lionweb.language.primitive_type import PrimitiveType
 from lionweb.language.reference import Reference
 
 
-def _identify_topological_deps(
-    classifiers: List[Classifier], id_to_concept
-) -> Dict[str, List[str]]:
-    graph: Dict[str, List[str]] = {cast(str, el.get_id()): [] for el in classifiers}
-    for c in classifiers:
-        if isinstance(c, Concept):
-            c_id = cast(str, c.get_id())
-            ec = c.get_extended_concept()
-            if ec and cast(str, ec.get_id()) in id_to_concept:
-                graph[c_id].append(cast(str, ec.get_id()))
-            for i in c.get_implemented():
-                graph[c_id].append(cast(str, i.get_id()))
-            for f in c.get_features():
-                if isinstance(f, Containment):
-                    f_type = f.get_type()
-                    if f_type and cast(str, f_type.get_id()) in id_to_concept:
-                        graph[cast(str, c_id)].append(cast(str, f_type.get_id()))
-        elif isinstance(c, Interface):
-            c_id = cast(str, c.get_id())
-            for i in c.get_extended_interfaces():
-                graph[c_id].append(cast(str, i.get_id()))
-            for f in c.get_features():
-                if isinstance(f, Containment):
-                    f_type = f.get_type()
-                    if f_type and cast(str, f_type.get_id()) in id_to_concept:
-                        graph[cast(str, c_id)].append(cast(str, f_type.get_id()))
-        else:
-            raise ValueError()
-    return graph
-
-
-def topological_classifiers_sort(classifiers: List[Classifier]) -> List[Classifier]:
-    id_to_concept = {el.get_id(): el for el in classifiers}
-
-    # Build graph edges: child -> [parents]
-    graph: Dict[str, List[str]] = _identify_topological_deps(classifiers, id_to_concept)
-
-    visited = set()
-    sorted_list = []
-
-    def visit(name: str):
-        if name in visited:
-            return
-        visited.add(name)
-        if name in graph:
-            for dep in graph[name]:
-                visit(dep)
-        if name in id_to_concept:
-            sorted_list.append(id_to_concept[name])
-
-    for c in classifiers:
-        visit(cast(str, c.get_id()))
-
-    return sorted_list
-
-
-def _expr_to_get_property(feature: Property):
-    return ast.Call(
-        func=ast.Attribute(
-            value=ast.Call(
-                func=ast.Attribute(
-                    value=ast.Name(id="self", ctx=ast.Load()),
-                    attr="get_classifier",
-                    ctx=ast.Load(),
-                ),
-                args=[],
-                keywords=[],
-            ),
-            attr="require_property_by_name",
-            ctx=ast.Load(),
-        ),
-        args=[ast.Constant(value=feature.get_name())],
-        keywords=[],
-    )
-
-
-def _expr_to_get_reference(feature: Reference):
-    return ast.Call(
-        func=ast.Attribute(
-            value=ast.Call(
-                func=ast.Attribute(
-                    value=ast.Name(id="self", ctx=ast.Load()),
-                    attr="get_classifier",
-                    ctx=ast.Load(),
-                ),
-                args=[],
-                keywords=[],
-            ),
-            attr="require_reference_by_name",
-            ctx=ast.Load(),
-        ),
-        args=[ast.Constant(value=feature.get_name())],
-        keywords=[],
-    )
-
-
-def _generate_property_setter(feature, prop_type):
-    return make_function_def(
-        name=feature.get_name(),
-        args=ast.arguments(
-            posonlyargs=[],
-            args=[
-                ast.arg(arg="self"),
-                ast.arg(
-                    arg="value",
-                    annotation=ast.Name(id=prop_type.strip('"'), ctx=ast.Load()),
-                ),
-            ],
-            kwonlyargs=[],
-            kw_defaults=[],
-            defaults=[],
-            type_comment=None,
-        ),
-        body=[
-            ast.Assign(
-                targets=[ast.Name(id="property_", ctx=ast.Store())],
-                value=_expr_to_get_property(feature),
-            ),
-            ast.Expr(
-                value=ast.Call(
-                    func=ast.Attribute(
-                        value=ast.Name(id="self", ctx=ast.Load()),
-                        attr="set_property_value",
-                        ctx=ast.Load(),
-                    ),
-                    args=[],
-                    keywords=[
-                        ast.keyword(
-                            arg="property",
-                            value=ast.Name(id="property_", ctx=ast.Load()),
-                        ),
-                        ast.keyword(
-                            arg="value", value=ast.Name(id="value", ctx=ast.Load())
-                        ),
-                    ],
-                )
-            ),
-        ],
-        decorator_list=[
-            ast.Attribute(
-                value=ast.Name(id=feature.get_name(), ctx=ast.Load()),
-                attr="setter",
-                ctx=ast.Load(),
-            )
-        ],
-        returns=None,
-    )
-
-
-def _generate_property_getter(feature, prop_type):
-    getter = make_function_def(
-        name=feature.get_name(),
-        args=ast.arguments(
-            posonlyargs=[],
-            args=[ast.arg(arg="self")],
-            kwonlyargs=[],
-            kw_defaults=[],
-            defaults=[],
-        ),
-        body=[
-            ast.Return(
-                value=ast.Call(
-                    func=ast.Name(id="cast", ctx=ast.Load()),
-                    args=[
-                        ast.Name(id=prop_type.strip('"'), ctx=ast.Load()),
-                        ast.Call(
-                            func=ast.Name(
-                                id="get_property_value_by_name",
-                                ctx=ast.Load(),
-                            ),
-                            args=[
-                                ast.Name(id="self", ctx=ast.Load()),
-                                ast.Constant(value=feature.get_name()),
-                            ],
-                            keywords=[],
-                        ),
-                    ],
-                    keywords=[],
-                )
-            )
-        ],
-        decorator_list=[ast.Name(id="property", ctx=ast.Load())],
-        returns=ast.Name(id=prop_type.strip('"'), ctx=ast.Load()),
-    )
-    return getter
-
-
-def _generate_reference_getter(feature, prop_type):
-    return make_function_def(
-        name=feature.get_name(),
-        args=ast.arguments(
-            posonlyargs=[],
-            args=[ast.arg(arg="self")],
-            kwonlyargs=[],
-            kw_defaults=[],
-            defaults=[],
-        ),
-        body=[
-            ast.Assign(
-                targets=[ast.Name(id="res", ctx=ast.Store())],
-                value=ast.Call(
-                    func=ast.Name(
-                        id="get_only_reference_value_by_reference_name", ctx=ast.Load()
-                    ),
-                    args=[
-                        ast.Name(id="self", ctx=ast.Load()),
-                        ast.Constant(value=feature.get_name()),
-                    ],
-                    keywords=[],
-                ),
-            ),
-            ast.If(
-                test=ast.Name(id="res", ctx=ast.Load()),
-                body=[
-                    ast.Return(
-                        value=ast.Call(
-                            func=ast.Name(id="cast", ctx=ast.Load()),
-                            args=[
-                                ast.Name(id=prop_type.strip('"'), ctx=ast.Load()),
-                                ast.Attribute(
-                                    value=ast.Name(id="res", ctx=ast.Load()),
-                                    attr="referred",
-                                    ctx=ast.Load(),
-                                ),
-                            ],
-                            keywords=[],
-                        )
-                    )
-                ],
-                orelse=[ast.Return(value=ast.Constant(value=None))],
-            ),
-        ],
-        decorator_list=[ast.Name(id="property", ctx=ast.Load())],
-        returns=ast.Subscript(
-            value=ast.Name(id="Optional", ctx=ast.Load()),
-            slice=ast.Constant(value=prop_type.strip('"'), ctx=ast.Load()),
-            ctx=ast.Load(),
-        ),
-    )
-
-
-def _generate_reference_setter(feature, prop_type):
-    return make_function_def(
-        name=feature.get_name(),
-        args=ast.arguments(
-            posonlyargs=[],
-            args=[
-                ast.arg(arg="self"),
-                ast.arg(
-                    arg=feature.get_name(),
-                    annotation=ast.Constant(value=prop_type.strip('"'), ctx=ast.Load()),
-                ),
-            ],
-            kwonlyargs=[],
-            kw_defaults=[],
-            defaults=[],
-        ),
-        body=[
-            ast.Assign(
-                targets=[ast.Name(id="reference", ctx=ast.Store())],
-                value=ast.Call(
-                    func=ast.Attribute(
-                        value=ast.Call(
-                            func=ast.Attribute(
-                                value=ast.Name(id="self", ctx=ast.Load()),
-                                attr="get_classifier",
-                                ctx=ast.Load(),
-                            ),
-                            args=[],
-                            keywords=[],
-                        ),
-                        attr="get_reference_by_name",
-                        ctx=ast.Load(),
-                    ),
-                    args=[ast.Constant(value=feature.get_name())],
-                    keywords=[],
-                ),
-            ),
-            ast.If(
-                test=ast.Attribute(
-                    value=ast.Name(id="self", ctx=ast.Load()),
-                    attr=feature.get_name(),
-                    ctx=ast.Load(),
-                ),
-                body=[
-                    ast.Expr(
-                        value=ast.Call(
-                            func=ast.Attribute(
-                                value=ast.Name(id="self", ctx=ast.Load()),
-                                attr="remove_reference_value_by_index",
-                                ctx=ast.Load(),
-                            ),
-                            args=[
-                                ast.Name(id="reference", ctx=ast.Load()),
-                                ast.Constant(value=0),
-                            ],
-                            keywords=[],
-                        )
-                    )
-                ],
-                orelse=[],
-            ),
-            ast.Expr(
-                value=ast.Call(
-                    func=ast.Attribute(
-                        value=ast.Name(id="self", ctx=ast.Load()),
-                        attr="add_reference_value",
-                        ctx=ast.Load(),
-                    ),
-                    args=[
-                        ast.Name(id="reference", ctx=ast.Load()),
-                        ast.Call(
-                            func=ast.Name(id="ReferenceValue", ctx=ast.Load()),
-                            args=[
-                                ast.Name(id=feature.get_name(), ctx=ast.Load()),
-                                ast.Attribute(
-                                    value=ast.Name(
-                                        id=feature.get_name(), ctx=ast.Load()
-                                    ),
-                                    attr="name",
-                                    ctx=ast.Load(),
-                                ),
-                            ],
-                            keywords=[],
-                        ),
-                    ],
-                    keywords=[],
-                )
-            ),
-        ],
-        decorator_list=[
-            ast.Attribute(
-                value=ast.Name(id=feature.get_name(), ctx=ast.Load()),
-                attr="setter",
-                ctx=ast.Load(),
-            )
-        ],
-        returns=None,
-    )
-
-
-class NodeClassesGenerator(BaseGenerator):
+class NodeClassesGenerator(BaseGenerator, ASTBuilder):
 
     def __init__(
         self,
@@ -369,6 +31,290 @@ class NodeClassesGenerator(BaseGenerator):
         primitive_types: tuple[PrimitiveTypeMappingSpec, ...],
     ):
         super().__init__(language_packages, primitive_types)
+
+    def _expr_to_get_property(self, feature: Property):
+        return ast.Call(
+            func=ast.Attribute(
+                value=ast.Call(
+                    func=ast.Attribute(
+                        value=ast.Name(id="self", ctx=ast.Load()),
+                        attr="get_classifier",
+                        ctx=ast.Load(),
+                    ),
+                    args=[],
+                    keywords=[],
+                ),
+                attr="require_property_by_name",
+                ctx=ast.Load(),
+            ),
+            args=[ast.Constant(value=feature.get_name())],
+            keywords=[],
+        )
+
+
+    def _expr_to_get_reference(self, feature: Reference):
+        return ast.Call(
+            func=ast.Attribute(
+                value=ast.Call(
+                    func=ast.Attribute(
+                        value=ast.Name(id="self", ctx=ast.Load()),
+                        attr="get_classifier",
+                        ctx=ast.Load(),
+                    ),
+                    args=[],
+                    keywords=[],
+                ),
+                attr="require_reference_by_name",
+                ctx=ast.Load(),
+            ),
+            args=[ast.Constant(value=feature.get_name())],
+            keywords=[],
+        )
+
+
+    def _generate_property_setter(self, feature, prop_type):
+        return make_function_def(
+            name=feature.get_name(),
+            args=ast.arguments(
+                posonlyargs=[],
+                args=[
+                    ast.arg(arg="self"),
+                    ast.arg(
+                        arg="value",
+                        annotation=ast.Name(id=prop_type.strip('"'), ctx=ast.Load()),
+                    ),
+                ],
+                kwonlyargs=[],
+                kw_defaults=[],
+                defaults=[],
+                type_comment=None,
+            ),
+            body=[
+                ast.Assign(
+                    targets=[ast.Name(id="property_", ctx=ast.Store())],
+                    value=self._expr_to_get_property(feature),
+                ),
+                ast.Expr(
+                    value=ast.Call(
+                        func=ast.Attribute(
+                            value=ast.Name(id="self", ctx=ast.Load()),
+                            attr="set_property_value",
+                            ctx=ast.Load(),
+                        ),
+                        args=[],
+                        keywords=[
+                            ast.keyword(
+                                arg="property",
+                                value=ast.Name(id="property_", ctx=ast.Load()),
+                            ),
+                            ast.keyword(
+                                arg="value", value=ast.Name(id="value", ctx=ast.Load())
+                            ),
+                        ],
+                    )
+                ),
+            ],
+            decorator_list=[
+                ast.Attribute(
+                    value=ast.Name(id=feature.get_name(), ctx=ast.Load()),
+                    attr="setter",
+                    ctx=ast.Load(),
+                )
+            ],
+            returns=None,
+        )
+
+
+    def _generate_property_getter(self, feature, prop_type):
+        getter = make_function_def(
+            name=feature.get_name(),
+            args=ast.arguments(
+                posonlyargs=[],
+                args=[ast.arg(arg="self")],
+                kwonlyargs=[],
+                kw_defaults=[],
+                defaults=[],
+            ),
+            body=[
+                ast.Return(
+                    value=ast.Call(
+                        func=ast.Name(id="cast", ctx=ast.Load()),
+                        args=[
+                            ast.Name(id=prop_type.strip('"'), ctx=ast.Load()),
+                            ast.Call(
+                                func=ast.Name(
+                                    id="get_property_value_by_name",
+                                    ctx=ast.Load(),
+                                ),
+                                args=[
+                                    ast.Name(id="self", ctx=ast.Load()),
+                                    ast.Constant(value=feature.get_name()),
+                                ],
+                                keywords=[],
+                            ),
+                        ],
+                        keywords=[],
+                    )
+                )
+            ],
+            decorator_list=[ast.Name(id="property", ctx=ast.Load())],
+            returns=ast.Name(id=prop_type.strip('"'), ctx=ast.Load()),
+        )
+        return getter
+
+
+    def _generate_reference_getter(self, feature, prop_type):
+        return make_function_def(
+            name=feature.get_name(),
+            args=ast.arguments(
+                posonlyargs=[],
+                args=[ast.arg(arg="self")],
+                kwonlyargs=[],
+                kw_defaults=[],
+                defaults=[],
+            ),
+            body=[
+                ast.Assign(
+                    targets=[ast.Name(id="res", ctx=ast.Store())],
+                    value=ast.Call(
+                        func=ast.Name(
+                            id="get_only_reference_value_by_reference_name", ctx=ast.Load()
+                        ),
+                        args=[
+                            ast.Name(id="self", ctx=ast.Load()),
+                            ast.Constant(value=feature.get_name()),
+                        ],
+                        keywords=[],
+                    ),
+                ),
+                ast.If(
+                    test=ast.Name(id="res", ctx=ast.Load()),
+                    body=[
+                        ast.Return(
+                            value=ast.Call(
+                                func=ast.Name(id="cast", ctx=ast.Load()),
+                                args=[
+                                    ast.Name(id=prop_type.strip('"'), ctx=ast.Load()),
+                                    ast.Attribute(
+                                        value=ast.Name(id="res", ctx=ast.Load()),
+                                        attr="referred",
+                                        ctx=ast.Load(),
+                                    ),
+                                ],
+                                keywords=[],
+                            )
+                        )
+                    ],
+                    orelse=[ast.Return(value=ast.Constant(value=None))],
+                ),
+            ],
+            decorator_list=[ast.Name(id="property", ctx=ast.Load())],
+            returns=ast.Subscript(
+                value=ast.Name(id="Optional", ctx=ast.Load()),
+                slice=ast.Constant(value=prop_type.strip('"'), ctx=ast.Load()),
+                ctx=ast.Load(),
+            ),
+        )
+
+
+    def _generate_reference_setter(self, feature, prop_type):
+        return make_function_def(
+            name=feature.get_name(),
+            args=ast.arguments(
+                posonlyargs=[],
+                args=[
+                    ast.arg(arg="self"),
+                    ast.arg(
+                        arg=feature.get_name(),
+                        annotation=ast.Constant(value=prop_type.strip('"'), ctx=ast.Load()),
+                    ),
+                ],
+                kwonlyargs=[],
+                kw_defaults=[],
+                defaults=[],
+            ),
+            body=[
+                ast.Assign(
+                    targets=[ast.Name(id="reference", ctx=ast.Store())],
+                    value=ast.Call(
+                        func=ast.Attribute(
+                            value=ast.Call(
+                                func=ast.Attribute(
+                                    value=ast.Name(id="self", ctx=ast.Load()),
+                                    attr="get_classifier",
+                                    ctx=ast.Load(),
+                                ),
+                                args=[],
+                                keywords=[],
+                            ),
+                            attr="get_reference_by_name",
+                            ctx=ast.Load(),
+                        ),
+                        args=[ast.Constant(value=feature.get_name())],
+                        keywords=[],
+                    ),
+                ),
+                ast.If(
+                    test=ast.Attribute(
+                        value=ast.Name(id="self", ctx=ast.Load()),
+                        attr=feature.get_name(),
+                        ctx=ast.Load(),
+                    ),
+                    body=[
+                        ast.Expr(
+                            value=ast.Call(
+                                func=ast.Attribute(
+                                    value=ast.Name(id="self", ctx=ast.Load()),
+                                    attr="remove_reference_value_by_index",
+                                    ctx=ast.Load(),
+                                ),
+                                args=[
+                                    ast.Name(id="reference", ctx=ast.Load()),
+                                    ast.Constant(value=0),
+                                ],
+                                keywords=[],
+                            )
+                        )
+                    ],
+                    orelse=[],
+                ),
+                ast.Expr(
+                    value=ast.Call(
+                        func=ast.Attribute(
+                            value=ast.Name(id="self", ctx=ast.Load()),
+                            attr="add_reference_value",
+                            ctx=ast.Load(),
+                        ),
+                        args=[
+                            ast.Name(id="reference", ctx=ast.Load()),
+                            ast.Call(
+                                func=ast.Name(id="ReferenceValue", ctx=ast.Load()),
+                                args=[
+                                    ast.Name(id=feature.get_name(), ctx=ast.Load()),
+                                    ast.Attribute(
+                                        value=ast.Name(
+                                            id=feature.get_name(), ctx=ast.Load()
+                                        ),
+                                        attr="name",
+                                        ctx=ast.Load(),
+                                    ),
+                                ],
+                                keywords=[],
+                            ),
+                        ],
+                        keywords=[],
+                    )
+                ),
+            ],
+            decorator_list=[
+                ast.Attribute(
+                    value=ast.Name(id=feature.get_name(), ctx=ast.Load()),
+                    attr="setter",
+                    ctx=ast.Load(),
+                )
+            ],
+            returns=None,
+        )
 
     def _generate_multiple_reference_getter(self, feature, prop_type):
         # @property
@@ -478,7 +424,7 @@ class NodeClassesGenerator(BaseGenerator):
                 ctx=ast.Load(),
             ),
             args=[
-                _expr_to_get_reference(feature),
+                self._expr_to_get_reference(feature),
                 reference_value_call,
             ],
             keywords=[],
@@ -737,8 +683,8 @@ class NodeClassesGenerator(BaseGenerator):
                         prop_type = qualified_name
                     else:
                         raise ValueError(f"type: {f_type}")
-                methods.append(_generate_property_getter(feature, prop_type))
-                methods.append(_generate_property_setter(feature, prop_type))
+                methods.append(self._generate_property_getter(feature, prop_type))
+                methods.append(self._generate_property_setter(feature, prop_type))
             elif isinstance(feature, Containment):
                 # raise ValueError("Containment")
                 pass
@@ -753,8 +699,8 @@ class NodeClassesGenerator(BaseGenerator):
                         self._generate_multiple_reference_adder(feature, prop_type)
                     )
                 else:
-                    methods.append(_generate_reference_getter(feature, prop_type))
-                    methods.append(_generate_reference_setter(feature, prop_type))
+                    methods.append(self._generate_reference_getter(feature, prop_type))
+                    methods.append(self._generate_reference_setter(feature, prop_type))
             else:
                 raise ValueError()
 

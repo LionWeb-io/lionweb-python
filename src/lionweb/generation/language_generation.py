@@ -36,7 +36,6 @@ class LanguageGenerator(BaseGenerator, ASTBuilder):
             ),
         )
 
-
     def _generate_language(self, language: Language) -> ast.Assign:
         return ast.Assign(
             targets=[ast.Name(id="language", ctx=ast.Store())],
