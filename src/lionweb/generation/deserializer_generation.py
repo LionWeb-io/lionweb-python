@@ -19,7 +19,9 @@ def deserializer_generation(click, language: Language, output):
             ast.ImportFrom(
                 module=".language",
                 names=[
-                    ast.alias(name=f"get_{cast(str, c.get_name()).lower()}", asname=None)
+                    ast.alias(
+                        name=f"get_{cast(str, c.get_name()).lower()}", asname=None
+                    )
                     for c in concepts
                 ],
                 level=0,

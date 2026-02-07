@@ -85,7 +85,7 @@ class Reference(Link["Reference"]):
         key: Optional[str] = None,
         type: Optional["Classifier"] = None,
         multiple: bool = False,
-        optional: bool = False
+        optional: bool = False,
     ):
         from lionweb.language.classifier import Classifier
 

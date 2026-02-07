@@ -9,10 +9,10 @@ from lionweb.generation.base_generator import BaseGenerator
 from lionweb.generation.configuration import (LanguageMappingSpec,
                                               PrimitiveTypeMappingSpec)
 from lionweb.generation.generation_utils import make_function_def
-from lionweb.generation.naming_utils import to_var_name, getter_name
-from lionweb.language import (Concept, Containment, DataType, Enumeration,
-                              Interface, Language, LionCoreBuiltins,
-                              PrimitiveType, Property)
+from lionweb.generation.naming_utils import getter_name, to_var_name
+from lionweb.language import (Classifier, Concept, Containment, DataType,
+                              Enumeration, Interface, Language,
+                              LionCoreBuiltins, PrimitiveType, Property)
 from lionweb.language.reference import Reference
 
 
@@ -221,9 +221,19 @@ class LanguageGenerator(BaseGenerator):
                             arg="name", value=ast.Constant(value=feature.get_name())
                         ),
                         ast.keyword(arg="key", value=ast.Constant(value=feature.key)),
-                        ast.keyword(arg="type", value=ast.Name(id=to_var_name(feature.type.name), ctx=ast.Load())),
-                        ast.keyword(arg="multiple", value=ast.Constant(value=feature.multiple)),
-                        ast.keyword(arg="optional", value=ast.Constant(value=feature.optional)),
+                        ast.keyword(
+                            arg="type",
+                            value=ast.Name(
+                                id=to_var_name(cast(Classifier, feature.type).name),
+                                ctx=ast.Load(),
+                            ),
+                        ),
+                        ast.keyword(
+                            arg="multiple", value=ast.Constant(value=feature.multiple)
+                        ),
+                        ast.keyword(
+                            arg="optional", value=ast.Constant(value=feature.optional)
+                        ),
                     ],
                 )
                 get_language_body.append(
@@ -319,9 +329,19 @@ class LanguageGenerator(BaseGenerator):
                             arg="name", value=ast.Constant(value=feature.get_name())
                         ),
                         ast.keyword(arg="key", value=ast.Constant(value=feature.key)),
-                        ast.keyword(arg="type", value=ast.Name(id=to_var_name(feature.type.name), ctx=ast.Load())),
-                        ast.keyword(arg="multiple", value=ast.Constant(value=feature.multiple)),
-                        ast.keyword(arg="optional", value=ast.Constant(value=feature.optional)),
+                        ast.keyword(
+                            arg="type",
+                            value=ast.Name(
+                                id=to_var_name(cast(Classifier, feature.type).name),
+                                ctx=ast.Load(),
+                            ),
+                        ),
+                        ast.keyword(
+                            arg="multiple", value=ast.Constant(value=feature.multiple)
+                        ),
+                        ast.keyword(
+                            arg="optional", value=ast.Constant(value=feature.optional)
+                        ),
                     ],
                 )
                 get_language_body.append(
@@ -379,9 +399,19 @@ class LanguageGenerator(BaseGenerator):
                             arg="name", value=ast.Constant(value=feature.get_name())
                         ),
                         ast.keyword(arg="key", value=ast.Constant(value=feature.key)),
-                        ast.keyword(arg="type", value=ast.Name(id=to_var_name(feature.type.name), ctx=ast.Load())),
-                        ast.keyword(arg="multiple", value=ast.Constant(value=feature.multiple)),
-                        ast.keyword(arg="optional", value=ast.Constant(value=feature.optional)),
+                        ast.keyword(
+                            arg="type",
+                            value=ast.Name(
+                                id=to_var_name(cast(Classifier, feature.type).name),
+                                ctx=ast.Load(),
+                            ),
+                        ),
+                        ast.keyword(
+                            arg="multiple", value=ast.Constant(value=feature.multiple)
+                        ),
+                        ast.keyword(
+                            arg="optional", value=ast.Constant(value=feature.optional)
+                        ),
                     ],
                 )
                 get_language_body.append(
@@ -477,9 +507,19 @@ class LanguageGenerator(BaseGenerator):
                             arg="name", value=ast.Constant(value=feature.get_name())
                         ),
                         ast.keyword(arg="key", value=ast.Constant(value=feature.key)),
-                        ast.keyword(arg="type", value=ast.Name(id=to_var_name(feature.type.name), ctx=ast.Load())),
-                        ast.keyword(arg="multiple", value=ast.Constant(value=feature.multiple)),
-                        ast.keyword(arg="optional", value=ast.Constant(value=feature.optional)),
+                        ast.keyword(
+                            arg="type",
+                            value=ast.Name(
+                                id=to_var_name(cast(Classifier, feature.type).name),
+                                ctx=ast.Load(),
+                            ),
+                        ),
+                        ast.keyword(
+                            arg="multiple", value=ast.Constant(value=feature.multiple)
+                        ),
+                        ast.keyword(
+                            arg="optional", value=ast.Constant(value=feature.optional)
+                        ),
                     ],
                 )
                 get_language_body.append(

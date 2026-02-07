@@ -10,8 +10,8 @@ from lionweb.generation.configuration import (LanguageMappingSpec,
                                               PrimitiveTypeMappingSpec)
 from lionweb.generation.generation_utils import (make_class_def,
                                                  make_function_def)
-from lionweb.generation.naming_utils import (to_snake_case, to_type_name,
-                                             to_var_name, getter_name)
+from lionweb.generation.naming_utils import (getter_name, to_snake_case,
+                                             to_type_name, to_var_name)
 from lionweb.language import (Concept, Containment, Feature, Interface,
                               Language, LionCoreBuiltins, Property)
 from lionweb.language.classifier import Classifier
@@ -546,9 +546,7 @@ class NodeClassesGenerator(BaseGenerator):
                 module=".language",
                 names=[ast.alias(name="get_language", asname=None)]
                 + [
-                    ast.alias(
-                        name=getter_name(c.name), asname=None
-                    )
+                    ast.alias(name=getter_name(c.name), asname=None)
                     for c in language.get_elements()
                     if isinstance(c, Concept)
                 ],
