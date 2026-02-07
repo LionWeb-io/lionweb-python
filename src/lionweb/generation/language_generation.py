@@ -12,9 +12,10 @@ from lionweb.generation.configuration import (LanguageMappingSpec,
 from lionweb.generation.generation_utils import make_function_def
 from lionweb.generation.naming_utils import getter_name, to_var_name
 from lionweb.language import (Classifier, Concept, Containment, DataType,
-                              Enumeration, Interface, Language,
-                              LionCoreBuiltins, PrimitiveType, Property, Feature)
+                              Enumeration, Feature, Interface, Language,
+                              LionCoreBuiltins, PrimitiveType, Property)
 from lionweb.language.reference import Reference
+from lionweb.model import Node
 
 
 class LanguageGenerator(BaseGenerator, ASTBuilder):
@@ -45,7 +46,9 @@ class LanguageGenerator(BaseGenerator, ASTBuilder):
                 keywords=[
                     self._set_lw_version(language),
                     ast.keyword(arg="id", value=ast.Constant(value=language.id)),
-                    ast.keyword(arg="name", value=ast.Constant(value=language.get_name())),
+                    ast.keyword(
+                        arg="name", value=ast.Constant(value=language.get_name())
+                    ),
                     ast.keyword(arg="key", value=ast.Constant(value=language.key)),
                     ast.keyword(
                         arg="version", value=ast.Constant(value=language.get_version())
@@ -53,7 +56,6 @@ class LanguageGenerator(BaseGenerator, ASTBuilder):
                 ],
             ),
         )
-
 
     def _add_to_language(self, var_name: str) -> ast.Expr:
         return ast.Expr(
@@ -69,7 +71,7 @@ class LanguageGenerator(BaseGenerator, ASTBuilder):
         )
 
     def _set_attribute(self, container: str, attribute: str, value: bool) -> ast.stmt:
-        ast.Assign(
+        return ast.Assign(
             targets=[
                 ast.Attribute(
                     value=ast.Name(id=container, ctx=ast.Load()),
@@ -80,10 +82,12 @@ class LanguageGenerator(BaseGenerator, ASTBuilder):
             value=ast.Constant(value=attribute),
         )
 
-    def _instantiate_lw_node(self, cls_name: str, node, extra_kws: dict = None):
+    def _instantiate_lw_node(self, cls_name: str, node, extra_kws: dict = {}):
         """Generates: ClsName(id='...', name='...', key='...', lion_web_version=...)"""
         kws = {
-            "lion_web_version": self.attr("LionWebVersion", node.language.get_lionweb_version().name),
+            "lion_web_version": self.attr(
+                "LionWebVersion", node.language.get_lionweb_version().name
+            ),
             "id": self.const(node.id),
             "name": self.const(node.get_name()),
             "key": self.const(node.key),
@@ -106,16 +110,22 @@ class LanguageGenerator(BaseGenerator, ASTBuilder):
                 self.call(
                     "Concept",
                     keywords={
-                        "lion_web_version": self.attr("LionWebVersion", language.get_lionweb_version().name),
+                        "lion_web_version": self.attr(
+                            "LionWebVersion", language.get_lionweb_version().name
+                        ),
                         "id": self.const(concept.id),
                         "name": self.const(concept_name),
                         "key": self.const(concept.key),
-                    }
-                )
+                    },
+                ),
             )
         )
-        get_language_body.append(self._set_attribute(var_name, "abstract", concept.is_abstract()))
-        get_language_body.append(self._set_attribute(var_name, "partition", concept.is_partition()))
+        get_language_body.append(
+            self._set_attribute(var_name, "abstract", concept.is_abstract())
+        )
+        get_language_body.append(
+            self._set_attribute(var_name, "partition", concept.is_partition())
+        )
         get_language_body.append(self._add_to_language(var_name))
 
     def _create_interface_in_language(
@@ -132,25 +142,29 @@ class LanguageGenerator(BaseGenerator, ASTBuilder):
                 self.call(
                     "Interface",
                     keywords={
-                        "lion_web_version": self.attr("LionWebVersion", language.get_lionweb_version().name),
+                        "lion_web_version": self.attr(
+                            "LionWebVersion", language.get_lionweb_version().name
+                        ),
                         "id": self.const(interface.id),
                         "name": self.const(concept_name),
                         "key": self.const(interface.key),
-                    }
-                )
+                    },
+                ),
             )
         )
         get_language_body.append(self._add_to_language(var_name))
 
     def _process_feature(self, container_name: str, feature: Feature) -> ast.Expr:
-        language = cast(Language, feature.parent.parent)
+        language = cast(Language, cast(Node, feature.parent).get_parent())
 
         # 1. Common Arguments (shared by Reference, Containment, and Property)
         # Note: We determine the class name dynamically (Reference/Property/Containment)
         cls_name = feature.__class__.__name__
 
         keywords = {
-            "lion_web_version": self.attr("LionWebVersion", language.get_lionweb_version().name),
+            "lion_web_version": self.attr(
+                "LionWebVersion", language.get_lionweb_version().name
+            ),
             "id": self.const(feature.id),
             "name": self.const(feature.get_name()),
             "key": self.const(feature.key),
@@ -159,7 +173,9 @@ class LanguageGenerator(BaseGenerator, ASTBuilder):
         # 2. Specific Arguments
         if isinstance(feature, (Reference, Containment)):
             # References and Containments logic is identical
-            keywords["type"] = self.name(to_var_name(cast(Classifier, feature.type).name))
+            keywords["type"] = self.name(
+                to_var_name(cast(Classifier, feature.type).name)
+            )
             keywords["multiple"] = self.const(feature.multiple)
             keywords["optional"] = self.const(feature.optional)
 
@@ -172,10 +188,7 @@ class LanguageGenerator(BaseGenerator, ASTBuilder):
 
         # 4. Add to Container: container.add_feature(...)
         return ast.Expr(
-            self.call(
-                self.attr(container_name, "add_feature"),
-                args=[feature_creation]
-            )
+            self.call(self.attr(container_name, "add_feature"), args=[feature_creation])
         )
 
     def _resolve_property_type(self, feature: Property, language: Language) -> expr:
@@ -183,20 +196,22 @@ class LanguageGenerator(BaseGenerator, ASTBuilder):
         pt = cast(DataType, feature.type)
 
         # Helper to generate the version kwarg for builtins
-        lw_version_kw = {"lion_web_version": self.attr("LionWebVersion", language.get_lionweb_version().name)}
+        lw_version_kw = {
+            "lion_web_version": self.attr(
+                "LionWebVersion", language.get_lionweb_version().name
+            )
+        }
 
         # A. Built-in String
         if pt == LionCoreBuiltins.get_string(feature.lion_web_version):
             return self.call(
-                self.attr("LionCoreBuiltins", "get_string"),
-                keywords=lw_version_kw
+                self.attr("LionCoreBuiltins", "get_string"), keywords=lw_version_kw
             )
 
         # B. Built-in Integer
         if pt == LionCoreBuiltins.get_integer(feature.lion_web_version):
             return self.call(
-                self.attr("LionCoreBuiltins", "get_integer"),
-                keywords=lw_version_kw
+                self.attr("LionCoreBuiltins", "get_integer"), keywords=lw_version_kw
             )
 
         # C. Local Type (Same Language)
@@ -218,7 +233,7 @@ class LanguageGenerator(BaseGenerator, ASTBuilder):
         )
 
     def _populate_concept_in_language(
-            self, concept: Concept, get_language_body: List[stmt]
+        self, concept: Concept, get_language_body: List[stmt]
     ):
         """
         Add definition details (extension, implementation, features) to the concept.
@@ -238,7 +253,7 @@ class LanguageGenerator(BaseGenerator, ASTBuilder):
                 ast.Expr(
                     self.call(
                         self.attr(var_name, "set_extended_concept"),
-                        args=[self.name(ec_var_name)]
+                        args=[self.name(ec_var_name)],
                     )
                 )
             )
@@ -250,7 +265,7 @@ class LanguageGenerator(BaseGenerator, ASTBuilder):
                 ast.Expr(
                     self.call(
                         self.attr(var_name, "add_implemented_interface"),
-                        args=[self.name(interf_var_name)]
+                        args=[self.name(interf_var_name)],
                     )
                 )
             )
@@ -259,7 +274,7 @@ class LanguageGenerator(BaseGenerator, ASTBuilder):
             get_language_body.append(self._process_feature(var_name, feature))
 
     def _populate_interface_in_language(
-            self, interface: Interface, get_language_body: List[stmt]
+        self, interface: Interface, get_language_body: List[stmt]
     ):
         """
         Add definition details (extended interfaces, features) to the interface.
@@ -278,7 +293,7 @@ class LanguageGenerator(BaseGenerator, ASTBuilder):
                 ast.Expr(
                     self.call(
                         self.attr(var_name, "add_extended_interface"),
-                        args=[self.name(extended_var_name)]
+                        args=[self.name(extended_var_name)],
                     )
                 )
             )
@@ -287,7 +302,7 @@ class LanguageGenerator(BaseGenerator, ASTBuilder):
             get_language_body.append(self._process_feature(var_name, feature))
 
     def _define_primitive_type_in_language(
-            self, primitive_type: PrimitiveType, get_language_body: List[stmt]
+        self, primitive_type: PrimitiveType, get_language_body: List[stmt]
     ):
         primitive_type_name = cast(str, primitive_type.get_name())
         language = primitive_type.language
@@ -302,19 +317,21 @@ class LanguageGenerator(BaseGenerator, ASTBuilder):
                 self.call(
                     "PrimitiveType",
                     keywords={
-                        "lion_web_version": self.attr("LionWebVersion", language.get_lionweb_version().name),
+                        "lion_web_version": self.attr(
+                            "LionWebVersion", language.get_lionweb_version().name
+                        ),
                         "id": self.const(primitive_type.id),
                         "name": self.const(primitive_type_name),
                         "key": self.const(primitive_type.key),
-                    }
-                )
+                    },
+                ),
             )
         )
 
         get_language_body.append(self._add_to_language(var_name))
 
     def _define_enumeration_in_language(
-            self, enumeration: Enumeration, get_language_body: List[stmt]
+        self, enumeration: Enumeration, get_language_body: List[stmt]
     ):
         enumeration_name = cast(str, enumeration.get_name())
         language = enumeration.language
@@ -329,12 +346,14 @@ class LanguageGenerator(BaseGenerator, ASTBuilder):
                 self.call(
                     "Enumeration",
                     keywords={
-                        "lion_web_version": self.attr("LionWebVersion", language.get_lionweb_version().name),
+                        "lion_web_version": self.attr(
+                            "LionWebVersion", language.get_lionweb_version().name
+                        ),
                         "id": self.const(enumeration.id),
                         "name": self.const(enumeration_name),
                         "key": self.const(enumeration.key),
-                    }
-                )
+                    },
+                ),
             )
         )
 
@@ -379,7 +398,9 @@ class LanguageGenerator(BaseGenerator, ASTBuilder):
         self.functions.append(
             make_function_def(
                 name="get_language",
-                args=ast.arguments(posonlyargs=[], args=[], kwonlyargs=[], kw_defaults=[], defaults=[]),
+                args=ast.arguments(
+                    posonlyargs=[], args=[], kwonlyargs=[], kw_defaults=[], defaults=[]
+                ),
                 body=func_body,
                 decorator_list=[
                     self.call("lru_cache", keywords={"maxsize": self.const(1)})
@@ -393,7 +414,9 @@ class LanguageGenerator(BaseGenerator, ASTBuilder):
             if isinstance(el, Concept):
                 self._add_getter_method(el, "get_concept_by_name", "Concept")
             elif isinstance(el, PrimitiveType):
-                self._add_getter_method(el, "get_primitive_type_by_name", "PrimitiveType")
+                self._add_getter_method(
+                    el, "get_primitive_type_by_name", "PrimitiveType"
+                )
 
         # 5. Final Assembly
         body.extend(self.imports)
@@ -414,11 +437,11 @@ class LanguageGenerator(BaseGenerator, ASTBuilder):
         element_name = cast(str, element.get_name())
 
         # Body: return get_language().lookup_method("element_name")
-        body = [
+        body: list[stmt] = [
             ast.Return(
                 value=self.call(
                     self.attr(self.call("get_language"), lookup_method),
-                    args=[self.const(element_name)]
+                    args=[self.const(element_name)],
                 )
             )
         ]
@@ -426,7 +449,9 @@ class LanguageGenerator(BaseGenerator, ASTBuilder):
         self.functions.append(
             make_function_def(
                 name=getter_name(element_name),
-                args=ast.arguments(posonlyargs=[], args=[], kwonlyargs=[], kw_defaults=[], defaults=[]),
+                args=ast.arguments(
+                    posonlyargs=[], args=[], kwonlyargs=[], kw_defaults=[], defaults=[]
+                ),
                 body=body,
                 decorator_list=[],
                 returns=self.name(return_type),

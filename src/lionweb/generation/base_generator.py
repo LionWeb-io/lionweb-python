@@ -135,4 +135,3 @@ class BaseGenerator:
         )
 
         return full_call
-

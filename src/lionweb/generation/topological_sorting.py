@@ -1,10 +1,10 @@
-from typing import List, Dict, cast
+from typing import Dict, List, cast
 
-from lionweb.language import Classifier, Containment, Interface, Concept
+from lionweb.language import Classifier, Concept, Containment, Interface
 
 
 def _identify_topological_deps(
-        classifiers: List[Classifier], id_to_concept
+    classifiers: List[Classifier], id_to_concept
 ) -> Dict[str, List[str]]:
     graph: Dict[str, List[str]] = {cast(str, el.get_id()): [] for el in classifiers}
     for c in classifiers:
