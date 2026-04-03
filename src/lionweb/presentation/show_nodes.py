@@ -1,7 +1,7 @@
 import hashlib
 from typing import cast
 
-from IPython.display import HTML, display
+from IPython.display import HTML, display  # type: ignore[import-not-found]
 
 from lionweb.model.node import Node
 

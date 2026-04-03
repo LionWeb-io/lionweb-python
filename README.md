@@ -15,7 +15,7 @@ We support Python 3.11 to 3.13
 Install the package and its dependencies in editable mode:
 
 ```
-pip install -e ".[dev]" ruff mypy mypy-protobuf
+pip install -e ".[dev]" ruff mypy mypy-protobuf types-requests
 ```
 
 ## Common tasks
