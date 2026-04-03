@@ -22,16 +22,16 @@ jobs:
       run: pip install -e ".[dev]" ruff==0.9.6 mypy==1.15.0 mypy-protobuf==3.6.0
 
     - name: Prepare for tests
-      run: sh prepare_for_tests.sh
+      run: make test-setup
 
     - name: Run unit tests
-      run: PYTHONPATH=src python -m unittest discover tests
+      run: make test
 
     - name: Check formatting with Ruff
-      run: ruff format --check src/ tests/
+      run: make format-check
 
     - name: Lint with Ruff
-      run: ruff check src/ tests/
+      run: make lint
 
     - name: Type-check with MyPy
-      run: mypy src/
+      run: make typecheck
