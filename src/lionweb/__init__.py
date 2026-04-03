@@ -1,4 +1,4 @@
-__version__ = "0.4.1"
+__version__ = "0.4.2"
 from .lionweb_version import LionWebVersion
 
 __all__ = ["LionWebVersion"]
