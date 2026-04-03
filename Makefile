@@ -23,7 +23,7 @@ test:
 
 coverage:
 	coverage run --rcfile=.coveragerc --source=src -m unittest discover tests
-	coverage report -m
+	coverage report -m $(COVERAGE_ARGS)
 	coverage html
 	@echo "HTML report: htmlcov/index.html"
 
