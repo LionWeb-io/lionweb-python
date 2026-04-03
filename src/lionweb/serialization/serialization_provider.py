@@ -44,7 +44,5 @@ def setup_standard_initialization(serialization):
         LionCore.get_instance(serialization.lion_web_version).this_and_all_descendants()
     )
     serialization.instance_resolver.extend(
-        LionCoreBuiltins.get_instance(
-            serialization.lion_web_version
-        ).this_and_all_descendants()
+        LionCoreBuiltins.get_instance(serialization.lion_web_version).this_and_all_descendants()
     )

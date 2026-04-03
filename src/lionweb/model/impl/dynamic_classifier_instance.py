@@ -1,11 +1,10 @@
-from typing import TYPE_CHECKING, Any, Dict, List, Optional, Union, cast
+from typing import TYPE_CHECKING, Any, Union, cast
 
 from lionweb.language.containment import Containment
 from lionweb.language.reference import Reference
 from lionweb.model.classifier_instance import ClassifierInstance
 from lionweb.model.has_settable_parent import HasSettableParent
-from lionweb.model.impl.abstract_classifier_instance import \
-    AbstractClassifierInstance
+from lionweb.model.impl.abstract_classifier_instance import AbstractClassifierInstance
 from lionweb.model.node import Node
 from lionweb.model.reference_value import ReferenceValue
 
@@ -20,20 +19,20 @@ class DynamicClassifierInstance(AbstractClassifierInstance, ClassifierInstance):
 
     def __init__(self):
         AbstractClassifierInstance.__init__(self)
-        self._id: Optional[str] = None
-        self.property_values: Dict[str, Any] = {}
-        self.containment_values: Dict[str, List[Node]] = {}
-        self.reference_values: Dict[str, List[ReferenceValue]] = {}
+        self._id: str | None = None
+        self.property_values: dict[str, Any] = {}
+        self.containment_values: dict[str, list[Node]] = {}
+        self.reference_values: dict[str, list[ReferenceValue]] = {}
 
-    def get_id(self) -> Optional[str]:
+    def get_id(self) -> str | None:
         return self._id
 
-    def set_id(self, id: Optional[str]):
+    def set_id(self, id: str | None):
         self._id = id
 
     # Public methods for properties
 
-    def get_property_value(self, property: Union[str, "Property"]) -> Optional[object]:
+    def get_property_value(self, property: Union[str, "Property"]) -> object | None:
         from lionweb.language import Classifier
         from lionweb.language.lioncore_builtins import LionCoreBuiltins
 
@@ -70,9 +69,7 @@ class DynamicClassifierInstance(AbstractClassifierInstance, ClassifierInstance):
 
         if isinstance(property, str):
             property_name = property
-            property_tmp = cast(Classifier, self.get_classifier()).get_property_by_name(
-                property
-            )
+            property_tmp = cast(Classifier, self.get_classifier()).get_property_by_name(property)
             if property_tmp is None:
                 raise ValueError(
                     f"Property {property_name} not found. Classifier {self.get_classifier()}"
@@ -95,14 +92,12 @@ class DynamicClassifierInstance(AbstractClassifierInstance, ClassifierInstance):
 
     # Public methods for containments
 
-    def get_children(
-        self, containment: Union[Containment, str, None] = None
-    ) -> List[Node]:
+    def get_children(self, containment: Containment | str | None = None) -> list[Node]:
         if containment is None:
             from lionweb.model.classifier_instance_utils import get_children
 
             return get_children(self)
-        my_containment: Union[Containment, str]
+        my_containment: Containment | str
         if isinstance(containment, str):
             tmp = self.get_classifier().get_containment_by_name(containment)
             if tmp is None:
@@ -117,10 +112,10 @@ class DynamicClassifierInstance(AbstractClassifierInstance, ClassifierInstance):
 
         return self.containment_values.get(my_containment.get_key(), [])
 
-    def add_child(self, containment: Union[Containment, str], child: Node):
+    def add_child(self, containment: Containment | str, child: Node):
         if containment is None or child is None:
             raise ValueError("Containment and child should not be null")
-        my_containment: Optional[Containment]
+        my_containment: Containment | None
         if isinstance(containment, str):
             my_containment = cast(
                 Containment,
@@ -159,7 +154,7 @@ class DynamicClassifierInstance(AbstractClassifierInstance, ClassifierInstance):
 
     # Public methods for references
 
-    def get_reference_values(self, reference: Reference) -> List[ReferenceValue]:
+    def get_reference_values(self, reference: Reference) -> list[ReferenceValue]:
         if reference is None:
             raise ValueError("Reference should not be null")
         if reference.get_key() is None:
@@ -169,9 +164,7 @@ class DynamicClassifierInstance(AbstractClassifierInstance, ClassifierInstance):
 
         return self.reference_values.get(reference.get_key(), [])
 
-    def add_reference_value(
-        self, reference: Reference, value: Optional[ReferenceValue]
-    ):
+    def add_reference_value(self, reference: Reference, value: ReferenceValue | None):
         if reference is None:
             raise ValueError("Reference should not be null")
         if reference.is_multiple():
@@ -180,9 +173,7 @@ class DynamicClassifierInstance(AbstractClassifierInstance, ClassifierInstance):
         else:
             self._set_reference_single_value(reference, value)
 
-    def remove_reference_value(
-        self, reference: Reference, reference_value: Optional[ReferenceValue]
-    ):
+    def remove_reference_value(self, reference: Reference, reference_value: ReferenceValue | None):
         if reference is None:
             raise ValueError("Reference should not be null")
         if reference.get_key() is None:
@@ -218,7 +209,7 @@ class DynamicClassifierInstance(AbstractClassifierInstance, ClassifierInstance):
                 f"Invalid index {index} when reference values are {len(reference_values)}"
             )
 
-    def set_reference_values(self, reference: Reference, values: List[ReferenceValue]):
+    def set_reference_values(self, reference: Reference, values: list[ReferenceValue]):
         if reference is None:
             raise ValueError("Reference should not be null")
         if reference.get_key() is None:
@@ -236,9 +227,7 @@ class DynamicClassifierInstance(AbstractClassifierInstance, ClassifierInstance):
             value.set_parent(self)
         self.containment_values.setdefault(containment.get_key(), []).append(value)
 
-    def _set_containment_single_value(
-        self, containment: Containment, value: Optional[Node]
-    ):
+    def _set_containment_single_value(self, containment: Containment, value: Node | None):
         prev_value = self.containment_values.get(containment.get_key())
         if prev_value:
             for child in list(prev_value):
@@ -253,19 +242,13 @@ class DynamicClassifierInstance(AbstractClassifierInstance, ClassifierInstance):
 
     # Private methods for references
 
-    def _set_reference_single_value(
-        self, reference: Reference, value: Optional[ReferenceValue]
-    ):
+    def _set_reference_single_value(self, reference: Reference, value: ReferenceValue | None):
         if value is None:
             self.reference_values.pop(reference.get_key(), None)
         else:
             self.reference_values[reference.get_key()] = [value]
 
-    def _add_reference_multiple_value(
-        self, reference: Reference, reference_value: ReferenceValue
-    ):
+    def _add_reference_multiple_value(self, reference: Reference, reference_value: ReferenceValue):
         assert reference.is_multiple()
         if reference_value is not None:
-            self.reference_values.setdefault(reference.get_key(), []).append(
-                reference_value
-            )
+            self.reference_values.setdefault(reference.get_key(), []).append(reference_value)

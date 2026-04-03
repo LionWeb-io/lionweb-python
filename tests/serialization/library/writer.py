@@ -8,8 +8,7 @@ from .library_language import LibraryLanguage
 
 
 class Writer(DynamicNode):
-
-    def __init__(self, id: str, name: Optional[str] = None):
+    def __init__(self, id: str, name: str | None = None):
         super().__init__(id=id, concept=LibraryLanguage.WRITER)
         if name is not None:
             self.set_name(name)

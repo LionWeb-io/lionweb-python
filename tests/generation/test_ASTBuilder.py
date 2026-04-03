@@ -5,7 +5,6 @@ from lionweb.generation.ASTBuilder import ASTBuilder
 
 
 class ASTBuilderTest(unittest.TestCase):
-
     def setUp(self):
         self.builder = ASTBuilder()
 
@@ -120,9 +119,7 @@ class ASTBuilderTest(unittest.TestCase):
 
     def test_call_with_args_and_keywords(self):
         arg = self.builder.const(1)
-        result = self.builder.call(
-            "my_func", args=[arg], keywords={"key": self.builder.const(2)}
-        )
+        result = self.builder.call("my_func", args=[arg], keywords={"key": self.builder.const(2)})
         self.assertIsInstance(result, ast.Call)
         self.assertEqual(len(result.args), 1)
         self.assertEqual(len(result.keywords), 1)

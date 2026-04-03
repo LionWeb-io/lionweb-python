@@ -6,7 +6,6 @@ from lionweb.language.language import Language
 
 
 class SimpleLanguageLanguageTest(unittest.TestCase):
-
     def test_empty_language_definition(self):
         language = Language("SimpleLanguage")
         language.set_id("myM3ID")

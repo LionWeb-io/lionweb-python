@@ -1,4 +1,4 @@
-from typing import TYPE_CHECKING, Dict, List, cast
+from typing import TYPE_CHECKING, cast
 
 if TYPE_CHECKING:
     from lionweb.language.concept import Concept
@@ -13,7 +13,7 @@ from lionweb.utils import clean_string_as_id
 
 
 class LionCore:
-    _instances: Dict[LionWebVersion, Language] = {}
+    _instances: dict[LionWebVersion, Language] = {}
     if TYPE_CHECKING:
         from lionweb.model.impl.m3node import M3Node
 
@@ -21,9 +21,7 @@ class LionCore:
     def get_language_entity(
         cls, lion_web_version: LionWebVersion = LionWebVersion.current_version()
     ) -> "Concept":
-        return cls.get_instance(lion_web_version).require_concept_by_name(
-            "LanguageEntity"
-        )
+        return cls.get_instance(lion_web_version).require_concept_by_name("LanguageEntity")
 
     @classmethod
     def get_link(
@@ -47,9 +45,7 @@ class LionCore:
     def get_structured_data_type(
         cls, lion_web_version: LionWebVersion = LionWebVersion.current_version()
     ) -> "Concept":
-        return cls.get_instance(lion_web_version).require_concept_by_name(
-            "StructuredDataType"
-        )
+        return cls.get_instance(lion_web_version).require_concept_by_name("StructuredDataType")
 
     @classmethod
     def get_field(
@@ -119,17 +115,13 @@ class LionCore:
     def get_primitive_type(
         cls, lion_web_version: LionWebVersion = LionWebVersion.current_version()
     ):
-        return cls.get_instance(lion_web_version).require_concept_by_name(
-            "PrimitiveType"
-        )
+        return cls.get_instance(lion_web_version).require_concept_by_name("PrimitiveType")
 
     @classmethod
     def get_enumeration_literal(
         cls, lion_web_version: LionWebVersion = LionWebVersion.current_version()
     ):
-        return cls.get_instance(lion_web_version).require_concept_by_name(
-            "EnumerationLiteral"
-        )
+        return cls.get_instance(lion_web_version).require_concept_by_name("EnumerationLiteral")
 
     @classmethod
     def get_instance(
@@ -155,9 +147,7 @@ class LionCore:
 
             # Initialize concepts
             concepts = {
-                name: instance.add_element(
-                    Concept(lion_web_version=lion_web_version, name=name)
-                )
+                name: instance.add_element(Concept(lion_web_version=lion_web_version, name=name))
                 for name in [
                     "Annotation",
                     "Concept",
@@ -179,9 +169,7 @@ class LionCore:
             from lionweb.language.interface import Interface
 
             interfaces = {
-                name: instance.add_element(
-                    Interface(lion_web_version=lion_web_version, name=name)
-                )
+                name: instance.add_element(Interface(lion_web_version=lion_web_version, name=name))
                 for name in [
                     "IKeyed",
                 ]
@@ -245,9 +233,7 @@ class LionCore:
                 ).set_id("-id-Enumeration-literals" + version_id_suffix)
             )
 
-            concepts["EnumerationLiteral"].add_implemented_interface(
-                interfaces["IKeyed"]
-            )
+            concepts["EnumerationLiteral"].add_implemented_interface(interfaces["IKeyed"])
 
             concepts["Feature"].set_abstract(True)
             concepts["Feature"].add_implemented_interface(interfaces["IKeyed"])
@@ -375,9 +361,7 @@ class LionCore:
                     lion_web_version=lion_web_version, name="StructuredDataType"
                 )
                 instance.add_element(concepts["StructuredDataType"])
-                concepts["Field"] = Concept(
-                    lion_web_version=lion_web_version, name="Field"
-                )
+                concepts["Field"] = Concept(lion_web_version=lion_web_version, name="Field")
                 instance.add_element(concepts["Field"])
 
                 concepts["StructuredDataType"].add_feature(
@@ -433,14 +417,14 @@ class LionCore:
             cls._check_ids(child, version_id_suffix)
 
     @classmethod
-    def _get_children_helper(cls, node: "M3Node") -> List["M3Node"]:
+    def _get_children_helper(cls, node: "M3Node") -> list["M3Node"]:
         from lionweb.language.classifier import Classifier
         from lionweb.language.feature import Feature
 
         if isinstance(node, Language):
-            return cast(List[M3Node], node.get_elements())
+            return cast(list[M3Node], node.get_elements())
         elif isinstance(node, Classifier):
-            return cast(List[M3Node], node.get_features())
+            return cast(list[M3Node], node.get_features())
         elif isinstance(node, Feature):
             return []
         else:

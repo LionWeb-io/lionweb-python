@@ -1,46 +1,45 @@
-from typing import Dict, List, Optional
-
 from lionweb import LionWebVersion
 from lionweb.language import Containment
 from lionweb.model import ClassifierInstance
-from lionweb.serialization import (JsonSerialization, MetaPointer,
-                                   SerializedClassifierInstance,
-                                   create_standard_json_serialization)
+from lionweb.serialization import (
+    JsonSerialization,
+    MetaPointer,
+    SerializedClassifierInstance,
+    create_standard_json_serialization,
+)
 
 
 class BulkImport:
     # Cache for JsonSerialization per LionWebVersion
-    _json_serializations: Dict[LionWebVersion, JsonSerialization] = {}
+    _json_serializations: dict[LionWebVersion, JsonSerialization] = {}
 
     @staticmethod
     def _get_json_serialization(lion_web_version: LionWebVersion) -> JsonSerialization:
         """Return cached JsonSerialization for a given LionWebVersion."""
         if lion_web_version not in BulkImport._json_serializations:
-            BulkImport._json_serializations[lion_web_version] = (
-                create_standard_json_serialization(lion_web_version)
+            BulkImport._json_serializations[lion_web_version] = create_standard_json_serialization(
+                lion_web_version
             )
         return BulkImport._json_serializations[lion_web_version]
 
     def __init__(
         self,
-        attach_points: Optional[List["BulkImport.AttachPoint"]] = None,
-        nodes: Optional[List[ClassifierInstance]] = None,
+        attach_points: list["BulkImport.AttachPoint"] | None = None,
+        nodes: list[ClassifierInstance] | None = None,
     ) -> None:
         """
         If `nodes` is a list of ClassifierInstance, serialize them into
         SerializedClassifierInstance immediately (matching the Java behavior).
         """
-        self._attach_points: List[BulkImport.AttachPoint] = attach_points or []
-        self._nodes: List[SerializedClassifierInstance] = []
+        self._attach_points: list[BulkImport.AttachPoint] = attach_points or []
+        self._nodes: list[SerializedClassifierInstance] = []
 
         nodes = nodes or []
         if nodes:
             json_serialization = self._get_json_serialization(
                 nodes[0].get_classifier().get_lionweb_version()
             )
-            serialized_chunk = (
-                json_serialization.serialize_nodes_to_serialization_chunk(nodes)
-            )
+            serialized_chunk = json_serialization.serialize_nodes_to_serialization_chunk(nodes)
             self._nodes = list(serialized_chunk.get_classifier_instances())
 
     # --- mutation API ---
@@ -55,9 +54,7 @@ class BulkImport:
         )
         self._nodes.extend(serialized_chunk.get_classifier_instances())
 
-    def add_nodes(
-        self, classifier_instances: List[SerializedClassifierInstance]
-    ) -> None:
+    def add_nodes(self, classifier_instances: list[SerializedClassifierInstance]) -> None:
         """Append already-serialized classifier instances as-is."""
         self._nodes.extend(classifier_instances)
 
@@ -70,10 +67,10 @@ class BulkImport:
 
     # --- accessors ---
 
-    def get_attach_points(self) -> List["BulkImport.AttachPoint"]:
+    def get_attach_points(self) -> list["BulkImport.AttachPoint"]:
         return self._attach_points
 
-    def get_nodes(self) -> List[SerializedClassifierInstance]:
+    def get_nodes(self) -> list[SerializedClassifierInstance]:
         return self._nodes
 
     def number_of_nodes(self) -> int:
@@ -93,9 +90,7 @@ class BulkImport:
     # --- nested class ---
 
     class AttachPoint:
-        def __init__(
-            self, container: str, containment: MetaPointer, root_id: str
-        ) -> None:
+        def __init__(self, container: str, containment: MetaPointer, root_id: str) -> None:
             self.container: str = container
             self.containment: MetaPointer = containment
             self.root_id: str = root_id

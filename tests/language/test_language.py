@@ -4,7 +4,6 @@ from lionweb.language.language import Language
 
 
 class LanguageTest(unittest.TestCase):
-
     def test_add_dependency(self):
         m1 = Language("m1")
         m2 = Language("m2")

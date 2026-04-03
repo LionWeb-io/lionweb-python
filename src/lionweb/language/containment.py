@@ -11,10 +11,10 @@ class Containment(Link["Containment"]):
 
     @staticmethod
     def create_optional(
-        name: Optional[str] = None,
+        name: str | None = None,
         type: Optional["Classifier"] = None,
-        id: Optional[str] = None,
-        key: Optional[str] = None,
+        id: str | None = None,
+        key: str | None = None,
     ) -> "Containment":
         containment = Containment(name=name)
         containment.set_optional(True)
@@ -28,7 +28,7 @@ class Containment(Link["Containment"]):
 
     @staticmethod
     def create_required(
-        name: Optional[str] = None, type: Optional["Classifier"] = None
+        name: str | None = None, type: Optional["Classifier"] = None
     ) -> "Containment":
         containment = Containment(name=name)
         containment.set_optional(False)
@@ -39,9 +39,9 @@ class Containment(Link["Containment"]):
     @staticmethod
     def create_multiple(
         lion_web_version: Optional["LionWebVersion"] = None,
-        name: Optional[str] = None,
+        name: str | None = None,
         type: Optional["Classifier"] = None,
-        id: Optional[str] = None,
+        id: str | None = None,
     ) -> "Containment":
         if lion_web_version is None:
             containment = Containment(name=name)
@@ -56,7 +56,7 @@ class Containment(Link["Containment"]):
 
     @staticmethod
     def create_multiple_and_required(
-        name: Optional[str] = None, type: Optional["Classifier"] = None
+        name: str | None = None, type: Optional["Classifier"] = None
     ) -> "Containment":
         containment = Containment(name=name)
         containment.set_optional(False)
@@ -67,17 +67,15 @@ class Containment(Link["Containment"]):
     def __init__(
         self,
         lion_web_version: Optional["LionWebVersion"] = None,
-        name: Optional[str] = None,
-        id: Optional[str] = None,
+        name: str | None = None,
+        id: str | None = None,
         container: Optional["Classifier"] = None,
-        key: Optional[str] = None,
+        key: str | None = None,
         type: Optional["Classifier"] = None,
         multiple: bool = False,
         optional: bool = False,
     ):
-        super().__init__(
-            lion_web_version=lion_web_version, name=name, id=id, container=container
-        )
+        super().__init__(lion_web_version=lion_web_version, name=name, id=id, container=container)
         if key:
             self.set_key(key)
         self.set_multiple(multiple)

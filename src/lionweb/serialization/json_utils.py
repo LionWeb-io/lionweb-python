@@ -1,6 +1,4 @@
-from typing import Dict, List, Union
-
-JsonObject = Dict[str, object]
-JsonArray = List[object]
-JsonPrimitiveValue = Union[str, int]
-JsonElement = Union[None, JsonObject, JsonArray, JsonPrimitiveValue]
+JsonObject = dict[str, object]
+JsonArray = list[object]
+JsonPrimitiveValue = str | int
+JsonElement = None | JsonObject | JsonArray | JsonPrimitiveValue

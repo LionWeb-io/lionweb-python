@@ -262,9 +262,7 @@ class TestLanguageVersion(unittest.TestCase):
         """Test from_meta_pointer with None raises ValueError."""
         with self.assertRaises(ValueError) as context:
             LanguageVersion.from_meta_pointer(None)
-        self.assertIn(
-            "meta_pointer parameter should not be null", str(context.exception)
-        )
+        self.assertIn("meta_pointer parameter should not be null", str(context.exception))
 
     def test_from_meta_pointer_with_none_language(self):
         """Test from_meta_pointer with None language raises ValueError."""
@@ -277,9 +275,7 @@ class TestLanguageVersion(unittest.TestCase):
         meta_pointer = MockMetaPointer(None, "1.8")
         with self.assertRaises(ValueError) as context:
             LanguageVersion.from_meta_pointer(meta_pointer)
-        self.assertIn(
-            "meta_pointer language should not be null", str(context.exception)
-        )
+        self.assertIn("meta_pointer language should not be null", str(context.exception))
 
     def test_from_meta_pointer_with_none_version(self):
         """Test from_meta_pointer with None version raises ValueError."""

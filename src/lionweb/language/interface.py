@@ -1,5 +1,5 @@
 import itertools
-from typing import TYPE_CHECKING, List, Optional, Set
+from typing import TYPE_CHECKING, Optional
 
 from lionweb.language.classifier import Classifier
 
@@ -16,9 +16,9 @@ class Interface(Classifier["Interface"]):
         self,
         lion_web_version: Optional["LionWebVersion"] = None,
         language: Optional["Language"] = None,
-        name: Optional[str] = None,
-        id: Optional[str] = None,
-        key: Optional[str] = None,
+        name: str | None = None,
+        id: str | None = None,
+        key: str | None = None,
     ):
         from lionweb.lionweb_version import LionWebVersion
 
@@ -32,11 +32,11 @@ class Interface(Classifier["Interface"]):
         if key:
             self.set_key(key)
 
-    def get_extended_interfaces(self) -> List["Interface"]:
+    def get_extended_interfaces(self) -> list["Interface"]:
         return self.get_reference_multiple_value("extends")
 
     @property
-    def extended_interfaces(self) -> List["Interface"]:
+    def extended_interfaces(self) -> list["Interface"]:
         return self.get_extended_interfaces()
 
     def add_extended_interface(self, extended_interface: "Interface"):
@@ -47,10 +47,10 @@ class Interface(Classifier["Interface"]):
 
         self.add_reference_multiple_value("extends", reference_to(extended_interface))
 
-    def inherited_features(self) -> List["Feature"]:
+    def inherited_features(self) -> list["Feature"]:
         from lionweb.language.feature import Feature
 
-        result: List[Feature] = []
+        result: list[Feature] = []
         for super_interface in self.all_ancestors():
             self.combine_features(result, super_interface.all_features())
         return result
@@ -60,16 +60,14 @@ class Interface(Classifier["Interface"]):
 
         return LionCore.get_interface(self.get_lionweb_version())
 
-    def direct_ancestors(self) -> List[Classifier]:
+    def direct_ancestors(self) -> list[Classifier]:
         return list(itertools.chain(self.get_extended_interfaces()))
 
-    def all_extended_interfaces(self) -> Set["Interface"]:
+    def all_extended_interfaces(self) -> set["Interface"]:
         to_avoid = {self}
         return self._all_extended_interfaces_helper(to_avoid)
 
-    def _all_extended_interfaces_helper(
-        self, to_avoid: Set["Interface"]
-    ) -> Set["Interface"]:
+    def _all_extended_interfaces_helper(self, to_avoid: set["Interface"]) -> set["Interface"]:
         interfaces = set()
         to_avoid.add(self)
         for ei in self.get_extended_interfaces():

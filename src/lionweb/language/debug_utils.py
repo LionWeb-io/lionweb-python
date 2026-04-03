@@ -1,5 +1,4 @@
 class DebugUtils:
-
     @staticmethod
     def qualified_name(namespaced_entity) -> str:
         """

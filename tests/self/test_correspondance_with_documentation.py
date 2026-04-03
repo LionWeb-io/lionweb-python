@@ -10,7 +10,6 @@ from lionweb.utils.model_comparator import ModelComparator
 
 
 class CorrespondenceWithDocumentationTest(unittest.TestCase):
-
     SPECIFICATION_2023_1_COMMIT_CONSIDERED = "73b1c88e8e8f365c76bcf13340da310ed74d5f8e"
     SPECIFICATION_2024_1_COMMIT_CONSIDERED = "73b1c88e8e8f365c76bcf13340da310ed74d5f8e"
 

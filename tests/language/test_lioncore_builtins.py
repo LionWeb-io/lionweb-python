@@ -7,7 +7,6 @@ from lionweb.utils.language_validator import LanguageValidator
 
 
 class LionCoreBuiltinsTest(unittest.TestCase):
-
     def test_string_primitive_type(self):
         string = LionCoreBuiltins.get_instance().get_element_by_name("String")
         self.assertIsInstance(string, PrimitiveType)

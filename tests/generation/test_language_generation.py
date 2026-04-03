@@ -2,22 +2,19 @@ import os
 import tempfile
 import textwrap
 import unittest
-from typing import List
 
 from lionweb.generation.language_generation import LanguageGenerator
 from lionweb.language import LanguageFactory
 
 
 class MockClick:
-
-    messages: List[str] = []
+    messages: list[str] = []
 
     def echo(self, msg):
         self.messages.append(msg)
 
 
 class LanguageGenerationTest(unittest.TestCase):
-
     def test_simple_generation(self):
         language_factory = LanguageFactory(name="MyLanguage")
         my_concept = language_factory.concept("MyConcept")
@@ -41,8 +38,8 @@ class LanguageGenerationTest(unittest.TestCase):
                 from lionweb.language import Language, Concept, Containment, Enumeration, Interface, PrimitiveType, Property, Reference, LionCoreBuiltins
                 from lionweb.lionweb_version import LionWebVersion
                 from functools import lru_cache
-                
-                
+
+
                 @lru_cache(maxsize=1)
                 def get_language() ->Language:
                     language = Language(lion_web_version=LionWebVersion.V2024_1, id=
@@ -59,12 +56,12 @@ class LanguageGenerationTest(unittest.TestCase):
                     my_other_concept.partition = False
                     language.add_element(my_other_concept)
                     return language
-                
-                
+
+
                 def get_my_concept() ->Concept:
                     return get_language().get_concept_by_name('MyConcept')
-                
-                
+
+
                 def get_my_other_concept() ->Concept:
                     return get_language().get_concept_by_name('MyOtherConcept')
             """

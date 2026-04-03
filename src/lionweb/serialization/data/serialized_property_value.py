@@ -1,5 +1,5 @@
 import threading
-from typing import ClassVar, Optional, Self
+from typing import ClassVar, Self
 
 from lionweb.serialization.data.metapointer import MetaPointer
 
@@ -10,15 +10,13 @@ class SerializedPropertyValue:
     """
 
     # Class-level cache for interning instances
-    _instances: ClassVar[
-        dict[tuple[MetaPointer, Optional[str]], "SerializedPropertyValue"]
-    ] = {}
+    _instances: ClassVar[dict[tuple[MetaPointer, str | None], "SerializedPropertyValue"]] = {}
     _lock = threading.Lock()  # Thread-safe access to cache
 
     _meta_pointer: MetaPointer
-    _value: Optional[str]
+    _value: str | None
 
-    def __new__(cls, meta_pointer: MetaPointer, value: Optional[str] = None):
+    def __new__(cls, meta_pointer: MetaPointer, value: str | None = None):
         # Create cache key
         cache_key = (meta_pointer, value)
 
@@ -34,12 +32,12 @@ class SerializedPropertyValue:
             cls._instances[cache_key] = instance
             return instance
 
-    def __init__(self, meta_pointer: MetaPointer, value: Optional[str] = None):
+    def __init__(self, meta_pointer: MetaPointer, value: str | None = None):
         # no-op; kept for signature compatibility
         pass
 
     @classmethod
-    def of(cls, meta_pointer: MetaPointer, value: Optional[str] = None) -> Self:
+    def of(cls, meta_pointer: MetaPointer, value: str | None = None) -> Self:
         """
         Factory method to get an interned SerializedPropertyValue instance.
         This is the preferred way to create SerializedPropertyValue instances.
@@ -54,21 +52,17 @@ class SerializedPropertyValue:
         return self._meta_pointer
 
     def set_meta_pointer(self, meta_pointer: MetaPointer):
-        raise RuntimeError(
-            "SerializedPropertyValue instances are immutable after creation"
-        )
+        raise RuntimeError("SerializedPropertyValue instances are immutable after creation")
 
-    def get_value(self) -> Optional[str]:
+    def get_value(self) -> str | None:
         return self._value
 
     @property
-    def value(self) -> Optional[str]:
+    def value(self) -> str | None:
         return self._value
 
-    def set_value(self, value: Optional[str]):
-        raise RuntimeError(
-            "SerializedPropertyValue instances are immutable after creation"
-        )
+    def set_value(self, value: str | None):
+        raise RuntimeError("SerializedPropertyValue instances are immutable after creation")
 
     @classmethod
     def clear_cache(cls):
@@ -83,7 +77,9 @@ class SerializedPropertyValue:
             return len(cls._instances)
 
     def __str__(self):
-        return f"SerializedPropertyValue{{meta_pointer={self._meta_pointer}, value='{self._value}'}}"
+        return (
+            f"SerializedPropertyValue{{meta_pointer={self._meta_pointer}, value='{self._value}'}}"
+        )
 
     def __eq__(self, other):
         if not isinstance(other, SerializedPropertyValue):

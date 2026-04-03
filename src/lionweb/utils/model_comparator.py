@@ -1,4 +1,4 @@
-from typing import List, Optional, cast
+from typing import cast
 
 from lionweb.language.classifier import Classifier
 from lionweb.model import ClassifierInstance
@@ -21,9 +21,7 @@ class ComparisonResult:
         self.differences.append(f"{context}: different ids, a={id_a}, b={id_b}")
 
     def mark_different_annotated(self, context: str, id_a: str, id_b: str):
-        self.differences.append(
-            f"{context}: different annotated ids, a={id_a}, b={id_b}"
-        )
+        self.differences.append(f"{context}: different annotated ids, a={id_a}, b={id_b}")
 
     def mark_different_concept(
         self, context: str, node_id: str, concept_id_a: str, concept_id_b: str
@@ -61,8 +59,8 @@ class ComparisonResult:
         context: str,
         node_id: str,
         containment_name: str,
-        children_a: List[str | None],
-        children_b: List[str | None],
+        children_a: list[str | None],
+        children_b: list[str | None],
     ):
         self.differences.append(
             f"{context} (id={node_id}): different of children for {containment_name}, a={children_a}, b={children_b}"
@@ -86,8 +84,8 @@ class ComparisonResult:
         node_id: str,
         reference_name: str,
         index: int,
-        referred_a: Optional[str],
-        referred_b: Optional[str],
+        referred_a: str | None,
+        referred_b: str | None,
     ):
         self.differences.append(
             f"{context} (id={node_id}): different referred id for {reference_name} index {index}, a={referred_a}, b={referred_b}"
@@ -99,8 +97,8 @@ class ComparisonResult:
         node_id: str,
         reference_name: str,
         index: int,
-        resolve_info_a: Optional[str],
-        resolve_info_b: Optional[str],
+        resolve_info_a: str | None,
+        resolve_info_b: str | None,
     ):
         self.differences.append(
             f"{context} (id={node_id}): different resolve info for {reference_name} index {index}, a={resolve_info_a}, b={resolve_info_b}"
@@ -111,9 +109,7 @@ class ComparisonResult:
         return self
 
     def mark_different_number_of_annotations(self, context: str, na: int, nb: int):
-        self.differences.append(
-            f"{context} different number of annotations ({na} != {nb})"
-        )
+        self.differences.append(f"{context} different number of annotations ({na} != {nb})")
 
     def mark_different_annotation(self, context: str, i: int):
         self.differences.append(f"{context} annotation {i} is different")
@@ -123,7 +119,6 @@ class ComparisonResult:
 
 
 class ModelComparator:
-
     def __init__(self, unordered_links=None):
         if unordered_links is None:
             unordered_links = []
@@ -224,9 +219,7 @@ class ModelComparator:
                     children_a_ids = [c.id for c in children_a]
                     children_b_ids = [c.id for c in children_b]
                     if children_a_ids == children_b_ids:
-                        for i, (child_a, child_b) in enumerate(
-                            zip(children_a, children_b)
-                        ):
+                        for i, (child_a, child_b) in enumerate(zip(children_a, children_b)):
                             self._compare_nodes(
                                 child_a,
                                 child_b,
@@ -262,9 +255,7 @@ class ModelComparator:
             comparison_result.mark_different_number_of_annotations(
                 context, len(node_a.get_annotations()), len(node_b.get_annotations())
             )
-        for i, (a, b) in enumerate(
-            zip(node_a.get_annotations(), node_b.get_annotations())
-        ):
+        for i, (a, b) in enumerate(zip(node_a.get_annotations(), node_b.get_annotations())):
             if a.id != b.id:
                 comparison_result.mark_different_annotation(context, i)
 
@@ -282,18 +273,10 @@ class ModelComparator:
         else:
             if node_a.get_classifier().id == node_b.get_classifier().id:
                 concept = node_a.get_classifier()
-                self._compare_properties(
-                    concept, node_a, node_b, comparison_result, context
-                )
-                self._compare_references(
-                    concept, node_a, node_b, comparison_result, context
-                )
-                self._compare_containments(
-                    concept, node_a, node_b, comparison_result, context
-                )
-                self._compare_annotations(
-                    concept, node_a, node_b, comparison_result, context
-                )
+                self._compare_properties(concept, node_a, node_b, comparison_result, context)
+                self._compare_references(concept, node_a, node_b, comparison_result, context)
+                self._compare_containments(concept, node_a, node_b, comparison_result, context)
+                self._compare_annotations(concept, node_a, node_b, comparison_result, context)
             else:
                 comparison_result.mark_different_concept(
                     context,
@@ -314,31 +297,17 @@ class ModelComparator:
                 context, cast(str, node_a.id), cast(str, node_b.id)
             )
         else:
-            if (
-                node_a.get_annotation_definition().id
-                == node_b.get_annotation_definition().id
-            ):
+            if node_a.get_annotation_definition().id == node_b.get_annotation_definition().id:
                 concept = node_a.get_annotation_definition()
-                if (
-                    cast(Node, node_a.get_parent()).id
-                    != cast(Node, node_b.get_parent()).id
-                ):
+                if cast(Node, node_a.get_parent()).id != cast(Node, node_b.get_parent()).id:
                     comparison_result.mark_different_annotated(
                         context, cast(str, node_a.id), cast(str, node_b.id)
                     )
 
-                self._compare_properties(
-                    concept, node_a, node_b, comparison_result, context
-                )
-                self._compare_references(
-                    concept, node_a, node_b, comparison_result, context
-                )
-                self._compare_containments(
-                    concept, node_a, node_b, comparison_result, context
-                )
-                self._compare_annotations(
-                    concept, node_a, node_b, comparison_result, context
-                )
+                self._compare_properties(concept, node_a, node_b, comparison_result, context)
+                self._compare_references(concept, node_a, node_b, comparison_result, context)
+                self._compare_containments(concept, node_a, node_b, comparison_result, context)
+                self._compare_annotations(concept, node_a, node_b, comparison_result, context)
             else:
                 comparison_result.mark_different_concept(
                     context,

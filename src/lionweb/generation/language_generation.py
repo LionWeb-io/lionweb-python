@@ -1,25 +1,33 @@
 import ast
 from _ast import expr, stmt
 from pathlib import Path
-from typing import List, cast
+from typing import cast
 
 import astor  # type: ignore
 
 from lionweb.generation.ASTBuilder import ASTBuilder
 from lionweb.generation.base_generator import BaseGenerator
-from lionweb.generation.configuration import (LanguageMappingSpec,
-                                              PrimitiveTypeMappingSpec)
+from lionweb.generation.configuration import LanguageMappingSpec, PrimitiveTypeMappingSpec
 from lionweb.generation.generation_utils import make_function_def
 from lionweb.generation.naming_utils import getter_name, to_var_name
-from lionweb.language import (Classifier, Concept, Containment, DataType,
-                              Enumeration, Feature, Interface, Language,
-                              LionCoreBuiltins, PrimitiveType, Property)
+from lionweb.language import (
+    Classifier,
+    Concept,
+    Containment,
+    DataType,
+    Enumeration,
+    Feature,
+    Interface,
+    Language,
+    LionCoreBuiltins,
+    PrimitiveType,
+    Property,
+)
 from lionweb.language.reference import Reference
 from lionweb.model import Node
 
 
 class LanguageGenerator(BaseGenerator, ASTBuilder):
-
     def __init__(
         self,
         language_packages: tuple[LanguageMappingSpec, ...] = (),
@@ -46,13 +54,9 @@ class LanguageGenerator(BaseGenerator, ASTBuilder):
                 keywords=[
                     self._set_lw_version(language),
                     ast.keyword(arg="id", value=ast.Constant(value=language.id)),
-                    ast.keyword(
-                        arg="name", value=ast.Constant(value=language.get_name())
-                    ),
+                    ast.keyword(arg="name", value=ast.Constant(value=language.get_name())),
                     ast.keyword(arg="key", value=ast.Constant(value=language.key)),
-                    ast.keyword(
-                        arg="version", value=ast.Constant(value=language.get_version())
-                    ),
+                    ast.keyword(arg="version", value=ast.Constant(value=language.get_version())),
                 ],
             ),
         )
@@ -96,9 +100,7 @@ class LanguageGenerator(BaseGenerator, ASTBuilder):
             kws.update(extra_kws)
         return self.call(cls_name, keywords=kws)
 
-    def _create_concept_in_language(
-        self, concept: Concept, get_language_body: List[stmt]
-    ):
+    def _create_concept_in_language(self, concept: Concept, get_language_body: list[stmt]):
         language = concept.language
         if language is None:
             raise ValueError(f"Concept {concept.get_name()} has no language")
@@ -120,17 +122,11 @@ class LanguageGenerator(BaseGenerator, ASTBuilder):
                 ),
             )
         )
-        get_language_body.append(
-            self._set_attribute(var_name, "abstract", concept.is_abstract())
-        )
-        get_language_body.append(
-            self._set_attribute(var_name, "partition", concept.is_partition())
-        )
+        get_language_body.append(self._set_attribute(var_name, "abstract", concept.is_abstract()))
+        get_language_body.append(self._set_attribute(var_name, "partition", concept.is_partition()))
         get_language_body.append(self._add_to_language(var_name))
 
-    def _create_interface_in_language(
-        self, interface: Interface, get_language_body: List[stmt]
-    ):
+    def _create_interface_in_language(self, interface: Interface, get_language_body: list[stmt]):
         language = interface.language
         if language is None:
             raise ValueError(f"Interface {interface.get_name()} has no language")
@@ -162,20 +158,16 @@ class LanguageGenerator(BaseGenerator, ASTBuilder):
         cls_name = feature.__class__.__name__
 
         keywords = {
-            "lion_web_version": self.attr(
-                "LionWebVersion", language.get_lionweb_version().name
-            ),
+            "lion_web_version": self.attr("LionWebVersion", language.get_lionweb_version().name),
             "id": self.const(feature.id),
             "name": self.const(feature.get_name()),
             "key": self.const(feature.key),
         }
 
         # 2. Specific Arguments
-        if isinstance(feature, (Reference, Containment)):
+        if isinstance(feature, Reference | Containment):
             # References and Containments logic is identical
-            keywords["type"] = self.name(
-                to_var_name(cast(Classifier, feature.type).name)
-            )
+            keywords["type"] = self.name(to_var_name(cast(Classifier, feature.type).name))
             keywords["multiple"] = self.const(feature.multiple)
             keywords["optional"] = self.const(feature.optional)
 
@@ -197,22 +189,16 @@ class LanguageGenerator(BaseGenerator, ASTBuilder):
 
         # Helper to generate the version kwarg for builtins
         lw_version_kw = {
-            "lion_web_version": self.attr(
-                "LionWebVersion", language.get_lionweb_version().name
-            )
+            "lion_web_version": self.attr("LionWebVersion", language.get_lionweb_version().name)
         }
 
         # A. Built-in String
         if pt == LionCoreBuiltins.get_string(feature.lion_web_version):
-            return self.call(
-                self.attr("LionCoreBuiltins", "get_string"), keywords=lw_version_kw
-            )
+            return self.call(self.attr("LionCoreBuiltins", "get_string"), keywords=lw_version_kw)
 
         # B. Built-in Integer
         if pt == LionCoreBuiltins.get_integer(feature.lion_web_version):
-            return self.call(
-                self.attr("LionCoreBuiltins", "get_integer"), keywords=lw_version_kw
-            )
+            return self.call(self.attr("LionCoreBuiltins", "get_integer"), keywords=lw_version_kw)
 
         # C. Local Type (Same Language)
         if language == pt.language:
@@ -232,9 +218,7 @@ class LanguageGenerator(BaseGenerator, ASTBuilder):
             f"{pt_language.get_name()} but no mapping was found"
         )
 
-    def _populate_concept_in_language(
-        self, concept: Concept, get_language_body: List[stmt]
-    ):
+    def _populate_concept_in_language(self, concept: Concept, get_language_body: list[stmt]):
         """
         Add definition details (extension, implementation, features) to the concept.
         """
@@ -273,9 +257,7 @@ class LanguageGenerator(BaseGenerator, ASTBuilder):
         for feature in concept.get_features():
             get_language_body.append(self._process_feature(var_name, feature))
 
-    def _populate_interface_in_language(
-        self, interface: Interface, get_language_body: List[stmt]
-    ):
+    def _populate_interface_in_language(self, interface: Interface, get_language_body: list[stmt]):
         """
         Add definition details (extended interfaces, features) to the interface.
         """
@@ -302,7 +284,7 @@ class LanguageGenerator(BaseGenerator, ASTBuilder):
             get_language_body.append(self._process_feature(var_name, feature))
 
     def _define_primitive_type_in_language(
-        self, primitive_type: PrimitiveType, get_language_body: List[stmt]
+        self, primitive_type: PrimitiveType, get_language_body: list[stmt]
     ):
         primitive_type_name = cast(str, primitive_type.get_name())
         language = primitive_type.language
@@ -331,7 +313,7 @@ class LanguageGenerator(BaseGenerator, ASTBuilder):
         get_language_body.append(self._add_to_language(var_name))
 
     def _define_enumeration_in_language(
-        self, enumeration: Enumeration, get_language_body: List[stmt]
+        self, enumeration: Enumeration, get_language_body: list[stmt]
     ):
         enumeration_name = cast(str, enumeration.get_name())
         language = enumeration.language
@@ -369,7 +351,7 @@ class LanguageGenerator(BaseGenerator, ASTBuilder):
             "from functools import lru_cache"
         ).body
 
-        func_body: List[stmt] = []
+        func_body: list[stmt] = []
 
         func_body.append(self._generate_language(language))
 
@@ -402,9 +384,7 @@ class LanguageGenerator(BaseGenerator, ASTBuilder):
                     posonlyargs=[], args=[], kwonlyargs=[], kw_defaults=[], defaults=[]
                 ),
                 body=func_body,
-                decorator_list=[
-                    self.call("lru_cache", keywords={"maxsize": self.const(1)})
-                ],
+                decorator_list=[self.call("lru_cache", keywords={"maxsize": self.const(1)})],
                 returns=self.name("Language"),
             )
         )
@@ -414,9 +394,7 @@ class LanguageGenerator(BaseGenerator, ASTBuilder):
             if isinstance(el, Concept):
                 self._add_getter_method(el, "get_concept_by_name", "Concept")
             elif isinstance(el, PrimitiveType):
-                self._add_getter_method(
-                    el, "get_primitive_type_by_name", "PrimitiveType"
-                )
+                self._add_getter_method(el, "get_primitive_type_by_name", "PrimitiveType")
 
         # 5. Final Assembly
         body.extend(self.imports)

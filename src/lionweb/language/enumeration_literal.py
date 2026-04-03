@@ -16,7 +16,7 @@ class EnumerationLiteral(M3Node, NamespacedEntity, IKeyed):
         self,
         lion_web_version: Optional["LionWebVersion"] = None,
         enumeration: Optional["Enumeration"] = None,
-        name: Optional[str] = None,
+        name: str | None = None,
     ):
         from lionweb.lionweb_version import LionWebVersion
 
@@ -34,17 +34,17 @@ class EnumerationLiteral(M3Node, NamespacedEntity, IKeyed):
             self.name = name
 
     @property
-    def name(self) -> Optional[str]:
-        return cast(Optional[str], self.get_property_value(property="name"))
+    def name(self) -> str | None:
+        return cast(str | None, self.get_property_value(property="name"))
 
     @name.setter
-    def name(self, name: Optional[str]) -> None:
+    def name(self, name: str | None) -> None:
         self.set_property_value(property="name", value=name)
 
-    def get_name(self) -> Optional[str]:
+    def get_name(self) -> str | None:
         return self.name
 
-    def set_name(self, name: Optional[str]) -> "M3Node":
+    def set_name(self, name: str | None) -> "M3Node":
         self.name = name
         return self
 
@@ -58,9 +58,7 @@ class EnumerationLiteral(M3Node, NamespacedEntity, IKeyed):
         elif isinstance(parent, Enumeration):
             return parent
         else:
-            raise ValueError(
-                "The parent of this EnumerationLiteral is not an Enumeration"
-            )
+            raise ValueError("The parent of this EnumerationLiteral is not an Enumeration")
 
     @enumeration.setter
     def enumeration(self, enumeration: Optional["Enumeration"]) -> None:

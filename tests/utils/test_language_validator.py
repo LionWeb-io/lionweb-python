@@ -7,7 +7,6 @@ from lionweb.utils.validation_result import ValidationResult
 
 
 class LanguageValidatorTest(unittest.TestCase):
-
     def test_an_empty_annotation_is_invalid(self):
         language = Language("MyLanguageName", "mm-id", "mm-key")
         annotation = Annotation(key="aa-key", id="aa-id")
@@ -43,9 +42,7 @@ class LanguageValidatorTest(unittest.TestCase):
 
     def test_an_empty_primitive_type_is_invalid(self):
         language = Language("MyLanguage", "myM3ID", "myM3key")
-        primitive_type = PrimitiveType(
-            language=language, name="", id="pt-id", key="pt-key"
-        )
+        primitive_type = PrimitiveType(language=language, name="", id="pt-id", key="pt-key")
         language.add_element(primitive_type)
         result = LanguageValidator().validate(language)
         self.assertFalse(result.is_successful())

@@ -4,7 +4,9 @@ from serialization.library.writer import Writer
 
 from lionweb.language.concept import Concept
 from lionweb.model.classifier_instance_utils import (
-    get_only_reference_value_by_reference_name, get_property_value_by_name)
+    get_only_reference_value_by_reference_name,
+    get_property_value_by_name,
+)
 from lionweb.model.impl.dynamic_node import DynamicNode
 from lionweb.model.reference_value import ReferenceValue
 

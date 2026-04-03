@@ -1,22 +1,18 @@
 import unittest
 
-from lionweb.api.local_classifier_instance_resolver import \
-    LocalClassifierInstanceResolver
+from lionweb.api.local_classifier_instance_resolver import LocalClassifierInstanceResolver
 from lionweb.language import Concept
 from lionweb.model.impl.dynamic_node import DynamicNode
 from lionweb.model.impl.proxy_node import ProxyNode
 
 
 class LocalClassifierInstanceResolverTest(unittest.TestCase):
-
     def test_resolve_or_proxy_when_cannot_be_solved(self):
         concept = Concept()
         lcir = LocalClassifierInstanceResolver()
         lcir.add(DynamicNode("123", concept))
 
-        self.assertEqual(
-            ProxyNode("unexistingID"), lcir.resolve_or_proxy("unexistingID")
-        )
+        self.assertEqual(ProxyNode("unexistingID"), lcir.resolve_or_proxy("unexistingID"))
 
     def test_resolve_or_proxy_when_can_be_solved(self):
         concept = Concept()

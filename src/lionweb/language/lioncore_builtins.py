@@ -1,4 +1,4 @@
-from typing import TYPE_CHECKING, Dict, Optional, cast
+from typing import TYPE_CHECKING, Optional, cast
 
 from lionweb.language.language import Language
 from lionweb.lionweb_version import LionWebVersion
@@ -12,7 +12,7 @@ class LionCoreBuiltins(Language):
         from lionweb.language.property import Property
         from lionweb.lionweb_version import LionWebVersion
 
-    _instances: Dict["LionWebVersion", "LionCoreBuiltins"] = {}
+    _instances: dict["LionWebVersion", "LionCoreBuiltins"] = {}
 
     def __init__(self, lion_web_version: "LionWebVersion"):
         super().__init__(lion_web_version=lion_web_version, name="LionCore_builtins")
@@ -71,9 +71,7 @@ class LionCoreBuiltins(Language):
 
         for element in self.get_elements():
             if element.id is None:
-                element.set_id(
-                    f"LionCore-builtins-{element.get_name()}{version_id_suffix}"
-                )
+                element.set_id(f"LionCore-builtins-{element.get_name()}{version_id_suffix}")
             if element.key is None:
                 element.set_key(f"LionCore-builtins-{element.get_name()}")
 
@@ -92,9 +90,7 @@ class LionCoreBuiltins(Language):
         return cls._instances[lion_web_version]
 
     @classmethod
-    def get_string(
-        cls, lion_web_version: Optional["LionWebVersion"] = None
-    ) -> "PrimitiveType":
+    def get_string(cls, lion_web_version: Optional["LionWebVersion"] = None) -> "PrimitiveType":
         from lionweb.language.primitive_type import PrimitiveType
 
         return cast(
@@ -103,9 +99,7 @@ class LionCoreBuiltins(Language):
         )
 
     @classmethod
-    def get_integer(
-        cls, lion_web_version: Optional["LionWebVersion"] = None
-    ) -> "PrimitiveType":
+    def get_integer(cls, lion_web_version: Optional["LionWebVersion"] = None) -> "PrimitiveType":
         from lionweb.language.primitive_type import PrimitiveType
 
         return cast(
@@ -114,9 +108,7 @@ class LionCoreBuiltins(Language):
         )
 
     @classmethod
-    def get_boolean(
-        cls, lion_web_version: Optional["LionWebVersion"] = None
-    ) -> "PrimitiveType":
+    def get_boolean(cls, lion_web_version: Optional["LionWebVersion"] = None) -> "PrimitiveType":
         if lion_web_version is None:
             lion_web_version = LionWebVersion.current_version()
         from lionweb.language.primitive_type import PrimitiveType
@@ -143,9 +135,7 @@ class LionCoreBuiltins(Language):
     ) -> "Concept":
         from lionweb.language.concept import Concept
 
-        return cast(
-            Concept, cls.get_instance(lion_web_version).get_concept_by_name("Node")
-        )
+        return cast(Concept, cls.get_instance(lion_web_version).get_concept_by_name("Node"))
 
     @classmethod
     def get_json(

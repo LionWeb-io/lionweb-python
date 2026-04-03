@@ -1,4 +1,4 @@
-from typing import TYPE_CHECKING, List, Optional
+from typing import TYPE_CHECKING, Optional
 
 if TYPE_CHECKING:
     from lionweb.language.concept import Concept
@@ -14,19 +14,17 @@ class Enumeration(DataType, NamespaceProvider):
     def __init__(
         self,
         lion_web_version: Optional["LionWebVersion"] = None,
-        language: Optional[Language] = None,
-        name: Optional[str] = None,
-        id: Optional[str] = None,
-        key: Optional[str] = None,
+        language: Language | None = None,
+        name: str | None = None,
+        id: str | None = None,
+        key: str | None = None,
     ):
-        super().__init__(
-            lion_web_version=lion_web_version, language=language, name=name, id=id
-        )
+        super().__init__(lion_web_version=lion_web_version, language=language, name=name, id=id)
         if key:
             self.set_key(key)
 
     @property
-    def literals(self) -> List[EnumerationLiteral]:
+    def literals(self) -> list[EnumerationLiteral]:
         return self.get_containment_multiple_value("literals")
 
     def add_literal(self, literal: EnumerationLiteral) -> "Enumeration":

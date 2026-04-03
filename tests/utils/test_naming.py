@@ -5,7 +5,6 @@ from lionweb.utils.naming import Naming
 
 
 class TestNaming(unittest.TestCase):
-
     def test_valid_simple_name(self):
         Naming.validate_name("myID123")
 

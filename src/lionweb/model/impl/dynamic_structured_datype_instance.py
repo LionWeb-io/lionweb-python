@@ -1,4 +1,4 @@
-from typing import Any, Dict, Union
+from typing import Any
 
 from lionweb.language.field import Field
 from lionweb.language.structured_data_type import StructuredDataType
@@ -9,7 +9,7 @@ class DynamicStructuredDataTypeInstance:
         if structured_data_type is None:
             raise ValueError("structuredDataType should not be null")
         self.structured_data_type = structured_data_type
-        self.field_values: Dict[Field, Any] = {}
+        self.field_values: dict[Field, Any] = {}
 
     def get_structured_data_type(self) -> StructuredDataType:
         return self.structured_data_type
@@ -20,12 +20,10 @@ class DynamicStructuredDataTypeInstance:
         if field.id is None:
             raise ValueError("Field with no ID specified should not be used")
         if field not in self.structured_data_type.get_fields():
-            raise ValueError(
-                f"Invalid field for StructuredDataType {self.structured_data_type}"
-            )
+            raise ValueError(f"Invalid field for StructuredDataType {self.structured_data_type}")
         return self.field_values.get(field)
 
-    def set_field_value(self, field: Union[Field, str], value: Any):
+    def set_field_value(self, field: Field | str, value: Any):
         if field is None:
             raise ValueError("Field should not be null")
         my_field: Field

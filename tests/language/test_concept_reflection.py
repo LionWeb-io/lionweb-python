@@ -9,7 +9,6 @@ from lionweb.self.lioncore import LionCore
 
 
 class ConceptReflectionTest(unittest.TestCase):
-
     def test_get_property_value_name(self):
         language = Language()
         concept = Concept(language=language, name="MyConcept")

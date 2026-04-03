@@ -5,7 +5,6 @@ from lionweb.language.enumeration_literal import EnumerationLiteral
 
 
 class EnumerationTest(unittest.TestCase):
-
     def test_literal_parent_is_enum_constructor(self):
         enm = Enumeration()
         enm.name = "MyEnum"

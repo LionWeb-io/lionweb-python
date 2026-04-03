@@ -1,4 +1,5 @@
-from typing import TYPE_CHECKING, Dict, Iterable, Optional, cast
+from collections.abc import Iterable
+from typing import TYPE_CHECKING, Optional, cast
 
 from lionweb.api.classifier_instance_resolver import ClassifierInstanceResolver
 
@@ -8,7 +9,7 @@ if TYPE_CHECKING:
 
 class LocalClassifierInstanceResolver(ClassifierInstanceResolver):
     def __init__(self, *instances: "ClassifierInstance"):
-        self.instances: Dict[str, ClassifierInstance] = {
+        self.instances: dict[str, ClassifierInstance] = {
             cast(str, instance.id): instance for instance in instances if instance.id
         }
 

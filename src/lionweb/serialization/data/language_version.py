@@ -1,5 +1,5 @@
 import threading
-from typing import ClassVar, Optional, Self
+from typing import ClassVar, Self
 
 
 class LanguageVersion:
@@ -9,15 +9,13 @@ class LanguageVersion:
     """
 
     # Class-level cache for interning instances
-    _instances: ClassVar[
-        dict[tuple[Optional[str], Optional[str]], "LanguageVersion"]
-    ] = {}
+    _instances: ClassVar[dict[tuple[str | None, str | None], "LanguageVersion"]] = {}
     _lock = threading.Lock()  # Thread-safe access to cache
 
-    _key: Optional[str]
-    _version: Optional[str]
+    _key: str | None
+    _version: str | None
 
-    def __new__(cls, key: Optional[str] = None, version: Optional[str] = None):
+    def __new__(cls, key: str | None = None, version: str | None = None):
         # Create cache key
         cache_key = (key, version)
 
@@ -33,12 +31,12 @@ class LanguageVersion:
             cls._instances[cache_key] = instance
             return instance
 
-    def __init__(self, key: Optional[str] = None, version: Optional[str] = None):
+    def __init__(self, key: str | None = None, version: str | None = None):
         # no-op; kept for signature compatibility
         pass
 
     @classmethod
-    def of(cls, key: Optional[str] = None, version: Optional[str] = None) -> Self:
+    def of(cls, key: str | None = None, version: str | None = None) -> Self:
         """
         Factory method to get an interned LanguageVersion instance.
         This is the preferred way to create LanguageVersion instances.
@@ -87,24 +85,24 @@ class LanguageVersion:
             raise ValueError("meta_pointer version should not be null")
         return LanguageVersion.of(meta_pointer.language, meta_pointer.version)
 
-    def get_key(self) -> Optional[str]:
+    def get_key(self) -> str | None:
         return self._key
 
     def set_key(self, key: str):
         raise RuntimeError("LanguageVersion instances are immutable after creation")
 
-    def get_version(self) -> Optional[str]:
+    def get_version(self) -> str | None:
         return self._version
 
     def set_version(self, version: str):
         raise RuntimeError("LanguageVersion instances are immutable after creation")
 
     @property
-    def key(self) -> Optional[str]:
+    def key(self) -> str | None:
         return self._key
 
     @property
-    def version(self) -> Optional[str]:
+    def version(self) -> str | None:
         return self._version
 
     @classmethod

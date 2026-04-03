@@ -1,5 +1,3 @@
-from typing import List
-
 from serialization.simple_node import SimpleNode
 from serialization.simplemath.int_literal import IntLiteral
 
@@ -19,19 +17,14 @@ class Sum(SimpleNode):
             self.assign_random_id()
 
     def get_classifier(self) -> Concept:
-        from serialization.simplemath.simple_math_language import \
-            SimpleMathLanguage
+        from serialization.simplemath.simple_math_language import SimpleMathLanguage
 
         return SimpleMathLanguage.SUM
 
     def __eq__(self, other):
         if not isinstance(other, Sum):
             return False
-        return (
-            self.id == other.id
-            and self.left == other.left
-            and self.right == other.right
-        )
+        return self.id == other.id and self.left == other.left and self.right == other.right
 
     def __hash__(self):
         return hash((self.left, self.right))
@@ -39,7 +32,7 @@ class Sum(SimpleNode):
     def __str__(self):
         return f"Sum{{left={self.left}, right={self.right}}}"
 
-    def concrete_get_children(self, containment: Containment) -> List[Node]:
+    def concrete_get_children(self, containment: Containment) -> list[Node]:
         if containment.get_name() == "left":
             return [self.left]
         elif containment.get_name() == "right":

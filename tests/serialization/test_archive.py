@@ -5,12 +5,10 @@ import unittest
 import zipfile
 from pathlib import Path
 
-from lionweb.language import (Concept, Containment, Language, LionCoreBuiltins,
-                              Property)
+from lionweb.language import Concept, Containment, Language, LionCoreBuiltins, Property
 from lionweb.model.impl.dynamic_node import DynamicNode
 from lionweb.serialization import SerializationChunk
-from lionweb.serialization.serialization_provider import \
-    create_standard_protobuf_serialization
+from lionweb.serialization.serialization_provider import create_standard_protobuf_serialization
 
 
 class TestArchive(unittest.TestCase):
@@ -51,14 +49,10 @@ class TestArchive(unittest.TestCase):
         # Create Section concept
         section = Concept(language=language, name="Section", key="Section")
         section.add_feature(
-            Property(
-                container=section, name="title", type=string_type, key="title_prop"
-            )
+            Property(container=section, name="title", type=string_type, key="title_prop")
         )
         section.add_feature(
-            Property(
-                container=section, name="order", type=integer_type, key="order_prop"
-            )
+            Property(container=section, name="order", type=integer_type, key="order_prop")
         )
         language.add_element(section)
 
@@ -76,9 +70,7 @@ class TestArchive(unittest.TestCase):
 
         # Add containment relationships
         document.add_feature(
-            Containment(
-                container=document, name="sections", type=section, key="sections_cont"
-            )
+            Containment(container=document, name="sections", type=section, key="sections_cont")
         )
         section.add_feature(
             Containment(
@@ -161,10 +153,8 @@ class TestArchive(unittest.TestCase):
                     partition_nodes = all_nodes[i : i + partition_size]
 
                     # Serialize partition
-                    chunk = (
-                        self.pb_serialization.serialize_nodes_to_serialization_chunk(
-                            partition_nodes
-                        )
+                    chunk = self.pb_serialization.serialize_nodes_to_serialization_chunk(
+                        partition_nodes
                     )
                     pb_data = self.pb_serialization.read_pbchunk_from_bytes(
                         self.pb_serialization._serialize_chunk_to_bytes(chunk)
@@ -203,16 +193,12 @@ class TestArchive(unittest.TestCase):
         self.assertGreater(len(first_chunk.classifier_instances), 0)
 
         # Verify we can deserialize
-        deserialized_nodes = self.pb_serialization.deserialize_serialization_chunk(
-            first_chunk
-        )
+        deserialized_nodes = self.pb_serialization.deserialize_serialization_chunk(first_chunk)
         self.assertGreater(len(deserialized_nodes), 0)
 
         # Check root document properties
         root_doc = next(
-            node
-            for node in deserialized_nodes
-            if node.get_classifier().get_name() == "Document"
+            node for node in deserialized_nodes if node.get_classifier().get_name() == "Document"
         )
         self.assertIsNotNone(root_doc.get_property_value("name"))
         self.assertIsNotNone(root_doc.get_property_value("published"))
@@ -229,9 +215,7 @@ class TestArchive(unittest.TestCase):
         try:
             with zipfile.ZipFile(archive_path, "w") as zf:
                 for i, doc in enumerate(documents):
-                    chunk = self.pb_serialization.serialize_tree_to_serialization_chunk(
-                        doc
-                    )
+                    chunk = self.pb_serialization.serialize_tree_to_serialization_chunk(doc)
                     # Simulate protobuf serialization by using JSON for now
                     bs = self.pb_serialization.serialize_chunk_to_bytes(chunk)
                     zf.writestr(f"chunk_{i}.binpb", bs)
@@ -263,9 +247,7 @@ class TestArchive(unittest.TestCase):
     def test_data_integrity_after_serialization(self):
         """Test that data remains intact after serialization/deserialization."""
         # Generate model with known data
-        doc = DynamicNode(
-            id="test_doc", concept=self.language.require_concept_by_name("Document")
-        )
+        doc = DynamicNode(id="test_doc", concept=self.language.require_concept_by_name("Document"))
         doc.set_property_value("name", "Test Document")
         doc.set_property_value("published", True)
 
@@ -279,9 +261,7 @@ class TestArchive(unittest.TestCase):
             id="test_paragraph",
             concept=self.language.require_concept_by_name("Paragraph"),
         )
-        paragraph.set_property_value(
-            "content", "This is test content with special chars: àáâãäå!"
-        )
+        paragraph.set_property_value("content", "This is test content with special chars: àáâãäå!")
 
         # Build hierarchy
         section.add_child("paragraphs", paragraph)
@@ -289,9 +269,7 @@ class TestArchive(unittest.TestCase):
 
         # Serialize and deserialize
         chunk = self.pb_serialization.serialize_tree_to_serialization_chunk(doc)
-        deserialized_nodes = self.pb_serialization.deserialize_serialization_chunk(
-            chunk
-        )
+        deserialized_nodes = self.pb_serialization.deserialize_serialization_chunk(chunk)
 
         # Verify structure is preserved
         self.assertEqual(3, len(deserialized_nodes))  # doc + section + paragraph
@@ -304,17 +282,13 @@ class TestArchive(unittest.TestCase):
             n for n in deserialized_nodes if n.get_classifier().get_name() == "Section"
         )
         deserialized_paragraph = next(
-            n
-            for n in deserialized_nodes
-            if n.get_classifier().get_name() == "Paragraph"
+            n for n in deserialized_nodes if n.get_classifier().get_name() == "Paragraph"
         )
 
         # Verify properties
         self.assertEqual("Test Document", deserialized_doc.get_property_value("name"))
         self.assertEqual(True, deserialized_doc.get_property_value("published"))
-        self.assertEqual(
-            "Test Section", deserialized_section.get_property_value("title")
-        )
+        self.assertEqual("Test Section", deserialized_section.get_property_value("title"))
         self.assertEqual(42, deserialized_section.get_property_value("order"))
         self.assertEqual(
             "This is test content with special chars: àáâãäå!",
@@ -346,9 +320,7 @@ class TestArchive(unittest.TestCase):
 
         for i in range(0, len(original_nodes), partition_size):
             partition_nodes = original_nodes[i : i + partition_size]
-            chunk = self.pb_serialization.serialize_nodes_to_serialization_chunk(
-                partition_nodes
-            )
+            chunk = self.pb_serialization.serialize_nodes_to_serialization_chunk(partition_nodes)
             partitions.append(chunk)
 
         # Deserialize all partitions and collect nodes

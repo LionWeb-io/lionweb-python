@@ -1,8 +1,9 @@
 from abc import ABC, abstractmethod
 from typing import TYPE_CHECKING, Optional
 
-from lionweb.api.unresolved_classifier_instance_exception import \
-    UnresolvedClassifierInstanceException
+from lionweb.api.unresolved_classifier_instance_exception import (
+    UnresolvedClassifierInstanceException,
+)
 from lionweb.model.impl.proxy_node import ProxyNode
 
 if TYPE_CHECKING:
@@ -10,7 +11,6 @@ if TYPE_CHECKING:
 
 
 class ClassifierInstanceResolver(ABC):
-
     @abstractmethod
     def resolve(self, instance_id: str) -> Optional["ClassifierInstance"]:
         """Return the classifier instance or None if not found."""

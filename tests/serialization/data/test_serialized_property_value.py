@@ -4,8 +4,7 @@ from concurrent.futures import ThreadPoolExecutor
 
 from lionweb.serialization.data.language_version import LanguageVersion
 from lionweb.serialization.data.metapointer import MetaPointer
-from lionweb.serialization.data.serialized_property_value import \
-    SerializedPropertyValue
+from lionweb.serialization.data.serialized_property_value import SerializedPropertyValue
 
 
 class TestSerializedPropertyValue(unittest.TestCase):
@@ -285,12 +284,8 @@ class TestSerializedPropertyValue(unittest.TestCase):
         )
 
         # All should share the same LanguageVersion instance
-        self.assertIs(
-            spv1.meta_pointer.language_version, spv2.meta_pointer.language_version
-        )
-        self.assertIs(
-            spv2.meta_pointer.language_version, spv3.meta_pointer.language_version
-        )
+        self.assertIs(spv1.meta_pointer.language_version, spv2.meta_pointer.language_version)
+        self.assertIs(spv2.meta_pointer.language_version, spv3.meta_pointer.language_version)
 
         # spv1 and spv2 should share the same MetaPointer instance
         self.assertIs(spv1.meta_pointer, spv2.meta_pointer)
@@ -321,9 +316,7 @@ class TestSerializedPropertyValue(unittest.TestCase):
 
         # Create multiple threads that create the same SerializedPropertyValue
         with ThreadPoolExecutor(max_workers=10) as executor:
-            futures = [
-                executor.submit(create_serialized_property_value) for _ in range(20)
-            ]
+            futures = [executor.submit(create_serialized_property_value) for _ in range(20)]
             # Wait for all threads to complete
             for future in futures:
                 future.result()
@@ -356,9 +349,7 @@ class TestSerializedPropertyValue(unittest.TestCase):
 
         # Create multiple threads
         with ThreadPoolExecutor(max_workers=5) as executor:
-            futures = [
-                executor.submit(create_different_property_values, i) for i in range(5)
-            ]
+            futures = [executor.submit(create_different_property_values, i) for i in range(5)]
             # Wait for all threads to complete
             for future in futures:
                 future.result()
@@ -401,15 +392,11 @@ class TestSerializedPropertyValue(unittest.TestCase):
         final_mp = MetaPointer(lv, "final")
 
         # Create multiple boolean property values
-        abstract_true_instances = [
-            SerializedPropertyValue(abstract_mp, "true") for _ in range(10)
-        ]
+        abstract_true_instances = [SerializedPropertyValue(abstract_mp, "true") for _ in range(10)]
         abstract_false_instances = [
             SerializedPropertyValue(abstract_mp, "false") for _ in range(10)
         ]
-        final_true_instances = [
-            SerializedPropertyValue(final_mp, "true") for _ in range(10)
-        ]
+        final_true_instances = [SerializedPropertyValue(final_mp, "true") for _ in range(10)]
 
         # All instances with same parameters should be identical
         for i in range(1, len(abstract_true_instances)):

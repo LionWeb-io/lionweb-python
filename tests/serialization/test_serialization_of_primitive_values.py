@@ -4,8 +4,7 @@ import unittest
 from lionweb.lionweb_version import LionWebVersion
 from lionweb.serialization import create_standard_json_serialization
 from lionweb.serialization.json_utils import JsonArray
-from lionweb.serialization.serialized_json_comparison_utils import \
-    SerializedJsonComparisonUtils
+from lionweb.serialization.serialized_json_comparison_utils import SerializedJsonComparisonUtils
 
 from .my_node_with_properties import MyNodeWithProperties
 from .my_node_with_properties2023 import MyNodeWithProperties2023
@@ -13,7 +12,6 @@ from .serialization_test import SerializationTest
 
 
 class TestSerializationOfPrimitiveValues(SerializationTest):
-
     def test_serialize_boolean(self):
         node = MyNodeWithProperties("n1")
         node.set_p1(True)
@@ -44,9 +42,7 @@ class TestSerializationOfPrimitiveValues(SerializationTest):
 
         json_serialization = create_standard_json_serialization()
         serialized = json_serialization.serialize_nodes_to_json_element([node])
-        SerializedJsonComparisonUtils.assert_equivalent_lionweb_json(
-            expected, serialized
-        )
+        SerializedJsonComparisonUtils.assert_equivalent_lionweb_json(expected, serialized)
 
     def test_deserialize_boolean(self):
         node = MyNodeWithProperties("n1")
@@ -76,14 +72,13 @@ class TestSerializationOfPrimitiveValues(SerializationTest):
         )
 
         json_serialization = create_standard_json_serialization()
-        json_serialization.classifier_resolver.register_language(
-            MyNodeWithProperties.LANGUAGE
-        )
+        json_serialization.classifier_resolver.register_language(MyNodeWithProperties.LANGUAGE)
         json_serialization.instantiator.register_custom_deserializer(
             MyNodeWithProperties.CONCEPT.id,
-            lambda concept, serialized_node, deserialized_nodes_by_id, properties_value: MyNodeWithProperties(
-                serialized_node.id
-            ),
+            lambda concept,
+            serialized_node,
+            deserialized_nodes_by_id,
+            properties_value: MyNodeWithProperties(serialized_node.id),
         )
         deserialized = json_serialization.deserialize_json_to_nodes(serialized)
         self.assertEqual([node], deserialized)
@@ -118,9 +113,7 @@ class TestSerializationOfPrimitiveValues(SerializationTest):
 
         json_serialization = create_standard_json_serialization()
         serialized = json_serialization.serialize_nodes_to_json_element(node)
-        SerializedJsonComparisonUtils.assert_equivalent_lionweb_json(
-            expected, serialized
-        )
+        SerializedJsonComparisonUtils.assert_equivalent_lionweb_json(expected, serialized)
 
     def test_deserialize_string(self):
         node = MyNodeWithProperties("n1")
@@ -148,14 +141,13 @@ class TestSerializationOfPrimitiveValues(SerializationTest):
         )
 
         json_serialization = create_standard_json_serialization()
-        json_serialization.classifier_resolver.register_language(
-            MyNodeWithProperties.LANGUAGE
-        )
+        json_serialization.classifier_resolver.register_language(MyNodeWithProperties.LANGUAGE)
         json_serialization.instantiator.register_custom_deserializer(
             MyNodeWithProperties.CONCEPT.id,
-            lambda concept, serialized_node, deserialized_nodes_by_id, properties_value: MyNodeWithProperties(
-                serialized_node.id
-            ),
+            lambda concept,
+            serialized_node,
+            deserialized_nodes_by_id,
+            properties_value: MyNodeWithProperties(serialized_node.id),
         )
         deserialized = json_serialization.deserialize_json_to_nodes(serialized)
         self.assertEqual([node], deserialized)
@@ -190,9 +182,7 @@ class TestSerializationOfPrimitiveValues(SerializationTest):
 
         json_serialization = create_standard_json_serialization()
         serialized = json_serialization.serialize_nodes_to_json_element(node)
-        SerializedJsonComparisonUtils.assert_equivalent_lionweb_json(
-            expected, serialized
-        )
+        SerializedJsonComparisonUtils.assert_equivalent_lionweb_json(expected, serialized)
 
     def test_deserialize_integer(self):
         node = MyNodeWithProperties("n1")
@@ -223,9 +213,7 @@ class TestSerializationOfPrimitiveValues(SerializationTest):
         }"""
 
         json_serialization = create_standard_json_serialization()
-        json_serialization.classifier_resolver.register_language(
-            MyNodeWithProperties.LANGUAGE
-        )
+        json_serialization.classifier_resolver.register_language(MyNodeWithProperties.LANGUAGE)
 
         def custom_deserializer(
             concept, serialized_node, deserialized_nodes_by_id, properties_value
@@ -236,9 +224,7 @@ class TestSerializationOfPrimitiveValues(SerializationTest):
             MyNodeWithProperties.CONCEPT.id, custom_deserializer
         )
 
-        deserialized = json_serialization.deserialize_json_to_nodes(
-            json.loads(serialized)
-        )
+        deserialized = json_serialization.deserialize_json_to_nodes(json.loads(serialized))
         self.assertEqual(deserialized, [node])
 
     def test_serialize_json(self):
@@ -274,9 +260,7 @@ class TestSerializationOfPrimitiveValues(SerializationTest):
 
         json_serialization = create_standard_json_serialization(LionWebVersion.V2023_1)
         serialized = json_serialization.serialize_nodes_to_json_element(node)
-        SerializedJsonComparisonUtils.assert_equivalent_lionweb_json(
-            expected, serialized
-        )
+        SerializedJsonComparisonUtils.assert_equivalent_lionweb_json(expected, serialized)
 
     def test_deserialize_json(self):
         node = MyNodeWithProperties2023("n1")
@@ -313,9 +297,7 @@ class TestSerializationOfPrimitiveValues(SerializationTest):
         )
         json_serialization = create_standard_json_serialization(LionWebVersion.V2023_1)
 
-        json_serialization.classifier_resolver.register_language(
-            MyNodeWithProperties2023.LANGUAGE
-        )
+        json_serialization.classifier_resolver.register_language(MyNodeWithProperties2023.LANGUAGE)
 
         def custom_deserializer(
             concept, serialized_node, deserialized_nodes_by_id, properties_value

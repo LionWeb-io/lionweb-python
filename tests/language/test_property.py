@@ -4,7 +4,6 @@ from lionweb.language import Property
 
 
 class PropertyTest(unittest.TestCase):
-
     def test_key_property(self):
         p1 = Property()
         p1.key = "k1"
@@ -41,9 +40,7 @@ class PropertyTest(unittest.TestCase):
 
         p1 = Property()
         p1.type = LionCoreBuiltins.get_string(LionWebVersion.current_version())
-        self.assertEqual(
-            LionCoreBuiltins.get_string(LionWebVersion.current_version()), p1.type
-        )
+        self.assertEqual(LionCoreBuiltins.get_string(LionWebVersion.current_version()), p1.type)
 
         p2 = Property()
         p2.type = None

@@ -18,9 +18,7 @@ class SimpleMathLanguage(Language):
         self.set_version("1")
 
         # Initialize concepts
-        self.__class__.INT_LITERAL = Concept(
-            name="IntLiteral", id="SimpleMath_IntLiteral"
-        )
+        self.__class__.INT_LITERAL = Concept(name="IntLiteral", id="SimpleMath_IntLiteral")
         self.__class__.INT_LITERAL.set_key("SimpleMath_IntLiteral")
         self.__class__.SUM = Concept(name="Sum", id="SimpleMath_Sum")
         self.__class__.SUM.set_key("SimpleMath_Sum")

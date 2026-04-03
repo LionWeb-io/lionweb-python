@@ -1,5 +1,5 @@
 from abc import abstractmethod
-from typing import List, Optional, Set, TypeVar
+from typing import Optional, TypeVar
 
 from lionweb.language.language_entity import LanguageEntity
 from lionweb.language.namespace_provider import NamespaceProvider
@@ -20,29 +20,25 @@ class Classifier(LanguageEntity[T], NamespaceProvider):
 
     def __init__(
         self,
-        lion_web_version: Optional[LionWebVersion] = None,
-        language: Optional[Language] = None,
-        name: Optional[str] = None,
-        id: Optional[str] = None,
+        lion_web_version: LionWebVersion | None = None,
+        language: Language | None = None,
+        name: str | None = None,
+        id: str | None = None,
     ):
-        if lion_web_version is not None and not isinstance(
-            lion_web_version, LionWebVersion
-        ):
+        if lion_web_version is not None and not isinstance(lion_web_version, LionWebVersion):
             raise ValueError(
                 f"Expected lion_web_version to be an instance of LionWebVersion or None but got {lion_web_version}"
             )
-        super().__init__(
-            lion_web_version=lion_web_version, language=language, name=name, id=id
-        )
+        super().__init__(lion_web_version=lion_web_version, language=language, name=name, id=id)
 
-    def get_feature_by_name(self, name: str) -> Optional[Feature]:
+    def get_feature_by_name(self, name: str) -> Feature | None:
         return next((f for f in self.all_features() if f.get_name() == name), None)
 
     @abstractmethod
-    def direct_ancestors(self) -> List["Classifier"]:
+    def direct_ancestors(self) -> list["Classifier"]:
         pass
 
-    def all_ancestors(self) -> Set["Classifier"]:
+    def all_ancestors(self) -> set["Classifier"]:
         result = set()
         ancestors = set(self.direct_ancestors())
         while ancestors:
@@ -52,40 +48,40 @@ class Classifier(LanguageEntity[T], NamespaceProvider):
                 ancestors.update(ancestor.direct_ancestors())
         return result
 
-    def all_features(self) -> List[Feature]:
+    def all_features(self) -> list[Feature]:
         result = list(self.get_features())
         self.combine_features(result, self.inherited_features())
         return result
 
     @abstractmethod
-    def inherited_features(self) -> List[Feature]:
+    def inherited_features(self) -> list[Feature]:
         pass
 
-    def all_properties(self) -> List[Property]:
+    def all_properties(self) -> list[Property]:
         from lionweb.language.property import Property
 
         return [f for f in self.all_features() if isinstance(f, Property)]
 
-    def all_containments(self) -> List[Containment]:
+    def all_containments(self) -> list[Containment]:
         from lionweb.language.containment import Containment
 
         return [f for f in self.all_features() if isinstance(f, Containment)]
 
-    def all_references(self) -> List[Reference]:
+    def all_references(self) -> list[Reference]:
         from lionweb.language.reference import Reference
 
         return [f for f in self.all_features() if isinstance(f, Reference)]
 
-    def all_links(self) -> List[Link]:
+    def all_links(self) -> list[Link]:
         from lionweb.language.link import Link
 
         return [f for f in self.all_features() if isinstance(f, Link)]
 
-    def get_features(self) -> List[Feature]:
+    def get_features(self) -> list[Feature]:
         return self.get_containment_multiple_value("features")
 
     @property
-    def features(self) -> List[Feature]:
+    def features(self) -> list[Feature]:
         return self.get_features()
 
     def add_feature(self, feature: Feature) -> "Classifier":
@@ -96,9 +92,7 @@ class Classifier(LanguageEntity[T], NamespaceProvider):
     def namespace_qualifier(self) -> str:
         return self.qualified_name()
 
-    def combine_features(
-        self, features_a: List[Feature], features_b: List[Feature]
-    ) -> None:
+    def combine_features(self, features_a: list[Feature], features_b: list[Feature]) -> None:
         existing_metapointers = {MetaPointer.from_feature(f) for f in features_a}
         for f in features_b:
             meta_pointer = MetaPointer.from_feature(f)
@@ -163,38 +157,20 @@ class Classifier(LanguageEntity[T], NamespaceProvider):
             None,
         )
 
-    def get_property_by_meta_pointer(
-        self, meta_pointer: MetaPointer
-    ) -> Optional[Property]:
+    def get_property_by_meta_pointer(self, meta_pointer: MetaPointer) -> Property | None:
         return next(
-            (
-                p
-                for p in self.all_properties()
-                if MetaPointer.from_feature(p) == meta_pointer
-            ),
+            (p for p in self.all_properties() if MetaPointer.from_feature(p) == meta_pointer),
             None,
         )
 
-    def get_containment_by_meta_pointer(
-        self, meta_pointer: MetaPointer
-    ) -> Optional[Containment]:
+    def get_containment_by_meta_pointer(self, meta_pointer: MetaPointer) -> Containment | None:
         return next(
-            (
-                c
-                for c in self.all_containments()
-                if MetaPointer.from_feature(c) == meta_pointer
-            ),
+            (c for c in self.all_containments() if MetaPointer.from_feature(c) == meta_pointer),
             None,
         )
 
-    def get_reference_by_meta_pointer(
-        self, meta_pointer: MetaPointer
-    ) -> Optional[Reference]:
+    def get_reference_by_meta_pointer(self, meta_pointer: MetaPointer) -> Reference | None:
         return next(
-            (
-                r
-                for r in self.all_references()
-                if MetaPointer.from_feature(r) == meta_pointer
-            ),
+            (r for r in self.all_references() if MetaPointer.from_feature(r) == meta_pointer),
             None,
         )

@@ -16,9 +16,7 @@ class NodeTreeValidator(Validator):
     ) -> None:
         if node.get_id() is not None:
             # It does not make sense to make the same ID as null and invalid
-            validation_result.add_error_if(
-                not is_valid_id(node.get_id()), "Invalid ID", node
-            )
+            validation_result.add_error_if(not is_valid_id(node.get_id()), "Invalid ID", node)
 
         if node.is_root():
             validation_result.add_error_if(

@@ -1,28 +1,22 @@
 import json
-from typing import Iterable, List, Optional, cast
+from collections.abc import Iterable
+from typing import cast
 
 from lionweb import LionWebVersion
 from lionweb.serialization.data.language_version import LanguageVersion
 from lionweb.serialization.data.metapointer import MetaPointer
 from lionweb.serialization.data.serialized_chunk import SerializationChunk
-from lionweb.serialization.data.serialized_classifier_instance import \
-    SerializedClassifierInstance
-from lionweb.serialization.data.serialized_containment_value import \
-    SerializedContainmentValue
-from lionweb.serialization.data.serialized_property_value import \
-    SerializedPropertyValue
-from lionweb.serialization.data.serialized_reference_value import \
-    SerializedReferenceValue
-from lionweb.serialization.deserialization_exception import \
-    DeserializationException
+from lionweb.serialization.data.serialized_classifier_instance import SerializedClassifierInstance
+from lionweb.serialization.data.serialized_containment_value import SerializedContainmentValue
+from lionweb.serialization.data.serialized_property_value import SerializedPropertyValue
+from lionweb.serialization.data.serialized_reference_value import SerializedReferenceValue
+from lionweb.serialization.deserialization_exception import DeserializationException
 from lionweb.serialization.json_utils import JsonArray, JsonElement, JsonObject
 from lionweb.serialization.serialization_utils import SerializationUtils
 
 
 class LowLevelJsonSerialization:
-    def deserialize_serialization_block(
-        self, json_element: JsonElement
-    ) -> SerializationChunk:
+    def deserialize_serialization_block(self, json_element: JsonElement) -> SerializationChunk:
         serialized_chunk = SerializationChunk()
         if isinstance(json_element, dict):
             self._check_no_extra_keys(
@@ -33,20 +27,14 @@ class LowLevelJsonSerialization:
             self._deserialize_classifier_instances(serialized_chunk, json_element)
             return serialized_chunk
         else:
-            raise ValueError(
-                f"We expected a JSON object, we got instead: {json_element}"
-            )
+            raise ValueError(f"We expected a JSON object, we got instead: {json_element}")
 
-    def serialize_to_json_element(
-        self, serialized_chunk: SerializationChunk
-    ) -> JsonObject:
+    def serialize_to_json_element(self, serialized_chunk: SerializationChunk) -> JsonObject:
         serialized_nodes = []
         for node in serialized_chunk.get_classifier_instances():
             node_json = {
                 "id": node.id,
-                "classifier": self._serialize_metapointer_to_json_element(
-                    node.get_classifier()
-                ),
+                "classifier": self._serialize_metapointer_to_json_element(node.get_classifier()),
                 "properties": [],
                 "containments": [],
                 "references": [],
@@ -68,9 +56,7 @@ class LowLevelJsonSerialization:
                     "containment": self._serialize_metapointer_to_json_element(
                         children_value.get_meta_pointer()
                     ),
-                    "children": SerializationUtils.to_json_array(
-                        children_value.get_children_ids()
-                    ),
+                    "children": SerializationUtils.to_json_array(children_value.get_children_ids()),
                 }
                 node_json["containments"].append(children_json)
 
@@ -105,9 +91,7 @@ class LowLevelJsonSerialization:
         }
         return cast(JsonObject, json_object)
 
-    def _serialize_metapointer_to_json_element(
-        self, meta_pointer: MetaPointer
-    ) -> JsonObject:
+    def _serialize_metapointer_to_json_element(self, meta_pointer: MetaPointer) -> JsonObject:
         return {
             "language": meta_pointer.language,
             "version": meta_pointer.version,
@@ -130,11 +114,9 @@ class LowLevelJsonSerialization:
         except json.JSONDecodeError as e:
             raise ValueError(f"Invalid JSON: {e}")
 
-    def deserialize_serialization_block_from_file(
-        self, file_path: str
-    ) -> SerializationChunk:
+    def deserialize_serialization_block_from_file(self, file_path: str) -> SerializationChunk:
         try:
-            with open(file_path, "r") as file:
+            with open(file_path) as file:
                 json_element = json.load(file)
                 return self.deserialize_serialization_block(json_element)
         except FileNotFoundError:
@@ -142,15 +124,11 @@ class LowLevelJsonSerialization:
         except json.JSONDecodeError as e:
             raise ValueError(f"Invalid JSON in file: {e}")
 
-    def _check_no_extra_keys(
-        self, json_object: JsonObject, expected_keys: List[str]
-    ) -> None:
+    def _check_no_extra_keys(self, json_object: JsonObject, expected_keys: list[str]) -> None:
         extra_keys = set(json_object.keys())
         extra_keys -= set(expected_keys)
         if extra_keys:
-            raise ValueError(
-                f"Extra keys found: {extra_keys}. Expected keys: {expected_keys}"
-            )
+            raise ValueError(f"Extra keys found: {extra_keys}. Expected keys: {expected_keys}")
 
     def _read_serialization_format_version(
         self, serialized_chunk: SerializationChunk, top_level: JsonObject
@@ -181,9 +159,7 @@ class LowLevelJsonSerialization:
         serialized_chunk.populate_used_languages()
         return serialized_chunk
 
-    def _read_languages(
-        self, serialized_chunk: SerializationChunk, top_level: JsonObject
-    ) -> None:
+    def _read_languages(self, serialized_chunk: SerializationChunk, top_level: JsonObject) -> None:
         if "languages" not in top_level:
             raise ValueError("languages not specified")
         languages = top_level.get("languages")
@@ -193,9 +169,7 @@ class LowLevelJsonSerialization:
                     if isinstance(element, dict):
                         extra_keys = set(element.keys()) - {"key", "version"}
                         if extra_keys:
-                            raise ValueError(
-                                f"Unexpected keys in language object: {extra_keys}"
-                            )
+                            raise ValueError(f"Unexpected keys in language object: {extra_keys}")
                         if "key" not in element or "version" not in element:
                             raise ValueError(
                                 f"Language should have keys 'key' and 'version'. Found: {element}"
@@ -203,16 +177,12 @@ class LowLevelJsonSerialization:
                         if not isinstance(element.get("key"), str) or not isinstance(
                             element.get("version"), str
                         ):
-                            raise ValueError(
-                                "Both 'key' and 'version' should be strings"
-                            )
+                            raise ValueError("Both 'key' and 'version' should be strings")
                         language_key_version = LanguageVersion(
                             element.get("key"), element.get("version")
                         )
                     else:
-                        raise ValueError(
-                            f"Language should be an object. Found: {element}"
-                        )
+                        raise ValueError(f"Language should be an object. Found: {element}")
                     serialized_chunk.add_language(language_key_version)
                 except Exception as e:
                     raise RuntimeError(f"Issue while deserializing {element}") from e
@@ -235,9 +205,7 @@ class LowLevelJsonSerialization:
                         "Issue while deserializing classifier instances"
                     ) from e
                 except Exception as e:
-                    raise DeserializationException(
-                        f"Issue while deserializing {element}"
-                    ) from e
+                    raise DeserializationException(f"Issue while deserializing {element}") from e
         else:
             raise ValueError(f"We expected a list, we got instead: {nodes}")
 
@@ -245,13 +213,9 @@ class LowLevelJsonSerialization:
         self, json_element: JsonElement
     ) -> SerializedClassifierInstance:
         if not isinstance(json_element, dict):
-            raise ValueError(
-                f"Malformed JSON. Object expected but found {json_element}"
-            )
+            raise ValueError(f"Malformed JSON. Object expected but found {json_element}")
         try:
-            mp = SerializationUtils.try_to_get_meta_pointer_property(
-                json_element, "classifier"
-            )
+            mp = SerializationUtils.try_to_get_meta_pointer_property(json_element, "classifier")
             if mp is None:
                 raise ValueError(f"MetaPointer not found in {json_element}")
             serialized_classifier_instance = SerializedClassifierInstance(
@@ -264,19 +228,13 @@ class LowLevelJsonSerialization:
             properties = cast(JsonArray, json_element.get("properties", []))
             for property_entry in properties:
                 property_obj = cast(JsonObject, property_entry)
-                mp = SerializationUtils.try_to_get_meta_pointer_property(
-                    property_obj, "property"
-                )
+                mp = SerializationUtils.try_to_get_meta_pointer_property(property_obj, "property")
                 if mp is None:
-                    raise ValueError(
-                        f"MetaPointer not found for property {property_obj}"
-                    )
+                    raise ValueError(f"MetaPointer not found for property {property_obj}")
                 serialized_classifier_instance.add_property_value(
                     SerializedPropertyValue(
                         mp,
-                        SerializationUtils.try_to_get_string_property(
-                            property_obj, "value"
-                        ),
+                        SerializationUtils.try_to_get_string_property(property_obj, "value"),
                     )
                 )
 
@@ -286,25 +244,18 @@ class LowLevelJsonSerialization:
             elif "containments" in json_element:
                 containments = cast(JsonArray, json_element.get("containments", []))
             else:
-                raise RuntimeError(
-                    f"Node is missing containments entry: {json_element}"
-                )
+                raise RuntimeError(f"Node is missing containments entry: {json_element}")
 
             for containment_entry in containments:
                 containment_obj = cast(JsonObject, containment_entry)
-                ids: List[Optional[str]] = (
-                    SerializationUtils.try_to_get_array_of_ids(
-                        containment_obj, "children"
-                    )
-                    or []
+                ids: list[str | None] = (
+                    SerializationUtils.try_to_get_array_of_ids(containment_obj, "children") or []
                 )
                 mp = SerializationUtils.try_to_get_meta_pointer_property(
                     containment_obj, "containment"
                 )
                 if mp is None:
-                    raise ValueError(
-                        f"MetaPointer not found in containment {containment_obj}"
-                    )
+                    raise ValueError(f"MetaPointer not found in containment {containment_obj}")
                 serialized_classifier_instance.add_containment_value(
                     SerializedContainmentValue(mp, ids)
                 )

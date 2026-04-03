@@ -1,4 +1,4 @@
-from typing import List, Optional, cast
+from typing import Optional, cast
 
 from lionweb.language.classifier import Classifier
 
@@ -11,32 +11,28 @@ class Concept(Classifier["Concept"]):
 
     def __init__(
         self,
-        lion_web_version: Optional[LionWebVersion] = None,
-        language: Optional[Language] = None,
-        name: Optional[str] = None,
-        id: Optional[str] = None,
-        key: Optional[str] = None,
+        lion_web_version: LionWebVersion | None = None,
+        language: Language | None = None,
+        name: str | None = None,
+        id: str | None = None,
+        key: str | None = None,
         abstract: bool = False,
         partition: bool = False,
     ):
         from lionweb.lionweb_version import LionWebVersion
 
-        if lion_web_version is not None and not isinstance(
-            lion_web_version, LionWebVersion
-        ):
+        if lion_web_version is not None and not isinstance(lion_web_version, LionWebVersion):
             raise ValueError(
                 f"Expected lion_web_version to be an instance of LionWebVersion or None but got {lion_web_version}"
             )
-        super().__init__(
-            lion_web_version=lion_web_version, language=language, name=name, id=id
-        )
+        super().__init__(lion_web_version=lion_web_version, language=language, name=name, id=id)
         if key:
             self.set_key(key)
         self.partition = partition
         self.abstract = abstract
 
-    def direct_ancestors(self) -> List[Classifier]:
-        direct_ancestors: List[Classifier] = []
+    def direct_ancestors(self) -> list[Classifier]:
+        direct_ancestors: list[Classifier] = []
         extended = self.get_extended_concept()
         if extended:
             direct_ancestors.append(extended)
@@ -44,9 +40,7 @@ class Concept(Classifier["Concept"]):
         return direct_ancestors
 
     def is_abstract(self) -> bool:
-        return cast(
-            bool, self.get_property_value(property="abstract", default_value=False)
-        )
+        return cast(bool, self.get_property_value(property="abstract", default_value=False))
 
     @property
     def abstract(self) -> bool:
@@ -95,13 +89,13 @@ class Concept(Classifier["Concept"]):
 
             self.set_reference_single_value("extends", reference_to(extended))
 
-    def get_implemented(self) -> List[Interface]:
+    def get_implemented(self) -> list[Interface]:
         from lionweb.language.interface import Interface
 
-        return cast(List[Interface], self.get_reference_multiple_value("implements"))
+        return cast(list[Interface], self.get_reference_multiple_value("implements"))
 
     @property
-    def implemented(self) -> List[Interface]:
+    def implemented(self) -> list[Interface]:
         return self.get_implemented()
 
     def add_implemented_interface(self, iface: Interface):
@@ -109,10 +103,10 @@ class Concept(Classifier["Concept"]):
 
         self.add_reference_multiple_value("implements", reference_to(iface))
 
-    def inherited_features(self) -> List[Feature]:
+    def inherited_features(self) -> list[Feature]:
         from lionweb.language.feature import Feature
 
-        result: List[Feature] = []
+        result: list[Feature] = []
         for ancestor in self.all_ancestors():
             self.combine_features(result, ancestor.get_features())
         return result

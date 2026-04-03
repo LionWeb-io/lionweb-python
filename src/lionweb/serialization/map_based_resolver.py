@@ -1,5 +1,3 @@
-from typing import Dict
-
 from lionweb.api.classifier_instance_resolver import ClassifierInstanceResolver
 from lionweb.model import ClassifierInstance
 
@@ -10,7 +8,7 @@ class MapBasedResolver(ClassifierInstanceResolver):
     position, so until we place them they could be a temporarily wrong ID.
     """
 
-    def __init__(self, instances_by_id: Dict[str, ClassifierInstance] = {}):
+    def __init__(self, instances_by_id: dict[str, ClassifierInstance] = {}):
         self.instances_by_id = dict(instances_by_id)
 
     def resolve(self, instance_id):

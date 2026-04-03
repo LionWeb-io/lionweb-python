@@ -8,7 +8,6 @@ from lionweb.utils.validation_result import ValidationResult
 
 
 class BaseTest(unittest.TestCase):
-
     def assert_node_tree_is_valid(self, node: Node) -> None:
         node_tree_validator = NodeTreeValidator()
         validation_result: ValidationResult = node_tree_validator.validate(node)

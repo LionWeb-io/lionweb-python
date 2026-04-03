@@ -1,19 +1,15 @@
 from dataclasses import dataclass, field
-from typing import Dict, List
 
 from lionweb.serialization.data.language_version import LanguageVersion
-from lionweb.serialization.data.serialized_classifier_instance import \
-    SerializedClassifierInstance
+from lionweb.serialization.data.serialized_classifier_instance import SerializedClassifierInstance
 
 
 @dataclass
 class SerializationChunk:
     serialization_format_version: str = ""
-    languages: List[LanguageVersion] = field(default_factory=list)
-    classifier_instances: List[SerializedClassifierInstance] = field(
-        default_factory=list
-    )
-    classifier_instances_by_id: Dict[str, SerializedClassifierInstance] = field(
+    languages: list[LanguageVersion] = field(default_factory=list)
+    classifier_instances: list[SerializedClassifierInstance] = field(default_factory=list)
+    classifier_instances_by_id: dict[str, SerializedClassifierInstance] = field(
         default_factory=dict
     )
 
@@ -54,13 +50,13 @@ class SerializationChunk:
             )
         )
 
-    def get_classifier_instances(self) -> List[SerializedClassifierInstance]:
+    def get_classifier_instances(self) -> list[SerializedClassifierInstance]:
         return list(self.classifier_instances)
 
-    def get_classifier_instances_by_id(self) -> Dict[str, object]:
+    def get_classifier_instances_by_id(self) -> dict[str, object]:
         return dict(self.classifier_instances_by_id)
 
-    def get_languages(self) -> List:
+    def get_languages(self) -> list:
         return list(self.languages)
 
     def populate_used_languages(self) -> None:

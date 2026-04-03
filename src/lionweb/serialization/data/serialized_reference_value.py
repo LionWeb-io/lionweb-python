@@ -1,30 +1,24 @@
 from dataclasses import dataclass
-from typing import List, Optional
 
 from lionweb.serialization.data.metapointer import MetaPointer
 
 
 @dataclass
 class SerializedReferenceValueEntry:
-    resolve_info: Optional[str] = None
-    reference: Optional[str] = None
+    resolve_info: str | None = None
+    reference: str | None = None
 
-    def __init__(self, resolve_info: Optional[str], reference: Optional[str]):
+    def __init__(self, resolve_info: str | None, reference: str | None):
         self.resolve_info = resolve_info
         self.reference = reference
 
     def __str__(self):
-        return (
-            f"Entry{{resolve_info='{self.resolve_info}', reference='{self.reference}'}}"
-        )
+        return f"Entry{{resolve_info='{self.resolve_info}', reference='{self.reference}'}}"
 
     def __eq__(self, other):
         if not isinstance(other, SerializedReferenceValueEntry):
             return False
-        return (
-            self.resolve_info == other.resolve_info
-            and self.reference == other.reference
-        )
+        return self.resolve_info == other.resolve_info and self.reference == other.reference
 
     def __hash__(self):
         return hash((self.resolve_info, self.reference))
@@ -34,7 +28,7 @@ class SerializedReferenceValue:
     def __init__(
         self,
         meta_pointer=None,
-        value: Optional[List[SerializedReferenceValueEntry]] = None,
+        value: list[SerializedReferenceValueEntry] | None = None,
     ):
         self.meta_pointer = meta_pointer
         self.value = value[:] if value else []
@@ -45,10 +39,10 @@ class SerializedReferenceValue:
     def set_meta_pointer(self, meta_pointer):
         self.meta_pointer = meta_pointer
 
-    def get_value(self) -> List[SerializedReferenceValueEntry]:
+    def get_value(self) -> list[SerializedReferenceValueEntry]:
         return list(self.value)
 
-    def set_value(self, value: List[SerializedReferenceValueEntry]):
+    def set_value(self, value: list[SerializedReferenceValueEntry]):
         self.value.clear()
         self.value.extend(value)
 

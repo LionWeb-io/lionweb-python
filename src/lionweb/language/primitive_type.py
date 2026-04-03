@@ -1,4 +1,4 @@
-from typing import TYPE_CHECKING, Optional
+from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     from lionweb.language.concept import Concept
@@ -12,10 +12,10 @@ class PrimitiveType(DataType):
     def __init__(
         self,
         lion_web_version: LionWebVersion = LionWebVersion.current_version(),
-        language: Optional[Language] = None,
-        name: Optional[str] = None,
-        id: Optional[str] = None,
-        key: Optional[str] = None,
+        language: Language | None = None,
+        name: str | None = None,
+        id: str | None = None,
+        key: str | None = None,
     ):
         super().__init__(lion_web_version, language, name)
         if id:

@@ -13,9 +13,9 @@ class Link(Feature[T]):
 
     def __init__(
         self,
-        lion_web_version: Optional[LionWebVersion] = None,
-        name: Optional[str] = None,
-        id: Optional[str] = None,
+        lion_web_version: LionWebVersion | None = None,
+        name: str | None = None,
+        id: str | None = None,
         container: Optional["Classifier"] = None,
     ):
         (
@@ -28,9 +28,7 @@ class Link(Feature[T]):
         self.set_multiple(False)
 
     def is_multiple(self) -> bool:
-        return cast(
-            bool, self.get_property_value(property="multiple", default_value=False)
-        )
+        return cast(bool, self.get_property_value(property="multiple", default_value=False))
 
     def is_single(self) -> bool:
         return not self.is_multiple()
@@ -46,7 +44,7 @@ class Link(Feature[T]):
     def get_type(self) -> Optional["Classifier"]:
         from lionweb.language.classifier import Classifier
 
-        return cast(Optional[Classifier], self.get_reference_single_value("type"))
+        return cast(Classifier | None, self.get_reference_single_value("type"))
 
     def set_type(self, type: Optional["Classifier"]) -> T:
         if type is None:

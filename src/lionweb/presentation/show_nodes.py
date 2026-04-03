@@ -135,7 +135,7 @@ def display_node(node: Node):
             margin:3px 3px;
             display: inline-grid;
             grid-template-columns: auto 10px auto 1px;
-            gap: 3px; 
+            gap: 3px;
             align-items: center;
         }
         span.propertyname {
@@ -169,7 +169,7 @@ def display_node(node: Node):
             font-size: 14px;
             transition: transform 0.2s ease;
         }
-        
+
         .leaf {
             display: inline-block;
             width: 12px;
@@ -215,14 +215,12 @@ def display_node(node: Node):
             event.stopPropagation(); // Prevent event bubbling
 
             // Find the clicked <li> and toggle 'expanded'
-            var node = event.target.closest("li"); 
+            var node = event.target.closest("li");
 
             if (node) {
                 node.classList.toggle("expanded");
             }
         }
     </script>
-    """.replace(
-        "NODE_DATA", _html_for_node(node)
-    )
+    """.replace("NODE_DATA", _html_for_node(node))
     display(HTML(html_code))

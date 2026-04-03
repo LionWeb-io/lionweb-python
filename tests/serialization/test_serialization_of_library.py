@@ -7,8 +7,7 @@ from lionweb.lionweb_version import LionWebVersion
 from lionweb.model.classifier_instance_utils import get_property_value_by_name
 from lionweb.model.node import Node
 from lionweb.serialization import create_standard_json_serialization
-from lionweb.serialization.serialized_json_comparison_utils import \
-    SerializedJsonComparisonUtils
+from lionweb.serialization.serialized_json_comparison_utils import SerializedJsonComparisonUtils
 
 from .library.book import Book
 from .library.library import Library
@@ -17,14 +16,9 @@ from .serialization_test import SerializationTest
 
 
 class SerializationOfLibraryTest(SerializationTest):
-
     def test_deserialize_library_to_concrete_classes(self):
         with open(
-            Path(__file__).parent.parent
-            / "resources"
-            / "serialization"
-            / "library-language.json",
-            "r",
+            Path(__file__).parent.parent / "resources" / "serialization" / "library-language.json",
         ) as f:
             json_element = json.load(f)
         json_serialization = create_standard_json_serialization(LionWebVersion.V2023_1)
@@ -34,9 +28,7 @@ class SerializationOfLibraryTest(SerializationTest):
         library_name: Property = library.get_property_by_name("name")
         self.assertIsNotNone(library_name.get_key())
 
-        book: Node = next(
-            node for node in deserialized_nodes if node.id == "library-Book"
-        )
+        book: Node = next(node for node in deserialized_nodes if node.id == "library-Book")
         self.assertEqual("Book", get_property_value_by_name(book, "name"))
         self.assertEqual(
             "library-Book",
@@ -54,23 +46,16 @@ class SerializationOfLibraryTest(SerializationTest):
 
     def test_reserialize_library(self):
         input_path = (
-            Path(__file__).parent.parent
-            / "resources"
-            / "serialization"
-            / "library-language.json"
+            Path(__file__).parent.parent / "resources" / "serialization" / "library-language.json"
         )
         with input_path.open("r") as file:
             json_element = json.load(file)
 
         json_serialization = create_standard_json_serialization(LionWebVersion.V2023_1)
         deserialized_nodes = json_serialization.deserialize_json_to_nodes(json_element)
-        reserialized = json_serialization.serialize_tree_to_json_element(
-            deserialized_nodes[0]
-        )
+        reserialized = json_serialization.serialize_tree_to_json_element(deserialized_nodes[0])
 
-        SerializedJsonComparisonUtils.assert_equivalent_lionweb_json(
-            json_element, reserialized
-        )
+        SerializedJsonComparisonUtils.assert_equivalent_lionweb_json(json_element, reserialized)
 
     def test_serialize_library_instance(self):
         library = Library("lib-1", "Language Engineering Library")
@@ -100,17 +85,11 @@ class SerializationOfLibraryTest(SerializationTest):
 
         # Read the expected JSON from the file
         with open(
-            Path(__file__).parent.parent
-            / "resources"
-            / "serialization"
-            / "langeng-library.json",
-            "r",
+            Path(__file__).parent.parent / "resources" / "serialization" / "langeng-library.json",
         ) as file:
             json_read = json.load(file)
 
-        SerializedJsonComparisonUtils.assert_equivalent_lionweb_json(
-            json_read, json_serialized
-        )
+        SerializedJsonComparisonUtils.assert_equivalent_lionweb_json(json_read, json_serialized)
 
     def test_deserialize_language_with_duplicate_ids(self):
         with open(
@@ -118,7 +97,6 @@ class SerializationOfLibraryTest(SerializationTest):
             / "resources"
             / "serialization"
             / "library-language-with-duplicate.json",
-            "r",
         ) as f:
             data = json.load(f)
         json_serialization = create_standard_json_serialization(LionWebVersion.V2023_1)

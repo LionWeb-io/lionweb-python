@@ -1,11 +1,10 @@
 import ast
-from typing import Optional
 
 
 class ASTBuilder:
     """Helper mixin to reduce ast verbosity."""
 
-    def name(self, id: Optional[str], ctx=None) -> ast.Name:
+    def name(self, id: str | None, ctx=None) -> ast.Name:
         if id is None:
             raise ValueError("id must not be None")
         return ast.Name(id=id, ctx=ctx or ast.Load())
@@ -13,7 +12,7 @@ class ASTBuilder:
     def const(self, value) -> ast.Constant:
         return ast.Constant(value=value)
 
-    def attr(self, value, attr: Optional[str], ctx=None) -> ast.Attribute:
+    def attr(self, value, attr: str | None, ctx=None) -> ast.Attribute:
         if attr is None:
             raise ValueError("attr must not be None")
         # value can be a string (implies a Name node) or an AST node

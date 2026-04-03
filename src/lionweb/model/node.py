@@ -1,11 +1,11 @@
 from abc import ABC, abstractmethod
-from typing import TYPE_CHECKING, List, Optional, cast
+from typing import TYPE_CHECKING, Optional, cast
 
 if TYPE_CHECKING:
     from lionweb.language.concept import Concept
     from lionweb.language.containment import Containment
 
-from typing_extensions import TypeGuard
+from typing import TypeGuard
 
 from lionweb.model.classifier_instance import ClassifierInstance
 
@@ -25,9 +25,7 @@ def _shallow_references_equality(node1, node2) -> bool:
         references2 = node2.get_reference_values(reference=reference)
         if len(references1) != len(references2):
             return False
-        for i in range(len(references1)):
-            ref1 = references1[i]
-            ref2 = references2[i]
+        for ref1, ref2 in zip(references1, references2):
             referred_id1 = ref1.get_referred_id()
             referred_id2 = ref2.get_referred_id()
             resolve_info1 = ref1.get_resolve_info()
@@ -42,9 +40,7 @@ def _shallow_references_equality(node1, node2) -> bool:
     return True
 
 
-def _shallow_classifier_instance_equality(
-    classifier_instance_1, classifier_instance_2
-) -> bool:
+def _shallow_classifier_instance_equality(classifier_instance_1, classifier_instance_2) -> bool:
     if classifier_instance_1 is None and classifier_instance_2 is None:
         return True
     if classifier_instance_1 is not None and classifier_instance_2 is not None:
@@ -56,16 +52,14 @@ def _shallow_classifier_instance_equality(
     return False
 
 
-def _shallow_containments_equality(
-    classifier_instance_1, classifier_instance_2
-) -> bool:
+def _shallow_containments_equality(classifier_instance_1, classifier_instance_2) -> bool:
     for containment in classifier_instance_1.get_classifier().all_containments():
         nodes1 = classifier_instance_1.get_children(containment=containment)
         nodes2 = classifier_instance_2.get_children(containment=containment)
         if len(nodes1) != len(nodes2):
             return False
-        for i in range(len(nodes1)):
-            if not _shallow_classifier_instance_equality(nodes1[i], nodes2[i]):
+        for n1, n2 in zip(nodes1, nodes2):
+            if not _shallow_classifier_instance_equality(n1, n2):
                 return False
     return True
 
@@ -73,10 +67,9 @@ def _shallow_containments_equality(
 def _shallow_annotations_equality(annotations1: list, annotations2: list) -> bool:
     if len(annotations1) != len(annotations2):
         return False
-    for i in range(len(annotations1)):
-        if not _shallow_classifier_instance_equality(annotations1[i], annotations2[i]):
-            return False
-    return True
+    return all(
+        _shallow_classifier_instance_equality(a1, a2) for a1, a2 in zip(annotations1, annotations2)
+    )
 
 
 class Node(ClassifierInstance["Concept"], ABC):
@@ -90,12 +83,12 @@ class Node(ClassifierInstance["Concept"], ABC):
     """
 
     @property
-    def id(self) -> Optional[str]:
+    def id(self) -> str | None:
         """The unique identifier of this node."""
         return self.get_id()
 
     @abstractmethod
-    def get_id(self) -> Optional[str]:
+    def get_id(self) -> str | None:
         """
         Returns the Node ID.
         A valid Node ID should not be None, but this method can return None in case the Node is in an invalid state.
@@ -111,7 +104,7 @@ class Node(ClassifierInstance["Concept"], ABC):
         This method should return None only if the Node is not inserted in a Model.
         """
         ancestors = []
-        curr: Optional["Node"] = self
+        curr: Node | None = self
         while curr is not None:
             if curr not in ancestors:
                 ancestors.append(curr)
@@ -148,13 +141,13 @@ class Node(ClassifierInstance["Concept"], ABC):
         """
         ...
 
-    def this_and_all_descendants(self) -> List["Node"]:
+    def this_and_all_descendants(self) -> list["Node"]:
         """
         Returns a list containing this node and all its descendants. Does not include annotations.
         """
-        result: List["Node"] = []
+        result: list[Node] = []
         ClassifierInstance.collect_self_and_descendants(
-            self, False, cast(List[ClassifierInstance], result)
+            self, False, cast(list[ClassifierInstance], result)
         )
         return result
 
@@ -165,18 +158,12 @@ class Node(ClassifierInstance["Concept"], ABC):
             return False
         return (
             self.id == other.id
-            and _shallow_classifier_instance_equality(
-                self.get_parent(), other.get_parent()
-            )
-            and _shallow_classifier_instance_equality(
-                self.get_classifier(), other.get_classifier()
-            )
+            and _shallow_classifier_instance_equality(self.get_parent(), other.get_parent())
+            and _shallow_classifier_instance_equality(self.get_classifier(), other.get_classifier())
             and _properties_equality(self, other)
             and _shallow_containments_equality(self, other)
             and _shallow_references_equality(self, other)
-            and _shallow_annotations_equality(
-                self.get_annotations(), other.get_annotations()
-            )
+            and _shallow_annotations_equality(self.get_annotations(), other.get_annotations())
         )
 
 

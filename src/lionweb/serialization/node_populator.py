@@ -6,20 +6,19 @@ from lionweb.lionweb_version import LionWebVersion
 from lionweb.model import ClassifierInstance, Node
 from lionweb.model.reference_value import ReferenceValue
 from lionweb.self.lioncore import LionCore
-from lionweb.serialization.data.serialized_classifier_instance import \
-    SerializedClassifierInstance
-from lionweb.serialization.deserialization_exception import \
-    DeserializationException
+from lionweb.serialization.data.serialized_classifier_instance import SerializedClassifierInstance
+from lionweb.serialization.deserialization_exception import DeserializationException
 from lionweb.serialization.deserialization_status import DeserializationStatus
 from lionweb.serialization.unavailable_node_policy import UnavailableNodePolicy
-from lionweb.utils.autoresolve import (LIONCORE_AUTORESOLVE_PREFIX,
-                                       LIONCOREBUILTINS_AUTORESOLVE_PREFIX)
+from lionweb.utils.autoresolve import (
+    LIONCORE_AUTORESOLVE_PREFIX,
+    LIONCOREBUILTINS_AUTORESOLVE_PREFIX,
+)
 
 
 class NodePopulator:
     if TYPE_CHECKING:
-        from lionweb.serialization.abstract_serialization import \
-            AbstractSerialization
+        from lionweb.serialization.abstract_serialization import AbstractSerialization
 
     def __init__(
         self,
@@ -28,8 +27,7 @@ class NodePopulator:
         deserialization_status: DeserializationStatus,
         auto_resolve_version: LionWebVersion = LionWebVersion.current_version(),
     ):
-        from lionweb.serialization.abstract_serialization import \
-            AbstractSerialization
+        from lionweb.serialization.abstract_serialization import AbstractSerialization
 
         self.serialization: AbstractSerialization = serialization
         self.classifier_instance_resolver = classifier_instance_resolver
@@ -38,15 +36,13 @@ class NodePopulator:
 
         lion_core_builtins = LionCoreBuiltins.get_instance(auto_resolve_version)
         for element in lion_core_builtins.get_elements():
-            self.auto_resolve_map[
-                f"{LIONCOREBUILTINS_AUTORESOLVE_PREFIX}{element.get_name()}"
-            ] = element
+            self.auto_resolve_map[f"{LIONCOREBUILTINS_AUTORESOLVE_PREFIX}{element.get_name()}"] = (
+                element
+            )
 
         lion_core = LionCore.get_instance(auto_resolve_version)
         for element in lion_core.get_elements():
-            self.auto_resolve_map[
-                f"{LIONCORE_AUTORESOLVE_PREFIX}{element.get_name()}"
-            ] = element
+            self.auto_resolve_map[f"{LIONCORE_AUTORESOLVE_PREFIX}{element.get_name()}"] = element
 
     def populate_classifier_instance(
         self,
@@ -62,9 +58,7 @@ class NodePopulator:
         serialized_classifier_instance: SerializedClassifierInstance,
     ) -> None:
         concept = node.get_classifier()
-        for (
-            serialized_containment_value
-        ) in serialized_classifier_instance.get_containments():
+        for serialized_containment_value in serialized_classifier_instance.get_containments():
             containment = concept.get_containment_by_meta_pointer(
                 serialized_containment_value.meta_pointer
             )
@@ -83,15 +77,11 @@ class NodePopulator:
                     == UnavailableNodePolicy.PROXY_NODES
                 ):
                     deserialized_value.append(
-                        self.classifier_instance_resolver.resolve_or_proxy(
-                            child_node_id
-                        )
+                        self.classifier_instance_resolver.resolve_or_proxy(child_node_id)
                     )
                 else:
                     deserialized_value.append(
-                        self.classifier_instance_resolver.strictly_resolve(
-                            child_node_id
-                        )
+                        self.classifier_instance_resolver.strictly_resolve(child_node_id)
                     )
 
             if deserialized_value != node.get_children(containment):

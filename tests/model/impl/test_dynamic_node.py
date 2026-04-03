@@ -9,12 +9,13 @@ from lionweb.language.language import Language
 from lionweb.language.lioncore_builtins import LionCoreBuiltins
 from lionweb.language.property import Property
 from lionweb.model.classifier_instance_utils import (
-    get_property_value_by_name, set_property_value_by_name)
+    get_property_value_by_name,
+    set_property_value_by_name,
+)
 from lionweb.model.impl.dynamic_node import DynamicNode
 
 
 class DynamicNodeTest(unittest.TestCase):
-
     def test_equality_positive_case_empty_nodes(self):
         n1 = MyNodeWithProperties("id1")
         n2 = MyNodeWithProperties("id1")

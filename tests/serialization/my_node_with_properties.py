@@ -3,14 +3,14 @@ from lionweb.language.language import Language
 from lionweb.language.lioncore_builtins import LionCoreBuiltins
 from lionweb.language.property import Property
 from lionweb.model.classifier_instance_utils import (
-    get_property_value_by_name, set_property_value_by_name)
+    get_property_value_by_name,
+    set_property_value_by_name,
+)
 from lionweb.model.impl.dynamic_node import DynamicNode
 
 
 class MyNodeWithProperties(DynamicNode):
-    LANGUAGE = (
-        Language().set_id("mm1").set_key("mylanguage").set_name("MM1").set_version("1")
-    )
+    LANGUAGE = Language().set_id("mm1").set_key("mylanguage").set_name("MM1").set_version("1")
 
     CONCEPT = (
         Concept()

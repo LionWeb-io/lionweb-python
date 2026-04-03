@@ -1,4 +1,4 @@
-from typing import TYPE_CHECKING, List, Optional
+from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     from lionweb.api.classifier_instance_resolver import (
@@ -10,25 +10,24 @@ if TYPE_CHECKING:
     from lionweb.model.impl.proxy_node import ProxyNode
 
 from lionweb.model.node import Node
-from lionweb.serialization.data.serialized_classifier_instance import \
-    SerializedClassifierInstance
+from lionweb.serialization.data.serialized_classifier_instance import SerializedClassifierInstance
 
 
 class DeserializationStatus:
     def __init__(
         self,
-        original_list: List[SerializedClassifierInstance],
+        original_list: list[SerializedClassifierInstance],
         outside_instances_resolver: "ClassifierInstanceResolver",
     ):
-        from lionweb.api.composite_classifier_instance_resolver import \
-            CompositeClassifierInstanceResolver
-        from lionweb.api.local_classifier_instance_resolver import \
-            LocalClassifierInstanceResolver
+        from lionweb.api.composite_classifier_instance_resolver import (
+            CompositeClassifierInstanceResolver,
+        )
+        from lionweb.api.local_classifier_instance_resolver import LocalClassifierInstanceResolver
         from lionweb.model.impl.proxy_node import ProxyNode
 
-        self.sorted_list: List[SerializedClassifierInstance] = []
+        self.sorted_list: list[SerializedClassifierInstance] = []
         self.nodes_to_sort = list(original_list)
-        self.proxies: List[ProxyNode] = []
+        self.proxies: list[ProxyNode] = []
         self.proxies_instance_resolver = LocalClassifierInstanceResolver()
         self.global_instance_resolver = CompositeClassifierInstanceResolver(
             outside_instances_resolver, self.proxies_instance_resolver
@@ -58,7 +57,7 @@ class DeserializationStatus:
     def stream_sorted(self):
         return iter(self.sorted_list)
 
-    def resolve(self, node_id: Optional[str]) -> Optional[Node]:
+    def resolve(self, node_id: str | None) -> Node | None:
         if node_id is None:
             return None
         resolved = self.global_instance_resolver.resolve(node_id)

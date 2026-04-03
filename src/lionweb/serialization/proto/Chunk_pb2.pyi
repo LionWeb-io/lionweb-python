@@ -50,25 +50,19 @@ class PBChunk(google.protobuf.message.Message):
     @property
     def interned_languages(
         self,
-    ) -> google.protobuf.internal.containers.RepeatedCompositeFieldContainer[
-        global___PBLanguage
-    ]:
+    ) -> google.protobuf.internal.containers.RepeatedCompositeFieldContainer[global___PBLanguage]:
         """Interned languages"""
 
     @property
     def nodes(
         self,
-    ) -> google.protobuf.internal.containers.RepeatedCompositeFieldContainer[
-        global___PBNode
-    ]: ...
+    ) -> google.protobuf.internal.containers.RepeatedCompositeFieldContainer[global___PBNode]: ...
     def __init__(
         self,
         *,
         serialization_format_version: builtins.str = ...,
         interned_strings: collections.abc.Iterable[builtins.str] | None = ...,
-        interned_meta_pointers: (
-            collections.abc.Iterable[global___PBMetaPointer] | None
-        ) = ...,
+        interned_meta_pointers: (collections.abc.Iterable[global___PBMetaPointer] | None) = ...,
         interned_languages: collections.abc.Iterable[global___PBLanguage] | None = ...,
         nodes: collections.abc.Iterable[global___PBNode] | None = ...,
     ) -> None: ...
@@ -317,9 +311,7 @@ class PBContainment(google.protobuf.message.Message):
     @property
     def si_children(
         self,
-    ) -> google.protobuf.internal.containers.RepeatedScalarFieldContainer[
-        builtins.int
-    ]: ...
+    ) -> google.protobuf.internal.containers.RepeatedScalarFieldContainer[builtins.int]: ...
     def __init__(
         self,
         *,
@@ -356,9 +348,7 @@ class PBReference(google.protobuf.message.Message):
     ) -> None: ...
     def ClearField(
         self,
-        field_name: typing.Literal[
-            "mpi_meta_pointer", b"mpi_meta_pointer", "values", b"values"
-        ],
+        field_name: typing.Literal["mpi_meta_pointer", b"mpi_meta_pointer", "values", b"values"],
     ) -> None: ...
 
 global___PBReference = PBReference

@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from typing import Any, Optional
+from typing import Any
 
 from lionweb.language.field import Field
 from lionweb.language.structured_data_type import StructuredDataType
@@ -14,12 +14,12 @@ class StructuredDataTypeInstance(ABC):
         ...
 
     @abstractmethod
-    def get_field_value(self, field: Field) -> Optional[Any]:
+    def get_field_value(self, field: Field) -> Any | None:
         """Get the field value associated with the specified field."""
         ...
 
     @abstractmethod
-    def set_field_value(self, field: Field, value: Optional[Any]) -> None:
+    def set_field_value(self, field: Field, value: Any | None) -> None:
         """Set the field value for the specified field.
 
         Raises:
