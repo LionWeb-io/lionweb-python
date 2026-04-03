@@ -1,12 +1,10 @@
-from typing import List, Optional
-
 from lionweb.api.classifier_instance_resolver import ClassifierInstanceResolver
 from lionweb.model import ClassifierInstance
 
 
 class CompositeClassifierInstanceResolver(ClassifierInstanceResolver):
     def __init__(self, *classifier_instance_resolvers: ClassifierInstanceResolver):
-        self.classifier_instance_resolvers: List[ClassifierInstanceResolver] = list(
+        self.classifier_instance_resolvers: list[ClassifierInstanceResolver] = list(
             classifier_instance_resolvers
         )
 
@@ -16,7 +14,7 @@ class CompositeClassifierInstanceResolver(ClassifierInstanceResolver):
         self.classifier_instance_resolvers.append(classifier_instance_resolver)
         return self
 
-    def resolve(self, instance_id: str) -> Optional[ClassifierInstance]:
+    def resolve(self, instance_id: str) -> ClassifierInstance | None:
         for resolver in self.classifier_instance_resolvers:
             instance = resolver.resolve(instance_id)
             if instance is not None:

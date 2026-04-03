@@ -18,20 +18,14 @@ class MyNodeWithStructuredDataType(DynamicNode):
     )
 
     POINT = (
-        StructuredDataType(
-            id="point-id", key="point-key", name="point", language=LANGUAGE
-        )
+        StructuredDataType(id="point-id", key="point-key", name="point", language=LANGUAGE)
         .add_field(Field("x", LionCoreBuiltins.get_integer(), "x-id", "x-key"))
         .add_field(Field("y", LionCoreBuiltins.get_integer(), "y-id", "y-key"))
     )
 
     ADDRESS = (
-        StructuredDataType(
-            id="address-id", key="address-key", name="address", language=LANGUAGE
-        )
-        .add_field(
-            Field("street", LionCoreBuiltins.get_string(), "street-id", "street-key")
-        )
+        StructuredDataType(id="address-id", key="address-key", name="address", language=LANGUAGE)
+        .add_field(Field("street", LionCoreBuiltins.get_string(), "street-id", "street-key"))
         .add_field(Field("city", LionCoreBuiltins.get_string(), "city-id", "city-key"))
     )
 
@@ -44,17 +38,15 @@ class MyNodeWithStructuredDataType(DynamicNode):
     def __init__(self, id: str):
         super().__init__(id, MyNodeWithStructuredDataType.CONCEPT)
 
-    def get_point(self) -> Optional[StructuredDataType]:
-        return cast(
-            Optional[StructuredDataType], self.get_property_value(property_name="point")
-        )
+    def get_point(self) -> StructuredDataType | None:
+        return cast(StructuredDataType | None, self.get_property_value(property_name="point"))
 
     def set_point(self, point: StructuredDataType) -> None:
         self.set_property_value(property_name="point", value=point)
 
-    def get_address(self) -> Optional[StructuredDataType]:
+    def get_address(self) -> StructuredDataType | None:
         return cast(
-            Optional[StructuredDataType],
+            StructuredDataType | None,
             self.get_property_value(property_name="address"),
         )
 

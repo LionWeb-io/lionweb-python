@@ -2,9 +2,13 @@ import ast
 import unittest
 from unittest.mock import Mock
 
-from lionweb.generation.naming_utils import (calculate_field_name,
-                                             dotted_name_expr, to_snake_case,
-                                             to_type_name, to_var_name)
+from lionweb.generation.naming_utils import (
+    calculate_field_name,
+    dotted_name_expr,
+    to_snake_case,
+    to_type_name,
+    to_var_name,
+)
 from lionweb.language import Feature
 
 

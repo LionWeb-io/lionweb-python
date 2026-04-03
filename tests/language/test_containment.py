@@ -4,7 +4,6 @@ from lionweb.language import Containment
 
 
 class ContainmentTest(unittest.TestCase):
-
     def test_key_property(self):
         c1 = Containment()
         c1.key = "k1"

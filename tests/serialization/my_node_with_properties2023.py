@@ -6,7 +6,9 @@ from lionweb.language.lioncore_builtins import LionCoreBuiltins
 from lionweb.language.property import Property
 from lionweb.lionweb_version import LionWebVersion
 from lionweb.model.classifier_instance_utils import (
-    get_property_value_by_name, set_property_value_by_name)
+    get_property_value_by_name,
+    set_property_value_by_name,
+)
 from lionweb.model.impl.dynamic_node import DynamicNode
 
 
@@ -68,16 +70,16 @@ class MyNodeWithProperties2023(DynamicNode):
     def __init__(self, id: str):
         super().__init__(id, MyNodeWithProperties2023.CONCEPT)
 
-    def get_p1(self) -> Optional[bool]:
+    def get_p1(self) -> bool | None:
         return get_property_value_by_name(self, "p1")
 
-    def get_p2(self) -> Optional[int]:
+    def get_p2(self) -> int | None:
         return get_property_value_by_name(self, "p2")
 
-    def get_p3(self) -> Optional[str]:
+    def get_p3(self) -> str | None:
         return get_property_value_by_name(self, "p3")
 
-    def get_p4(self) -> Optional[dict]:
+    def get_p4(self) -> dict | None:
         p4_value = get_property_value_by_name(self, "p4")
         return p4_value
 

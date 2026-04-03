@@ -8,7 +8,6 @@ from lionweb.utils.node_tree_validator import NodeTreeValidator
 
 
 class NodeTreeValidatorTest(unittest.TestCase):
-
     def test_everything_correct_case(self):
         c = Concept()
         c.set_partition(True)
@@ -23,9 +22,7 @@ class NodeTreeValidatorTest(unittest.TestCase):
         node = DynamicNode(None, c)
         vr = NodeTreeValidator().validate(node)
         self.assertFalse(vr.is_successful())
-        self.assertEqual(
-            {Issue(IssueSeverity.ERROR, "ID null found", node)}, vr.get_issues()
-        )
+        self.assertEqual({Issue(IssueSeverity.ERROR, "ID null found", node)}, vr.get_issues())
 
     def test_a_node_with_invalid_id_is_not_valid(self):
         c = Concept()
@@ -33,9 +30,7 @@ class NodeTreeValidatorTest(unittest.TestCase):
         node = DynamicNode("@@@", c)
         vr = NodeTreeValidator().validate(node)
         self.assertFalse(vr.is_successful())
-        self.assertEqual(
-            {Issue(IssueSeverity.ERROR, "Invalid ID", node)}, vr.get_issues()
-        )
+        self.assertEqual({Issue(IssueSeverity.ERROR, "Invalid ID", node)}, vr.get_issues())
 
     def test_root_node_which_is_not_partition(self):
         non_partition_concept = Concept()

@@ -5,7 +5,6 @@ from lionweb.utils.language_validator import LanguageValidator
 
 
 class LionCoreTest(unittest.TestCase):
-
     def test_lion_core_is_valid(self):
         vr = LanguageValidator().validate(LionCore.get_instance())
         if not vr.is_successful():

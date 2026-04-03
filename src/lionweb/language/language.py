@@ -1,4 +1,4 @@
-from typing import TYPE_CHECKING, List, Optional, TypeVar, cast
+from typing import TYPE_CHECKING, Optional, TypeVar, cast
 
 from lionweb.language.ikeyed import IKeyed
 from lionweb.language.namespace_provider import NamespaceProvider
@@ -26,11 +26,11 @@ class Language(M3Node["Language"], NamespaceProvider, IKeyed["Language"]):
 
     def __init__(
         self,
-        name: Optional[str] = None,
-        id: Optional[str] = None,
-        key: Optional[str] = None,
-        version: Optional[str] = None,
-        lion_web_version: Optional[LionWebVersion] = None,
+        name: str | None = None,
+        id: str | None = None,
+        key: str | None = None,
+        version: str | None = None,
+        lion_web_version: LionWebVersion | None = None,
     ):
         super().__init__(lion_web_version or LionWebVersion.current_version())
         if name:
@@ -42,11 +42,11 @@ class Language(M3Node["Language"], NamespaceProvider, IKeyed["Language"]):
         if version:
             self.set_version(version)
 
-    def set_name(self, name: Optional[str]) -> "Language":
+    def set_name(self, name: str | None) -> "Language":
         self.set_property_value(property="name", value=name)
         return self
 
-    def set_version(self, version: Optional[str]) -> "Language":
+    def set_version(self, version: str | None) -> "Language":
         self.set_property_value(property="version", value=version)
         return self
 
@@ -77,14 +77,14 @@ class Language(M3Node["Language"], NamespaceProvider, IKeyed["Language"]):
         else:
             raise ValueError()
 
-    def depends_on(self) -> List["Language"]:
+    def depends_on(self) -> list["Language"]:
         return self.get_reference_multiple_value("dependsOn")
 
-    def get_elements(self) -> List["LanguageEntity"]:
+    def get_elements(self) -> list["LanguageEntity"]:
         return self.get_containment_multiple_value("entities")
 
     @property
-    def elements(self) -> List["LanguageEntity"]:
+    def elements(self) -> list["LanguageEntity"]:
         return self.get_elements()
 
     def add_dependency(self, dependency: "Language") -> "Language":
@@ -104,11 +104,7 @@ class Language(M3Node["Language"], NamespaceProvider, IKeyed["Language"]):
         from lionweb.language.concept import Concept
 
         return next(
-            (
-                e
-                for e in self.get_elements()
-                if isinstance(e, Concept) and e.get_name() == name
-            ),
+            (e for e in self.get_elements() if isinstance(e, Concept) and e.get_name() == name),
             None,
         )
 
@@ -116,11 +112,7 @@ class Language(M3Node["Language"], NamespaceProvider, IKeyed["Language"]):
         from lionweb.language.concept import Classifier
 
         return next(
-            (
-                e
-                for e in self.get_elements()
-                if isinstance(e, Classifier) and e.get_name() == name
-            ),
+            (e for e in self.get_elements() if isinstance(e, Classifier) and e.get_name() == name),
             None,
         )
 
@@ -128,24 +120,15 @@ class Language(M3Node["Language"], NamespaceProvider, IKeyed["Language"]):
         from lionweb.language.annotation import Annotation
 
         return next(
-            (
-                e
-                for e in self.get_elements()
-                if isinstance(e, Annotation) and e.get_name() == name
-            ),
+            (e for e in self.get_elements() if isinstance(e, Annotation) and e.get_name() == name),
             None,
         )
 
     def get_enumeration_by_name(self, name: str) -> Optional["Enumeration"]:
-
         from lionweb.language.enumeration import Enumeration
 
         return next(
-            (
-                e
-                for e in self.get_elements()
-                if isinstance(e, Enumeration) and e.get_name() == name
-            ),
+            (e for e in self.get_elements() if isinstance(e, Enumeration) and e.get_name() == name),
             None,
         )
 
@@ -183,26 +166,22 @@ class Language(M3Node["Language"], NamespaceProvider, IKeyed["Language"]):
         from lionweb.language.interface import Interface
 
         return next(
-            (
-                e
-                for e in self.get_elements()
-                if isinstance(e, Interface) and e.get_name() == name
-            ),
+            (e for e in self.get_elements() if isinstance(e, Interface) and e.get_name() == name),
             None,
         )
 
-    def get_name(self) -> Optional[str]:
-        return cast(Optional[str], self.get_property_value(property="name"))
+    def get_name(self) -> str | None:
+        return cast(str | None, self.get_property_value(property="name"))
 
     @property
-    def name(self) -> Optional[str]:
+    def name(self) -> str | None:
         return self.get_name()
 
     def get_key(self) -> str:
         return cast(str, self.get_property_value(property="key"))
 
-    def get_version(self) -> Optional[str]:
-        return cast(Optional[str], self.get_property_value(property="version"))
+    def get_version(self) -> str | None:
+        return cast(str | None, self.get_property_value(property="version"))
 
     def get_element_by_name(self, name: str) -> Optional["LanguageEntity"]:
         return next((e for e in self.get_elements() if e.get_name() == name), None)
@@ -235,7 +214,7 @@ class Language(M3Node["Language"], NamespaceProvider, IKeyed["Language"]):
     def __str__(self) -> str:
         return f"{super().__str__()}{{name={self.get_name()}}}"
 
-    def get_primitive_types(self) -> List["PrimitiveType"]:
+    def get_primitive_types(self) -> list["PrimitiveType"]:
         from lionweb.language.primitive_type import PrimitiveType
 
         return [e for e in self.get_elements() if isinstance(e, PrimitiveType)]
@@ -250,7 +229,7 @@ class Language(M3Node["Language"], NamespaceProvider, IKeyed["Language"]):
 
         return LanguageValidator().validate(self)
 
-    def get_structured_data_types(self) -> List["StructuredDataType"]:
+    def get_structured_data_types(self) -> list["StructuredDataType"]:
         from lionweb.language.structured_data_type import StructuredDataType
 
         return [e for e in self.get_elements() if isinstance(e, StructuredDataType)]

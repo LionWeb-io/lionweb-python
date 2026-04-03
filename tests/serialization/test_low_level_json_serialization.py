@@ -7,37 +7,26 @@ from serialization.serialization_test import SerializationTest
 
 from lionweb.language import Annotation, Concept, Language
 from lionweb.lionweb_version import LionWebVersion
-from lionweb.model.impl.dynamic_annotation_instance import \
-    DynamicAnnotationInstance
+from lionweb.model.impl.dynamic_annotation_instance import DynamicAnnotationInstance
 from lionweb.model.impl.dynamic_node import DynamicNode
 from lionweb.self.lioncore import LionCore
 from lionweb.serialization.data import LanguageVersion
 from lionweb.serialization.data.metapointer import MetaPointer
-from lionweb.serialization.data.serialized_reference_value import \
-    SerializedReferenceValueEntry
+from lionweb.serialization.data.serialized_reference_value import SerializedReferenceValueEntry
 from lionweb.serialization.json_serialization import JsonSerialization
-from lionweb.serialization.low_level_json_serialization import \
-    LowLevelJsonSerialization
-from lionweb.serialization.serialized_json_comparison_utils import \
-    SerializedJsonComparisonUtils
+from lionweb.serialization.low_level_json_serialization import LowLevelJsonSerialization
+from lionweb.serialization.serialized_json_comparison_utils import SerializedJsonComparisonUtils
 
 
 class LowLevelJsonSerializationTest(SerializationTest):
-
     def test_deserialize_lioncore_to_serialized_nodes(self):
         with open(
-            Path(__file__).parent.parent
-            / "resources"
-            / "serialization"
-            / "lioncore.json",
-            "r",
+            Path(__file__).parent.parent / "resources" / "serialization" / "lioncore.json",
         ) as file:
             json_element = json.load(file)
 
         json_serialization = LowLevelJsonSerialization()
-        serialized_chunk = json_serialization.deserialize_serialization_block(
-            json_element
-        )
+        serialized_chunk = json_serialization.deserialize_serialization_block(json_element)
         deserialized_instances = serialized_chunk.get_classifier_instances()
 
         lioncore = deserialized_instances[0]
@@ -55,51 +44,29 @@ class LowLevelJsonSerializationTest(SerializationTest):
 
     def test_deserialize_library_language_to_serialized_nodes(self):
         with open(
-            Path(__file__).parent.parent
-            / "resources"
-            / "serialization"
-            / "library-language.json",
-            "r",
+            Path(__file__).parent.parent / "resources" / "serialization" / "library-language.json",
         ) as file:
             json_element = json.load(file)
 
         json_serialization = LowLevelJsonSerialization()
-        serialized_chunk = json_serialization.deserialize_serialization_block(
-            json_element
-        )
+        serialized_chunk = json_serialization.deserialize_serialization_block(json_element)
         book = serialized_chunk.get_instance_by_id("library-Book")
-        self.assertEqual(
-            "Book", book.get_property_value_by_key("LionCore-builtins-INamed-name")
-        )
+        self.assertEqual("Book", book.get_property_value_by_key("LionCore-builtins-INamed-name"))
 
-        guided_book_writer = serialized_chunk.get_instance_by_id(
-            "library-GuideBookWriter"
-        )
+        guided_book_writer = serialized_chunk.get_instance_by_id("library-GuideBookWriter")
         self.assertEqual(
             "GuideBookWriter",
-            guided_book_writer.get_property_value_by_key(
-                "LionCore-builtins-INamed-name"
-            ),
+            guided_book_writer.get_property_value_by_key("LionCore-builtins-INamed-name"),
         )
         self.assertEqual(
-            [
-                SerializedReferenceValueEntry(
-                    reference="library-Writer", resolve_info="Writer"
-                )
-            ],
+            [SerializedReferenceValueEntry(reference="library-Writer", resolve_info="Writer")],
             guided_book_writer.get_reference_values_by_key("Concept-extends"),
         )
         self.assertEqual(
-            [
-                SerializedReferenceValueEntry(
-                    reference="library-Writer", resolve_info="Writer"
-                )
-            ],
+            [SerializedReferenceValueEntry(reference="library-Writer", resolve_info="Writer")],
             guided_book_writer.get_reference_values(
                 MetaPointer.from_feature(
-                    LionCore.get_concept(LionWebVersion.V2023_1).get_reference_by_name(
-                        "extends"
-                    )
+                    LionCore.get_concept(LionWebVersion.V2023_1).get_reference_by_name("extends")
                 )
             ),
         )
@@ -107,9 +74,7 @@ class LowLevelJsonSerializationTest(SerializationTest):
             ["library-GuideBookWriter-countries"],
             guided_book_writer.get_containment_values(
                 MetaPointer.from_feature(
-                    LionCore.get_concept(
-                        LionWebVersion.V2023_1
-                    ).get_containment_by_name("features")
+                    LionCore.get_concept(LionWebVersion.V2023_1).get_containment_by_name("features")
                 )
             ),
         )
@@ -117,26 +82,17 @@ class LowLevelJsonSerializationTest(SerializationTest):
     def test_reserialize_library_language(self):
         self.maxDiff = None
         self.assert_file_is_reserialized_correctly(
-            Path(__file__).parent.parent
-            / "resources"
-            / "serialization"
-            / "library-language.json"
+            Path(__file__).parent.parent / "resources" / "serialization" / "library-language.json"
         )
 
     def test_reserialize_bobs_library(self):
         self.assert_file_is_reserialized_correctly(
-            Path(__file__).parent.parent
-            / "resources"
-            / "serialization"
-            / "bobslibrary.json"
+            Path(__file__).parent.parent / "resources" / "serialization" / "bobslibrary.json"
         )
 
     def test_reserialize_language_engineering_library(self):
         self.assert_file_is_reserialized_correctly(
-            Path(__file__).parent.parent
-            / "resources"
-            / "serialization"
-            / "langeng-library.json"
+            Path(__file__).parent.parent / "resources" / "serialization" / "langeng-library.json"
         )
 
     def test_serialize_annotations(self):
@@ -169,19 +125,15 @@ class LowLevelJsonSerializationTest(SerializationTest):
         with self.assertRaises(Exception):
             lljs.deserialize_serialization_block(json.loads(json_str))
 
-    def assert_file_is_reserialized_correctly(self, file_path: Union[str, Path]):
-        with open(file_path, "r") as file:
+    def assert_file_is_reserialized_correctly(self, file_path: str | Path):
+        with open(file_path) as file:
             json_element = json.load(file)
 
         json_serialization = LowLevelJsonSerialization()
-        serialized_chunk = json_serialization.deserialize_serialization_block(
-            json_element
-        )
+        serialized_chunk = json_serialization.deserialize_serialization_block(json_element)
         reserialized = json_serialization.serialize_to_json_element(serialized_chunk)
 
-        SerializedJsonComparisonUtils.assert_equivalent_lionweb_json(
-            json_element, reserialized
-        )
+        SerializedJsonComparisonUtils.assert_equivalent_lionweb_json(json_element, reserialized)
 
 
 if __name__ == "__main__":

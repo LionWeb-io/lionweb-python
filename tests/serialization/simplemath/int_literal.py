@@ -7,7 +7,7 @@ from lionweb.language.property import Property
 
 
 class IntLiteral(SimpleNode):
-    def __init__(self, value: int, id: Optional[str] = None):
+    def __init__(self, value: int, id: str | None = None):
         super().__init__()
         self.value = value
         if id is not None:
@@ -16,8 +16,7 @@ class IntLiteral(SimpleNode):
             self.assign_random_id()
 
     def get_classifier(self) -> Concept:
-        from serialization.simplemath.simple_math_language import \
-            SimpleMathLanguage
+        from serialization.simplemath.simple_math_language import SimpleMathLanguage
 
         return SimpleMathLanguage.INT_LITERAL
 

@@ -6,7 +6,6 @@ from lionweb.language.interface import Interface
 
 
 class ClassifierAncestorsTest(unittest.TestCase):
-
     def test_concept(self):
         a = Concept(name="A")
         b = Concept(name="b")

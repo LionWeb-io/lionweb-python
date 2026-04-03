@@ -1,5 +1,6 @@
+from collections.abc import Callable
 from enum import Enum
-from typing import Callable, List, Optional, TypedDict, cast
+from typing import TypedDict, cast
 
 from lionweb import LionWebVersion
 
@@ -51,22 +52,22 @@ class PropertyData(TypedDict):
     name: str
     type: "PrimitiveTypeFactory | EnumerationTypeFactory | DataType"
     multiplicity: Multiplicity
-    id: Optional[str]
-    key: Optional[str]
+    id: str | None
+    key: str | None
 
 
 class LinkData(TypedDict):
     name: str
     type: "ClassifierFactory | Classifier"
     multiplicity: Multiplicity
-    id: Optional[str]
-    key: Optional[str]
+    id: str | None
+    key: str | None
 
 
 class LiteralData(TypedDict):
     name: str
-    id: Optional[str]
-    key: Optional[str]
+    id: str | None
+    key: str | None
 
 
 class ClassifierFactory:
@@ -94,7 +95,7 @@ class ClassifierFactory:
         name: str,
         id: str,
         key: str,
-        extends: List["ClassifierFactory | Classifier"] = [],
+        extends: list["ClassifierFactory | Classifier"] = [],
     ):
         self.type = type
         self.name = name
@@ -102,10 +103,10 @@ class ClassifierFactory:
         self.partition = False
         self.id = id
         self.key = key
-        self.properties: List[PropertyData] = []
-        self.references: List[LinkData] = []
-        self.containments: List[LinkData] = []
-        self.annotates: Optional[Classifier | ClassifierFactory] = None
+        self.properties: list[PropertyData] = []
+        self.references: list[LinkData] = []
+        self.containments: list[LinkData] = []
+        self.annotates: Classifier | ClassifierFactory | None = None
         self.extends = extends
 
     def property(
@@ -113,8 +114,8 @@ class ClassifierFactory:
         name: str,
         type: "PrimitiveTypeFactory | EnumerationTypeFactory | DataType",
         multiplicity: Multiplicity = Multiplicity.REQUIRED,
-        id: Optional[str] = None,
-        key: Optional[str] = None,
+        id: str | None = None,
+        key: str | None = None,
     ) -> "ClassifierFactory":
         self.properties.append(
             {
@@ -132,8 +133,8 @@ class ClassifierFactory:
         name: str,
         type: "ClassifierFactory | Classifier",
         multiplicity: Multiplicity = Multiplicity.REQUIRED,
-        id: Optional[str] = None,
-        key: Optional[str] = None,
+        id: str | None = None,
+        key: str | None = None,
     ) -> "ClassifierFactory":
         self.references.append(
             {
@@ -151,8 +152,8 @@ class ClassifierFactory:
         name: str,
         type: "ClassifierFactory",
         multiplicity: Multiplicity = Multiplicity.REQUIRED,
-        id: Optional[str] = None,
-        key: Optional[str] = None,
+        id: str | None = None,
+        key: str | None = None,
     ) -> "ClassifierFactory":
         self.containments.append(
             {
@@ -168,8 +169,8 @@ class ClassifierFactory:
     def populate(
         self,
         classifier: Classifier,
-        id_calculator: Callable[[Optional[str], str], str],
-        key_calculator: Callable[[Optional[str], str], str],
+        id_calculator: Callable[[str | None, str], str],
+        key_calculator: Callable[[str | None, str], str],
     ):
         language = classifier.language
         assert language is not None
@@ -178,10 +179,8 @@ class ClassifierFactory:
                 lion_web_version=classifier.lion_web_version,
                 name=property_data.get("name"),
                 container=classifier,
-                id=property_data["id"]
-                or id_calculator(classifier.id, property_data["name"]),
-                key=property_data["key"]
-                or key_calculator(classifier.key, property_data["name"]),
+                id=property_data["id"] or id_calculator(classifier.id, property_data["name"]),
+                key=property_data["key"] or key_calculator(classifier.key, property_data["name"]),
             )
             property.set_optional(not property_data["multiplicity"].value["required"])
             property_type = property_data["type"]
@@ -231,9 +230,7 @@ class ClassifierFactory:
             classifier.add_feature(containment)
         if isinstance(classifier, Annotation):
             if isinstance(self.annotates, ClassifierFactory):
-                classifier.annotates = language.require_classifier_by_name(
-                    self.annotates.name
-                )
+                classifier.annotates = language.require_classifier_by_name(self.annotates.name)
             elif isinstance(self.annotates, Classifier):
                 classifier.annotates = self.annotates
         elif isinstance(classifier, Interface):
@@ -278,21 +275,16 @@ class ClassifierFactory:
         else:
             raise ValueError(f"Invalid classifier type: {self.type}")
 
-    def set_extends(
-        self, extends: "Classifier | ClassifierFactory"
-    ) -> "ClassifierFactory":
+    def set_extends(self, extends: "Classifier | ClassifierFactory") -> "ClassifierFactory":
         self.extends = [extends]
         return self
 
-    def set_annotates(
-        self, annotates: "Classifier | ClassifierFactory"
-    ) -> "ClassifierFactory":
+    def set_annotates(self, annotates: "Classifier | ClassifierFactory") -> "ClassifierFactory":
         self.annotates = annotates
         return self
 
 
 class PrimitiveTypeFactory:
-
     def __init__(self, name: str, id: str, key: str):
         self.name = name
         self.id = id
@@ -310,8 +302,7 @@ class PrimitiveTypeFactory:
 
 
 class EnumerationTypeFactory:
-
-    def __init__(self, name: str, id: str, key: str, literals: List[str | LiteralData]):
+    def __init__(self, name: str, id: str, key: str, literals: list[str | LiteralData]):
         self.name = name
         self.id = id
         self.key = key
@@ -320,8 +311,8 @@ class EnumerationTypeFactory:
     def build(
         self,
         language: Language,
-        id_calculator: Callable[[Optional[str], str], str],
-        key_calculator: Callable[[Optional[str], str], str],
+        id_calculator: Callable[[str | None, str], str],
+        key_calculator: Callable[[str | None, str], str],
     ) -> "Enumeration":
         enumeration = Enumeration(
             lion_web_version=language.lion_web_version,
@@ -346,12 +337,10 @@ class EnumerationTypeFactory:
                     name=literal_data["name"],
                 )
                 literal.set_id(
-                    literal_data.get("id")
-                    or id_calculator(enumeration.id, literal_data["name"])
+                    literal_data.get("id") or id_calculator(enumeration.id, literal_data["name"])
                 )
                 literal.set_key(
-                    literal_data.get("key")
-                    or key_calculator(enumeration.key, literal_data["name"])
+                    literal_data.get("key") or key_calculator(enumeration.key, literal_data["name"])
                 )
         return enumeration
 
@@ -394,12 +383,12 @@ class LanguageFactory:
     def __init__(
         self,
         name: str,
-        lw_version: Optional[LionWebVersion] = None,
+        lw_version: LionWebVersion | None = None,
         version: str = "1",
-        id: Optional[str] = None,
-        key: Optional[str] = None,
-        id_calculator: Optional[Callable[[Optional[str], str], str]] = None,
-        key_calculator: Optional[Callable[[Optional[str], str], str]] = None,
+        id: str | None = None,
+        key: str | None = None,
+        id_calculator: Callable[[str | None, str], str] | None = None,
+        key_calculator: Callable[[str | None, str], str] | None = None,
     ):
         """
         Initializes a new instance of the class with provided parameters and default values where
@@ -443,15 +432,13 @@ class LanguageFactory:
             lambda parent_id, name: name if parent_id is None else f"{parent_id}_{name}"
         )
         self.key_calculator = key_calculator or (
-            lambda parent_key, name: (
-                name if parent_key is None else f"{parent_key}_{name}"
-            )
+            lambda parent_key, name: (name if parent_key is None else f"{parent_key}_{name}")
         )
         self.id = id or self.id_calculator(None, name)
         self.key = key or self.key_calculator(None, name)
-        self.classifiers: List[ClassifierFactory] = []
-        self.primitive_types: List[PrimitiveTypeFactory] = []
-        self.enumerations: List[EnumerationTypeFactory] = []
+        self.classifiers: list[ClassifierFactory] = []
+        self.primitive_types: list[PrimitiveTypeFactory] = []
+        self.enumerations: list[EnumerationTypeFactory] = []
 
     def build(self) -> Language:
         """
@@ -483,14 +470,12 @@ class LanguageFactory:
         for classifier in self.classifiers:
             classifiers[classifier] = classifier.build(language)
         for classifier in self.classifiers:
-            classifier.populate(
-                classifiers[classifier], self.id_calculator, self.key_calculator
-            )
+            classifier.populate(classifiers[classifier], self.id_calculator, self.key_calculator)
 
         return language
 
     def concept(
-        self, name: str, id: Optional[str] = None, key: Optional[str] = None
+        self, name: str, id: str | None = None, key: str | None = None
     ) -> ClassifierFactory:
         sub = ClassifierFactory(
             "Concept",
@@ -504,9 +489,9 @@ class LanguageFactory:
     def interface(
         self,
         name: str,
-        id: Optional[str] = None,
-        key: Optional[str] = None,
-        extends: List[ClassifierFactory | Classifier] = [],
+        id: str | None = None,
+        key: str | None = None,
+        extends: list[ClassifierFactory | Classifier] = [],
     ) -> ClassifierFactory:
         sub = ClassifierFactory(
             "Interface",
@@ -522,8 +507,8 @@ class LanguageFactory:
         self,
         name: str,
         annotates: ClassifierFactory | Classifier,
-        id: Optional[str] = None,
-        key: Optional[str] = None,
+        id: str | None = None,
+        key: str | None = None,
     ) -> ClassifierFactory:
         sub = ClassifierFactory(
             "Annotation",
@@ -536,7 +521,7 @@ class LanguageFactory:
         return sub
 
     def primitive_type(
-        self, name: str, id: Optional[str] = None, key: Optional[str] = None
+        self, name: str, id: str | None = None, key: str | None = None
     ) -> PrimitiveTypeFactory:
         sub = PrimitiveTypeFactory(
             name,
@@ -549,9 +534,9 @@ class LanguageFactory:
     def enumeration(
         self,
         name: str,
-        literals: List[str | LiteralData],
-        id: Optional[str] = None,
-        key: Optional[str] = None,
+        literals: list[str | LiteralData],
+        id: str | None = None,
+        key: str | None = None,
     ) -> EnumerationTypeFactory:
         sub = EnumerationTypeFactory(
             name,

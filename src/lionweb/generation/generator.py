@@ -7,13 +7,12 @@ and deserializers.
 """
 
 from pathlib import Path
-from typing import List, cast
+from typing import cast
 
 import click
 
 from lionweb.generation.configuration import PrimitiveTypeMappingSpec
-from lionweb.generation.language_generation import (LanguageGenerator,
-                                                    LanguageMappingSpec)
+from lionweb.generation.language_generation import LanguageGenerator, LanguageMappingSpec
 from lionweb.generation.node_classes_generation import NodeClassesGenerator
 from lionweb.language import Language
 from lionweb.lionweb_version import LionWebVersion
@@ -135,7 +134,7 @@ PRIMITIVE_TYPE_MAPPING = PrimitiveTypeMappingSpecMappingType()
 )
 @click.argument("output", type=click.Path(exists=False, file_okay=False, writable=True))
 def main(
-    dependencies: List[Path],
+    dependencies: list[Path],
     lionweb_version: LionWebVersion,
     lionweb_language: Path,
     language_packages: tuple[LanguageMappingSpec, ...],
@@ -169,24 +168,21 @@ def main(
         $ python -m lionweb.generation.generator -d deps.json input.json output/
         $ python -m lionweb.generation.generator --lp "MyLang=myapp.lang" input.json output/
     """
-    from lionweb.generation.deserializer_generation import \
-        DeserializerGenerator
+    from lionweb.generation.deserializer_generation import DeserializerGenerator
 
     serialization = create_standard_json_serialization(lionweb_version)
 
     for dep in dependencies:
         click.echo(f"Processing dependency {dep}")
-        with open(file=dep, mode="r", encoding="utf-8") as f:
+        with open(file=dep, encoding="utf-8") as f:
             content = f.read()
-            language = cast(
-                Language, serialization.deserialize_string_to_nodes(content)[0]
-            )
+            language = cast(Language, serialization.deserialize_string_to_nodes(content)[0])
             serialization.register_language(language=language)
             serialization.classifier_resolver.register_language(language)
             serialization.instance_resolver.add_tree(language)
 
     click.echo(f"📄 Processing file: {lionweb_language}")
-    with open(lionweb_language, "r", encoding="utf-8") as f:
+    with open(lionweb_language, encoding="utf-8") as f:
         content = f.read()
         language = cast(Language, serialization.deserialize_string_to_nodes(content)[0])
     LanguageGenerator(language_packages, primitive_types).language_generation(

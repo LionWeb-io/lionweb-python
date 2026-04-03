@@ -7,7 +7,6 @@ from lionweb.language.property import Property
 
 
 class ConceptTest(unittest.TestCase):
-
     def test_a_concept_is_non_abstract_by_default(self):
         c = Concept()
         self.assertEqual(False, c.abstract)

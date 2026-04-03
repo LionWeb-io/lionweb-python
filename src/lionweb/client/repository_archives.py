@@ -4,9 +4,7 @@ from lionweb.client import BulkImport, Client
 from lionweb.serialization import LowLevelJsonSerialization
 
 
-def load_repository_archive(
-    client: Client, archive_path: str, upload_threshold=250_000
-):
+def load_repository_archive(client: Client, archive_path: str, upload_threshold=250_000):
     import time
 
     def upload(bulk_import: BulkImport) -> int:

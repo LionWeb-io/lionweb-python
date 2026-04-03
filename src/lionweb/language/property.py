@@ -17,13 +17,13 @@ class Property(Feature["Property"]):
     def create_optional(**kwargs) -> "Property":
         from lionweb.lionweb_version import LionWebVersion
 
-        lion_web_version: Optional[LionWebVersion] = LionWebVersion.current_version()
+        lion_web_version: LionWebVersion | None = LionWebVersion.current_version()
         if "lionweb_version" in kwargs:
             lion_web_version = kwargs["lionweb_version"]
-        name: Optional[str] = kwargs["name"]
+        name: str | None = kwargs["name"]
         from lionweb.language.data_type import DataType
 
-        type: Optional[DataType] = kwargs["type"]
+        type: DataType | None = kwargs["type"]
         id = None
         if "id" in kwargs:
             id = kwargs["id"]
@@ -45,10 +45,10 @@ class Property(Feature["Property"]):
     @staticmethod
     def create_required(
         lion_web_version: Optional["LionWebVersion"] = None,
-        name: Optional[str] = None,
+        name: str | None = None,
         type: Optional["DataType"] = None,
-        id: Optional[str] = None,
-        key: Optional[str] = None,
+        id: str | None = None,
+        key: str | None = None,
     ) -> "Property":
         if id is not None and not isinstance(id, str):
             raise ValueError("id should not be null")
@@ -66,15 +66,13 @@ class Property(Feature["Property"]):
     def __init__(
         self,
         lion_web_version: Optional["LionWebVersion"] = None,
-        name: Optional[str] = None,
+        name: str | None = None,
         container: Optional["Classifier"] = None,
-        id: Optional[str] = None,
-        key: Optional[str] = None,
+        id: str | None = None,
+        key: str | None = None,
         type: Optional["DataType"] = None,
     ):
-        super().__init__(
-            lion_web_version=lion_web_version, name=name, container=container, id=id
-        )
+        super().__init__(lion_web_version=lion_web_version, name=name, container=container, id=id)
         if key:
             self.key = key
         if type:
@@ -84,14 +82,13 @@ class Property(Feature["Property"]):
     def type(self) -> Optional["DataType"]:
         from lionweb.language.data_type import DataType
 
-        return cast(Optional[DataType], self.get_reference_single_value("type"))
+        return cast(DataType | None, self.get_reference_single_value("type"))
 
     @type.setter
     def type(self, type: Optional["DataType"]) -> None:
         if type is None:
             self.set_reference_single_value(link_name="type", value=None)
         else:
-
             from lionweb.model.classifier_instance_utils import reference_to
 
             self.set_reference_single_value("type", reference_to(type))
@@ -105,11 +102,11 @@ class Property(Feature["Property"]):
         self.set_property_value(property="optional", value=value)
 
     @property
-    def key(self) -> Optional[str]:
-        return cast(Optional[str], self.get_property_value(property="key"))
+    def key(self) -> str | None:
+        return cast(str | None, self.get_property_value(property="key"))
 
     @key.setter
-    def key(self, value: Optional[str]) -> None:
+    def key(self, value: str | None) -> None:
         self.set_property_value(property="key", value=value)
 
     def __str__(self) -> str:

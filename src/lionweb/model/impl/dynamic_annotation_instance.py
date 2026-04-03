@@ -5,10 +5,8 @@ if TYPE_CHECKING:
 
 from lionweb.model.annotation_instance import AnnotationInstance
 from lionweb.model.classifier_instance import ClassifierInstance
-from lionweb.model.impl.abstract_classifier_instance import \
-    AbstractClassifierInstance
-from lionweb.model.impl.dynamic_classifier_instance import \
-    DynamicClassifierInstance
+from lionweb.model.impl.abstract_classifier_instance import AbstractClassifierInstance
+from lionweb.model.impl.dynamic_classifier_instance import DynamicClassifierInstance
 
 
 class DynamicAnnotationInstance(DynamicClassifierInstance, AnnotationInstance):
@@ -16,22 +14,22 @@ class DynamicAnnotationInstance(DynamicClassifierInstance, AnnotationInstance):
         self,
         id: str,
         annotation: Optional["Annotation"] = None,
-        annotated: Optional[ClassifierInstance] = None,
+        annotated: ClassifierInstance | None = None,
     ):
         super().__init__()
         self._id = id
         self.annotation = annotation
-        self.annotated: Optional[ClassifierInstance] = None
+        self.annotated: ClassifierInstance | None = None
         if annotated:
             self.set_annotated(annotated)
 
-    def get_id(self) -> Optional[str]:
+    def get_id(self) -> str | None:
         return self._id
 
     def set_annotation(self, annotation: "Annotation"):
         self.annotation = annotation
 
-    def set_annotated(self, annotated: Optional[ClassifierInstance]):
+    def set_annotated(self, annotated: ClassifierInstance | None):
         from lionweb.model.impl.dynamic_node import DynamicNode
 
         if annotated == self.annotated:
@@ -50,7 +48,7 @@ class DynamicAnnotationInstance(DynamicClassifierInstance, AnnotationInstance):
 
         return cast(Annotation, self.annotation)
 
-    def get_parent(self) -> Optional[ClassifierInstance]:
+    def get_parent(self) -> ClassifierInstance | None:
         return self.annotated
 
     def __eq__(self, other):
@@ -71,4 +69,6 @@ class DynamicAnnotationInstance(DynamicClassifierInstance, AnnotationInstance):
 
     def __str__(self):
         annotated_desc = self.annotated.id if self.annotated else None
-        return f"DynamicAnnotationInstance{{annotation={self.annotation}, annotated={annotated_desc}}}"
+        return (
+            f"DynamicAnnotationInstance{{annotation={self.annotation}, annotated={annotated_desc}}}"
+        )

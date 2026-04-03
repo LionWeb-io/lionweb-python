@@ -1,20 +1,19 @@
 import random
-from typing import List, Optional
+from typing import Optional
 
 from lionweb.language import Containment
 from lionweb.language.reference import Reference
 from lionweb.model.annotation_instance import AnnotationInstance
-from lionweb.model.impl.abstract_classifier_instance import \
-    AbstractClassifierInstance
+from lionweb.model.impl.abstract_classifier_instance import AbstractClassifierInstance
 from lionweb.model.node import Node
 from lionweb.model.reference_value import ReferenceValue
 
 
 class SimpleNode(AbstractClassifierInstance, Node):
     def __init__(self):
-        self._id: Optional[str] = None
-        self.parent: Optional["SimpleNode"] = None
-        self.annotations: List["AnnotationInstance"] = []
+        self._id: str | None = None
+        self.parent: SimpleNode | None = None
+        self.annotations: list[AnnotationInstance] = []
 
     def assign_random_id(self):
         random_id = f"id_{abs(random.getrandbits(64))}"
@@ -26,13 +25,13 @@ class SimpleNode(AbstractClassifierInstance, Node):
     def set_parent(self, parent: "SimpleNode"):
         self.parent = parent
 
-    def get_id(self) -> Optional[str]:
+    def get_id(self) -> str | None:
         return self._id
 
     def get_parent(self) -> Optional["SimpleNode"]:
         return self.parent
 
-    def get_annotations(self) -> List["AnnotationInstance"]:
+    def get_annotations(self) -> list["AnnotationInstance"]:
         return self.annotations
 
     def get_containment_feature(self):
@@ -49,7 +48,7 @@ class SimpleNode(AbstractClassifierInstance, Node):
     def set_property_value(self, property, value):
         raise NotImplementedError()
 
-    def get_children(self, containment: Optional[Containment] = None):
+    def get_children(self, containment: Containment | None = None):
         if containment is None:
             from lionweb.model.classifier_instance_utils import get_children
 
@@ -67,14 +66,12 @@ class SimpleNode(AbstractClassifierInstance, Node):
     def remove_child(self, node):
         raise NotImplementedError()
 
-    def get_reference_values(self, reference: Reference) -> List["ReferenceValue"]:
+    def get_reference_values(self, reference: Reference) -> list["ReferenceValue"]:
         if reference not in self.get_classifier().all_references():
             raise ValueError("Reference not belonging to this concept")
         return self.concrete_get_reference_values(reference)
 
-    def concrete_get_reference_values(
-        self, reference: Reference
-    ) -> List["ReferenceValue"]:
+    def concrete_get_reference_values(self, reference: Reference) -> list["ReferenceValue"]:
         raise NotImplementedError(f"Reference {reference} not yet supported")
 
     def add_reference_value(self, reference, referred_node: Optional["ReferenceValue"]):
@@ -82,9 +79,7 @@ class SimpleNode(AbstractClassifierInstance, Node):
             raise ValueError("Reference not belonging to this concept")
         self.concrete_add_reference_value(reference, referred_node)
 
-    def concrete_add_reference_value(
-        self, reference, referred_node: Optional["ReferenceValue"]
-    ):
+    def concrete_add_reference_value(self, reference, referred_node: Optional["ReferenceValue"]):
         raise NotImplementedError(f"Reference {reference} not yet supported")
 
     def get_root(self):
@@ -93,13 +88,11 @@ class SimpleNode(AbstractClassifierInstance, Node):
     def remove_child_by_index(self, containment, index: int):
         raise NotImplementedError()
 
-    def remove_reference_value(
-        self, reference, reference_value: Optional["ReferenceValue"] = None
-    ):
+    def remove_reference_value(self, reference, reference_value: Optional["ReferenceValue"] = None):
         raise NotImplementedError()
 
     def remove_reference_value_by_index(self, reference, index: int):
         raise NotImplementedError()
 
-    def set_reference_values(self, reference, values: List["ReferenceValue"]):
+    def set_reference_values(self, reference, values: list["ReferenceValue"]):
         raise NotImplementedError()

@@ -3,14 +3,12 @@ from enum import Enum
 
 from lionweb.language import Annotation, Concept, Language, Property
 from lionweb.language.lioncore_builtins import LionCoreBuiltins
-from lionweb.model.impl.dynamic_annotation_instance import \
-    DynamicAnnotationInstance
+from lionweb.model.impl.dynamic_annotation_instance import DynamicAnnotationInstance
 from lionweb.model.impl.dynamic_node import DynamicNode
 from lionweb.serialization import create_standard_protobuf_serialization
 from lionweb.serialization.data import LanguageVersion
 from lionweb.serialization.data.metapointer import MetaPointer
-from lionweb.serialization.deserialization_exception import \
-    DeserializationException
+from lionweb.serialization.deserialization_exception import DeserializationException
 from lionweb.serialization.protobuf_serialization import ProtoBufSerialization
 
 from .refsmm.container_node import ContainerNode
@@ -28,13 +26,10 @@ class MyEnum(Enum):
 
 
 class ProtobufSerializationTest(SerializationTest):
-
     def _prepare_deserialization_of_simple_math(
         self, protobuf_serialization: ProtoBufSerialization
     ):
-        protobuf_serialization.classifier_resolver.register_language(
-            SimpleMathLanguage.INSTANCE
-        )
+        protobuf_serialization.classifier_resolver.register_language(SimpleMathLanguage.INSTANCE)
 
         # Register custom deserializer for IntLiteral
         def deserialize_int_literal(
@@ -48,9 +43,7 @@ class ProtobufSerializationTest(SerializationTest):
         )
 
         # Register custom deserializer for Sum
-        def deserialize_sum(
-            concept, serialized_node, deserialized_nodes_by_id, properties_values
-        ):
+        def deserialize_sum(concept, serialized_node, deserialized_nodes_by_id, properties_values):
             left_scv = next(
                 c
                 for c in serialized_node.containments
@@ -78,9 +71,7 @@ class ProtobufSerializationTest(SerializationTest):
         serialized = pb.serialize_trees_to_bytes([sum1, sum2])
 
         self._prepare_deserialization_of_simple_math(pb)
-        deserialized = [
-            n for n in pb.deserialize_bytes_to_nodes(serialized) if isinstance(n, Sum)
-        ]
+        deserialized = [n for n in pb.deserialize_bytes_to_nodes(serialized) if isinstance(n, Sum)]
         self.assertEqual(deserialized, [sum1, sum2])
 
     def test_deserialize_nodes_without_ids_in_the_right_order(self):
@@ -147,7 +138,10 @@ class ProtobufSerializationTest(SerializationTest):
         js.classifier_resolver.register_language(RefsLanguage.INSTANCE)
         js.instantiator.register_custom_deserializer(
             RefsLanguage.CONTAINER_NODE.id,
-            lambda concept, serialized_node, deserialized_nodes_by_id, properties_values: ContainerNode(
+            lambda concept,
+            serialized_node,
+            deserialized_nodes_by_id,
+            properties_values: ContainerNode(
                 properties_values.get(concept.get_containment_by_name("contained")),
                 serialized_node.id,
             ),
@@ -220,9 +214,7 @@ class ProtobufSerializationTest(SerializationTest):
         my_instance = DynamicNode("instance-a", my_concept)
         json_ser = create_standard_protobuf_serialization()
         json_ser.keep_null_properties = True
-        serialized_chunk = json_ser.serialize_nodes_to_serialization_chunk(
-            [my_instance]
-        )
+        serialized_chunk = json_ser.serialize_nodes_to_serialization_chunk([my_instance])
 
         self.assertEqual(1, len(serialized_chunk.get_classifier_instances()))
         serialized_classifier_instance = serialized_chunk.get_classifier_instances()[0]
@@ -262,9 +254,7 @@ class ProtobufSerializationTest(SerializationTest):
 
     def test_serialize_language(self):
         meta_lang = Language("metaLang", "metaLang", "metaLang", "1")
-        meta_ann = Annotation(
-            language=meta_lang, name="metaAnn", id="metaAnn", key="metaAnn"
-        )
+        meta_ann = Annotation(language=meta_lang, name="metaAnn", id="metaAnn", key="metaAnn")
 
         lang = Language("l", "l", "l", "1")
         Annotation(language=lang, name="a1", key="a1", id="a1")
@@ -307,8 +297,7 @@ class ProtobufSerializationTest(SerializationTest):
         )
 
         n1 = DynamicNode("n1", c)
-        from lionweb.model.classifier_instance_utils import \
-            set_property_value_by_name
+        from lionweb.model.classifier_instance_utils import set_property_value_by_name
 
         set_property_value_by_name(n1, "foo", "abc")
 
@@ -318,8 +307,7 @@ class ProtobufSerializationTest(SerializationTest):
         self.assertEqual(2, len(serialized_chunk.get_languages()))
         self.assertTrue(
             any(
-                entry.get_key() == lang.get_key()
-                and entry.get_version() == lang.get_version()
+                entry.get_key() == lang.get_key() and entry.get_version() == lang.get_version()
                 for entry in serialized_chunk.get_languages()
             )
         )

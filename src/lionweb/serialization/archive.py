@@ -1,6 +1,6 @@
 from collections.abc import Callable
 from os import PathLike
-from typing import TYPE_CHECKING, List
+from typing import TYPE_CHECKING
 
 from lionweb import LionWebVersion
 from lionweb.serialization.protobuf_serialization import ProtoBufSerialization
@@ -29,7 +29,7 @@ def process_archive(
             i += 1
 
 
-def load_archive(filename) -> List["SerializationChunk"]:
+def load_archive(filename) -> list["SerializationChunk"]:
     chunks = []
     process_archive(filename, lambda i, n, chunk: chunks.append(chunk))
     return chunks

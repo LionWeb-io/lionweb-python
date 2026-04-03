@@ -13,9 +13,9 @@ class Reference(Link["Reference"]):
     @staticmethod
     def create_optional(
         lion_web_version: Optional["LionWebVersion"] = None,
-        name: Optional[str] = None,
+        name: str | None = None,
         type: Optional["Classifier"] = None,
-        id: Optional[str] = None,
+        id: str | None = None,
     ) -> "Reference":
         if lion_web_version is None:
             from lionweb.lionweb_version import LionWebVersion
@@ -31,9 +31,9 @@ class Reference(Link["Reference"]):
     @staticmethod
     def create_required(
         lion_web_version: Optional["LionWebVersion"] = None,
-        name: Optional[str] = None,
+        name: str | None = None,
         type: Optional["Classifier"] = None,
-        id: Optional[str] = None,
+        id: str | None = None,
     ) -> "Reference":
         from lionweb.lionweb_version import LionWebVersion
 
@@ -50,9 +50,9 @@ class Reference(Link["Reference"]):
     @staticmethod
     def create_multiple(
         lion_web_version: Optional["LionWebVersion"] = None,
-        name: Optional[str] = None,
+        name: str | None = None,
         type: Optional["Classifier"] = None,
-        id: Optional[str] = None,
+        id: str | None = None,
     ) -> "Reference":
         from lionweb.lionweb_version import LionWebVersion
 
@@ -68,7 +68,7 @@ class Reference(Link["Reference"]):
 
     @staticmethod
     def create_multiple_and_required(
-        name: Optional[str] = None, type: Optional["Classifier"] = None
+        name: str | None = None, type: Optional["Classifier"] = None
     ) -> "Reference":
         reference = Reference(name=name)
         reference.set_optional(False)
@@ -79,10 +79,10 @@ class Reference(Link["Reference"]):
     def __init__(
         self,
         lion_web_version: Optional["LionWebVersion"] = None,
-        name: Optional[str] = None,
+        name: str | None = None,
         container: Optional["Classifier"] = None,
-        id: Optional[str] = None,
-        key: Optional[str] = None,
+        id: str | None = None,
+        key: str | None = None,
         type: Optional["Classifier"] = None,
         multiple: bool = False,
         optional: bool = False,
@@ -100,9 +100,7 @@ class Reference(Link["Reference"]):
                 id=id,
             )
         elif lion_web_version is not None:
-            super().__init__(
-                lion_web_version=lion_web_version, name=name, container=container
-            )
+            super().__init__(lion_web_version=lion_web_version, name=name, container=container)
         elif id is not None:
             super().__init__(name=name, id=id)
         else:

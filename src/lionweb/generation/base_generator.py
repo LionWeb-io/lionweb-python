@@ -1,8 +1,7 @@
 import ast
-from typing import Any, Optional
+from typing import Any
 
-from lionweb.generation.configuration import (LanguageMappingSpec,
-                                              PrimitiveTypeMappingSpec)
+from lionweb.generation.configuration import LanguageMappingSpec, PrimitiveTypeMappingSpec
 from lionweb.generation.naming_utils import to_snake_case
 from lionweb.language import Classifier, DataType, Enumeration, Language
 
@@ -71,7 +70,7 @@ class BaseGenerator:
         return None
 
     def _primitive_type_lookup_exp(
-        self, package_str: str, primitive_type_name: Optional[str]
+        self, package_str: str, primitive_type_name: str | None
     ) -> ast.expr:
         """
         Looks up an expression to retrieve a primitive type based on the provided package name and primitive type name.

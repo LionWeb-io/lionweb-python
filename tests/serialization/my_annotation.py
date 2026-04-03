@@ -1,8 +1,6 @@
-from lionweb.language import (Annotation, Concept, Containment, Language,
-                              Property)
+from lionweb.language import Annotation, Concept, Containment, Language, Property
 from lionweb.language.lioncore_builtins import LionCoreBuiltins
-from lionweb.model.impl.dynamic_annotation_instance import \
-    DynamicAnnotationInstance
+from lionweb.model.impl.dynamic_annotation_instance import DynamicAnnotationInstance
 
 
 class MyAnnotation(DynamicAnnotationInstance):
@@ -21,13 +19,7 @@ class MyAnnotation(DynamicAnnotationInstance):
         key="ma",
     )
 
-    VALUE = (
-        Concept()
-        .set_id("Value-id")
-        .set_key("Value-key")
-        .set_name("Value")
-        .set_parent(LANGUAGE)
-    )
+    VALUE = Concept().set_id("Value-id").set_key("Value-key").set_name("Value").set_parent(LANGUAGE)
 
     ANNOTATED = (
         Concept()

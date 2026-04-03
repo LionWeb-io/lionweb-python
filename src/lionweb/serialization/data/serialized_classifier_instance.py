@@ -1,29 +1,28 @@
 from dataclasses import dataclass, field
-from typing import List, Optional
 
 from lionweb.serialization.data.metapointer import MetaPointer
-from lionweb.serialization.data.serialized_containment_value import \
-    SerializedContainmentValue
-from lionweb.serialization.data.serialized_property_value import \
-    SerializedPropertyValue
+from lionweb.serialization.data.serialized_containment_value import SerializedContainmentValue
+from lionweb.serialization.data.serialized_property_value import SerializedPropertyValue
 from lionweb.serialization.data.serialized_reference_value import (
-    SerializedReferenceValue, SerializedReferenceValueEntry)
+    SerializedReferenceValue,
+    SerializedReferenceValueEntry,
+)
 
 
 @dataclass
 class SerializedClassifierInstance:
-    id: Optional[str]
+    id: str | None
     classifier: MetaPointer
-    properties: List[SerializedPropertyValue] = field(default_factory=list)
-    containments: List[SerializedContainmentValue] = field(default_factory=list)
-    references: List[SerializedReferenceValue] = field(default_factory=list)
-    annotations: List[Optional[str]] = field(default_factory=list)
-    parent_node_id: Optional[str] = None
+    properties: list[SerializedPropertyValue] = field(default_factory=list)
+    containments: list[SerializedContainmentValue] = field(default_factory=list)
+    references: list[SerializedReferenceValue] = field(default_factory=list)
+    annotations: list[str | None] = field(default_factory=list)
+    parent_node_id: str | None = None
 
     def get_parent_node_id(self):
         return self.parent_node_id
 
-    def set_parent_node_id(self, parent_node_id: Optional[str]):
+    def set_parent_node_id(self, parent_node_id: str | None):
         self.parent_node_id = parent_node_id
 
     def get_containments(self):
@@ -53,29 +52,19 @@ class SerializedClassifierInstance:
     def set_property_value(self, property_meta_pointer, serialized_value):
         from .serialized_property_value import SerializedPropertyValue
 
-        self.properties.append(
-            SerializedPropertyValue(property_meta_pointer, serialized_value)
-        )
+        self.properties.append(SerializedPropertyValue(property_meta_pointer, serialized_value))
 
-    def add_children(
-        self, containment_meta_pointer: MetaPointer, children_ids: List[Optional[str]]
-    ):
+    def add_children(self, containment_meta_pointer: MetaPointer, children_ids: list[str | None]):
         from .serialized_containment_value import SerializedContainmentValue
 
-        self.containments.append(
-            SerializedContainmentValue(containment_meta_pointer, children_ids)
-        )
+        self.containments.append(SerializedContainmentValue(containment_meta_pointer, children_ids))
 
-    def add_reference_value_entries(
-        self, reference_meta_pointer, reference_values: List
-    ):
+    def add_reference_value_entries(self, reference_meta_pointer, reference_values: list):
         from .serialized_reference_value import SerializedReferenceValue
 
-        self.references.append(
-            SerializedReferenceValue(reference_meta_pointer, reference_values)
-        )
+        self.references.append(SerializedReferenceValue(reference_meta_pointer, reference_values))
 
-    def get_property_value_by_key(self, property_key: str) -> Optional[str]:
+    def get_property_value_by_key(self, property_key: str) -> str | None:
         for pv in self.properties:
             mp = pv.get_meta_pointer()
             if mp:
@@ -83,7 +72,7 @@ class SerializedClassifierInstance:
                     return pv.get_value()
         return None
 
-    def get_property_value(self, property_meta_pointer) -> Optional[str]:
+    def get_property_value(self, property_meta_pointer) -> str | None:
         for pv in self.properties:
             if property_meta_pointer == pv.get_meta_pointer():
                 return pv.get_value()
@@ -91,38 +80,34 @@ class SerializedClassifierInstance:
 
     def get_reference_values_by_key(
         self, reference_key: str
-    ) -> Optional[List[SerializedReferenceValueEntry]]:
+    ) -> list[SerializedReferenceValueEntry] | None:
         for rv in self.references:
             if rv.get_meta_pointer().key == reference_key:
                 return rv.get_value()
         return None
 
-    def get_reference_values(self, reference_meta_pointer) -> List:
+    def get_reference_values(self, reference_meta_pointer) -> list:
         for rv in self.references:
             if reference_meta_pointer == rv.get_meta_pointer():
                 return rv.get_value()
         return []
 
-    def get_containment_values_by_key(
-        self, containment_key: str
-    ) -> List[Optional[str]]:
+    def get_containment_values_by_key(self, containment_key: str) -> list[str | None]:
         for rv in self.containments:
             if rv.get_meta_pointer().key == containment_key:
                 return rv.get_children_ids()
         return []
 
-    def get_containment_values(
-        self, containment_meta_pointer: MetaPointer
-    ) -> List[Optional[str]]:
+    def get_containment_values(self, containment_meta_pointer: MetaPointer) -> list[str | None]:
         for cv in self.containments:
             if containment_meta_pointer == cv.get_meta_pointer():
                 return cv.get_children_ids()
         return []
 
-    def set_annotations(self, annotation_ids: List[Optional[str]]):
+    def set_annotations(self, annotation_ids: list[str | None]):
         self.annotations = annotation_ids[:]
 
-    def add_annotation(self, annotation_id: Optional[str]):
+    def add_annotation(self, annotation_id: str | None):
         self.annotations.append(annotation_id)
 
     def __eq__(self, other):

@@ -1,4 +1,4 @@
-from typing import TYPE_CHECKING, List, Optional
+from typing import TYPE_CHECKING, Optional
 
 if TYPE_CHECKING:
     from lionweb.language.concept import Concept
@@ -22,10 +22,10 @@ class StructuredDataType(DataType, NamespaceProvider):
 
     def __init__(
         self,
-        language: Optional[Language] = None,
-        name: Optional[str] = None,
-        id: Optional[str] = None,
-        key: Optional[str] = None,
+        language: Language | None = None,
+        name: str | None = None,
+        id: str | None = None,
+        key: str | None = None,
     ):
         super().__init__(language=language, name=name)
         if id:
@@ -40,7 +40,7 @@ class StructuredDataType(DataType, NamespaceProvider):
         field.set_parent(self)
         return self
 
-    def get_fields(self) -> List["Field"]:
+    def get_fields(self) -> list["Field"]:
         return self.get_containment_multiple_value("fields")
 
     def namespace_qualifier(self) -> str:

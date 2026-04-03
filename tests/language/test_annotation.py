@@ -1,7 +1,6 @@
 import unittest
 
-from lionweb.language import (Annotation, Concept, Containment, Interface,
-                              Language, Property)
+from lionweb.language import Annotation, Concept, Containment, Interface, Language, Property
 from lionweb.model.classifier_instance_utils import get_referred_nodes
 from lionweb.model.reference_value import ReferenceValue
 from lionweb.self.lioncore import LionCore
@@ -10,15 +9,12 @@ from .base_test import BaseTest
 
 
 class AnnotationTest(BaseTest):
-
     def test_get_property_value_name(self):
         language = Language()
         annotation = Annotation(language=language, name="MyAnnotation")
         name_prop = LionCore.get_annotation().get_property_by_name("name")
         self.assertIsNotNone(name_prop)
-        self.assertEqual(
-            "MyAnnotation", annotation.get_property_value(property=name_prop)
-        )
+        self.assertEqual("MyAnnotation", annotation.get_property_value(property=name_prop))
 
     def test_set_property_value_name(self):
         language = Language()
@@ -64,30 +60,22 @@ class AnnotationTest(BaseTest):
         annotation = Annotation(language=language, name="MyAnnotation")
         self.assertEqual(
             [],
-            annotation.get_children(
-                LionCore.get_annotation().get_containment_by_name("features")
-            ),
+            annotation.get_children(LionCore.get_annotation().get_containment_by_name("features")),
         )
 
         prop = Property()
         annotation.add_feature(prop)
         self.assertEqual(
             [prop],
-            annotation.get_children(
-                LionCore.get_annotation().get_containment_by_name("features")
-            ),
+            annotation.get_children(LionCore.get_annotation().get_containment_by_name("features")),
         )
 
     def test_annotates(self):
         language = Language(name="LangFoo", id="lf", key="lf")
         my_concept = Concept(language=language, name="MyConcept", id="c", key="c")
-        other_annotation = Annotation(
-            language=language, name="OtherAnnotation", id="oa", key="oa"
-        )
+        other_annotation = Annotation(language=language, name="OtherAnnotation", id="oa", key="oa")
         other_annotation.annotates = my_concept
-        super_annotation = Annotation(
-            language=language, name="SuperAnnotation", id="sa", key="sa"
-        )
+        super_annotation = Annotation(language=language, name="SuperAnnotation", id="sa", key="sa")
         super_annotation.annotates = my_concept
         my_ci = Interface(language=language, name="MyCI", id="ci", key="ci")
 
@@ -135,9 +123,7 @@ class AnnotationTest(BaseTest):
         self.assert_node_tree_is_valid(annotation)
         self.assert_language_is_valid(language)
 
-        annotation.add_feature(
-            Containment.create_optional("cont", my_concept, "cont", "cont-key")
-        )
+        annotation.add_feature(Containment.create_optional("cont", my_concept, "cont", "cont-key"))
         self.assert_node_tree_is_valid(annotation)
         self.assert_language_is_valid(language)
 

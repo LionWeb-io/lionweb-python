@@ -1,5 +1,5 @@
 import threading
-from typing import ClassVar, Optional, Self
+from typing import ClassVar, Self
 
 from lionweb.serialization.data.language_version import LanguageVersion
 
@@ -11,18 +11,16 @@ class MetaPointer:
     """
 
     # Class-level cache for interning instances
-    _instances: ClassVar[
-        dict[tuple[Optional[LanguageVersion], Optional[str]], "MetaPointer"]
-    ] = {}
+    _instances: ClassVar[dict[tuple[LanguageVersion | None, str | None], "MetaPointer"]] = {}
     _lock = threading.Lock()  # Thread-safe access to cache
 
-    _language_version: Optional[LanguageVersion]
-    _key: Optional[str]
+    _language_version: LanguageVersion | None
+    _key: str | None
 
     def __new__(
         cls,
-        language_version: Optional[LanguageVersion] = None,
-        key: Optional[str] = None,
+        language_version: LanguageVersion | None = None,
+        key: str | None = None,
     ):
         # Create cache key
         cache_key = (language_version, key)
@@ -41,8 +39,8 @@ class MetaPointer:
 
     def __init__(
         self,
-        language_version: Optional[LanguageVersion] = None,
-        key: Optional[str] = None,
+        language_version: LanguageVersion | None = None,
+        key: str | None = None,
     ):
         # no-op; kept for signature compatibility
         pass
@@ -50,8 +48,8 @@ class MetaPointer:
     @classmethod
     def of(
         cls,
-        language_version: Optional[LanguageVersion] = None,
-        key: Optional[str] = None,
+        language_version: LanguageVersion | None = None,
+        key: str | None = None,
     ) -> Self:
         """
         Factory method to get an interned MetaPointer instance.
@@ -64,9 +62,7 @@ class MetaPointer:
         """Create MetaPointer from a language entity."""
         language = entity.language if hasattr(entity, "language") else None
         language_version = (
-            LanguageVersion.of(language.get_key(), language.get_version())
-            if language
-            else None
+            LanguageVersion.of(language.get_key(), language.get_version()) if language else None
         )
         entity_key = entity.get_key() if hasattr(entity, "get_key") else entity.id
         return cls.of(language_version, entity_key)
@@ -75,9 +71,7 @@ class MetaPointer:
     def from_keyed(cls, keyed, language) -> "MetaPointer":
         """Create MetaPointer from a keyed object and language."""
         language_version = (
-            LanguageVersion.of(language.get_key(), language.get_version())
-            if language
-            else None
+            LanguageVersion.of(language.get_key(), language.get_version()) if language else None
         )
         entity_key = keyed.get_key() if hasattr(keyed, "get_key") else keyed.id
         return cls.of(language_version, entity_key)
@@ -85,46 +79,42 @@ class MetaPointer:
     @classmethod
     def from_feature(cls, feature) -> "MetaPointer":
         """Create MetaPointer from a feature."""
-        container = (
-            feature.get_container() if hasattr(feature, "get_container") else None
-        )
+        container = feature.get_container() if hasattr(feature, "get_container") else None
         language = container.language if container else None
         language_version = (
-            LanguageVersion.of(language.get_key(), language.get_version())
-            if language
-            else None
+            LanguageVersion.of(language.get_key(), language.get_version()) if language else None
         )
         feature_key = feature.get_key() if hasattr(feature, "get_key") else feature.id
         return cls.of(language_version, feature_key)
 
     @property
-    def language_version(self) -> Optional[LanguageVersion]:
+    def language_version(self) -> LanguageVersion | None:
         return self._language_version
 
     @property
-    def language(self) -> Optional[str]:
+    def language(self) -> str | None:
         if self._language_version is None:
             return None
         return self._language_version.key
 
     @property
-    def version(self) -> Optional[str]:
+    def version(self) -> str | None:
         if self._language_version is None:
             return None
         return self._language_version.version
 
     @property
-    def key(self) -> Optional[str]:
+    def key(self) -> str | None:
         return self._key
 
     # Backward compatibility properties
     @property
-    def language_key(self) -> Optional[str]:
+    def language_key(self) -> str | None:
         """Backward compatibility: get language key from LanguageVersion."""
         return self._language_version.key if self._language_version else None
 
     @property
-    def language_version_string(self) -> Optional[str]:
+    def language_version_string(self) -> str | None:
         """Backward compatibility: get language version string from LanguageVersion."""
         return self._language_version.version if self._language_version else None
 

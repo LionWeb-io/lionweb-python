@@ -1,25 +1,21 @@
-from typing import Any, Dict, List, Optional, Union, cast
+from typing import Any, cast
 
 from lionweb.serialization.data import LanguageVersion
 from lionweb.serialization.data.metapointer import MetaPointer
-from lionweb.serialization.data.serialized_reference_value import \
-    SerializedReferenceValueEntry
-from lionweb.serialization.deserialization_exception import \
-    DeserializationException
+from lionweb.serialization.data.serialized_reference_value import SerializedReferenceValueEntry
+from lionweb.serialization.deserialization_exception import DeserializationException
 from lionweb.serialization.low_level_json_serialization import JsonObject
 
 
 class SerializationUtils:
     @staticmethod
-    def get_as_string_or_none(element) -> Optional[str]:
+    def get_as_string_or_none(element) -> str | None:
         if element is None or element == "null":
             return None
         return str(element)
 
     @staticmethod
-    def try_to_get_string_property(
-        json_object: Dict, property_name: str
-    ) -> Optional[str]:
+    def try_to_get_string_property(json_object: dict, property_name: str) -> str | None:
         if property_name not in json_object:
             return None
         value = json_object.get(property_name)
@@ -29,17 +25,17 @@ class SerializationUtils:
 
     @staticmethod
     def try_to_get_meta_pointer_property(
-        json_object: Dict, property_name: str
-    ) -> Optional[MetaPointer]:
+        json_object: dict, property_name: str
+    ) -> MetaPointer | None:
         if property_name not in json_object:
             return None
         value = cast(dict[Any, Any], json_object.get(property_name))
-        language_k: Optional[str] = cast(
-            Optional[str],
+        language_k: str | None = cast(
+            str | None,
             SerializationUtils.try_to_get_string_property(value, "language"),
         )
-        language_v: Optional[str] = cast(
-            Optional[str],
+        language_v: str | None = cast(
+            str | None,
             SerializationUtils.try_to_get_string_property(value, "version"),
         )
         language_version = LanguageVersion(language_k, language_v)
@@ -53,12 +49,12 @@ class SerializationUtils:
     @staticmethod
     def try_to_get_array_of_ids(
         json_object: JsonObject, property_name: str
-    ) -> Optional[List[Optional[str]]]:
+    ) -> list[str | None] | None:
         if property_name not in json_object:
             return None
         value = json_object.get(property_name)
         if isinstance(value, list):
-            result: List[Optional[str]] = []
+            result: list[str | None] = []
             for e in value:
                 if e is None:
                     raise DeserializationException(
@@ -71,19 +67,17 @@ class SerializationUtils:
     @staticmethod
     def try_to_get_array_of_references_property(
         json_object: JsonObject, property_name: str
-    ) -> List[SerializedReferenceValueEntry]:
+    ) -> list[SerializedReferenceValueEntry]:
         if property_name not in json_object:
             return []
         value = json_object.get(property_name)
         if isinstance(value, list):
-            entries: List[SerializedReferenceValueEntry] = []
+            entries: list[SerializedReferenceValueEntry] = []
             for e in value:
                 if isinstance(e, dict):
                     entries.append(
                         SerializedReferenceValueEntry(
-                            reference=SerializationUtils.try_to_get_string_property(
-                                e, "reference"
-                            ),
+                            reference=SerializationUtils.try_to_get_string_property(e, "reference"),
                             resolve_info=SerializationUtils.try_to_get_string_property(
                                 e, "resolveInfo"
                             ),
@@ -93,13 +87,13 @@ class SerializationUtils:
         return []
 
     @staticmethod
-    def to_json_array(string_list: List[str]) -> List[str]:
+    def to_json_array(string_list: list[str]) -> list[str]:
         return string_list
 
     @staticmethod
     def to_json_array_of_reference_values(
-        entries: List[SerializedReferenceValueEntry],
-    ) -> List[Dict[str, Union[str, None]]]:
+        entries: list[SerializedReferenceValueEntry],
+    ) -> list[dict[str, str | None]]:
         json_array = []
         for entry in entries:
             entry_json = {

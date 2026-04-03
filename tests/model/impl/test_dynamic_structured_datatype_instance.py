@@ -1,16 +1,12 @@
 import unittest
 
-from serialization.my_node_with_structured_data_type import \
-    MyNodeWithStructuredDataType
+from serialization.my_node_with_structured_data_type import MyNodeWithStructuredDataType
 
-from lionweb.model.impl.dynamic_structured_datype_instance import \
-    DynamicStructuredDataTypeInstance
+from lionweb.model.impl.dynamic_structured_datype_instance import DynamicStructuredDataTypeInstance
 
 
 class TestDynamicStructuredDataTypeInstance(unittest.TestCase):
-
     def test_check_equality(self):
-
         sdt1 = DynamicStructuredDataTypeInstance(MyNodeWithStructuredDataType.POINT)
         sdt2 = DynamicStructuredDataTypeInstance(MyNodeWithStructuredDataType.POINT)
         sdt3 = DynamicStructuredDataTypeInstance(MyNodeWithStructuredDataType.ADDRESS)

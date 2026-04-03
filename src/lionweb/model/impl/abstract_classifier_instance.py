@@ -1,5 +1,5 @@
 from abc import ABC
-from typing import TYPE_CHECKING, Generic, List, Optional, TypeVar
+from typing import TYPE_CHECKING, Generic, Optional, TypeVar
 
 from lionweb.model.classifier_instance import ClassifierInstance
 
@@ -13,31 +13,27 @@ class AbstractClassifierInstance(Generic[T], ClassifierInstance[T], ABC):
         from lionweb.language.reference import Reference
         from lionweb.model.annotation_instance import AnnotationInstance
         from lionweb.model.has_settable_parent import HasSettableParent
-        from lionweb.model.impl.dynamic_annotation_instance import \
-            DynamicAnnotationInstance
+        from lionweb.model.impl.dynamic_annotation_instance import DynamicAnnotationInstance
         from lionweb.model.reference_value import ReferenceValue
 
     def __init__(self):
         from lionweb.model.annotation_instance import AnnotationInstance
 
-        self.annotations: List[AnnotationInstance] = []
+        self.annotations: list[AnnotationInstance] = []
 
     # Public methods for annotations
 
     def get_annotations(
         self, annotation: Optional["Annotation"] = None
-    ) -> List["AnnotationInstance"]:
+    ) -> list["AnnotationInstance"]:
         if annotation is None:
             return self.annotations
-        return [
-            a for a in self.annotations if a.get_annotation_definition() == annotation
-        ]
+        return [a for a in self.annotations if a.get_annotation_definition() == annotation]
 
     def add_annotation(self, instance: "AnnotationInstance") -> None:
         if instance in self.annotations:
             return
-        from lionweb.model.impl.dynamic_annotation_instance import \
-            DynamicAnnotationInstance
+        from lionweb.model.impl.dynamic_annotation_instance import DynamicAnnotationInstance
 
         if isinstance(instance, DynamicAnnotationInstance):
             instance.set_annotated(self)
@@ -48,8 +44,7 @@ class AbstractClassifierInstance(Generic[T], ClassifierInstance[T], ABC):
         if instance not in self.annotations:
             raise ValueError("Annotation instance not found")
         self.annotations.remove(instance)
-        from lionweb.model.impl.dynamic_annotation_instance import \
-            DynamicAnnotationInstance
+        from lionweb.model.impl.dynamic_annotation_instance import DynamicAnnotationInstance
 
         if isinstance(instance, DynamicAnnotationInstance):
             instance.set_annotated(None)
@@ -57,8 +52,7 @@ class AbstractClassifierInstance(Generic[T], ClassifierInstance[T], ABC):
     def try_to_remove_annotation(self, instance: "AnnotationInstance") -> None:
         if instance in self.annotations:
             self.annotations.remove(instance)
-            from lionweb.model.impl.dynamic_annotation_instance import \
-                DynamicAnnotationInstance
+            from lionweb.model.impl.dynamic_annotation_instance import DynamicAnnotationInstance
 
             if isinstance(instance, DynamicAnnotationInstance):
                 instance.set_annotated(None)
@@ -84,15 +78,11 @@ class AbstractClassifierInstance(Generic[T], ClassifierInstance[T], ABC):
         if index < len(children):
             del children[index]
         else:
-            raise ValueError(
-                f"Invalid index {index}, children count is {len(children)}"
-            )
+            raise ValueError(f"Invalid index {index}, children count is {len(children)}")
 
     # Public methods for references
 
-    def remove_reference_value_by_index(
-        self, reference: "Reference", index: int
-    ) -> None:
+    def remove_reference_value_by_index(self, reference: "Reference", index: int) -> None:
         if reference not in self.get_classifier().all_references():
             raise ValueError("Reference not belonging to this concept")
         del self.get_reference_values(reference)[index]
@@ -103,7 +93,5 @@ class AbstractClassifierInstance(Generic[T], ClassifierInstance[T], ABC):
         if reference not in self.get_classifier().all_references():
             raise ValueError("Reference not belonging to this concept")
         if reference_value not in self.get_reference_values(reference):
-            raise ValueError(
-                f"Reference value not found under reference {reference.get_name()}"
-            )
+            raise ValueError(f"Reference value not found under reference {reference.get_name()}")
         self.get_reference_values(reference).remove(reference_value)

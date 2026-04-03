@@ -1,5 +1,4 @@
 from abc import ABC, abstractmethod
-from typing import Optional
 
 from lionweb.language.inamed import INamed
 from lionweb.language.namespace_provider import NamespaceProvider
@@ -14,7 +13,7 @@ class NamespacedEntity(INamed, ABC):
     """
 
     @abstractmethod
-    def get_name(self) -> Optional[str]:
+    def get_name(self) -> str | None:
         pass
 
     def qualified_name(self) -> str:
@@ -27,5 +26,5 @@ class NamespacedEntity(INamed, ABC):
         return container.namespace_qualifier() + "." + name
 
     @abstractmethod
-    def get_container(self) -> Optional[NamespaceProvider]:
+    def get_container(self) -> NamespaceProvider | None:
         pass

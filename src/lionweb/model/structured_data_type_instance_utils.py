@@ -1,7 +1,4 @@
-from typing import Optional
-
-from lionweb.model.structured_data_type_instance import \
-    StructuredDataTypeInstance
+from lionweb.model.structured_data_type_instance import StructuredDataTypeInstance
 
 
 class StructuredDataTypeInstanceUtils:
@@ -36,7 +33,7 @@ class StructuredDataTypeInstanceUtils:
 
     @staticmethod
     def set_field_value_by_name(
-        instance: StructuredDataTypeInstance, field_name: str, value: Optional[object]
+        instance: StructuredDataTypeInstance, field_name: str, value: object | None
     ):
         """
         Set the field value by the field name.

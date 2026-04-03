@@ -1,17 +1,14 @@
-from typing import Dict, List, cast
+from typing import cast
 
 from lionweb.serialization.json_utils import JsonArray, JsonObject
 
 
 class SerializedJsonComparisonUtils:
-
     @staticmethod
     def assert_equivalent_lionweb_json(expected: JsonObject, actual: JsonObject):
         keys = {"serializationFormatVersion", "nodes", "languages"}
         if set(expected.keys()) != keys:
-            raise RuntimeError(
-                f"The expected object has irregular keys: {expected.keys()}"
-            )
+            raise RuntimeError(f"The expected object has irregular keys: {expected.keys()}")
         if set(actual.keys()) != keys:
             raise RuntimeError(f"The actual object has irregular keys: {actual.keys()}")
 
@@ -38,12 +35,10 @@ class SerializedJsonComparisonUtils:
             )
 
         expected_versions = {
-            cast(Dict, lang)["key"]: cast(Dict, lang)["version"]
-            for lang in expected_languages
+            cast(dict, lang)["key"]: cast(dict, lang)["version"] for lang in expected_languages
         }
         actual_versions = {
-            cast(Dict, lang)["key"]: cast(Dict, lang)["version"]
-            for lang in actual_languages
+            cast(dict, lang)["key"]: cast(dict, lang)["version"] for lang in actual_languages
         }
 
         if expected_versions != actual_versions:
@@ -90,9 +85,7 @@ class SerializedJsonComparisonUtils:
         missing_keys = expected_keys - actual_keys
 
         if unexpected_keys:
-            raise AssertionError(
-                f"({context}) Unexpected keys found: {unexpected_keys}"
-            )
+            raise AssertionError(f"({context}) Unexpected keys found: {unexpected_keys}")
         if missing_keys:
             raise AssertionError(f"({context}) Missing keys found: {missing_keys}")
 
@@ -108,14 +101,10 @@ class SerializedJsonComparisonUtils:
                     f"{key.capitalize()} of {context}",
                 )
             else:
-                raise AssertionError(
-                    f"({context}) unexpected top-level key found: {key}"
-                )
+                raise AssertionError(f"({context}) unexpected top-level key found: {key}")
 
     @staticmethod
-    def assert_equivalent_unordered_arrays(
-        expected: List[dict], actual: List[dict], context: str
-    ):
+    def assert_equivalent_unordered_arrays(expected: list[dict], actual: list[dict], context: str):
         if len(expected) != len(actual):
             raise AssertionError(
                 f"({context}) Arrays with different sizes: expected={len(expected)} and actual={len(actual)}"
@@ -151,20 +140,14 @@ class SerializedJsonComparisonUtils:
 
     @staticmethod
     def assert_equivalent_objects(expected: dict, actual: dict, context: str):
-        actual_meaningful_keys = {
-            k for k, v in actual.items() if v not in ({}, [], None)
-        }
-        expected_meaningful_keys = {
-            k for k, v in expected.items() if v not in ({}, [], None)
-        }
+        actual_meaningful_keys = {k for k, v in actual.items() if v not in ({}, [], None)}
+        expected_meaningful_keys = {k for k, v in expected.items() if v not in ({}, [], None)}
 
         unexpected_keys = actual_meaningful_keys - expected_meaningful_keys
         missing_keys = expected_meaningful_keys - actual_meaningful_keys
 
         if unexpected_keys:
-            raise AssertionError(
-                f"({context}) Unexpected keys found: {unexpected_keys}"
-            )
+            raise AssertionError(f"({context}) Unexpected keys found: {unexpected_keys}")
         if missing_keys:
             raise AssertionError(f"({context}) Missing keys found: {missing_keys}")
 

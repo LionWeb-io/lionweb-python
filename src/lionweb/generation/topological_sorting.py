@@ -1,12 +1,12 @@
-from typing import Dict, List, cast
+from typing import cast
 
 from lionweb.language import Classifier, Concept, Containment, Interface
 
 
 def _identify_topological_deps(
-    classifiers: List[Classifier], id_to_concept
-) -> Dict[str, List[str]]:
-    graph: Dict[str, List[str]] = {cast(str, el.get_id()): [] for el in classifiers}
+    classifiers: list[Classifier], id_to_concept
+) -> dict[str, list[str]]:
+    graph: dict[str, list[str]] = {cast(str, el.get_id()): [] for el in classifiers}
     for c in classifiers:
         if isinstance(c, Concept):
             c_id = cast(str, c.get_id())
@@ -34,11 +34,11 @@ def _identify_topological_deps(
     return graph
 
 
-def topological_classifiers_sort(classifiers: List[Classifier]) -> List[Classifier]:
+def topological_classifiers_sort(classifiers: list[Classifier]) -> list[Classifier]:
     id_to_concept = {el.get_id(): el for el in classifiers}
 
     # Build graph edges: child -> [parents]
-    graph: Dict[str, List[str]] = _identify_topological_deps(classifiers, id_to_concept)
+    graph: dict[str, list[str]] = _identify_topological_deps(classifiers, id_to_concept)
 
     visited = set()
     sorted_list = []

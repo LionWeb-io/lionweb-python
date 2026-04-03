@@ -1,7 +1,7 @@
 import ast
 import keyword
 import re
-from typing import Optional, cast
+from typing import cast
 
 from lionweb.language import Feature
 
@@ -27,7 +27,7 @@ def calculate_field_name(feature: Feature) -> str:
     return field_name
 
 
-def to_snake_case(name: Optional[str]) -> str:
+def to_snake_case(name: str | None) -> str:
     if not name:
         raise ValueError("Name should not be None")
     # Replace capital letters with _lowercase, except at the beginning
@@ -36,7 +36,7 @@ def to_snake_case(name: Optional[str]) -> str:
     return name.lower()
 
 
-def to_var_name(name: Optional[str]) -> str:
+def to_var_name(name: str | None) -> str:
     """Convert a name to snake_case while avoiding Python keywords."""
     import keyword
     import re
@@ -57,14 +57,14 @@ def to_var_name(name: Optional[str]) -> str:
     return snake_case
 
 
-def to_type_name(name: Optional[str]) -> str:
+def to_type_name(name: str | None) -> str:
     """Convert a name to snake_case while avoiding Python keywords."""
     if name is None:
         raise ValueError("Name should not be None")
     return name[0].upper() + name[1:]
 
 
-def getter_name(name: Optional[str]) -> str:
+def getter_name(name: str | None) -> str:
     if name is None:
         raise ValueError("Name should not be None")
     return f"get_{to_snake_case(name)}"

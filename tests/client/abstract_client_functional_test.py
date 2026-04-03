@@ -30,9 +30,7 @@ class AbstractClientFunctionalTest(unittest.TestCase):
         cls.network.create()
 
         # Start PostgreSQL
-        cls.db = PostgresContainer(
-            DB_IMAGE, username=DB_USER, password=DB_PASSWORD, dbname=DB_NAME
-        )
+        cls.db = PostgresContainer(DB_IMAGE, username=DB_USER, password=DB_PASSWORD, dbname=DB_NAME)
         cls.db.with_network(cls.network)
         cls.db.with_network_aliases(DB_HOST)
         cls.db.with_exposed_ports(DB_CONTAINER_PORT)  # Expose the correct port
@@ -73,9 +71,7 @@ class AbstractClientFunctionalTest(unittest.TestCase):
         # Expose port for tests
         os.environ["SERVER_PORT"] = str(cls.server_port)
         # Debugging Output
-        print(
-            f"[DEBUG] Server should be reachable at: http://localhost:{cls.server_port}"
-        )
+        print(f"[DEBUG] Server should be reachable at: http://localhost:{cls.server_port}")
         print(f"[DEBUG] Environment SERVER_PORT = {os.getenv('SERVER_PORT')}")
         time.sleep(2)
 
@@ -139,9 +135,7 @@ class AbstractClientFunctionalTest(unittest.TestCase):
                 print(f"[SERVER] Detected '{expected_log}', Server is ready!")
                 return
             time.sleep(1)
-        raise RuntimeError(
-            f"[SERVER] '{expected_log}' not found in logs after {timeout} seconds!"
-        )
+        raise RuntimeError(f"[SERVER] '{expected_log}' not found in logs after {timeout} seconds!")
 
     def assert_lw_trees_are_equal(self, a, b):
         """Dummy comparison function (replace with real comparison logic)."""

@@ -1,4 +1,4 @@
-from typing import List, Optional
+from typing import Optional
 
 from serialization.simple_node import SimpleNode
 
@@ -8,9 +8,9 @@ from lionweb.model.reference_value import ReferenceValue
 
 
 class RefNode(SimpleNode):
-    def __init__(self, id: Optional[str] = None):
+    def __init__(self, id: str | None = None):
         super().__init__()
-        self.referred: Optional["RefNode"] = None
+        self.referred: RefNode | None = None
         if id is not None:
             self._id = id
         else:
@@ -35,9 +35,7 @@ class RefNode(SimpleNode):
     def __str__(self):
         return f"RefNode{{referred={self.referred.get_id()}}}"
 
-    def concrete_get_reference_values(
-        self, reference: Reference
-    ) -> List[ReferenceValue]:
+    def concrete_get_reference_values(self, reference: Reference) -> list[ReferenceValue]:
         if reference.get_name() == "referred":
             if self.referred is None:
                 return []
@@ -45,7 +43,7 @@ class RefNode(SimpleNode):
         return super().concrete_get_reference_values(reference)
 
     def concrete_add_reference_value(
-        self, reference: Reference, referred_node: Optional[ReferenceValue]
+        self, reference: Reference, referred_node: ReferenceValue | None
     ):
         if reference.get_name() == "referred":
             self.referred = referred_node.referred if referred_node else None

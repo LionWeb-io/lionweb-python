@@ -1,4 +1,4 @@
-from typing import TYPE_CHECKING, Optional, cast
+from typing import TYPE_CHECKING, cast
 
 if TYPE_CHECKING:
     from lionweb.language.concept import Concept
@@ -19,11 +19,11 @@ class Field(M3Node, NamespacedEntity, IKeyed):
 
     def __init__(
         self,
-        name: Optional[str] = None,
-        type: Optional[DataType] = None,
-        id: Optional[str] = None,
-        key: Optional[str] = None,
-        structured_data_type: Optional[StructuredDataType] = None,
+        name: str | None = None,
+        type: DataType | None = None,
+        id: str | None = None,
+        key: str | None = None,
+        structured_data_type: StructuredDataType | None = None,
     ):
         super().__init__()
         if structured_data_type:
@@ -38,13 +38,13 @@ class Field(M3Node, NamespacedEntity, IKeyed):
         if key:
             self.set_key(key)
 
-    def get_name(self) -> Optional[str]:
-        return cast(Optional[str], self.get_property_value(property="name"))
+    def get_name(self) -> str | None:
+        return cast(str | None, self.get_property_value(property="name"))
 
-    def set_name(self, name: Optional[str]):
+    def set_name(self, name: str | None):
         self.set_property_value(property="name", value=name)
 
-    def get_container(self) -> Optional[NamespaceProvider]:
+    def get_container(self) -> NamespaceProvider | None:
         """
         The container is always the parent. It is just casted for convenience.
         """
@@ -61,20 +61,18 @@ class Field(M3Node, NamespacedEntity, IKeyed):
 
         return LionCore.get_field(self.get_lionweb_version())
 
-    def get_type(self) -> Optional[DataType]:
-        return cast(Optional[DataType], self.get_reference_single_value("type"))
+    def get_type(self) -> DataType | None:
+        return cast(DataType | None, self.get_reference_single_value("type"))
 
-    def set_type(self, type: Optional[DataType]):
+    def set_type(self, type: DataType | None):
         if type is None:
             self.set_reference_single_value("type", None)
         else:
-            self.set_reference_single_value(
-                "type", ReferenceValue(type, type.get_name())
-            )
+            self.set_reference_single_value("type", ReferenceValue(type, type.get_name()))
 
     def get_key(self) -> str:
         return cast(str, self.get_property_value(property="key"))
 
-    def set_key(self, key: Optional[str]) -> "Field":
+    def set_key(self, key: str | None) -> "Field":
         self.set_property_value(property="key", value=key)
         return self

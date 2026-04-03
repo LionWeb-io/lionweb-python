@@ -1,7 +1,9 @@
-from typing import TYPE_CHECKING, List, Optional
+from typing import TYPE_CHECKING, Optional
 
-from lionweb.utils.autoresolve import (LIONCORE_AUTORESOLVE_PREFIX,
-                                       LIONCOREBUILTINS_AUTORESOLVE_PREFIX)
+from lionweb.utils.autoresolve import (
+    LIONCORE_AUTORESOLVE_PREFIX,
+    LIONCOREBUILTINS_AUTORESOLVE_PREFIX,
+)
 
 if TYPE_CHECKING:
     from lionweb.language.language_entity import LanguageEntity
@@ -11,12 +13,8 @@ if TYPE_CHECKING:
     from lionweb.model.reference_value import ReferenceValue
 
 
-def get_property_value_by_name(
-    instance: "ClassifierInstance", property_name: str
-) -> Optional[object]:
-    property_ = instance.get_classifier().get_property_by_name(
-        property_name=property_name
-    )
+def get_property_value_by_name(instance: "ClassifierInstance", property_name: str) -> object | None:
+    property_ = instance.get_classifier().get_property_by_name(property_name=property_name)
     if property_ is None:
         raise ValueError(
             f"Concept {instance.get_classifier().qualified_name()} does not contain a property named {property_name}"
@@ -25,7 +23,7 @@ def get_property_value_by_name(
 
 
 def set_property_value_by_name(
-    instance: "ClassifierInstance", property_name: str, value: Optional[object]
+    instance: "ClassifierInstance", property_name: str, value: object | None
 ) -> None:
     classifier = instance.get_classifier()
     if classifier is None:
@@ -38,7 +36,7 @@ def set_property_value_by_name(
     instance.set_property_value(property=property_, value=value)
 
 
-def get_children(instance: "ClassifierInstance") -> List["Node"]:
+def get_children(instance: "ClassifierInstance") -> list["Node"]:
     all_children = []
     for containment in instance.get_classifier().all_containments():
         all_children.extend(instance.get_children(containment))
@@ -47,7 +45,7 @@ def get_children(instance: "ClassifierInstance") -> List["Node"]:
 
 def get_referred_nodes(
     instance: "ClassifierInstance", reference: Optional["Reference"] = None
-) -> List["ClassifierInstance"]:
+) -> list["ClassifierInstance"]:
     return [
         e
         for e in [rv.get_referred() for rv in get_reference_values(instance, reference)]
@@ -57,7 +55,7 @@ def get_referred_nodes(
 
 def get_reference_values(
     instance: "ClassifierInstance", reference: Optional["Reference"] = None
-) -> List["ReferenceValue"]:
+) -> list["ReferenceValue"]:
     if reference is None:
         all_referred_values = []
         for reference in instance.get_classifier().all_references():
@@ -127,7 +125,7 @@ def is_builtin_element_language_entity(entity: "LanguageEntity") -> bool:
 
 def get_reference_value_by_name(
     instance: "ClassifierInstance", reference_name: str
-) -> List["ReferenceValue"]:
+) -> list["ReferenceValue"]:
     if instance is None:
         raise ValueError("_this should not be null")
     if reference_name is None:
@@ -156,9 +154,7 @@ def get_only_reference_value_by_reference_name(
     if reference_name is None:
         raise ValueError("reference_name should not be null")
 
-    reference_values: List["ReferenceValue"] = get_reference_value_by_name(
-        instance, reference_name
-    )
+    reference_values: list[ReferenceValue] = get_reference_value_by_name(instance, reference_name)
     if len(reference_values) > 1:
         raise RuntimeError("More than one reference value found")
     elif len(reference_values) == 0:
@@ -167,15 +163,13 @@ def get_only_reference_value_by_reference_name(
         return reference_values[0]
 
 
-def get_only_child_by_reference_name(
-    instance, containment_name: str
-) -> Optional["Node"]:
+def get_only_child_by_reference_name(instance, containment_name: str) -> Optional["Node"]:
     if instance is None:
         raise ValueError("_this should not be null")
     if containment_name is None:
         raise ValueError("containment_name should not be null")
 
-    children: List["Node"] = instance.get_children(containment_name)
+    children: list[Node] = instance.get_children(containment_name)
     if len(children) > 1:
         raise RuntimeError("More than one child found")
     elif len(children) == 0:
@@ -184,7 +178,7 @@ def get_only_child_by_reference_name(
         return children[0]
 
 
-def get_root(nodes: List["Node"]) -> "Node":
+def get_root(nodes: list["Node"]) -> "Node":
     if len(nodes) == 0:
         raise ValueError("No nodes found")
     roots = [n for n in nodes if n.get_parent() is None]

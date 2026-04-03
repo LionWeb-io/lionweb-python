@@ -1,28 +1,31 @@
 import ast
 from _ast import stmt
 from pathlib import Path
-from typing import List, Set, cast
+from typing import cast
 
 import astor  # type: ignore
 
 from lionweb.generation.ASTBuilder import ASTBuilder
 from lionweb.generation.base_generator import BaseGenerator
-from lionweb.generation.configuration import (LanguageMappingSpec,
-                                              PrimitiveTypeMappingSpec)
-from lionweb.generation.generation_utils import (make_class_def,
-                                                 make_function_def)
-from lionweb.generation.naming_utils import (getter_name, to_snake_case,
-                                             to_type_name, to_var_name)
+from lionweb.generation.configuration import LanguageMappingSpec, PrimitiveTypeMappingSpec
+from lionweb.generation.generation_utils import make_class_def, make_function_def
+from lionweb.generation.naming_utils import getter_name, to_snake_case, to_type_name, to_var_name
 from lionweb.generation.topological_sorting import topological_classifiers_sort
-from lionweb.language import (Concept, Containment, Feature, Interface,
-                              Language, LionCoreBuiltins, Property)
+from lionweb.language import (
+    Concept,
+    Containment,
+    Feature,
+    Interface,
+    Language,
+    LionCoreBuiltins,
+    Property,
+)
 from lionweb.language.classifier import Classifier
 from lionweb.language.enumeration import Enumeration
 from lionweb.language.reference import Reference
 
 
 class NodeClassesGenerator(BaseGenerator, ASTBuilder):
-
     def __init__(
         self,
         language_packages: tuple[LanguageMappingSpec, ...],
@@ -57,17 +60,15 @@ class NodeClassesGenerator(BaseGenerator, ASTBuilder):
             body=[ast.Pass()],
         )
 
-    def _get_imports_for_enumeration(self) -> List[stmt]:
+    def _get_imports_for_enumeration(self) -> list[stmt]:
         """Get standard imports needed for enumerations."""
         return ast.parse("from enum import Enum").body
 
-    def _get_imports_for_interface(self) -> List[stmt]:
+    def _get_imports_for_interface(self) -> list[stmt]:
         """Get standard imports needed for interfaces."""
-        return ast.parse("from abc import ABC\n" "from lionweb.model import Node").body
+        return ast.parse("from abc import ABC\nfrom lionweb.model import Node").body
 
-    def _get_imports_for_concept(
-        self, concept: Concept, language: Language
-    ) -> List[stmt]:
+    def _get_imports_for_concept(self, concept: Concept, language: Language) -> list[stmt]:
         """Get imports needed for a specific concept."""
         # Standard runtime imports
         imports = ast.parse(
@@ -97,11 +98,7 @@ class NodeClassesGenerator(BaseGenerator, ASTBuilder):
             imports.append(
                 ast.ImportFrom(
                     module=f".{module_name}",
-                    names=[
-                        ast.alias(
-                            name=to_type_name(extended_concept.get_name()), asname=None
-                        )
-                    ],
+                    names=[ast.alias(name=to_type_name(extended_concept.get_name()), asname=None)],
                     level=0,
                 )
             )
@@ -127,9 +124,7 @@ class NodeClassesGenerator(BaseGenerator, ASTBuilder):
                         isinstance(feature.type, Enumeration)
                         and feature.type.name not in imported_types
                     ):
-                        module_name = self._get_safe_filename(feature.type)[
-                            :-3
-                        ]  # Remove .py
+                        module_name = self._get_safe_filename(feature.type)[:-3]  # Remove .py
                         imports.append(
                             ast.ImportFrom(
                                 module=f".{module_name}",
@@ -147,19 +142,12 @@ class NodeClassesGenerator(BaseGenerator, ASTBuilder):
                 feature_type = cast(Classifier, feature.get_type())
                 type_name = feature_type.get_name()
                 # Import referenced classifiers only for type checking
-                if (
-                    feature_type.language == concept.language
-                    and type_name not in imported_types
-                ):
-                    module_name = self._get_safe_filename(feature_type)[
-                        :-3
-                    ]  # Remove .py
+                if feature_type.language == concept.language and type_name not in imported_types:
+                    module_name = self._get_safe_filename(feature_type)[:-3]  # Remove .py
                     type_checking_imports.append(
                         ast.ImportFrom(
                             module=f".{module_name}",
-                            names=[
-                                ast.alias(name=to_type_name(type_name), asname=None)
-                            ],
+                            names=[ast.alias(name=to_type_name(type_name), asname=None)],
                             level=0,
                         )
                     )
@@ -189,9 +177,7 @@ class NodeClassesGenerator(BaseGenerator, ASTBuilder):
         # Enumerations and built-in types don't need quoting
         return False
 
-    def _resolve_property_type_for_node_class(
-        self, feature: Property, concept: Concept
-    ) -> str:
+    def _resolve_property_type_for_node_class(self, feature: Property, concept: Concept) -> str:
         """Resolve the Python type string for a property in node class generation."""
         f_type = feature.type
         if f_type is None:
@@ -439,9 +425,7 @@ class NodeClassesGenerator(BaseGenerator, ASTBuilder):
                     self.call(
                         self.attr("self", "add_reference_value"),
                         args=[
-                            self._get_feature_by_name(
-                                feature, "require_reference_by_name"
-                            ),
+                            self._get_feature_by_name(feature, "require_reference_by_name"),
                             self.call(
                                 "ReferenceValue",
                                 args=[
@@ -550,9 +534,7 @@ class NodeClassesGenerator(BaseGenerator, ASTBuilder):
             returns=None,
         )
 
-    def _generate_multiple_containment_getter(
-        self, feature: Containment, prop_type: str
-    ):
+    def _generate_multiple_containment_getter(self, feature: Containment, prop_type: str):
         # Use string annotation for forward reference
         return make_function_def(
             name=feature.name,
@@ -577,9 +559,7 @@ class NodeClassesGenerator(BaseGenerator, ASTBuilder):
             returns=self.const(f'List["{prop_type}"]'),  # String annotation
         )
 
-    def _generate_multiple_containment_adder(
-        self, feature: Containment, prop_type: str
-    ):
+    def _generate_multiple_containment_adder(self, feature: Containment, prop_type: str):
         # Use string annotation for forward reference
         return make_function_def(
             name=f"add_to_{to_snake_case(feature.name)}",
@@ -600,9 +580,7 @@ class NodeClassesGenerator(BaseGenerator, ASTBuilder):
                     self.call(
                         self.attr("self", "add_child"),
                         args=[
-                            self._get_feature_by_name(
-                                feature, "require_containment_by_name"
-                            ),
+                            self._get_feature_by_name(feature, "require_containment_by_name"),
                             self.name("new_element"),
                         ],
                     )
@@ -653,9 +631,7 @@ class NodeClassesGenerator(BaseGenerator, ASTBuilder):
         # Generate __init__.py to export all classes (always, even if empty)
         self._write_init_file(language, output_path, click)
 
-    def _write_enumeration_file(
-        self, enumeration: Enumeration, output_path: Path, click
-    ):
+    def _write_enumeration_file(self, enumeration: Enumeration, output_path: Path, click):
         """Write a single enumeration to its own file."""
         imports = self._get_imports_for_enumeration()
         class_def = self._generate_enumeration_class(enumeration)
@@ -687,9 +663,7 @@ class NodeClassesGenerator(BaseGenerator, ASTBuilder):
 
         click.echo(f"  ✓ {file_name}")
 
-    def _write_concept_file(
-        self, concept: Concept, language: Language, output_path: Path, click
-    ):
+    def _write_concept_file(self, concept: Concept, language: Language, output_path: Path, click):
         """Write a single concept to its own file."""
         imports = self._get_imports_for_concept(concept, language)
         class_def = self._generate_concept_class(concept)
@@ -711,7 +685,7 @@ class NodeClassesGenerator(BaseGenerator, ASTBuilder):
         all_exports = []
 
         for element in language.get_elements():
-            if isinstance(element, (Enumeration, Interface, Concept)):
+            if isinstance(element, Enumeration | Interface | Concept):
                 class_name = to_type_name(element.get_name())
                 # Get safe module name (without .py extension)
                 module_name = self._get_safe_filename(element)[:-3]  # Remove .py
@@ -733,7 +707,7 @@ class NodeClassesGenerator(BaseGenerator, ASTBuilder):
 
         click.echo("  ✓ __init__.py")
 
-    def _relevant_features(self, concept: Concept) -> List[Feature]:
+    def _relevant_features(self, concept: Concept) -> list[Feature]:
         """
         Returns a list of features that should be considered for a concept, including those inherited from interfaces.
         """
@@ -741,7 +715,7 @@ class NodeClassesGenerator(BaseGenerator, ASTBuilder):
         # as they may lack definitions
         relevant_features = concept.get_features()
         interfaces = concept.get_implemented()
-        examined_interfaces: Set[Classifier] = set()
+        examined_interfaces: set[Classifier] = set()
         while len(interfaces) > 0:
             interface = interfaces.pop(0)
             if interface not in examined_interfaces:
@@ -784,7 +758,7 @@ class NodeClassesGenerator(BaseGenerator, ASTBuilder):
         )
 
         # Property getter and setter (just for the first field, e.g. "title")
-        methods: List[stmt] = [init_func]
+        methods: list[stmt] = [init_func]
 
         for feature in self._relevant_features(concept):
             if isinstance(feature, Property):
@@ -795,29 +769,17 @@ class NodeClassesGenerator(BaseGenerator, ASTBuilder):
                 feature_type = cast(Classifier, feature.get_type())
                 prop_type = cast(str, feature_type.get_name())
                 if feature.is_multiple():
-                    methods.append(
-                        self._generate_multiple_containment_getter(feature, prop_type)
-                    )
-                    methods.append(
-                        self._generate_multiple_containment_adder(feature, prop_type)
-                    )
+                    methods.append(self._generate_multiple_containment_getter(feature, prop_type))
+                    methods.append(self._generate_multiple_containment_adder(feature, prop_type))
                 else:
-                    methods.append(
-                        self._generate_containment_getter(feature, prop_type)
-                    )
-                    methods.append(
-                        self._generate_containment_setter(feature, prop_type)
-                    )
+                    methods.append(self._generate_containment_getter(feature, prop_type))
+                    methods.append(self._generate_containment_setter(feature, prop_type))
             elif isinstance(feature, Reference):
                 feature_type = cast(Classifier, feature.get_type())
                 prop_type = cast(str, feature_type.get_name())
                 if feature.is_multiple():
-                    methods.append(
-                        self._generate_multiple_reference_getter(feature, prop_type)
-                    )
-                    methods.append(
-                        self._generate_multiple_reference_adder(feature, prop_type)
-                    )
+                    methods.append(self._generate_multiple_reference_getter(feature, prop_type))
+                    methods.append(self._generate_multiple_reference_adder(feature, prop_type))
                 else:
                     methods.append(self._generate_reference_getter(feature, prop_type))
                     methods.append(self._generate_reference_setter(feature, prop_type))

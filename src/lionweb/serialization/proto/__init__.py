@@ -1,5 +1,13 @@
-from .Chunk_pb2 import (PBChunk, PBContainment, PBLanguage, PBMetaPointer,
-                        PBNode, PBProperty, PBReference, PBReferenceValue)
+from .Chunk_pb2 import (
+    PBChunk,
+    PBContainment,
+    PBLanguage,
+    PBMetaPointer,
+    PBNode,
+    PBProperty,
+    PBReference,
+    PBReferenceValue,
+)
 
 __all__ = [
     "PBChunk",

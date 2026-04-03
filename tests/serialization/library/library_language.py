@@ -24,7 +24,7 @@ class LibraryLanguage:
             "serialization",
             "library-language.json",
         )
-        with open(file_path, "r") as file:
+        with open(file_path) as file:
             json_element = json.load(file)
 
         json_serialization = create_standard_json_serialization(LionWebVersion.V2023_1)
@@ -33,15 +33,11 @@ class LibraryLanguage:
         LibraryLanguage.LIBRARY_MM = next(
             (node for node in deserialized_nodes if isinstance(node, Language)), None
         )
-        LibraryLanguage.LIBRARY = LibraryLanguage.LIBRARY_MM.get_concept_by_name(
-            "Library"
-        )
+        LibraryLanguage.LIBRARY = LibraryLanguage.LIBRARY_MM.get_concept_by_name("Library")
         LibraryLanguage.BOOK = LibraryLanguage.LIBRARY_MM.get_concept_by_name("Book")
-        LibraryLanguage.WRITER = LibraryLanguage.LIBRARY_MM.get_concept_by_name(
-            "Writer"
-        )
-        LibraryLanguage.GUIDE_BOOK_WRITER = (
-            LibraryLanguage.LIBRARY_MM.get_concept_by_name("GuideBookWriter")
+        LibraryLanguage.WRITER = LibraryLanguage.LIBRARY_MM.get_concept_by_name("Writer")
+        LibraryLanguage.GUIDE_BOOK_WRITER = LibraryLanguage.LIBRARY_MM.get_concept_by_name(
+            "GuideBookWriter"
         )
 
         for feature in LibraryLanguage.LIBRARY.all_features():

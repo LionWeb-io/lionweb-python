@@ -20,11 +20,11 @@ code = f"""{{
   }},
   "postgres": {{
     "database": {{
-      "host": "{os.environ['PGHOST']}",
-      "user": "{os.environ['PGUSER']}",
-      "db": "{os.environ['PGDB']}",
-      "password": "{os.environ['PGPASSWORD']}",
-      "port": "{os.environ['PGPORT']}"
+      "host": "{os.environ["PGHOST"]}",
+      "user": "{os.environ["PGUSER"]}",
+      "db": "{os.environ["PGDB"]}",
+      "password": "{os.environ["PGPASSWORD"]}",
+      "port": "{os.environ["PGPORT"]}"
     }},
     "certificates": {{
       "rootcert": null,

@@ -1,11 +1,9 @@
 import ast
 import sys
-from typing import Any, List, Optional, cast
+from typing import Any, cast
 
 
-def make_class_def(
-    name: str, bases: List[ast.expr], body: List[ast.stmt]
-) -> ast.ClassDef:
+def make_class_def(name: str, bases: list[ast.expr], body: list[ast.stmt]) -> ast.ClassDef:
     if sys.version_info >= (3, 12):
         return ast.ClassDef(
             name=name,
@@ -16,17 +14,15 @@ def make_class_def(
             type_params=[],  # Only valid from Python 3.12+
         )
     else:
-        return ast.ClassDef(
-            name=name, bases=bases, keywords=[], body=body, decorator_list=[]
-        )
+        return ast.ClassDef(name=name, bases=bases, keywords=[], body=body, decorator_list=[])
 
 
 def make_function_def(
-    name: Optional[str],
+    name: str | None,
     args: ast.arguments,
-    body: List[ast.stmt],
-    decorator_list: Optional[List[ast.expr]] = None,
-    returns: Optional[ast.expr] = None,
+    body: list[ast.stmt],
+    decorator_list: list[ast.expr] | None = None,
+    returns: ast.expr | None = None,
 ) -> ast.FunctionDef:
     if name is None:
         raise ValueError("Name should not be None")
@@ -41,7 +37,7 @@ def make_function_def(
             decorator_list=decorator_list,
             returns=returns,
             type_comment=None,
-            type_params=cast(List[Any], []),
+            type_params=cast(list[Any], []),
         )
     else:
         return ast.FunctionDef(

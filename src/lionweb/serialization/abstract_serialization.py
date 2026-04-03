@@ -1,4 +1,4 @@
-from typing import TYPE_CHECKING, Dict, List
+from typing import TYPE_CHECKING
 
 from lionweb.language.data_type import DataType
 from lionweb.lionweb_version import LionWebVersion
@@ -8,20 +8,17 @@ from lionweb.serialization.classifier_resolver import ClassifierResolver
 from lionweb.serialization.data.language_version import LanguageVersion
 from lionweb.serialization.data.metapointer import MetaPointer
 from lionweb.serialization.data.serialized_chunk import SerializationChunk
-from lionweb.serialization.data.serialized_classifier_instance import \
-    SerializedClassifierInstance
-from lionweb.serialization.data.serialized_containment_value import \
-    SerializedContainmentValue
-from lionweb.serialization.data.serialized_property_value import \
-    SerializedPropertyValue
+from lionweb.serialization.data.serialized_classifier_instance import SerializedClassifierInstance
+from lionweb.serialization.data.serialized_containment_value import SerializedContainmentValue
+from lionweb.serialization.data.serialized_property_value import SerializedPropertyValue
 from lionweb.serialization.data.serialized_reference_value import (
-    SerializedReferenceValue, SerializedReferenceValueEntry)
-from lionweb.serialization.deserialization_exception import \
-    DeserializationException
+    SerializedReferenceValue,
+    SerializedReferenceValueEntry,
+)
+from lionweb.serialization.deserialization_exception import DeserializationException
 from lionweb.serialization.deserialization_status import DeserializationStatus
 from lionweb.serialization.instantiator import Instantiator
-from lionweb.serialization.primitives_values_serialization import \
-    PrimitiveValuesSerialization
+from lionweb.serialization.primitives_values_serialization import PrimitiveValuesSerialization
 from lionweb.serialization.unavailable_node_policy import UnavailableNodePolicy
 
 if TYPE_CHECKING:
@@ -29,14 +26,10 @@ if TYPE_CHECKING:
 
 
 class AbstractSerialization:
-
     DEFAULT_SERIALIZATION_FORMAT = LionWebVersion.current_version()
 
-    def __init__(
-        self, lionweb_version: LionWebVersion = LionWebVersion.current_version()
-    ):
-        from lionweb.api.local_classifier_instance_resolver import \
-            LocalClassifierInstanceResolver
+    def __init__(self, lionweb_version: LionWebVersion = LionWebVersion.current_version()):
+        from lionweb.api.local_classifier_instance_resolver import LocalClassifierInstanceResolver
 
         self.lion_web_version = lionweb_version
         self.classifier_resolver = ClassifierResolver()
@@ -84,9 +77,7 @@ class AbstractSerialization:
             if classifier_instance is None:
                 raise ValueError("nodes should not contain null values")
 
-            serialized_chunk.add_classifier_instance(
-                self.serialize_node(classifier_instance)
-            )
+            serialized_chunk.add_classifier_instance(self.serialize_node(classifier_instance))
 
             # Handle annotations
             for annotation_instance in classifier_instance.get_annotations():
@@ -101,9 +92,7 @@ class AbstractSerialization:
             # Validate classifier and its language
             classifier = classifier_instance.get_classifier()
             if classifier is None:
-                raise ValueError(
-                    "A node should have a concept in order to be serialized"
-                )
+                raise ValueError("A node should have a concept in order to be serialized")
 
             language = classifier.language
             if language is None:
@@ -121,9 +110,7 @@ class AbstractSerialization:
 
             # Add all properties' type languages
             for prop in classifier.all_properties():
-                self._consider_language_during_serialization(
-                    serialized_chunk, prop.type.language
-                )
+                self._consider_language_during_serialization(serialized_chunk, prop.type.language)
 
             # Add all links' type languages
             for link in classifier.all_links():
@@ -162,16 +149,12 @@ class AbstractSerialization:
 
         serialized_classifier_instance = SerializedClassifierInstance(
             annotation_instance.id,
-            MetaPointer.from_language_entity(
-                annotation_instance.get_annotation_definition()
-            ),
+            MetaPointer.from_language_entity(annotation_instance.get_annotation_definition()),
         )
         parent = annotation_instance.get_parent()
         serialized_classifier_instance.parent_node_id = parent.id if parent else None
         self._serialize_properties(annotation_instance, serialized_classifier_instance)
-        self._serialize_containments(
-            annotation_instance, serialized_classifier_instance
-        )
+        self._serialize_containments(annotation_instance, serialized_classifier_instance)
         self._serialize_references(annotation_instance, serialized_classifier_instance)
         self._serialize_annotations(annotation_instance, serialized_classifier_instance)
 
@@ -199,9 +182,7 @@ class AbstractSerialization:
                     mp,
                     self._serialize_property_value(dt, property_value),
                 )
-                serialized_classifier_instance.add_property_value(
-                    serialized_property_value
-                )
+                serialized_classifier_instance.add_property_value(serialized_property_value)
 
     def _serialize_property_value(self, data_type: DataType, value: object):
         if data_type is None:
@@ -250,8 +231,7 @@ class AbstractSerialization:
             if language is None:
                 raise ValueError()
             reference_value.meta_pointer = MetaPointer.from_keyed(reference, language)
-            from lionweb.model.classifier_instance_utils import \
-                is_builtin_element
+            from lionweb.model.classifier_instance_utils import is_builtin_element
 
             reference_value.value = [
                 SerializedReferenceValueEntry(
@@ -283,17 +263,16 @@ class AbstractSerialization:
 
     def deserialize_serialization_chunk(self, serialized_chunk: SerializationChunk):
         serialized_instances = serialized_chunk.classifier_instances
-        return self._deserialize_classifier_instances(
-            self.lion_web_version, serialized_instances
-        )
+        return self._deserialize_classifier_instances(self.lion_web_version, serialized_instances)
 
     def _deserialize_classifier_instances(
         self,
         lion_web_version: LionWebVersion,
-        serialized_classifier_instances: List[SerializedClassifierInstance],
-    ) -> (List)[ClassifierInstance]:
-        from lionweb.api.composite_classifier_instance_resolver import \
-            CompositeClassifierInstanceResolver
+        serialized_classifier_instances: list[SerializedClassifierInstance],
+    ) -> (list)[ClassifierInstance]:
+        from lionweb.api.composite_classifier_instance_resolver import (
+            CompositeClassifierInstanceResolver,
+        )
         from lionweb.model.annotation_instance import AnnotationInstance
         from lionweb.model.impl.proxy_node import ProxyNode
         from lionweb.serialization.map_based_resolver import MapBasedResolver
@@ -304,15 +283,13 @@ class AbstractSerialization:
 
         # We want to deserialize the nodes starting from the leaves. This is useful because in certain
         # cases we may want to use the children as constructor parameters of the parent
-        deserialization_status = self._sort_leaves_first(
-            serialized_classifier_instances
-        )
+        deserialization_status = self._sort_leaves_first(serialized_classifier_instances)
         sorted_serialized_instances = deserialization_status.sorted_list
 
         if len(sorted_serialized_instances) != len(serialized_classifier_instances):
             raise ValueError("Mismatch in number of nodes to deserialize")
 
-        deserialized_by_id: Dict[str, ClassifierInstance] = {}
+        deserialized_by_id: dict[str, ClassifierInstance] = {}
         serialized_to_instance_map = {}
 
         for n in sorted_serialized_instances:
@@ -349,9 +326,7 @@ class AbstractSerialization:
 
             parent_node_id = node.parent_node_id
             parent = (
-                classifier_instance_resolver.resolve(parent_node_id)
-                if parent_node_id
-                else None
+                classifier_instance_resolver.resolve(parent_node_id) if parent_node_id else None
             )
             if (
                 isinstance(parent, ProxyNode)
@@ -360,19 +335,13 @@ class AbstractSerialization:
                 if isinstance(classifier_instance, HasSettableParent):
                     classifier_instance.set_parent(parent)
                 else:
-                    raise NotImplementedError(
-                        f"Cannot set parent for {classifier_instance}"
-                    )
+                    raise NotImplementedError(f"Cannot set parent for {classifier_instance}")
 
             if isinstance(classifier_instance, AnnotationInstance):
                 if node is None:
-                    raise ValueError(
-                        "Dangling annotation instance found (annotated node is null)"
-                    )
+                    raise ValueError("Dangling annotation instance found (annotated node is null)")
                 parent_node_id = node.parent_node_id
-                parent_instance = (
-                    deserialized_by_id.get(parent_node_id) if parent_node_id else None
-                )
+                parent_instance = deserialized_by_id.get(parent_node_id) if parent_node_id else None
                 if parent_instance:
                     parent_instance.add_annotation(classifier_instance)
                 else:
@@ -387,32 +356,25 @@ class AbstractSerialization:
 
         return nodes_with_original_sorting
 
-    def _validate_serialization_chunk(
-        self, serialization_chunk: SerializationChunk
-    ) -> None:
+    def _validate_serialization_chunk(self, serialization_chunk: SerializationChunk) -> None:
         if serialization_chunk is None:
             raise ValueError("serialization_chunk should not be null")
         if serialization_chunk.serialization_format_version is None:
             raise ValueError("The serializationFormatVersion should not be null")
-        if (
-            serialization_chunk.serialization_format_version
-            != self.lion_web_version.value
-        ):
+        if serialization_chunk.serialization_format_version != self.lion_web_version.value:
             raise ValueError(
                 f"Only serializationFormatVersion supported by this instance of Serialization is '{self.lion_web_version.value}' "
                 f"but we found '{serialization_chunk.serialization_format_version}'"
             )
 
     def _sort_leaves_first(
-        self, original_list: List[SerializedClassifierInstance]
+        self, original_list: list[SerializedClassifierInstance]
     ) -> DeserializationStatus:
         """
         This method returned a sorted version of the original list, so that leaves nodes comes first,
         or in other words that a parent never precedes its children.
         """
-        deserialization_status = DeserializationStatus(
-            original_list, self.instance_resolver
-        )
+        deserialization_status = DeserializationStatus(original_list, self.instance_resolver)
 
         # We create the list going from the roots to their children and then reverse it
         deserialization_status.put_nodes_with_null_ids_in_front()
@@ -426,9 +388,7 @@ class AbstractSerialization:
         elif self.unavailable_parent_policy == UnavailableNodePolicy.PROXY_NODES:
             known_ids = {ci.id for ci in original_list}
             parent_ids = {
-                n.get_parent_node_id()
-                for n in original_list
-                if n.get_parent_node_id() is not None
+                n.get_parent_node_id() for n in original_list if n.get_parent_node_id() is not None
             }
             unknown_parent_ids = parent_ids - known_ids
             for ci in original_list:
@@ -469,16 +429,14 @@ class AbstractSerialization:
         self,
         lion_web_version: LionWebVersion,
         serialized_classifier_instance: SerializedClassifierInstance,
-        deserialized_by_id: Dict[str, ClassifierInstance],
+        deserialized_by_id: dict[str, ClassifierInstance],
     ) -> ClassifierInstance:
         if lion_web_version is None:
             raise ValueError("lionWebVersion should not be null")
 
         serialized_classifier = serialized_classifier_instance.get_classifier()
         if serialized_classifier is None:
-            raise RuntimeError(
-                f"No metaPointer available for {serialized_classifier_instance}"
-            )
+            raise RuntimeError(f"No metaPointer available for {serialized_classifier_instance}")
 
         classifier = self.classifier_resolver.resolve_classifier(serialized_classifier)
 
@@ -515,11 +473,7 @@ class AbstractSerialization:
 
         # Ensure that properties values are set correctly
         for property, deserialized_value in properties_values.items():
-            if deserialized_value != classifier_instance.get_property_value(
-                property=property
-            ):
-                classifier_instance.set_property_value(
-                    property=property, value=deserialized_value
-                )
+            if deserialized_value != classifier_instance.get_property_value(property=property):
+                classifier_instance.set_property_value(property=property, value=deserialized_value)
 
         return classifier_instance

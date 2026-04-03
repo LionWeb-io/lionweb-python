@@ -1,21 +1,19 @@
 import ast
 from _ast import stmt
 from pathlib import Path
-from typing import List, cast
+from typing import cast
 
 import astor  # type: ignore
 
 from lionweb.generation.ASTBuilder import ASTBuilder
 from lionweb.generation.base_generator import BaseGenerator
-from lionweb.generation.configuration import (LanguageMappingSpec,
-                                              PrimitiveTypeMappingSpec)
+from lionweb.generation.configuration import LanguageMappingSpec, PrimitiveTypeMappingSpec
 from lionweb.generation.generation_utils import make_function_def
 from lionweb.generation.naming_utils import getter_name
 from lionweb.language import Concept, Language
 
 
 class DeserializerGenerator(BaseGenerator, ASTBuilder):
-
     def __init__(
         self,
         language_packages: tuple[LanguageMappingSpec, ...],
@@ -32,10 +30,7 @@ class DeserializerGenerator(BaseGenerator, ASTBuilder):
             module_body.append(
                 ast.ImportFrom(
                     module=".language",
-                    names=[
-                        ast.alias(name=getter_name(c.name), asname=None)
-                        for c in concepts
-                    ],
+                    names=[ast.alias(name=getter_name(c.name), asname=None) for c in concepts],
                     level=0,
                 )
             )
@@ -62,7 +57,7 @@ class DeserializerGenerator(BaseGenerator, ASTBuilder):
             )
         )
 
-        register_func_body: List[stmt] = []
+        register_func_body: list[stmt] = []
         for language_element in language.get_elements():
             if isinstance(language_element, Concept):
                 concept_name = cast(str, language_element.get_name())
@@ -126,9 +121,7 @@ class DeserializerGenerator(BaseGenerator, ASTBuilder):
                             args=[
                                 ast.Attribute(
                                     value=ast.Call(
-                                        func=ast.Name(
-                                            id=getter_name(concept_name), ctx=ast.Load()
-                                        ),
+                                        func=ast.Name(id=getter_name(concept_name), ctx=ast.Load()),
                                         args=[],
                                         keywords=[],
                                     ),

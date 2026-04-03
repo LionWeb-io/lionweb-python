@@ -4,6 +4,7 @@
 # source: lionweb/serialization/proto/Chunk.proto
 # Protobuf Python Version: 6.32.0
 """Generated protocol buffer code."""
+
 from google.protobuf import descriptor as _descriptor
 from google.protobuf import descriptor_pool as _descriptor_pool
 from google.protobuf import runtime_version as _runtime_version
@@ -34,17 +35,11 @@ _builder.BuildTopDescriptorsAndMessages(
 )
 if not _descriptor._USE_C_DESCRIPTORS:
     _globals["DESCRIPTOR"]._loaded_options = None
-    _globals["DESCRIPTOR"]._serialized_options = (
-        b"\n\023io.lionweb.protobufB\013ChunkProtosP\001"
-    )
+    _globals["DESCRIPTOR"]._serialized_options = b"\n\023io.lionweb.protobufB\013ChunkProtosP\001"
     _globals["_PBNODE"].fields_by_name["si_annotations"]._loaded_options = None
-    _globals["_PBNODE"].fields_by_name[
-        "si_annotations"
-    ]._serialized_options = b"\020\001"
+    _globals["_PBNODE"].fields_by_name["si_annotations"]._serialized_options = b"\020\001"
     _globals["_PBCONTAINMENT"].fields_by_name["si_children"]._loaded_options = None
-    _globals["_PBCONTAINMENT"].fields_by_name[
-        "si_children"
-    ]._serialized_options = b"\020\001"
+    _globals["_PBCONTAINMENT"].fields_by_name["si_children"]._serialized_options = b"\020\001"
     _globals["_PBCHUNK"]._serialized_start = 65
     _globals["_PBCHUNK"]._serialized_end = 311
     _globals["_PBLANGUAGE"]._serialized_start = 313

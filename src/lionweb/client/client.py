@@ -1,4 +1,4 @@
-from typing import TYPE_CHECKING, List, Optional
+from typing import TYPE_CHECKING
 
 import requests
 from pydantic import BaseModel
@@ -22,31 +22,26 @@ class RepositoryConfiguration(BaseModel):
 
 
 class Client:
-
     def __init__(
         self,
         lionweb_version=LionWebVersion.current_version(),
         server_url="http://localhost:3005",
         client_id="lwpython",
-        repository_name: Optional[str] = "default",
-        serialization: Optional[JsonSerialization] = None,
+        repository_name: str | None = "default",
+        serialization: JsonSerialization | None = None,
         unavailable_parent_policy: UnavailableNodePolicy = UnavailableNodePolicy.PROXY_NODES,
         unavailable_children_policy: UnavailableNodePolicy = UnavailableNodePolicy.PROXY_NODES,
     ):
         if not isinstance(client_id, str):
             raise ValueError(f"client_id should be a string, but it is {client_id}")
         if not isinstance(repository_name, str):
-            raise ValueError(
-                f"repository_name should be a string, but it is {repository_name}"
-            )
+            raise ValueError(f"repository_name should be a string, but it is {repository_name}")
         self._lionweb_version = lionweb_version
         self._server_url = server_url
         self._client_id = client_id
         self._repository_name = repository_name
         if serialization is None:
-            self._serialization = create_standard_json_serialization(
-                self._lionweb_version
-            )
+            self._serialization = create_standard_json_serialization(self._lionweb_version)
         else:
             self._serialization = serialization
         self._serialization.unavailable_parent_policy = unavailable_parent_policy
@@ -128,7 +123,7 @@ class Client:
     def create_partition(self, node: Node):
         self.create_partitions([node])
 
-    def create_partitions(self, nodes: List["Node"]):
+    def create_partitions(self, nodes: list["Node"]):
         for n in nodes:
             if len(n.get_children(containment=None)) > 0:
                 raise ValueError("Cannot store a node with children as a new partition")
@@ -144,7 +139,7 @@ class Client:
         if response.status_code != 200:
             raise ValueError("Error:", response.status_code, response.text)
 
-    def delete_partitions(self, node_ids: List[str]):
+    def delete_partitions(self, node_ids: list[str]):
         if len(node_ids) == 0:
             return
 
@@ -154,13 +149,11 @@ class Client:
             "repository": self._repository_name,
             "clientId": self._client_id,
         }
-        response = requests.post(
-            url, params=query_params, json=node_ids, headers=headers
-        )
+        response = requests.post(url, params=query_params, json=node_ids, headers=headers)
         if response.status_code != 200:
             raise ValueError("Error:", response.status_code, response.text)
 
-    def ids(self, count: Optional[int] = None) -> List[str]:
+    def ids(self, count: int | None = None) -> list[str]:
         url = f"{self._server_url}/bulk/ids"
         headers = {"Content-Type": "application/json"}
         query_params = {
@@ -174,7 +167,7 @@ class Client:
             raise ValueError("Error:", response.status_code, response.text)
         return response.json()["ids"]
 
-    def store(self, nodes: List["ClassifierInstance"]):
+    def store(self, nodes: list["ClassifierInstance"]):
         url = f"{self._server_url}/bulk/store"
         headers = {"Content-Type": "application/json"}
         query_params = {
@@ -186,14 +179,14 @@ class Client:
         if response.status_code != 200:
             raise ValueError("Error:", response.status_code, response.text)
 
-    def retrieve(self, ids: List[str], depth_limit: Optional[int] = None):
+    def retrieve(self, ids: list[str], depth_limit: int | None = None):
         if not self._is_list_of_strings(ids):
             raise ValueError(f"ids should be a list of strings, but we got {ids}")
         data = self._retrieve_raw(ids, depth_limit=depth_limit)
         nodes = self._serialization.deserialize_json_to_nodes(data["chunk"])
         return nodes
 
-    def _retrieve_raw(self, ids: List[str], depth_limit: Optional[int] = None):
+    def _retrieve_raw(self, ids: list[str], depth_limit: int | None = None):
         if not self._is_list_of_strings(ids):
             raise ValueError(f"ids should be a list of strings, but we got {ids}")
         url = f"{self._server_url}/bulk/retrieve"
@@ -204,13 +197,9 @@ class Client:
         }
         if depth_limit is not None:
             if not isinstance(depth_limit, int):
-                raise ValueError(
-                    f"depth_limit should be an int, but it is {depth_limit}"
-                )
+                raise ValueError(f"depth_limit should be an int, but it is {depth_limit}")
             query_params["depthLimit"] = str(depth_limit)
-        response = requests.post(
-            url, params=query_params, json={"ids": ids}, headers=headers
-        )
+        response = requests.post(url, params=query_params, json={"ids": ids}, headers=headers)
         # Check response
         if response.status_code == 200:
             data = response.json()
@@ -255,14 +244,14 @@ class Client:
     # Convenience methods                               #
     #####################################################
 
-    def retrieve_partition(self, id: str, depth_limit: Optional[int] = None):
+    def retrieve_partition(self, id: str, depth_limit: int | None = None):
         res = self.retrieve([id], depth_limit=depth_limit)
         roots = [n for n in res if res.get_parent() is None]
         if len(roots) != 1:
             raise ValueError()
         return roots[0]
 
-    def retrieve_node(self, id: str, depth_limit: Optional[int] = None):
+    def retrieve_node(self, id: str, depth_limit: int | None = None):
         from lionweb.model.impl.proxy_node import ProxyNode
 
         retrieved_nodes = self.retrieve([id], depth_limit=depth_limit)
@@ -278,12 +267,12 @@ class Client:
             raise ValueError(f"Expected one root, but found {len(roots)}")
         return roots[0]
 
-    def get_ancestors_ids(self, node_id: str) -> List[str]:
+    def get_ancestors_ids(self, node_id: str) -> list[str]:
         """
         Retrieve the list of ancestor node IDs for a given node ID.
         """
         result = []
-        current_node_id: Optional[str] = node_id
+        current_node_id: str | None = node_id
 
         while current_node_id:
             current_node_id = self.get_parent_id(current_node_id)
@@ -299,7 +288,7 @@ class Client:
         else:
             return ancestors[-1]
 
-    def get_parent_id(self, node_id: str) -> Optional[str]:
+    def get_parent_id(self, node_id: str) -> str | None:
         """
         Retrieve the parent node ID of a given node ID.
         """
@@ -314,7 +303,6 @@ class Client:
     #####################################################
 
     def bulk_import_using_json(self, bulk_import: "BulkImport"):
-
         body_attach_points = []
 
         for attach_point in bulk_import.get_attach_points():
@@ -332,11 +320,9 @@ class Client:
 
         from lionweb.serialization import LowLevelJsonSerialization
 
-        serialized_chunk_as_json = (
-            LowLevelJsonSerialization().serialize_to_json_element(
-                LowLevelJsonSerialization.group_nodes_into_serialization_block(
-                    bulk_import.get_nodes(), self._lionweb_version
-                )
+        serialized_chunk_as_json = LowLevelJsonSerialization().serialize_to_json_element(
+            LowLevelJsonSerialization.group_nodes_into_serialization_block(
+                bulk_import.get_nodes(), self._lionweb_version
             )
         )
 

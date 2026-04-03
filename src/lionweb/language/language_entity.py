@@ -15,9 +15,9 @@ class LanguageEntity(M3Node[T], NamespacedEntity, IKeyed[T]):
     def __init__(
         self,
         lion_web_version: Optional["LionWebVersion"] = None,
-        language: Optional[Language] = None,
-        name: Optional[str] = None,
-        id: Optional[str] = None,
+        language: Language | None = None,
+        name: str | None = None,
+        id: str | None = None,
     ):
         if language and not isinstance(language, Language):
             raise ValueError()
@@ -39,7 +39,7 @@ class LanguageEntity(M3Node[T], NamespacedEntity, IKeyed[T]):
             self.set_parent(None)
 
     @property
-    def language(self) -> Optional[Language]:
+    def language(self) -> Language | None:
         parent = self.get_parent()
         if parent is None:
             return None
@@ -47,22 +47,22 @@ class LanguageEntity(M3Node[T], NamespacedEntity, IKeyed[T]):
             return parent
         raise ValueError("The parent of this LanguageEntity is not a Language")
 
-    def get_name(self) -> Optional[str]:
-        return cast(Optional[str], self.get_property_value(property="name"))
+    def get_name(self) -> str | None:
+        return cast(str | None, self.get_property_value(property="name"))
 
-    def set_name(self, name: Optional[str]) -> T:
+    def set_name(self, name: str | None) -> T:
         self.set_property_value(property="name", value=name)
         return cast(T, self)
 
     @property
-    def name(self) -> Optional[str]:
+    def name(self) -> str | None:
         return self.get_name()
 
     @name.setter
     def name(self, new_value):
         self.set_name(new_value)
 
-    def get_container(self) -> Optional[NamespaceProvider]:
+    def get_container(self) -> NamespaceProvider | None:
         parent = self.get_parent()
         if parent is None:
             return None

@@ -1,1 +1,0 @@
-docker build -t model_repo_for_lwpython_tests -f tests/docker/Dockerfile tests/docker

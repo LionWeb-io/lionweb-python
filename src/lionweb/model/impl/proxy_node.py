@@ -21,7 +21,7 @@ class ProxyNode(Node):
         raise self.CannotDoBecauseProxyException(self.id)
 
     class CannotDoBecauseProxyException(Exception):
-        def __init__(self, node_id: Optional[str]):
+        def __init__(self, node_id: str | None):
             super().__init__(
                 f"Replace the proxy node with a real node to perform this operation (nodeID: {node_id})"
             )

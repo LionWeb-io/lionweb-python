@@ -4,7 +4,6 @@ from lionweb.language import Reference
 
 
 class ReferenceTest(unittest.TestCase):
-
     def test_key_property(self):
         r1 = Reference()
         r1.key = "k1"

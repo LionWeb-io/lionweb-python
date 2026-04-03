@@ -1,5 +1,6 @@
 from abc import ABC, abstractmethod
-from typing import TYPE_CHECKING, Collection, Generic, List, Optional, TypeVar
+from collections.abc import Collection
+from typing import TYPE_CHECKING, Generic, Optional, TypeVar
 
 from lionweb.model.has_feature_values import HasFeatureValues
 
@@ -13,7 +14,7 @@ class ClassifierInstance(Generic[T], HasFeatureValues, ABC):
         from lionweb.model.annotation_instance import AnnotationInstance
 
     @abstractmethod
-    def get_annotations(self, annotation: Optional["Annotation"] = None) -> List:
+    def get_annotations(self, annotation: Optional["Annotation"] = None) -> list:
         pass
 
     @abstractmethod
@@ -25,12 +26,12 @@ class ClassifierInstance(Generic[T], HasFeatureValues, ABC):
         pass
 
     @property
-    def id(self) -> Optional[str]:
+    def id(self) -> str | None:
         """The unique identifier of this classifier instance."""
         return self.get_id()
 
     @abstractmethod
-    def get_id(self) -> Optional[str]:
+    def get_id(self) -> str | None:
         """Deprecated: the id property should be used instead."""
         pass
 
@@ -65,9 +66,7 @@ class ClassifierInstance(Generic[T], HasFeatureValues, ABC):
                     annotation, include_annotations, result
                 )
         for child in self.get_children():
-            ClassifierInstance.collect_self_and_descendants(
-                child, include_annotations, result
-            )
+            ClassifierInstance.collect_self_and_descendants(child, include_annotations, result)
 
     def __hash__(self):
         return hash(self.id)

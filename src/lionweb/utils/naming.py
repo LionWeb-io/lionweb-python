@@ -4,9 +4,7 @@ from lionweb.utils.invalid_name import InvalidName
 
 
 class Naming:
-    QUALIFIED_NAME_PATTERN = re.compile(
-        r"^[a-zA-Z][a-zA-Z0-9_]*(\.[a-zA-Z][a-zA-Z0-9_]*)*$"
-    )
+    QUALIFIED_NAME_PATTERN = re.compile(r"^[a-zA-Z][a-zA-Z0-9_]*(\.[a-zA-Z][a-zA-Z0-9_]*)*$")
 
     @staticmethod
     def validate_qualified_name(qualified_name: str) -> None:

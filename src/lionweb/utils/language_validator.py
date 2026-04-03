@@ -1,4 +1,4 @@
-from typing import List, Optional, cast
+from typing import cast
 
 from lionweb.language.annotation import Annotation
 from lionweb.language.classifier import Classifier
@@ -14,7 +14,6 @@ from lionweb.utils.validator import Validator
 
 
 class LanguageValidator(Validator):
-
     @staticmethod
     def ensure_is_valid(language: Language):
         vr = LanguageValidator().validate(language)
@@ -28,12 +27,8 @@ class LanguageValidator(Validator):
 
     def validate_classifier(self, result: ValidationResult, classifier: Classifier):
         for feature in classifier.get_features():
-            result.add_error_if(
-                feature.get_name() is None, "Simple name not set", feature
-            )
-            result.add_error_if(
-                feature.get_container() is None, "Container not set", feature
-            )
+            result.add_error_if(feature.get_name() is None, "Simple name not set", feature)
+            result.add_error_if(feature.get_container() is None, "Container not set", feature)
             result.add_error_if(
                 feature.get_container() is not None
                 and isinstance(feature.get_container(), Node)
@@ -83,9 +78,7 @@ class LanguageValidator(Validator):
 
     def validate(self, language: Language) -> ValidationResult:
         result = NodeTreeValidator().validate(language)
-        result.add_error_if(
-            language.get_name() is None, "Qualified name not set", language
-        )
+        result.add_error_if(language.get_name() is None, "Qualified name not set", language)
 
         self.validate_names_are_unique(language.get_elements(), result)
         self.validate_keys_are_not_null(language, result)
@@ -93,9 +86,7 @@ class LanguageValidator(Validator):
 
         for el in language.get_elements():
             result.add_error_if(el.get_name() is None, "Simple name not set", el)
-            result.add_error_if(
-                el.get_name() == "", "Simple name set to empty string", el
-            )
+            result.add_error_if(el.get_name() == "", "Simple name set to empty string", el)
             result.add_error_if(el.language is None, "Language not set", el)
             result.add_error_if(
                 el.language is not None and el.language != language,
@@ -119,7 +110,7 @@ class LanguageValidator(Validator):
         return result
 
     def validate_names_are_unique(self, elements, result: ValidationResult):
-        elements_by_name: dict[str, List[object]] = {}
+        elements_by_name: dict[str, list[object]] = {}
         for el in elements:
             if el.get_name():
                 elements_by_name.setdefault(el.get_name(), []).append(el)
@@ -138,7 +129,7 @@ class LanguageValidator(Validator):
                     result.add_error("Key should not be null", n)
 
     def validate_keys_are_unique(self, language: Language, result: ValidationResult):
-        unique_keys: dict[str, Optional[str]] = {}
+        unique_keys: dict[str, str | None] = {}
         for n in language.this_and_all_descendants():
             from lionweb.language.ikeyed import IKeyed
 
@@ -159,9 +150,7 @@ class LanguageValidator(Validator):
     def check_ancestors(self, concept: Concept, validation_result: ValidationResult):
         self.check_ancestors_helper(set(), concept, validation_result, True)
 
-    def check_annotates(
-        self, annotation: Annotation, validation_result: ValidationResult
-    ):
+    def check_annotates(self, annotation: Annotation, validation_result: ValidationResult):
         validation_result.add_error_if(
             annotation.get_effectively_annotated() is None,
             "An annotation should specify annotates or inherit it",
@@ -170,8 +159,7 @@ class LanguageValidator(Validator):
         validation_result.add_error_if(
             annotation.extended_annotation is not None
             and annotation.annotates is not None
-            and annotation.annotates
-            != cast(Annotation, annotation.extended_annotation).annotates,
+            and annotation.annotates != cast(Annotation, annotation.extended_annotation).annotates,
             "When a sub annotation specifies a value for annotates, it must be the same value the super annotation specifies",
             annotation,
         )
@@ -225,9 +213,7 @@ class LanguageValidator(Validator):
         else:
             raise ValueError()
 
-    def check_interfaces_cycles(
-        self, iface: Interface, validation_result: ValidationResult
-    ):
+    def check_interfaces_cycles(self, iface: Interface, validation_result: ValidationResult):
         if iface in iface.all_extended_interfaces():
             validation_result.add_error(
                 "Cyclic hierarchy found: the interface extends itself", iface

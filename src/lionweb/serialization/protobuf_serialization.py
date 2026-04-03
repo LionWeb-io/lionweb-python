@@ -1,30 +1,35 @@
-from typing import TYPE_CHECKING, Dict, List, Optional, Set
+from typing import TYPE_CHECKING
 
 from lionweb.lionweb_version import LionWebVersion
 from lionweb.serialization.data import LanguageVersion
-from lionweb.serialization.data.serialized_reference_value import \
-    SerializedReferenceValueEntry
-from lionweb.serialization.deserialization_exception import \
-    DeserializationException
-from lionweb.serialization.proto import (PBChunk, PBContainment, PBLanguage,
-                                         PBMetaPointer, PBNode, PBProperty,
-                                         PBReference, PBReferenceValue)
+from lionweb.serialization.data.serialized_reference_value import SerializedReferenceValueEntry
+from lionweb.serialization.deserialization_exception import DeserializationException
+from lionweb.serialization.proto import (
+    PBChunk,
+    PBContainment,
+    PBLanguage,
+    PBMetaPointer,
+    PBNode,
+    PBProperty,
+    PBReference,
+    PBReferenceValue,
+)
 
 from ..model import ClassifierInstance
 from ..model.impl.proxy_node import ProxyNode
 from .abstract_serialization import AbstractSerialization
 
 if TYPE_CHECKING:
-    from lionweb.serialization import (AbstractSerialization, MetaPointer,
-                                       SerializationChunk,
-                                       SerializedClassifierInstance)
+    from lionweb.serialization import (
+        AbstractSerialization,
+        MetaPointer,
+        SerializationChunk,
+        SerializedClassifierInstance,
+    )
 
 
 class ProtoBufSerialization(AbstractSerialization):
-
-    def __init__(
-        self, lionweb_version: LionWebVersion = LionWebVersion.current_version()
-    ) -> None:
+    def __init__(self, lionweb_version: LionWebVersion = LionWebVersion.current_version()) -> None:
         super().__init__(lionweb_version=lionweb_version)
         self._chunk_instance = PBChunk()  # Reusable instance
 
@@ -35,24 +40,20 @@ class ProtoBufSerialization(AbstractSerialization):
         return self._chunk_instance
 
     def deserialize_chunk_from_bytes(self, data: bytes) -> "SerializationChunk":
-        return self._deserialize_pbchunk_to_serialization_chunk(
-            self._read_pbchunk_from_bytes(data)
-        )
+        return self._deserialize_pbchunk_to_serialization_chunk(self._read_pbchunk_from_bytes(data))
 
-    def _deserialize_pbchunk_to_serialization_chunk(
-        self, chunk: PBChunk
-    ) -> "SerializationChunk":
+    def _deserialize_pbchunk_to_serialization_chunk(self, chunk: PBChunk) -> "SerializationChunk":
         # Pre-size arrays
         string_count = len(chunk.interned_strings)
         language_count = len(chunk.interned_languages)
         meta_pointer_count = len(chunk.interned_meta_pointers)
 
-        strings_array: List[Optional[str]] = [None] * (string_count + 1)
+        strings_array: list[str | None] = [None] * (string_count + 1)
         strings_array[0] = None
         for i, s in enumerate(chunk.interned_strings):
             strings_array[i + 1] = s
 
-        languages_array: List[Optional[LanguageVersion]] = [None] * (language_count + 1)
+        languages_array: list[LanguageVersion | None] = [None] * (language_count + 1)
         languages_array[0] = None
         for i, language in enumerate(chunk.interned_languages):
             key = strings_array[language.si_key]
@@ -62,24 +63,22 @@ class ProtoBufSerialization(AbstractSerialization):
 
         from .data.metapointer import MetaPointer
         from .data.serialized_chunk import SerializationChunk
-        from .data.serialized_classifier_instance import \
-            SerializedClassifierInstance
-        from .data.serialized_containment_value import \
-            SerializedContainmentValue
+        from .data.serialized_classifier_instance import SerializedClassifierInstance
+        from .data.serialized_containment_value import SerializedContainmentValue
         from .data.serialized_property_value import SerializedPropertyValue
         from .data.serialized_reference_value import SerializedReferenceValue
 
-        metapointers_array: List[MetaPointer] = [None] * meta_pointer_count  # type: ignore
+        metapointers_array: list[MetaPointer] = [None] * meta_pointer_count  # type: ignore
         for i, mp in enumerate(chunk.interned_meta_pointers):
             if mp.li_language >= len(languages_array):
                 raise DeserializationException(
                     f"Unable to deserialize meta pointer with language {mp.li_language}"
                 )
             language_version = languages_array[mp.li_language]
-            language_key: Optional[str] = (
+            language_key: str | None = (
                 language_version.key if language_version is not None else None
             )
-            language_v: Optional[str] = (
+            language_v: str | None = (
                 language_version.version if language_version is not None else None
             )
             language_version = LanguageVersion(language_key, language_v)
@@ -87,9 +86,7 @@ class ProtoBufSerialization(AbstractSerialization):
             metapointers_array[i] = meta_pointer
 
         serialization_chunk = SerializationChunk()
-        serialization_chunk.serialization_format_version = (
-            chunk.serialization_format_version
-        )
+        serialization_chunk.serialization_format_version = chunk.serialization_format_version
 
         valid_languages = [lv for lv in languages_array if lv is not None]
         for lv in valid_languages:
@@ -97,15 +94,10 @@ class ProtoBufSerialization(AbstractSerialization):
 
         # Nodes
         for n in chunk.nodes:
-
             id = strings_array[n.si_id] if n.HasField("si_id") else None
-            parent_node_id = (
-                strings_array[n.si_parent] if n.HasField("si_parent") else None
-            )
+            parent_node_id = strings_array[n.si_parent] if n.HasField("si_parent") else None
             classifier = metapointers_array[n.mpi_classifier]
-            sci = SerializedClassifierInstance(
-                id, classifier, parent_node_id=parent_node_id
-            )
+            sci = SerializedClassifierInstance(id, classifier, parent_node_id=parent_node_id)
 
             # properties
             for p in n.properties:
@@ -117,7 +109,7 @@ class ProtoBufSerialization(AbstractSerialization):
 
             # containments
             for c in n.containments:
-                children: List[Optional[str]] = []
+                children: list[str | None] = []
                 for child_index in c.si_children:
                     if child_index == 0:
                         raise DeserializationException(
@@ -134,16 +126,11 @@ class ProtoBufSerialization(AbstractSerialization):
             for r in n.references:
                 srv = SerializedReferenceValue(metapointers_array[r.mpi_meta_pointer])
                 for rv in r.values:
-
                     reference = (
-                        strings_array[rv.si_referred]
-                        if rv.HasField("si_referred")
-                        else None
+                        strings_array[rv.si_referred] if rv.HasField("si_referred") else None
                     )
                     resolve_info = (
-                        strings_array[rv.si_resolveInfo]
-                        if rv.HasField("si_resolveInfo")
-                        else None
+                        strings_array[rv.si_resolveInfo] if rv.HasField("si_resolveInfo") else None
                     )
                     entry = SerializedReferenceValueEntry(resolve_info, reference)
                     srv.add_value(entry)
@@ -157,24 +144,21 @@ class ProtoBufSerialization(AbstractSerialization):
 
         return serialization_chunk
 
-    def serialize_chunk_to_bytes(
-        self, serialization_chunk: "SerializationChunk"
-    ) -> bytes:
+    def serialize_chunk_to_bytes(self, serialization_chunk: "SerializationChunk") -> bytes:
         pb_chunk = self._serialize(serialization_chunk)
         return pb_chunk.SerializeToString()
 
     class _SerializeHelper:
-
         def __init__(self) -> None:
-            self.meta_pointers: List[MetaPointer] = []
-            self.strings: List[Optional[str]] = [None]
-            self.languages: List[Optional[LanguageVersion]] = [None]
+            self.meta_pointers: list[MetaPointer] = []
+            self.strings: list[str | None] = [None]
+            self.languages: list[LanguageVersion | None] = [None]
 
-            self._meta_pointer_index: Dict[MetaPointer, int] = {}
-            self._string_index: Dict[Optional[str], int] = {None: 0}
-            self._language_index: Dict[Optional[LanguageVersion], int] = {None: 0}
+            self._meta_pointer_index: dict[MetaPointer, int] = {}
+            self._string_index: dict[str | None, int] = {None: 0}
+            self._language_index: dict[LanguageVersion | None, int] = {None: 0}
 
-        def string_indexer(self, s: Optional[str]) -> int:
+        def string_indexer(self, s: str | None) -> int:
             if s in self._string_index:
                 return self._string_index[s]
             idx = len(self.strings)
@@ -182,7 +166,7 @@ class ProtoBufSerialization(AbstractSerialization):
             self._string_index[s] = idx
             return idx
 
-        def language_indexer(self, lang: Optional[LanguageVersion]) -> int:
+        def language_indexer(self, lang: LanguageVersion | None) -> int:
             if lang in self._language_index:
                 return self._language_index[lang]
             idx = len(self.languages)
@@ -222,9 +206,7 @@ class ProtoBufSerialization(AbstractSerialization):
             # containments
             for c in n.containments:
                 pbc = PBContainment()
-                pbc.si_children.extend(
-                    self.string_indexer(cid) for cid in c.children_ids
-                )
+                pbc.si_children.extend(self.string_indexer(cid) for cid in c.children_ids)
                 pbc.mpi_meta_pointer = self.meta_pointer_indexer(c.meta_pointer)
                 b.containments.append(pbc)
 
@@ -250,7 +232,7 @@ class ProtoBufSerialization(AbstractSerialization):
     def serialize_tree(self, classifier_instance: ClassifierInstance) -> PBChunk:
         if isinstance(classifier_instance, ProxyNode):
             raise ValueError("Proxy nodes cannot be serialized")
-        classifier_instances: "set[ClassifierInstance]" = set()
+        classifier_instances: set[ClassifierInstance] = set()
         ClassifierInstance.collect_self_and_descendants(
             classifier_instance, True, classifier_instances
         )
@@ -260,13 +242,11 @@ class ProtoBufSerialization(AbstractSerialization):
 
     def _serialize(self, serialization_chunk: "SerializationChunk") -> PBChunk:
         chunk = PBChunk()
-        chunk.serialization_format_version = (
-            serialization_chunk.serialization_format_version
-        )
+        chunk.serialization_format_version = serialization_chunk.serialization_format_version
 
         helper = self._SerializeHelper()
 
-        instances: List[SerializedClassifierInstance] = (
+        instances: list[SerializedClassifierInstance] = (
             serialization_chunk.get_classifier_instances()
         )
         for inst in instances:
@@ -296,24 +276,22 @@ class ProtoBufSerialization(AbstractSerialization):
         return chunk
 
     def serialize_nodes_to_bytes(
-        self, classifier_instances: List[ClassifierInstance] | ClassifierInstance
+        self, classifier_instances: list[ClassifierInstance] | ClassifierInstance
     ) -> bytes:
         if isinstance(classifier_instances, ClassifierInstance):
             classifier_instances = [classifier_instances]
         chunk = self.serialize_nodes_to_serialization_chunk(classifier_instances)
         return self.serialize_chunk_to_bytes(chunk)
 
-    def serialize_trees_to_bytes(self, roots: List[ClassifierInstance]) -> bytes:
+    def serialize_trees_to_bytes(self, roots: list[ClassifierInstance]) -> bytes:
         from lionweb.model.impl.proxy_node import ProxyNode
 
-        nodes_ids: Set[str] = set()
-        all_nodes: List[ClassifierInstance] = []
+        nodes_ids: set[str] = set()
+        all_nodes: list[ClassifierInstance] = []
 
         for root in roots:
-            classifier_instances: List[ClassifierInstance] = list()
-            ClassifierInstance.collect_self_and_descendants(
-                root, True, classifier_instances
-            )
+            classifier_instances: list[ClassifierInstance] = list()
+            ClassifierInstance.collect_self_and_descendants(root, True, classifier_instances)
 
             for node in classifier_instances:
                 id = node.id
@@ -331,6 +309,6 @@ class ProtoBufSerialization(AbstractSerialization):
         filtered_nodes = [node for node in all_nodes if not isinstance(node, ProxyNode)]
         return self.serialize_nodes_to_bytes(filtered_nodes)
 
-    def deserialize_bytes_to_nodes(self, data: bytes) -> List[ClassifierInstance]:
+    def deserialize_bytes_to_nodes(self, data: bytes) -> list[ClassifierInstance]:
         chunk = self.deserialize_chunk_from_bytes(data)
         return self.deserialize_serialization_chunk(chunk)

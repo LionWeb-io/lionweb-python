@@ -3,8 +3,7 @@ from pathlib import Path
 from typing import cast
 
 from lionweb import LionWebVersion
-from lionweb.language import (Language, LanguageFactory, LionCoreBuiltins,
-                              Multiplicity)
+from lionweb.language import Language, LanguageFactory, LionCoreBuiltins, Multiplicity
 from lionweb.model import get_root
 from lionweb.self.lioncore import LionCore
 from lionweb.serialization import create_standard_json_serialization
@@ -12,7 +11,6 @@ from lionweb.utils.language_comparator import compare_languages
 
 
 class DefinitionTest(unittest.TestCase):
-
     def test_language_definition(self):
         factory = LanguageFactory(
             lw_version=LionWebVersion.V2023_1,
@@ -35,9 +33,7 @@ class DefinitionTest(unittest.TestCase):
             ["MissingASTTransformation", "FailingASTTransformation"],
         )
         (
-            factory.annotation(
-                "PlaceholderNode", LionCore.get_concept(LionWebVersion.V2023_1)
-            )
+            factory.annotation("PlaceholderNode", LionCore.get_concept(LionWebVersion.V2023_1))
             .reference("originalNode", ast_node, Multiplicity.OPTIONAL)
             .property("type", placeholder_node_type, Multiplicity.REQUIRED)
             .property(
@@ -61,9 +57,7 @@ class DefinitionTest(unittest.TestCase):
         issue_type = factory.enumeration(
             "IssueType", ["LEXICAL", "SYNTACTIC", "SEMANTIC", "TRANSLATION"]
         )
-        issue_severity = factory.enumeration(
-            "IssueSeverity", ["ERROR", "WARNING", "INFO"]
-        )
+        issue_severity = factory.enumeration("IssueSeverity", ["ERROR", "WARNING", "INFO"])
 
         (
             factory.concept("Issue")
@@ -149,9 +143,7 @@ class DefinitionTest(unittest.TestCase):
 
         p = a.get_property_by_name("type")
         self.assertEqual(False, p.optional)
-        self.assertEqual(
-            language.get_enumeration_by_name("PlaceholderNodeType"), p.type
-        )
+        self.assertEqual(language.get_enumeration_by_name("PlaceholderNodeType"), p.type)
 
         p = a.get_property_by_name("message")
         self.assertEqual(False, p.optional)
@@ -233,9 +225,7 @@ class DefinitionTest(unittest.TestCase):
             key="com_strumenta_starlasu-PlaceholderNode-PlaceholderNodeType-key",
         )
         (
-            factory.annotation(
-                "PlaceholderNode", LionCore.get_concept(LionWebVersion.V2023_1)
-            )
+            factory.annotation("PlaceholderNode", LionCore.get_concept(LionWebVersion.V2023_1))
             .reference("originalNode", ast_node, Multiplicity.OPTIONAL)
             .property("type", placeholder_node_type, Multiplicity.REQUIRED)
             .property(

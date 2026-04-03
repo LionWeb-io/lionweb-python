@@ -1,4 +1,4 @@
-from typing import List, Optional
+from typing import Optional
 
 from serialization.simple_node import SimpleNode
 
@@ -8,9 +8,7 @@ from lionweb.model.node import Node
 
 
 class ContainerNode(SimpleNode):
-    def __init__(
-        self, contained: Optional["ContainerNode"] = None, id: Optional[str] = None
-    ):
+    def __init__(self, contained: Optional["ContainerNode"] = None, id: str | None = None):
         super().__init__()
         self.contained = contained
         if id:
@@ -23,7 +21,7 @@ class ContainerNode(SimpleNode):
 
         return RefsLanguage.CONTAINER_NODE
 
-    def concrete_get_children(self, containment: Containment) -> List[Node]:
+    def concrete_get_children(self, containment: Containment) -> list[Node]:
         if containment.get_name() == "contained":
             return [self.contained] if self.contained else []
         return super().concrete_get_children(containment)

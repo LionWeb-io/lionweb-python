@@ -5,7 +5,6 @@ from lionweb.language.enumeration_literal import EnumerationLiteral
 
 
 class M3NodeTest(unittest.TestCase):
-
     def test_to_string_enumeration_literal_without_id(self):
         literal = EnumerationLiteral()
         self.assertEqual(str(literal), "EnumerationLiteral[None]")

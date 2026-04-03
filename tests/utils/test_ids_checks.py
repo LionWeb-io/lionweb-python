@@ -4,7 +4,6 @@ from lionweb.utils import is_valid_id
 
 
 class TestIDsCheck(unittest.TestCase):
-
     def test_positive_case(self):
         self.assertTrue(is_valid_id("foo"))
 
