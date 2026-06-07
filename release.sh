@@ -14,4 +14,4 @@ rm -Rf dist
 python -m build
 
 # Upload to PyPI
-twine upload --repository custom-pypi --config-file ~/.pypirc  --non-interactive dist/*
+twine upload --config-file ~/.pypirc  --non-interactive dist/*
