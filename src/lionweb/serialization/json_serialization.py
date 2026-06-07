@@ -12,7 +12,9 @@ from lionweb.serialization.low_level_json_serialization import (
 
 
 class JsonSerialization(AbstractSerialization):
-    def __init__(self, lionweb_version: LionWebVersion = LionWebVersion.current_version()):
+    """LionWeb (de)serialization to/from the standard JSON wire format."""
+
+    def __init__(self, lionweb_version: LionWebVersion = LionWebVersion.current_version()) -> None:
         super().__init__(lionweb_version=lionweb_version)
 
     def serialize_trees_to_json_element(self, roots: list[ClassifierInstance]) -> JsonElement:

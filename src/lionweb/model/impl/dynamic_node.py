@@ -10,8 +10,25 @@ from lionweb.model.impl.dynamic_classifier_instance import DynamicClassifierInst
 from lionweb.model.node import Node
 
 
+class ContainmentFeatureNotFoundError(RuntimeError):
+    """Raised when the containment feature used to hold a node within its parent
+    cannot be located among the parent's containments.
+
+    Args:
+        node: The node whose containment feature could not be found.
+    """
+
+    def __init__(self, node: Node):
+        super().__init__("Unable to find the containment feature")
+        self.node = node
+
+
 class DynamicNode(DynamicClassifierInstance, Node, HasSettableParent):
-    def __init__(self, id: str | None = None, concept: Optional["Concept"] = None):
+    """A generic, reflective implementation of Node backed by a
+    DynamicClassifierInstance, suitable for any Concept definition.
+    """
+
+    def __init__(self, id: str | None = None, concept: Optional["Concept"] = None) -> None:
         self._id = id
         self.concept = concept
         self.parent: Node | None = None
@@ -27,7 +44,7 @@ class DynamicNode(DynamicClassifierInstance, Node, HasSettableParent):
     def get_id(self) -> str | None:
         return self._id
 
-    def set_concept(self, concept: "Concept"):
+    def set_concept(self, concept: "Concept") -> None:
         self.concept = concept
 
     def get_parent(self) -> Node | None:
@@ -44,9 +61,9 @@ class DynamicNode(DynamicClassifierInstance, Node, HasSettableParent):
         for containment in self.parent.get_classifier().all_containments():
             if any(child == self for child in self.parent.get_children(containment)):
                 return containment
-        raise RuntimeError("Unable to find the containment feature")
+        raise ContainmentFeatureNotFoundError(self)
 
-    def set_parent(self, parent: Optional["ClassifierInstance"]):
+    def set_parent(self, parent: Optional["ClassifierInstance"]) -> None:
         self.parent = cast(Node | None, parent)
 
     def __eq__(self, other):

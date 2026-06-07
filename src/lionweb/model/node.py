@@ -72,6 +72,18 @@ def _shallow_annotations_equality(annotations1: list, annotations2: list) -> boo
     )
 
 
+class CircularHierarchyError(RuntimeError):
+    """Raised when a node is found to be its own ancestor while walking up the parent chain.
+
+    Args:
+        node: The node at which the circularity was detected.
+    """
+
+    def __init__(self, node: "Node"):
+        super().__init__("A circular hierarchy has been identified")
+        self.node = node
+
+
 class Node(ClassifierInstance["Concept"], ABC):
     """
     A node is an instance of a Concept. It contains all the values associated with that instance.
@@ -110,7 +122,7 @@ class Node(ClassifierInstance["Concept"], ABC):
                 ancestors.append(curr)
                 curr = curr.get_parent()
             else:
-                raise RuntimeError("A circular hierarchy has been identified")
+                raise CircularHierarchyError(curr)
         return ancestors[-1]
 
     def is_root(self) -> bool:

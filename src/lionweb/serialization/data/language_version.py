@@ -2,6 +2,18 @@ import threading
 from typing import ClassVar, Self
 
 
+class ImmutableInstanceError(RuntimeError):
+    """Raised when attempting to mutate an immutable, interned instance.
+
+    Args:
+        class_name: The name of the class whose instance was mutated.
+    """
+
+    def __init__(self, class_name: str):
+        super().__init__(f"{class_name} instances are immutable after creation")
+        self.class_name = class_name
+
+
 class LanguageVersion:
     """
     The pair Language Key and Language Version identify a specific version of a language.
@@ -88,14 +100,24 @@ class LanguageVersion:
     def get_key(self) -> str | None:
         return self._key
 
-    def set_key(self, key: str):
-        raise RuntimeError("LanguageVersion instances are immutable after creation")
+    def set_key(self, key: str) -> None:
+        """Always raises, since instances are immutable.
+
+        Raises:
+            ImmutableInstanceError: Always.
+        """
+        raise ImmutableInstanceError("LanguageVersion")
 
     def get_version(self) -> str | None:
         return self._version
 
-    def set_version(self, version: str):
-        raise RuntimeError("LanguageVersion instances are immutable after creation")
+    def set_version(self, version: str) -> None:
+        """Always raises, since instances are immutable.
+
+        Raises:
+            ImmutableInstanceError: Always.
+        """
+        raise ImmutableInstanceError("LanguageVersion")
 
     @property
     def key(self) -> str | None:

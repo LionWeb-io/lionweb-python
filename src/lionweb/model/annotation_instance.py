@@ -14,7 +14,17 @@ class AnnotationInstance(ClassifierInstance, ABC):
 
     @abstractmethod
     def get_annotation_definition(self) -> "Annotation":
+        """Returns the Annotation this instance is an instance of.
+
+        Returns:
+            Annotation: The annotation definition for this instance.
+        """
         pass
 
     def get_classifier(self) -> "Annotation":
+        """Returns the classifier of this instance, i.e. its annotation definition.
+
+        Returns:
+            Annotation: The annotation definition for this instance.
+        """
         return self.get_annotation_definition()

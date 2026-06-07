@@ -8,6 +8,13 @@ T = TypeVar("T")
 
 
 class ClassifierInstance(Generic[T], HasFeatureValues, ABC):
+    """An instance of a Classifier (a Concept or an Annotation).
+
+    This is the base abstraction shared by Nodes and AnnotationInstances: it
+    provides access to the id, the classifier, the parent, the annotations and
+    the feature values (inherited from :class:`HasFeatureValues`).
+    """
+
     if TYPE_CHECKING:
         from lionweb.language.annotation import Annotation
         from lionweb.language.classifier import Classifier
@@ -48,9 +55,17 @@ class ClassifierInstance(Generic[T], HasFeatureValues, ABC):
         self: "ClassifierInstance",
         include_annotations: bool,
         result: Collection["ClassifierInstance"],
-    ):
-        """
-        Collects `self` and all its descendants into `result`.
+    ) -> None:
+        """Collects `self` and all its descendants into `result`.
+
+        Args:
+            self: The classifier instance to start the collection from.
+            include_annotations: Whether annotations should also be visited and collected.
+            result: A mutable collection (list or set) into which the instances are added.
+
+        Raises:
+            ValueError: If `self` is not a ClassifierInstance, or `result` is neither
+                a list nor a set.
         """
         if not isinstance(self, ClassifierInstance):
             raise ValueError(f"Expecting a ClassifierInstance but got {self}")
@@ -59,7 +74,7 @@ class ClassifierInstance(Generic[T], HasFeatureValues, ABC):
         elif isinstance(result, set):
             result.add(self)
         else:
-            raise ValueError()
+            raise ValueError(f"Unsupported result collection type: {type(result).__name__}")
         if include_annotations:
             for annotation in self.get_annotations():
                 ClassifierInstance.collect_self_and_descendants(
@@ -68,5 +83,5 @@ class ClassifierInstance(Generic[T], HasFeatureValues, ABC):
         for child in self.get_children():
             ClassifierInstance.collect_self_and_descendants(child, include_annotations, result)
 
-    def __hash__(self):
+    def __hash__(self) -> int:
         return hash(self.id)

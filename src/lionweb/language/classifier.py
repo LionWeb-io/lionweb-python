@@ -11,6 +11,9 @@ T = TypeVar("T", bound=M3Node)
 
 
 class Classifier(LanguageEntity[T], NamespaceProvider):
+    """Base class for language entities that classify model nodes and declare features
+    (concepts, interfaces, annotations)."""
+
     from lionweb.language.containment import Containment
     from lionweb.language.feature import Feature
     from lionweb.language.language import Language
@@ -32,13 +35,27 @@ class Classifier(LanguageEntity[T], NamespaceProvider):
         super().__init__(lion_web_version=lion_web_version, language=language, name=name, id=id)
 
     def get_feature_by_name(self, name: str) -> Feature | None:
+        """Look up a feature (own or inherited) by its name.
+
+        Args:
+            name: The name of the feature to find.
+
+        Returns:
+            Optional[Feature]: The matching feature, or ``None`` if none is found.
+        """
         return next((f for f in self.all_features() if f.get_name() == name), None)
 
     @abstractmethod
     def direct_ancestors(self) -> list["Classifier"]:
+        """Return the classifiers this classifier directly extends or implements."""
         pass
 
     def all_ancestors(self) -> set["Classifier"]:
+        """Compute the transitive closure of all ancestor classifiers.
+
+        Returns:
+            set[Classifier]: All ancestors reachable through ``direct_ancestors``.
+        """
         result = set()
         ancestors = set(self.direct_ancestors())
         while ancestors:
@@ -49,12 +66,18 @@ class Classifier(LanguageEntity[T], NamespaceProvider):
         return result
 
     def all_features(self) -> list[Feature]:
+        """Return the own features combined with the inherited ones (own features take precedence).
+
+        Returns:
+            list[Feature]: The combined list of features.
+        """
         result = list(self.get_features())
         self.combine_features(result, self.inherited_features())
         return result
 
     @abstractmethod
     def inherited_features(self) -> list[Feature]:
+        """Return the features inherited from ancestor classifiers."""
         pass
 
     def all_properties(self) -> list[Property]:
@@ -85,6 +108,14 @@ class Classifier(LanguageEntity[T], NamespaceProvider):
         return self.get_features()
 
     def add_feature(self, feature: Feature) -> "Classifier":
+        """Add a feature (own declaration) to this classifier and set its parent.
+
+        Args:
+            feature: The feature to add.
+
+        Returns:
+            Classifier: This classifier, to allow fluent chaining.
+        """
         self.add_containment_multiple_value("features", feature)
         feature.set_parent(self)
         return self
@@ -93,6 +124,13 @@ class Classifier(LanguageEntity[T], NamespaceProvider):
         return self.qualified_name()
 
     def combine_features(self, features_a: list[Feature], features_b: list[Feature]) -> None:
+        """Append to ``features_a`` (in place) the features from ``features_b`` whose meta-pointer
+        is not already present in ``features_a``.
+
+        Args:
+            features_a: The list to extend; entries already present take precedence.
+            features_b: The candidate features to merge in.
+        """
         existing_metapointers = {MetaPointer.from_feature(f) for f in features_a}
         for f in features_b:
             meta_pointer = MetaPointer.from_feature(f)

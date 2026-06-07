@@ -12,6 +12,8 @@ T = TypeVar("T", bound=M3Node)
 
 
 class LanguageEntity(M3Node[T], NamespacedEntity, IKeyed[T]):
+    """Base class for the top-level entities declared in a Language (classifiers, data types)."""
+
     def __init__(
         self,
         lion_web_version: Optional["LionWebVersion"] = None,

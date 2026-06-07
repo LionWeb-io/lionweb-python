@@ -3,6 +3,10 @@ from typing import TYPE_CHECKING, Any, Optional, Union
 
 
 class HasFeatureValues(ABC):
+    """Interface for objects exposing property, containment, and reference values
+    associated with the features of their classifier.
+    """
+
     if TYPE_CHECKING:
         from lionweb.language import Containment, Property, Reference
         from lionweb.model import Node, ReferenceValue

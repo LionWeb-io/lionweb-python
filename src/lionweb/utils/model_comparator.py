@@ -8,13 +8,17 @@ from lionweb.model.reference_value import ReferenceValue
 
 
 class ComparisonResult:
-    def __init__(self):
-        self.differences = []
+    """Accumulates the differences found while comparing two model trees."""
 
-    def get_differences(self):
+    def __init__(self) -> None:
+        self.differences: list[str] = []
+
+    def get_differences(self) -> list[str]:
+        """Return the list of differences found so far, as human-readable strings."""
         return self.differences
 
-    def are_equivalent(self):
+    def are_equivalent(self) -> bool:
+        """Return True if no differences were recorded."""
         return len(self.differences) == 0
 
     def mark_different_ids(self, context: str, id_a: str, id_b: str):
@@ -114,17 +118,31 @@ class ComparisonResult:
     def mark_different_annotation(self, context: str, i: int):
         self.differences.append(f"{context} annotation {i} is different")
 
-    def __str__(self):
+    def __str__(self) -> str:
         return f"ComparisonResult: {self.differences}"
 
 
 class ModelComparator:
-    def __init__(self, unordered_links=None):
-        if unordered_links is None:
-            unordered_links = []
-        self.unordered_links = unordered_links
+    """Compares two model trees node-by-node, collecting differences.
 
-    def compare(self, node_a: Node, node_b: Node):
+    Containments listed in `unordered_links` are compared as sets (matched by
+    ID after sorting) rather than positionally, which is useful for links whose
+    order is not semantically significant.
+    """
+
+    def __init__(self, unordered_links: list | None = None) -> None:
+        self.unordered_links = unordered_links if unordered_links is not None else []
+
+    def compare(self, node_a: Node, node_b: Node) -> ComparisonResult:
+        """Compare two node trees and return the differences found.
+
+        Args:
+            node_a: The first tree to compare.
+            node_b: The second tree to compare.
+
+        Returns:
+            ComparisonResult: The differences found between the two trees.
+        """
         comparison_result = ComparisonResult()
         self._compare_nodes(node_a, node_b, comparison_result, "<root>")
         return comparison_result
@@ -171,9 +189,9 @@ class ModelComparator:
             else:
                 for i, (ref_a, ref_b) in enumerate(zip(value_a, value_b)):
                     if not isinstance(ref_a, ReferenceValue):
-                        raise ValueError()
+                        raise ValueError(f"Expected a ReferenceValue, got {ref_a!r}")
                     if not isinstance(ref_b, ReferenceValue):
-                        raise ValueError()
+                        raise ValueError(f"Expected a ReferenceValue, got {ref_b!r}")
                     if ref_a.get_referred_id() != ref_b.get_referred_id():
                         comparison_result.mark_different_referred_id(
                             context,

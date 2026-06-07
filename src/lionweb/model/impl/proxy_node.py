@@ -14,13 +14,16 @@ class ProxyNode(Node):
     retrieve the data necessary to properly instantiate it.
     """
 
-    def add_annotation(self, instance: "AnnotationInstance") -> None:
-        raise self.CannotDoBecauseProxyException(self.id)
-
-    def remove_annotation(self, instance: "AnnotationInstance") -> None:
-        raise self.CannotDoBecauseProxyException(self.id)
-
     class CannotDoBecauseProxyException(Exception):
+        """Raised when an operation is attempted on a ProxyNode.
+
+        A ProxyNode only holds an ID and cannot support any of the regular Node
+        operations; the proxy must be replaced with a real node first.
+
+        Args:
+            node_id: The ID of the proxy node on which the operation was attempted.
+        """
+
         def __init__(self, node_id: str | None):
             super().__init__(
                 f"Replace the proxy node with a real node to perform this operation (nodeID: {node_id})"
@@ -32,7 +35,13 @@ class ProxyNode(Node):
             raise ValueError("The node ID of a ProxyNode should not be null")
         self._id = node_id
 
-    def get_parent(self):
+    def add_annotation(self, instance: "AnnotationInstance") -> None:
+        raise self.CannotDoBecauseProxyException(self.id)
+
+    def remove_annotation(self, instance: "AnnotationInstance") -> None:
+        raise self.CannotDoBecauseProxyException(self.id)
+
+    def get_parent(self) -> Optional["Node"]:
         raise self.CannotDoBecauseProxyException(self.id)
 
     def get_property_value(self, property):

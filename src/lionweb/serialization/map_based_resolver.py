@@ -8,14 +8,22 @@ class MapBasedResolver(ClassifierInstanceResolver):
     position, so until we place them they could be a temporarily wrong ID.
     """
 
-    def __init__(self, instances_by_id: dict[str, ClassifierInstance] = {}):
-        self.instances_by_id = dict(instances_by_id)
+    def __init__(self, instances_by_id: dict[str, ClassifierInstance] | None = None) -> None:
+        """Initialize the resolver with a (copied) mapping of IDs to instances.
 
-    def resolve(self, instance_id):
+        Args:
+            instances_by_id: The initial ID-to-instance mapping. A defensive copy
+                is stored, so subsequent external mutation has no effect.
         """
-        Resolve the instance by its ID.
+        self.instances_by_id = dict(instances_by_id) if instances_by_id is not None else {}
 
-        :param instance_id: The ID of the instance to resolve.
-        :return: The instance if found, otherwise None.
+    def resolve(self, instance_id: str) -> ClassifierInstance | None:
+        """Resolve the instance by its ID.
+
+        Args:
+            instance_id: The ID of the instance to resolve.
+
+        Returns:
+            The instance if found, otherwise ``None``.
         """
         return self.instances_by_id.get(instance_id)

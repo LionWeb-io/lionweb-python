@@ -5,6 +5,10 @@ from lionweb.language.structured_data_type import StructuredDataType
 
 
 class DynamicStructuredDataTypeInstance:
+    """A generic, reflective implementation of StructuredDataTypeInstance that stores
+    field values in a dictionary keyed by Field, suitable for any StructuredDataType.
+    """
+
     def __init__(self, structured_data_type: StructuredDataType):
         if structured_data_type is None:
             raise ValueError("structuredDataType should not be null")
@@ -23,7 +27,7 @@ class DynamicStructuredDataTypeInstance:
             raise ValueError(f"Invalid field for StructuredDataType {self.structured_data_type}")
         return self.field_values.get(field)
 
-    def set_field_value(self, field: Field | str, value: Any):
+    def set_field_value(self, field: Field | str, value: Any) -> None:
         if field is None:
             raise ValueError("Field should not be null")
         my_field: Field

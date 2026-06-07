@@ -1,5 +1,6 @@
 from .abstract_serialization import AbstractSerialization
 from .archive import load_archive, process_archive
+from .classifier_resolver import ClassifierResolver, UnresolvedClassifierError
 from .data import (
     MetaPointer,
     SerializationChunk,
@@ -20,6 +21,8 @@ from .serialized_json_comparison_utils import SerializedJsonComparisonUtils
 
 __all__ = [
     "AbstractSerialization",
+    "ClassifierResolver",
+    "UnresolvedClassifierError",
     "InstantiationError",
     "JsonSerialization",
     "create_standard_json_serialization",

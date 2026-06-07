@@ -10,6 +10,10 @@ from lionweb.model.impl.dynamic_classifier_instance import DynamicClassifierInst
 
 
 class DynamicAnnotationInstance(DynamicClassifierInstance, AnnotationInstance):
+    """A generic, reflective implementation of AnnotationInstance backed by a
+    DynamicClassifierInstance, suitable for any Annotation definition.
+    """
+
     def __init__(
         self,
         id: str,
@@ -26,10 +30,10 @@ class DynamicAnnotationInstance(DynamicClassifierInstance, AnnotationInstance):
     def get_id(self) -> str | None:
         return self._id
 
-    def set_annotation(self, annotation: "Annotation"):
+    def set_annotation(self, annotation: "Annotation") -> None:
         self.annotation = annotation
 
-    def set_annotated(self, annotated: ClassifierInstance | None):
+    def set_annotated(self, annotated: ClassifierInstance | None) -> None:
         from lionweb.model.impl.dynamic_node import DynamicNode
 
         if annotated == self.annotated:

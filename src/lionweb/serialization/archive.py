@@ -13,6 +13,17 @@ def process_archive(
     filename: str | PathLike,
     chunk_processor: Callable[[int, int, "SerializationChunk"], None],
 ) -> None:
+    """Stream-process the chunks contained in a zipped LionWeb archive.
+
+    Each entry of the zip archive is read, deserialized as a protobuf
+    :class:`SerializationChunk`, and passed to ``chunk_processor`` along with
+    its index and the total number of entries.
+
+    Args:
+        filename: Path to the zip archive to process.
+        chunk_processor: Callback invoked as ``(index, total, chunk)`` for each
+            deserialized chunk.
+    """
     ps = ProtoBufSerialization(LionWebVersion.V2023_1)
     import zipfile
 
@@ -29,7 +40,15 @@ def process_archive(
             i += 1
 
 
-def load_archive(filename) -> list["SerializationChunk"]:
-    chunks = []
+def load_archive(filename: str | PathLike) -> list["SerializationChunk"]:
+    """Load all chunks from a zipped LionWeb archive into memory.
+
+    Args:
+        filename: Path to the zip archive to load.
+
+    Returns:
+        The list of deserialized chunks, in archive order.
+    """
+    chunks: list[SerializationChunk] = []
     process_archive(filename, lambda i, n, chunk: chunks.append(chunk))
     return chunks

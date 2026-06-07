@@ -4,6 +4,8 @@ from lionweb.language.link import Link
 
 
 class Containment(Link["Containment"]):
+    """A link expressing a part-whole (ownership) relationship between classifiers."""
+
     if TYPE_CHECKING:
         from lionweb.language.classifier import Classifier
         from lionweb.language.concept import Concept

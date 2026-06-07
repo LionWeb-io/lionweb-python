@@ -16,7 +16,25 @@ from lionweb.serialization.serialization_utils import SerializationUtils
 
 
 class LowLevelJsonSerialization:
+    """Translates between raw JSON elements and :class:`SerializationChunk` instances.
+
+    This class operates purely at the level of generic JSON data structures
+    (dicts, lists, primitives) and the :class:`SerializationChunk` data model,
+    without any knowledge of the LionWeb metamodel.
+    """
+
     def deserialize_serialization_block(self, json_element: JsonElement) -> SerializationChunk:
+        """Deserialize a raw JSON element into a :class:`SerializationChunk`.
+
+        Args:
+            json_element: The JSON element to deserialize, expected to be a JSON object.
+
+        Returns:
+            The deserialized :class:`SerializationChunk`.
+
+        Raises:
+            ValueError: If ``json_element`` is not a JSON object.
+        """
         serialized_chunk = SerializationChunk()
         if isinstance(json_element, dict):
             self._check_no_extra_keys(
@@ -32,44 +50,54 @@ class LowLevelJsonSerialization:
     def serialize_to_json_element(self, serialized_chunk: SerializationChunk) -> JsonObject:
         serialized_nodes = []
         for node in serialized_chunk.get_classifier_instances():
-            node_json = {
+            properties_json: list[JsonObject] = []
+            for property_value in node.properties:
+                properties_json.append(
+                    {
+                        "property": self._serialize_metapointer_to_json_element(
+                            cast(MetaPointer, property_value.get_meta_pointer())
+                        ),
+                        "value": property_value.get_value(),
+                    }
+                )
+
+            containments_json: list[JsonObject] = []
+            for children_value in node.get_containments():
+                containments_json.append(
+                    {
+                        "containment": self._serialize_metapointer_to_json_element(
+                            cast(MetaPointer, children_value.get_meta_pointer())
+                        ),
+                        "children": SerializationUtils.to_json_array(
+                            cast(list[str], children_value.get_children_ids())
+                        ),
+                    }
+                )
+
+            references_json: list[JsonObject] = []
+            for reference_value in node.references:
+                references_json.append(
+                    {
+                        "reference": self._serialize_metapointer_to_json_element(
+                            cast(MetaPointer, reference_value.get_meta_pointer())
+                        ),
+                        "targets": SerializationUtils.to_json_array_of_reference_values(
+                            reference_value.get_value()
+                        ),
+                    }
+                )
+
+            node_json: JsonObject = {
                 "id": node.id,
-                "classifier": self._serialize_metapointer_to_json_element(node.get_classifier()),
-                "properties": [],
-                "containments": [],
-                "references": [],
+                "classifier": self._serialize_metapointer_to_json_element(
+                    cast(MetaPointer, node.get_classifier())
+                ),
+                "properties": properties_json,
+                "containments": containments_json,
+                "references": references_json,
                 "annotations": [annotation_id for annotation_id in node.annotations],
                 "parent": node.get_parent_node_id(),
             }
-
-            for property_value in node.properties:
-                property_json = {
-                    "property": self._serialize_metapointer_to_json_element(
-                        property_value.get_meta_pointer()
-                    ),
-                    "value": property_value.get_value(),
-                }
-                node_json["properties"].append(property_json)
-
-            for children_value in node.get_containments():
-                children_json = {
-                    "containment": self._serialize_metapointer_to_json_element(
-                        children_value.get_meta_pointer()
-                    ),
-                    "children": SerializationUtils.to_json_array(children_value.get_children_ids()),
-                }
-                node_json["containments"].append(children_json)
-
-            for reference_value in node.references:
-                reference_json = {
-                    "reference": self._serialize_metapointer_to_json_element(
-                        reference_value.get_meta_pointer()
-                    ),
-                    "targets": SerializationUtils.to_json_array_of_reference_values(
-                        reference_value.get_value()
-                    ),
-                }
-                node_json["references"].append(reference_json)
 
             serialized_nodes.append(node_json)
 
@@ -185,7 +213,7 @@ class LowLevelJsonSerialization:
                         raise ValueError(f"Language should be an object. Found: {element}")
                     serialized_chunk.add_language(language_key_version)
                 except Exception as e:
-                    raise RuntimeError(f"Issue while deserializing {element}") from e
+                    raise DeserializationException(f"Issue while deserializing {element}") from e
         else:
             raise ValueError(f"We expected a list, we got instead: {languages}")
 
@@ -244,7 +272,9 @@ class LowLevelJsonSerialization:
             elif "containments" in json_element:
                 containments = cast(JsonArray, json_element.get("containments", []))
             else:
-                raise RuntimeError(f"Node is missing containments entry: {json_element}")
+                raise DeserializationException(
+                    f"Node is missing containments entry: {json_element}"
+                )
 
             for containment_entry in containments:
                 containment_obj = cast(JsonObject, containment_entry)

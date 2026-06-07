@@ -1,6 +1,7 @@
 import threading
 from typing import ClassVar, Self
 
+from lionweb.serialization.data.language_version import ImmutableInstanceError
 from lionweb.serialization.data.metapointer import MetaPointer
 
 
@@ -51,8 +52,13 @@ class SerializedPropertyValue:
     def meta_pointer(self) -> MetaPointer:
         return self._meta_pointer
 
-    def set_meta_pointer(self, meta_pointer: MetaPointer):
-        raise RuntimeError("SerializedPropertyValue instances are immutable after creation")
+    def set_meta_pointer(self, meta_pointer: MetaPointer) -> None:
+        """Always raises, since instances are immutable.
+
+        Raises:
+            ImmutableInstanceError: Always.
+        """
+        raise ImmutableInstanceError("SerializedPropertyValue")
 
     def get_value(self) -> str | None:
         return self._value
@@ -61,8 +67,13 @@ class SerializedPropertyValue:
     def value(self) -> str | None:
         return self._value
 
-    def set_value(self, value: str | None):
-        raise RuntimeError("SerializedPropertyValue instances are immutable after creation")
+    def set_value(self, value: str | None) -> None:
+        """Always raises, since instances are immutable.
+
+        Raises:
+            ImmutableInstanceError: Always.
+        """
+        raise ImmutableInstanceError("SerializedPropertyValue")
 
     @classmethod
     def clear_cache(cls):

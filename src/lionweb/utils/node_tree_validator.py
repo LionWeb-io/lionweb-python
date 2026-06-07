@@ -5,6 +5,13 @@ from lionweb.utils.validator import Validator
 
 
 class NodeTreeValidator(Validator):
+    """Validates a node and all its descendants.
+
+    Checks performed include: ID validity, root node being a Partition,
+    containment cardinality constraints, and uniqueness of node IDs across
+    the whole tree.
+    """
+
     def validate(self, element: Node) -> ValidationResult:
         validation_result = ValidationResult()
         self._validate_node_and_descendants(element, validation_result)

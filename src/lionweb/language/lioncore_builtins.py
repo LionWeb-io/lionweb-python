@@ -5,6 +5,12 @@ from lionweb.lionweb_version import LionWebVersion
 
 
 class LionCoreBuiltins(Language):
+    """The built-in LionCore language, providing the base primitive types (String, Boolean,
+    Integer, optionally JSON), the ``Node`` concept, and the ``INamed`` interface.
+
+    Instances are cached per :class:`LionWebVersion` and obtained via :meth:`get_instance`.
+    """
+
     if TYPE_CHECKING:
         from lionweb.language.concept import Concept
         from lionweb.language.interface import Interface

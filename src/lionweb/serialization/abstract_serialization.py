@@ -26,9 +26,19 @@ if TYPE_CHECKING:
 
 
 class AbstractSerialization:
+    """Base class for LionWeb (de)serialization, format-agnostic.
+
+    Concrete subclasses (e.g. :class:`JsonSerialization`,
+    :class:`ProtoBufSerialization`) translate between a specific wire format
+    and :class:`SerializationChunk`; this class handles the common logic of
+    converting between :class:`SerializationChunk` and live model nodes
+    (:class:`ClassifierInstance`), including topological sorting, instantiation,
+    and population of containments/references.
+    """
+
     DEFAULT_SERIALIZATION_FORMAT = LionWebVersion.current_version()
 
-    def __init__(self, lionweb_version: LionWebVersion = LionWebVersion.current_version()):
+    def __init__(self, lionweb_version: LionWebVersion = LionWebVersion.current_version()) -> None:
         from lionweb.api.local_classifier_instance_resolver import LocalClassifierInstanceResolver
 
         self.lion_web_version = lionweb_version
@@ -42,19 +52,34 @@ class AbstractSerialization:
         self.builtins_reference_dangling = False
         self.keep_null_properties = False
 
-    def enable_dynamic_nodes(self):
+    def enable_dynamic_nodes(self) -> None:
+        """Enable deserialization of arbitrary classifiers as dynamic nodes."""
         self.instantiator.enable_dynamic_nodes()
         self.primitive_values_serialization.enable_dynamic_nodes()
 
-    def register_language(self, language):
+    def register_language(self, language) -> None:
+        """Register a language so its classifiers and primitive types can be (de)serialized.
+
+        Args:
+            language: The language to register.
+        """
         self.classifier_resolver.register_language(language)
         self.primitive_values_serialization.register_language(language)
 
-    def make_builtins_reference_dangling(self):
+    def make_builtins_reference_dangling(self) -> None:
+        """Make references to LionCoreBuiltins elements serialize as dangling (no target ID)."""
         self.builtins_reference_dangling = True
 
-    def serialize_tree_to_serialization_chunk(self, root):
-        classifier_instances = []
+    def serialize_tree_to_serialization_chunk(self, root) -> SerializationChunk:
+        """Serialize a node and all its descendants into a :class:`SerializationChunk`.
+
+        Args:
+            root: The root node of the tree to serialize.
+
+        Returns:
+            The resulting serialization chunk.
+        """
+        classifier_instances: list[ClassifierInstance] = []
         self.collect_self_and_descendants(root, True, classifier_instances)
         return self.serialize_nodes_to_serialization_chunk(classifier_instances)
 
@@ -69,7 +94,22 @@ class AbstractSerialization:
             self.collect_self_and_descendants(child, True, collection)
         return collection
 
-    def serialize_nodes_to_serialization_chunk(self, classifier_instances):
+    def serialize_nodes_to_serialization_chunk(self, classifier_instances) -> SerializationChunk:
+        """Serialize a flat collection of classifier instances into a :class:`SerializationChunk`.
+
+        Annotations of the given instances are included automatically (and their
+        languages registered) even if not present in ``classifier_instances``.
+
+        Args:
+            classifier_instances: The classifier instances to serialize.
+
+        Returns:
+            The resulting serialization chunk.
+
+        Raises:
+            ValueError: If any instance is ``None``, lacks a classifier, or its
+                classifier is not part of a language.
+        """
         serialized_chunk = SerializationChunk()
         serialized_chunk.serialization_format_version = self.lion_web_version.value
 
@@ -129,6 +169,14 @@ class AbstractSerialization:
     def serialize_node(
         self, classifier_instance: ClassifierInstance
     ) -> SerializedClassifierInstance:
+        """Serialize a single classifier instance (without its descendants).
+
+        Args:
+            classifier_instance: The instance to serialize.
+
+        Returns:
+            The serialized form of the instance.
+        """
         serialized_instance = SerializedClassifierInstance(
             classifier_instance.id,
             MetaPointer.from_language_entity(classifier_instance.get_classifier()),
@@ -261,7 +309,18 @@ class AbstractSerialization:
             annotation.id for annotation in classifier_instance.get_annotations()
         ]
 
-    def deserialize_serialization_chunk(self, serialized_chunk: SerializationChunk):
+    def deserialize_serialization_chunk(
+        self, serialized_chunk: SerializationChunk
+    ) -> list[ClassifierInstance]:
+        """Deserialize a :class:`SerializationChunk` into live classifier instances.
+
+        Args:
+            serialized_chunk: The chunk to deserialize.
+
+        Returns:
+            The deserialized classifier instances (including any proxy nodes
+            created for unavailable parents/references), in the chunk's original order.
+        """
         serialized_instances = serialized_chunk.classifier_instances
         return self._deserialize_classifier_instances(self.lion_web_version, serialized_instances)
 
@@ -395,7 +454,8 @@ class AbstractSerialization:
                 if ci.get_parent_node_id() in unknown_parent_ids:
                     deserialization_status.place(ci)
             for id_ in unknown_parent_ids:
-                deserialization_status.create_proxy(id_)
+                if id_ is not None:
+                    deserialization_status.create_proxy(id_)
 
         # Place elements with no parent or already sorted parents
         while deserialization_status.how_many_sorted() < len(original_list):
@@ -436,7 +496,9 @@ class AbstractSerialization:
 
         serialized_classifier = serialized_classifier_instance.get_classifier()
         if serialized_classifier is None:
-            raise RuntimeError(f"No metaPointer available for {serialized_classifier_instance}")
+            raise DeserializationException(
+                f"No metaPointer available for {serialized_classifier_instance}"
+            )
 
         classifier = self.classifier_resolver.resolve_classifier(serialized_classifier)
 
@@ -450,11 +512,11 @@ class AbstractSerialization:
                 available_properties = [
                     MetaPointer.from_feature(p) for p in classifier.all_properties()
                 ]
-                raise RuntimeError(
+                raise DeserializationException(
                     f"Property with metaPointer {serialized_property_value.meta_pointer} not found in classifier {classifier}. Available properties: {available_properties}"
                 )
             if property.type is None:
-                raise RuntimeError("Property type should not be null")
+                raise DeserializationException("Property type should not be null")
             deserialized_value = self.primitive_values_serialization.deserialize(
                 property.type,
                 serialized_property_value.value,

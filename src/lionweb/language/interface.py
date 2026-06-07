@@ -5,6 +5,9 @@ from lionweb.language.classifier import Classifier
 
 
 class Interface(Classifier["Interface"]):
+    """A classifier that declares features to be implemented/inherited by concepts and other
+    interfaces, without being directly instantiable."""
+
     if TYPE_CHECKING:
         from lionweb.language.concept import Concept
         from lionweb.language.feature import Feature
@@ -39,7 +42,15 @@ class Interface(Classifier["Interface"]):
     def extended_interfaces(self) -> list["Interface"]:
         return self.get_extended_interfaces()
 
-    def add_extended_interface(self, extended_interface: "Interface"):
+    def add_extended_interface(self, extended_interface: "Interface") -> None:
+        """Add an interface to the list of interfaces this interface extends.
+
+        Args:
+            extended_interface: The interface to extend.
+
+        Raises:
+            ValueError: If ``extended_interface`` is ``None``.
+        """
         if not extended_interface:
             raise ValueError("extended_interface should not be null")
 
@@ -64,6 +75,11 @@ class Interface(Classifier["Interface"]):
         return list(itertools.chain(self.get_extended_interfaces()))
 
     def all_extended_interfaces(self) -> set["Interface"]:
+        """Compute the transitive closure of all interfaces extended by this interface (cycle-safe).
+
+        Returns:
+            set[Interface]: All directly and indirectly extended interfaces.
+        """
         to_avoid = {self}
         return self._all_extended_interfaces_helper(to_avoid)
 

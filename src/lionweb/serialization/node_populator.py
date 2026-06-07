@@ -17,6 +17,13 @@ from lionweb.utils.autoresolve import (
 
 
 class NodePopulator:
+    """Populates a deserialized node's containments and references from its serialized form.
+
+    This is used during deserialization, after instances have been created
+    (instantiated) but before their containment and reference features are filled in,
+    since resolving these features may require other instances to already exist.
+    """
+
     if TYPE_CHECKING:
         from lionweb.serialization.abstract_serialization import AbstractSerialization
 
@@ -26,7 +33,16 @@ class NodePopulator:
         classifier_instance_resolver: ClassifierInstanceResolver,
         deserialization_status: DeserializationStatus,
         auto_resolve_version: LionWebVersion = LionWebVersion.current_version(),
-    ):
+    ) -> None:
+        """Initialize the populator.
+
+        Args:
+            serialization: The owning serialization, providing unavailable-node policies.
+            classifier_instance_resolver: Resolver used to look up already-deserialized instances.
+            deserialization_status: The deserialization status, used to resolve/create proxies.
+            auto_resolve_version: The LionWeb version used to build the auto-resolve map
+                for LionCore and LionCoreBuiltins elements.
+        """
         from lionweb.serialization.abstract_serialization import AbstractSerialization
 
         self.serialization: AbstractSerialization = serialization
@@ -49,6 +65,12 @@ class NodePopulator:
         node: ClassifierInstance,
         serialized_classifier_instance: SerializedClassifierInstance,
     ) -> None:
+        """Populate both containments and references of a deserialized node.
+
+        Args:
+            node: The deserialized node to populate.
+            serialized_classifier_instance: The serialized form to populate it from.
+        """
         self.populate_containments(node, serialized_classifier_instance)
         self.populate_node_references(node, serialized_classifier_instance)
 
@@ -57,21 +79,33 @@ class NodePopulator:
         node: ClassifierInstance,
         serialized_classifier_instance: SerializedClassifierInstance,
     ) -> None:
+        """Populate the containment features of a deserialized node.
+
+        Args:
+            node: The deserialized node to populate.
+            serialized_classifier_instance: The serialized form providing the children IDs.
+
+        Raises:
+            DeserializationException: If a containment cannot be resolved on the
+                node's concept, or its serialized children value is null.
+        """
         concept = node.get_classifier()
         for serialized_containment_value in serialized_classifier_instance.get_containments():
             containment = concept.get_containment_by_meta_pointer(
                 serialized_containment_value.meta_pointer
             )
             if containment is None:
-                raise ValueError(
+                raise DeserializationException(
                     f"Unable to resolve containment {serialized_containment_value.meta_pointer} in concept {concept}"
                 )
 
             if serialized_containment_value.children_ids is None:
-                raise ValueError("The containment value should not be null")
+                raise DeserializationException("The containment value should not be null")
 
             deserialized_value = []
             for child_node_id in serialized_containment_value.children_ids:
+                if child_node_id is None:
+                    raise DeserializationException("A child id should not be null")
                 if (
                     self.serialization.unavailable_children_policy
                     == UnavailableNodePolicy.PROXY_NODES
@@ -93,13 +127,24 @@ class NodePopulator:
         node: ClassifierInstance,
         serialized_classifier_instance: SerializedClassifierInstance,
     ) -> None:
+        """Populate the reference features of a deserialized node.
+
+        Args:
+            node: The deserialized node to populate.
+            serialized_classifier_instance: The serialized form providing the reference entries.
+
+        Raises:
+            DeserializationException: If a reference cannot be resolved on the
+                node's concept, or an unresolved target must throw per policy.
+        """
         concept = node.get_classifier()
         for serialized_reference_value in serialized_classifier_instance.references:
-            reference = concept.get_reference_by_meta_pointer(
-                serialized_reference_value.meta_pointer
-            )
+            meta_pointer = serialized_reference_value.meta_pointer
+            if meta_pointer is None:
+                raise DeserializationException("The reference meta-pointer should not be null")
+            reference = concept.get_reference_by_meta_pointer(meta_pointer)
             if reference is None:
-                raise ValueError(
+                raise DeserializationException(
                     f"Unable to resolve reference {serialized_reference_value.meta_pointer}. Concept {concept}. SerializedNode {serialized_classifier_instance}"
                 )
 

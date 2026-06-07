@@ -29,6 +29,8 @@ if TYPE_CHECKING:
 
 
 class ProtoBufSerialization(AbstractSerialization):
+    """LionWeb (de)serialization to/from the protobuf binary wire format."""
+
     def __init__(self, lionweb_version: LionWebVersion = LionWebVersion.current_version()) -> None:
         super().__init__(lionweb_version=lionweb_version)
         self._chunk_instance = PBChunk()  # Reusable instance
@@ -149,6 +151,9 @@ class ProtoBufSerialization(AbstractSerialization):
         return pb_chunk.SerializeToString()
 
     class _SerializeHelper:
+        """Accumulates and indexes interned strings, languages, and meta pointers
+        while building a protobuf chunk."""
+
         def __init__(self) -> None:
             self.meta_pointers: list[MetaPointer] = []
             self.strings: list[str | None] = [None]
@@ -220,6 +225,8 @@ class ProtoBufSerialization(AbstractSerialization):
                     if rv.resolve_info is not None:
                         pbv.si_resolveInfo = self.string_indexer(rv.resolve_info)
                     pbr.values.append(pbv)
+                if r.meta_pointer is None:
+                    raise ValueError("The reference meta-pointer should not be null")
                 pbr.mpi_meta_pointer = self.meta_pointer_indexer(r.meta_pointer)
                 b.references.append(pbr)
 

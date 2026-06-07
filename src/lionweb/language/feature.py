@@ -10,6 +10,8 @@ T = TypeVar("T", bound="M3Node")
 
 
 class Feature(M3Node[T], NamespacedEntity, IKeyed[T], Generic[T]):
+    """Base class for the named, keyed members of a Classifier (properties and links)."""
+
     if TYPE_CHECKING:
         from lionweb.language.classifier import Classifier
         from lionweb.language.language import Language

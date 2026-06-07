@@ -1,3 +1,4 @@
+from collections.abc import Sequence
 from typing import cast
 
 from lionweb.language.annotation import Annotation
@@ -6,19 +7,45 @@ from lionweb.language.concept import Concept
 from lionweb.language.enumeration import Enumeration
 from lionweb.language.interface import Interface
 from lionweb.language.language import Language
+from lionweb.language.namespaced_entity import NamespacedEntity
 from lionweb.language.structured_data_type import StructuredDataType
+from lionweb.model.classifier_instance import ClassifierInstance
 from lionweb.model.node import Node
 from lionweb.utils.node_tree_validator import NodeTreeValidator
 from lionweb.utils.validation_result import ValidationResult
 from lionweb.utils.validator import Validator
 
 
+class InvalidLanguageError(ValueError):
+    """Raised when a :class:`Language` fails validation.
+
+    Args:
+        language: The invalid language.
+        validation_result: The validation result describing the issues found.
+    """
+
+    def __init__(self, language: Language, validation_result: ValidationResult):
+        super().__init__(f"Invalid language: {validation_result.get_issues()}")
+        self.language = language
+        self.validation_result = validation_result
+
+
 class LanguageValidator(Validator):
+    """Validates :class:`Language` definitions for structural and naming consistency."""
+
     @staticmethod
-    def ensure_is_valid(language: Language):
+    def ensure_is_valid(language: Language) -> None:
+        """Validate a language and raise if it is invalid.
+
+        Args:
+            language: The language to validate.
+
+        Raises:
+            InvalidLanguageError: If the language fails validation.
+        """
         vr = LanguageValidator().validate(language)
         if not vr.is_successful():
-            raise RuntimeError(f"Invalid language: {vr.get_issues()}")
+            raise InvalidLanguageError(language, vr)
 
     def validate_enumeration(self, result: ValidationResult, enumeration: Enumeration):
         for lit in enumeration.literals:
@@ -109,16 +136,21 @@ class LanguageValidator(Validator):
 
         return result
 
-    def validate_names_are_unique(self, elements, result: ValidationResult):
-        elements_by_name: dict[str, list[object]] = {}
+    def validate_names_are_unique(
+        self, elements: Sequence[NamespacedEntity], result: ValidationResult
+    ) -> None:
+        elements_by_name: dict[str, list[NamespacedEntity]] = {}
         for el in elements:
-            if el.get_name():
-                elements_by_name.setdefault(el.get_name(), []).append(el)
+            name = el.get_name()
+            if name:
+                elements_by_name.setdefault(name, []).append(el)
 
         for name, entities in elements_by_name.items():
             if len(entities) > 1:
                 for el in entities:
-                    result.add_error(f"Duplicate name {el.get_name()}", el)
+                    result.add_error(
+                        f"Duplicate name {el.get_name()}", cast(ClassifierInstance, el)
+                    )
 
     def validate_keys_are_not_null(self, language: Language, result: ValidationResult):
         for n in language.this_and_all_descendants():
@@ -171,47 +203,46 @@ class LanguageValidator(Validator):
         validation_result: ValidationResult,
         examining_concept: bool,
     ):
-        if isinstance(classifier, Concept):
-            concept = classifier
-            if concept in already_explored:
-                validation_result.add_error("Cyclic hierarchy found", concept)
-            else:
-                already_explored.add(concept)
-                extended = concept.get_extended_concept()
-                if extended:
-                    self.check_ancestors_helper(
-                        already_explored, extended, validation_result, examining_concept
-                    )
-                for interf in concept.get_implemented():
-                    self.check_ancestors_helper(
-                        already_explored, interf, validation_result, examining_concept
-                    )
-        elif isinstance(classifier, Interface):
-            iface = classifier
-            if iface in already_explored:
-                # It is ok to indirectly implement the same interface multiple times for a Concept.
-                # It is instead an issue in case we are looking into interfaces.
-                #
-                # For example, this is fine:
-                # class A extends B, implements I
-                # class B implements I
-                #
-                # This is not fine:
-                # interface I1 extends I2
-                # interface I2 extends I1
-                if not examining_concept:
-                    validation_result.add_error("Cyclic hierarchy found", iface)
-            else:
-                already_explored.add(iface)
-                for extended_interface in iface.get_extended_interfaces():
-                    self.check_ancestors_helper(
-                        already_explored,
-                        extended_interface,
-                        validation_result,
-                        examining_concept,
-                    )
-        else:
-            raise ValueError()
+        match classifier:
+            case Concept() as concept:
+                if concept in already_explored:
+                    validation_result.add_error("Cyclic hierarchy found", concept)
+                else:
+                    already_explored.add(concept)
+                    extended = concept.get_extended_concept()
+                    if extended:
+                        self.check_ancestors_helper(
+                            already_explored, extended, validation_result, examining_concept
+                        )
+                    for interf in concept.get_implemented():
+                        self.check_ancestors_helper(
+                            already_explored, interf, validation_result, examining_concept
+                        )
+            case Interface() as iface:
+                if iface in already_explored:
+                    # It is ok to indirectly implement the same interface multiple times for a Concept.
+                    # It is instead an issue in case we are looking into interfaces.
+                    #
+                    # For example, this is fine:
+                    # class A extends B, implements I
+                    # class B implements I
+                    #
+                    # This is not fine:
+                    # interface I1 extends I2
+                    # interface I2 extends I1
+                    if not examining_concept:
+                        validation_result.add_error("Cyclic hierarchy found", iface)
+                else:
+                    already_explored.add(iface)
+                    for extended_interface in iface.get_extended_interfaces():
+                        self.check_ancestors_helper(
+                            already_explored,
+                            extended_interface,
+                            validation_result,
+                            examining_concept,
+                        )
+            case _:
+                raise ValueError(f"Unsupported classifier type: {type(classifier).__name__}")
 
     def check_interfaces_cycles(self, iface: Interface, validation_result: ValidationResult):
         if iface in iface.all_extended_interfaces():

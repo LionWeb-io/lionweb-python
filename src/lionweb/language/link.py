@@ -8,6 +8,9 @@ T = TypeVar("T", bound=M3Node)
 
 
 class Link(Feature[T]):
+    """Base class for features that relate a classifier to instances of other classifiers
+    (containments and references)."""
+
     if TYPE_CHECKING:
         from lionweb.language.classifier import Classifier
 

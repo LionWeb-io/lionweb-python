@@ -4,6 +4,17 @@ from typing import Any, cast
 
 
 def make_class_def(name: str, bases: list[ast.expr], body: list[ast.stmt]) -> ast.ClassDef:
+    """Build an `ast.ClassDef` node, handling the Python-version-specific fields.
+
+    Args:
+        name: The class name.
+        bases: AST expressions for the base classes.
+        body: Statements making up the class body.
+
+    Returns:
+        ast.ClassDef: The constructed class-definition node, with `type_params`
+        populated only on Python 3.12+ where the field is required.
+    """
     if sys.version_info >= (3, 12):
         return ast.ClassDef(
             name=name,
@@ -24,6 +35,22 @@ def make_function_def(
     decorator_list: list[ast.expr] | None = None,
     returns: ast.expr | None = None,
 ) -> ast.FunctionDef:
+    """Build an `ast.FunctionDef` node, handling the Python-version-specific fields.
+
+    Args:
+        name: The function name (must not be None).
+        args: The function's argument specification.
+        body: Statements making up the function body.
+        decorator_list: AST expressions for decorators applied to the function.
+        returns: AST expression for the return type annotation, if any.
+
+    Returns:
+        ast.FunctionDef: The constructed function-definition node, with
+        `type_params` populated only on Python 3.12+ where the field is required.
+
+    Raises:
+        ValueError: If `name` is None.
+    """
     if name is None:
         raise ValueError("Name should not be None")
 

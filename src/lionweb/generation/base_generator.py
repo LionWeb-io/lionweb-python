@@ -61,6 +61,14 @@ class BaseGenerator:
         return None
 
     def _data_type_lookup(self, primitive_type: DataType) -> str | None:
+        """Find the qualified Python type name mapped to the given primitive type.
+
+        Args:
+            primitive_type: The primitive data type to look up, matched by ID or name.
+
+        Returns:
+            str | None: The qualified Python type name if a mapping exists, else None.
+        """
         for mapping in self.primitive_types:
             if (
                 primitive_type.id == mapping.primitive_type

@@ -12,6 +12,24 @@ if TYPE_CHECKING:
     from lionweb.language import Property
 
 
+class FeatureNotInClassifierError(ValueError):
+    """Raised when a feature (property, containment, or reference) does not belong
+    to the classifier of the instance it is being used on.
+
+    Args:
+        feature: The feature that does not belong to the classifier.
+        classifier_instance: The instance whose classifier does not declare the feature.
+    """
+
+    def __init__(self, feature, classifier_instance):
+        super().__init__(
+            f"{feature} does not belong to the classifier of {classifier_instance} "
+            f"(class {type(classifier_instance).__name__})"
+        )
+        self.feature = feature
+        self.classifier_instance = classifier_instance
+
+
 class DynamicClassifierInstance(AbstractClassifierInstance, ClassifierInstance):
     """DynamicClassifierInstance can represent any instance of a Classifier.
     It allows flexible property, containment, and reference management.
@@ -27,7 +45,7 @@ class DynamicClassifierInstance(AbstractClassifierInstance, ClassifierInstance):
     def get_id(self) -> str | None:
         return self._id
 
-    def set_id(self, id: str | None):
+    def set_id(self, id: str | None) -> None:
         self._id = id
 
     # Public methods for properties
@@ -50,7 +68,7 @@ class DynamicClassifierInstance(AbstractClassifierInstance, ClassifierInstance):
         if property.key is None:
             raise ValueError("Property.key should not be null")
         if property not in self.get_classifier().all_properties():
-            raise ValueError("Property not belonging to this classifier")
+            raise FeatureNotInClassifierError(property, self)
 
         stored_value = self.property_values.get(property.key)
 
@@ -108,11 +126,11 @@ class DynamicClassifierInstance(AbstractClassifierInstance, ClassifierInstance):
         if my_containment.get_key() is None:
             raise ValueError("Containment.key should not be null")
         if my_containment not in self.get_classifier().all_containments():
-            raise ValueError("Containment not belonging to this concept")
+            raise FeatureNotInClassifierError(my_containment, self)
 
         return self.containment_values.get(my_containment.get_key(), [])
 
-    def add_child(self, containment: Containment | str, child: Node):
+    def add_child(self, containment: Containment | str, child: Node) -> None:
         if containment is None or child is None:
             raise ValueError("Containment and child should not be null")
         my_containment: Containment | None
@@ -138,13 +156,13 @@ class DynamicClassifierInstance(AbstractClassifierInstance, ClassifierInstance):
                 return
         raise ValueError("The given node is not a child of this node")
 
-    def remove_child_by_index(self, containment: Containment, index: int):
+    def remove_child_by_index(self, containment: Containment, index: int) -> None:
         if containment is None:
             raise ValueError("Containment should not be null")
         if containment.get_key() is None:
             raise ValueError("Containment.key should not be null")
         if containment not in self.get_classifier().all_containments():
-            raise ValueError("Containment not belonging to this concept")
+            raise FeatureNotInClassifierError(containment, self)
 
         children = self.containment_values.get(containment.get_key(), [])
         if len(children) > index:
@@ -160,11 +178,11 @@ class DynamicClassifierInstance(AbstractClassifierInstance, ClassifierInstance):
         if reference.get_key() is None:
             raise ValueError("Reference.key should not be null")
         if reference not in self.get_classifier().all_references():
-            raise ValueError("Reference not belonging to this concept")
+            raise FeatureNotInClassifierError(reference, self)
 
         return self.reference_values.get(reference.get_key(), [])
 
-    def add_reference_value(self, reference: Reference, value: ReferenceValue | None):
+    def add_reference_value(self, reference: Reference, value: ReferenceValue | None) -> None:
         if reference is None:
             raise ValueError("Reference should not be null")
         if reference.is_multiple():
@@ -173,13 +191,15 @@ class DynamicClassifierInstance(AbstractClassifierInstance, ClassifierInstance):
         else:
             self._set_reference_single_value(reference, value)
 
-    def remove_reference_value(self, reference: Reference, reference_value: ReferenceValue | None):
+    def remove_reference_value(
+        self, reference: Reference, reference_value: ReferenceValue | None
+    ) -> None:
         if reference is None:
             raise ValueError("Reference should not be null")
         if reference.get_key() is None:
             raise ValueError("Reference.key should not be null")
         if reference not in self.get_classifier().all_references():
-            raise ValueError("Reference not belonging to this concept")
+            raise FeatureNotInClassifierError(reference, self)
 
         reference_values = self.reference_values.get(reference.get_key(), [])
         for i, rv in enumerate(reference_values):
@@ -193,13 +213,13 @@ class DynamicClassifierInstance(AbstractClassifierInstance, ClassifierInstance):
             f"The given reference value could not be found under reference {reference.get_name()}"
         )
 
-    def remove_reference_value_by_index(self, reference: Reference, index: int):
+    def remove_reference_value_by_index(self, reference: Reference, index: int) -> None:
         if reference is None:
             raise ValueError("Reference should not be null")
         if reference.get_key() is None:
             raise ValueError("Reference.key should not be null")
         if reference not in self.get_classifier().all_references():
-            raise ValueError("Reference not belonging to this classifier")
+            raise FeatureNotInClassifierError(reference, self)
 
         reference_values = self.reference_values.get(reference.get_key(), [])
         if len(reference_values) > index:
@@ -209,25 +229,25 @@ class DynamicClassifierInstance(AbstractClassifierInstance, ClassifierInstance):
                 f"Invalid index {index} when reference values are {len(reference_values)}"
             )
 
-    def set_reference_values(self, reference: Reference, values: list[ReferenceValue]):
+    def set_reference_values(self, reference: Reference, values: list[ReferenceValue]) -> None:
         if reference is None:
             raise ValueError("Reference should not be null")
         if reference.get_key() is None:
             raise ValueError("Reference.key should not be null")
         if reference not in self.get_classifier().all_references():
-            raise ValueError("Reference not belonging to this classifier")
+            raise FeatureNotInClassifierError(reference, self)
 
         self.reference_values[reference.get_key()] = values
 
     # Private methods for containments
 
-    def _add_containment(self, containment: Containment, value: Node):
+    def _add_containment(self, containment: Containment, value: Node) -> None:
         assert containment.is_multiple()
         if isinstance(value, HasSettableParent):
             value.set_parent(self)
         self.containment_values.setdefault(containment.get_key(), []).append(value)
 
-    def _set_containment_single_value(self, containment: Containment, value: Node | None):
+    def _set_containment_single_value(self, containment: Containment, value: Node | None) -> None:
         prev_value = self.containment_values.get(containment.get_key())
         if prev_value:
             for child in list(prev_value):
@@ -242,13 +262,17 @@ class DynamicClassifierInstance(AbstractClassifierInstance, ClassifierInstance):
 
     # Private methods for references
 
-    def _set_reference_single_value(self, reference: Reference, value: ReferenceValue | None):
+    def _set_reference_single_value(
+        self, reference: Reference, value: ReferenceValue | None
+    ) -> None:
         if value is None:
             self.reference_values.pop(reference.get_key(), None)
         else:
             self.reference_values[reference.get_key()] = [value]
 
-    def _add_reference_multiple_value(self, reference: Reference, reference_value: ReferenceValue):
+    def _add_reference_multiple_value(
+        self, reference: Reference, reference_value: ReferenceValue
+    ) -> None:
         assert reference.is_multiple()
         if reference_value is not None:
             self.reference_values.setdefault(reference.get_key(), []).append(reference_value)

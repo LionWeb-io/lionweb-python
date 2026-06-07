@@ -28,6 +28,14 @@ from lionweb.model import Node
 
 
 class LanguageGenerator(BaseGenerator, ASTBuilder):
+    """Generates a `language.py` module describing a LionWeb language in Python.
+
+    The generated module builds, via a `get_language()` function, a `Language`
+    instance mirroring the input LionWeb language (concepts, interfaces,
+    primitive types, enumerations, and their features), plus convenience getter
+    functions (e.g. `get_<concept_name>`) for each concept and primitive type.
+    """
+
     def __init__(
         self,
         language_packages: tuple[LanguageMappingSpec, ...] = (),
@@ -341,7 +349,15 @@ class LanguageGenerator(BaseGenerator, ASTBuilder):
 
         get_language_body.append(self._add_to_language(var_name))
 
-    def language_generation(self, click, language: Language, output):
+    def language_generation(self, click, language: Language, output: str) -> None:
+        """Generate and write `language.py` for the given language.
+
+        Args:
+            click: The click module/context used to print progress messages.
+            language: The LionWeb language to generate Python code for.
+            output: Directory path where `language.py` will be written
+                (created if it does not exist).
+        """
         # 1. Clean Static Imports
         # Instead of building nodes manually, parse a string. It's readable and standard.
         body = ast.parse(
@@ -357,21 +373,23 @@ class LanguageGenerator(BaseGenerator, ASTBuilder):
 
         # Creation Loop
         for el in language.get_elements():
-            if isinstance(el, Concept):
-                self._create_concept_in_language(el, func_body)
-            elif isinstance(el, Interface):
-                self._create_interface_in_language(el, func_body)
-            elif isinstance(el, PrimitiveType):
-                self._define_primitive_type_in_language(el, func_body)
-            elif isinstance(el, Enumeration):
-                self._define_enumeration_in_language(el, func_body)
+            match el:
+                case Concept():
+                    self._create_concept_in_language(el, func_body)
+                case Interface():
+                    self._create_interface_in_language(el, func_body)
+                case PrimitiveType():
+                    self._define_primitive_type_in_language(el, func_body)
+                case Enumeration():
+                    self._define_enumeration_in_language(el, func_body)
 
         # Population Loop
         for el in language.get_elements():
-            if isinstance(el, Concept):
-                self._populate_concept_in_language(el, func_body)
-            elif isinstance(el, Interface):
-                self._populate_interface_in_language(el, func_body)
+            match el:
+                case Concept():
+                    self._populate_concept_in_language(el, func_body)
+                case Interface():
+                    self._populate_interface_in_language(el, func_body)
 
         # Return statement
         func_body.append(ast.Return(value=self.name("language")))
@@ -391,10 +409,11 @@ class LanguageGenerator(BaseGenerator, ASTBuilder):
 
         # 4. Generate Getters (Refactored duplication)
         for el in language.get_elements():
-            if isinstance(el, Concept):
-                self._add_getter_method(el, "get_concept_by_name", "Concept")
-            elif isinstance(el, PrimitiveType):
-                self._add_getter_method(el, "get_primitive_type_by_name", "PrimitiveType")
+            match el:
+                case Concept():
+                    self._add_getter_method(el, "get_concept_by_name", "Concept")
+                case PrimitiveType():
+                    self._add_getter_method(el, "get_primitive_type_by_name", "PrimitiveType")
 
         # 5. Final Assembly
         body.extend(self.imports)

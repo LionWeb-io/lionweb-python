@@ -4,6 +4,9 @@ from lionweb.language.classifier import Classifier
 
 
 class Concept(Classifier["Concept"]):
+    """A classifier that defines instantiable node types, optionally extending another concept
+    and implementing interfaces."""
+
     from lionweb.language.feature import Feature
     from lionweb.language.interface import Interface
     from lionweb.language.language import Language

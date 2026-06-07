@@ -17,13 +17,21 @@ class NamespacedEntity(INamed, ABC):
         pass
 
     def qualified_name(self) -> str:
+        """Compute the fully qualified name of this entity.
+
+        Returns:
+            str: The container's namespace qualifier joined with this entity's name.
+
+        Raises:
+            ValueError: If this entity has no container or no name.
+        """
         container = self.get_container()
         name = self.get_name()
         if container is None:
-            raise ValueError("No container for " + str(self))
+            raise ValueError(f"No container for {self}")
         if name is None:
-            raise ValueError("No name for " + str(self))
-        return container.namespace_qualifier() + "." + name
+            raise ValueError(f"No name for {self}")
+        return f"{container.namespace_qualifier()}.{name}"
 
     @abstractmethod
     def get_container(self) -> NamespaceProvider | None:

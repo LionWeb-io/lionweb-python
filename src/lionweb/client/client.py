@@ -1,4 +1,4 @@
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any, cast
 
 import requests
 from pydantic import BaseModel
@@ -15,6 +15,20 @@ if TYPE_CHECKING:
     from .bulk_import import BulkImport
 
 
+class LionWebServerError(RuntimeError):
+    """Raised when a LionWeb repository server responds with a non-success status code.
+
+    Attributes:
+        status_code: The HTTP status code returned by the server.
+        response_text: The raw response body returned by the server.
+    """
+
+    def __init__(self, status_code: int, response_text: str):
+        super().__init__(f"Error: {status_code} {response_text}")
+        self.status_code = status_code
+        self.response_text = response_text
+
+
 class RepositoryConfiguration(BaseModel):
     name: str
     lionweb_version: LionWebVersion
@@ -22,11 +36,18 @@ class RepositoryConfiguration(BaseModel):
 
 
 class Client:
+    """HTTP client for interacting with a LionWeb repository server.
+
+    Wraps the LionWeb repository REST APIs (DB admin, bulk, inspection and
+    additional APIs), handling serialization/deserialization of nodes via a
+    JsonSerialization instance.
+    """
+
     def __init__(
         self,
-        lionweb_version=LionWebVersion.current_version(),
-        server_url="http://localhost:3005",
-        client_id="lwpython",
+        lionweb_version: LionWebVersion = LionWebVersion.current_version(),
+        server_url: str = "http://localhost:3005",
+        client_id: str = "lwpython",
         repository_name: str | None = "default",
         serialization: JsonSerialization | None = None,
         unavailable_parent_policy: UnavailableNodePolicy = UnavailableNodePolicy.PROXY_NODES,
@@ -39,7 +60,7 @@ class Client:
         self._lionweb_version = lionweb_version
         self._server_url = server_url
         self._client_id = client_id
-        self._repository_name = repository_name
+        self._repository_name: str | None = repository_name
         if serialization is None:
             self._serialization = create_standard_json_serialization(self._lionweb_version)
         else:
@@ -48,16 +69,18 @@ class Client:
         self._serialization.unavailable_children_policy = unavailable_children_policy
 
     def serialization(self) -> JsonSerialization:
+        """Return the JsonSerialization used by this client."""
         return self._serialization
 
-    def set_repository_name(self, repository_name):
+    def set_repository_name(self, repository_name: str | None) -> None:
+        """Change the repository this client operates against."""
         self._repository_name = repository_name
 
     #####################################################
     # DB Admin APIs                                     #
     #####################################################
 
-    def create_database(self):
+    def create_database(self) -> None:
         url = f"{self._server_url}/createDatabase"
         headers = {"Content-Type": "application/json"}
         query_params = {
@@ -65,15 +88,15 @@ class Client:
         }
         response = requests.post(url, params=query_params, headers=headers)
         if response.status_code != 200:
-            raise ValueError("Error:", response.status_code, response.text)
+            raise LionWebServerError(response.status_code, response.text)
 
-    def list_repositories(self):
+    def list_repositories(self) -> list[RepositoryConfiguration]:
         url = f"{self._server_url}/listRepositories"
         headers = {"Content-Type": "application/json"}
         query_params = {"clientId": self._client_id}
         response = requests.post(url, params=query_params, headers=headers)
         if response.status_code != 200:
-            raise ValueError("Error:", response.status_code, response.text)
+            raise LionWebServerError(response.status_code, response.text)
         return [
             RepositoryConfiguration(
                 name=r["name"],
@@ -83,7 +106,7 @@ class Client:
             for r in response.json()["repositories"]
         ]
 
-    def create_repository(self, repository_configuration: RepositoryConfiguration):
+    def create_repository(self, repository_configuration: RepositoryConfiguration) -> None:
         url = f"{self._server_url}/createRepository"
         headers = {"Content-Type": "application/json"}
         query_params = {
@@ -94,21 +117,21 @@ class Client:
         }
         response = requests.post(url, params=query_params, headers=headers)
         if response.status_code != 200:
-            raise ValueError("Error:", response.status_code, response.text)
+            raise LionWebServerError(response.status_code, response.text)
 
-    def delete_repository(self, repository_name: str):
+    def delete_repository(self, repository_name: str) -> None:
         url = f"{self._server_url}/deleteRepository"
         headers = {"Content-Type": "application/json"}
         query_params = {"clientId": self._client_id, "repository": repository_name}
         response = requests.post(url, params=query_params, headers=headers)
         if response.status_code != 200:
-            raise ValueError("Error:", response.status_code, response.text)
+            raise LionWebServerError(response.status_code, response.text)
 
     #####################################################
     # Bulk APIs                                         #
     #####################################################
 
-    def list_partitions(self):
+    def list_partitions(self) -> list:
         url = f"{self._server_url}/bulk/listPartitions"
         headers = {"Content-Type": "application/json"}
         query_params = {
@@ -117,13 +140,13 @@ class Client:
         }
         response = requests.post(url, params=query_params, headers=headers)
         if response.status_code != 200:
-            raise ValueError("Error:", response.status_code, response.text)
+            raise LionWebServerError(response.status_code, response.text)
         return response.json()["chunk"]["nodes"]
 
-    def create_partition(self, node: Node):
+    def create_partition(self, node: Node) -> None:
         self.create_partitions([node])
 
-    def create_partitions(self, nodes: list["Node"]):
+    def create_partitions(self, nodes: list["Node"]) -> None:
         for n in nodes:
             if len(n.get_children(containment=None)) > 0:
                 raise ValueError("Cannot store a node with children as a new partition")
@@ -134,12 +157,14 @@ class Client:
             "repository": self._repository_name,
             "clientId": self._client_id,
         }
-        data = self._serialization.serialize_trees_to_json_element(nodes)
-        response = requests.post(url, params=query_params, json=data, headers=headers)
+        data = self._serialization.serialize_trees_to_json_element(
+            cast("list[ClassifierInstance]", nodes)
+        )
+        response = requests.post(url, params=query_params, json=cast(Any, data), headers=headers)
         if response.status_code != 200:
-            raise ValueError("Error:", response.status_code, response.text)
+            raise LionWebServerError(response.status_code, response.text)
 
-    def delete_partitions(self, node_ids: list[str]):
+    def delete_partitions(self, node_ids: list[str]) -> None:
         if len(node_ids) == 0:
             return
 
@@ -151,7 +176,7 @@ class Client:
         }
         response = requests.post(url, params=query_params, json=node_ids, headers=headers)
         if response.status_code != 200:
-            raise ValueError("Error:", response.status_code, response.text)
+            raise LionWebServerError(response.status_code, response.text)
 
     def ids(self, count: int | None = None) -> list[str]:
         url = f"{self._server_url}/bulk/ids"
@@ -164,10 +189,10 @@ class Client:
             query_params["count"] = str(count)
         response = requests.post(url, params=query_params, headers=headers)
         if response.status_code != 200:
-            raise ValueError("Error:", response.status_code, response.text)
+            raise LionWebServerError(response.status_code, response.text)
         return response.json()["ids"]
 
-    def store(self, nodes: list["ClassifierInstance"]):
+    def store(self, nodes: list["ClassifierInstance"]) -> None:
         url = f"{self._server_url}/bulk/store"
         headers = {"Content-Type": "application/json"}
         query_params = {
@@ -175,18 +200,18 @@ class Client:
             "clientId": self._client_id,
         }
         data = self._serialization.serialize_trees_to_json_element(nodes)
-        response = requests.post(url, params=query_params, json=data, headers=headers)
+        response = requests.post(url, params=query_params, json=cast(Any, data), headers=headers)
         if response.status_code != 200:
-            raise ValueError("Error:", response.status_code, response.text)
+            raise LionWebServerError(response.status_code, response.text)
 
-    def retrieve(self, ids: list[str], depth_limit: int | None = None):
+    def retrieve(self, ids: list[str], depth_limit: int | None = None) -> list[Node]:
         if not self._is_list_of_strings(ids):
             raise ValueError(f"ids should be a list of strings, but we got {ids}")
         data = self._retrieve_raw(ids, depth_limit=depth_limit)
         nodes = self._serialization.deserialize_json_to_nodes(data["chunk"])
         return nodes
 
-    def _retrieve_raw(self, ids: list[str], depth_limit: int | None = None):
+    def _retrieve_raw(self, ids: list[str], depth_limit: int | None = None) -> dict:
         if not self._is_list_of_strings(ids):
             raise ValueError(f"ids should be a list of strings, but we got {ids}")
         url = f"{self._server_url}/bulk/retrieve"
@@ -205,16 +230,16 @@ class Client:
             data = response.json()
             return data
         else:
-            raise ValueError("Error:", response.status_code, response.text)
+            raise LionWebServerError(response.status_code, response.text)
 
-    def _is_list_of_strings(self, value):
+    def _is_list_of_strings(self, value) -> bool:
         return isinstance(value, list) and all(isinstance(item, str) for item in value)
 
     #####################################################
     # Inspection APIs                                   #
     #####################################################
 
-    def nodes_by_classifier(self):
+    def nodes_by_classifier(self) -> list:
         url = f"{self._server_url}/inspection/nodesByClassifier"
         headers = {"Content-Type": "application/json"}
         query_params = {
@@ -223,11 +248,11 @@ class Client:
         }
         response = requests.get(url, params=query_params, headers=headers)
         if response.status_code != 200:
-            raise ValueError("Error:", response.status_code, response.text)
+            raise LionWebServerError(response.status_code, response.text)
         # return an array of language, classifier, ids, size
         return response.json()
 
-    def nodes_by_language(self):
+    def nodes_by_language(self) -> list:
         url = f"{self._server_url}/inspection/nodesByLanguage"
         headers = {"Content-Type": "application/json"}
         query_params = {
@@ -236,7 +261,7 @@ class Client:
         }
         response = requests.get(url, params=query_params, headers=headers)
         if response.status_code != 200:
-            raise ValueError("Error:", response.status_code, response.text)
+            raise LionWebServerError(response.status_code, response.text)
         # return an array of language, ids, size
         return response.json()
 
@@ -244,14 +269,14 @@ class Client:
     # Convenience methods                               #
     #####################################################
 
-    def retrieve_partition(self, id: str, depth_limit: int | None = None):
+    def retrieve_partition(self, id: str, depth_limit: int | None = None) -> Node:
         res = self.retrieve([id], depth_limit=depth_limit)
-        roots = [n for n in res if res.get_parent() is None]
+        roots = [n for n in res if n.get_parent() is None]
         if len(roots) != 1:
-            raise ValueError()
+            raise ValueError(f"Expected one root partition for id {id}, found {len(roots)}")
         return roots[0]
 
-    def retrieve_node(self, id: str, depth_limit: int | None = None):
+    def retrieve_node(self, id: str, depth_limit: int | None = None) -> Node:
         from lionweb.model.impl.proxy_node import ProxyNode
 
         retrieved_nodes = self.retrieve([id], depth_limit=depth_limit)
@@ -294,7 +319,7 @@ class Client:
         """
         nodes = self._retrieve_raw([node_id], depth_limit=0)["chunk"]["nodes"]
         if len(nodes) != 1:
-            raise ValueError()
+            raise ValueError(f"Expected exactly one node for id {node_id}, found {len(nodes)}")
         node = nodes[0]
         return node["parent"]
 
@@ -302,7 +327,7 @@ class Client:
     # Additional APIs                                   #
     #####################################################
 
-    def bulk_import_using_json(self, bulk_import: "BulkImport"):
+    def bulk_import_using_json(self, bulk_import: "BulkImport") -> None:
         body_attach_points = []
 
         for attach_point in bulk_import.get_attach_points():
@@ -336,6 +361,6 @@ class Client:
         }
 
         url = f"{self._server_url}/additional/bulkImport"
-        response = requests.post(url, params=query_params, json=body, headers=headers)
+        response = requests.post(url, params=query_params, json=cast(Any, body), headers=headers)
         if response.status_code != 200:
-            raise ValueError("Error:", response.status_code, response.text)
+            raise LionWebServerError(response.status_code, response.text)

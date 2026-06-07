@@ -9,6 +9,8 @@ from lionweb.lionweb_version import LionWebVersion
 
 
 class PrimitiveType(DataType):
+    """A data type whose values are not further decomposed (e.g. String, Integer, Boolean)."""
+
     def __init__(
         self,
         lion_web_version: LionWebVersion = LionWebVersion.current_version(),

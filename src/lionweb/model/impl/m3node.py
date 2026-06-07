@@ -10,6 +10,12 @@ T = TypeVar("T", bound="M3Node")
 
 
 class M3Node(Generic[T], Node, IKeyed[T], AbstractClassifierInstance, ABC):
+    """Base class for all M3 (metamodel) nodes, such as Concepts, Properties,
+    Containments, and References. Provides a fluent, reflective implementation
+    of Node backed by simple dictionaries for property, containment, and
+    reference values.
+    """
+
     if TYPE_CHECKING:
         from lionweb.language.containment import Containment
         from lionweb.language.property import Property
@@ -17,7 +23,7 @@ class M3Node(Generic[T], Node, IKeyed[T], AbstractClassifierInstance, ABC):
         from lionweb.model.classifier_instance import ClassifierInstance
         from lionweb.model.reference_value import ReferenceValue
 
-    def __init__(self, lion_web_version: LionWebVersion | None = None):
+    def __init__(self, lion_web_version: LionWebVersion | None = None) -> None:
         AbstractClassifierInstance.__init__(self)
         if lion_web_version is not None and not isinstance(lion_web_version, LionWebVersion):
             raise ValueError(
@@ -41,7 +47,7 @@ class M3Node(Generic[T], Node, IKeyed[T], AbstractClassifierInstance, ABC):
         return self._id
 
     @id.setter
-    def id(self, new_value):
+    def id(self, new_value: str | None) -> None:
         self._id = new_value
 
     def set_name(self, name: str | None) -> "M3Node":
@@ -196,5 +202,5 @@ class M3Node(Generic[T], Node, IKeyed[T], AbstractClassifierInstance, ABC):
     def get_lionweb_version(self) -> LionWebVersion:
         return self.lion_web_version
 
-    def __hash__(self):
+    def __hash__(self) -> int:
         return hash(self.id)

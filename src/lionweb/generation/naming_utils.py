@@ -21,6 +21,17 @@ def dotted_name_expr(dotted: str) -> ast.expr:
 
 
 def calculate_field_name(feature: Feature) -> str:
+    """Compute the Python field name for a LionWeb feature.
+
+    Appends a trailing underscore if the feature's name collides with a
+    Python keyword.
+
+    Args:
+        feature: The feature whose field name should be computed.
+
+    Returns:
+        str: A Python-safe field name.
+    """
     field_name = cast(str, feature.get_name())
     if field_name in keyword.kwlist:
         field_name = f"{field_name}_"
@@ -28,6 +39,17 @@ def calculate_field_name(feature: Feature) -> str:
 
 
 def to_snake_case(name: str | None) -> str:
+    """Convert a CamelCase/PascalCase name to snake_case.
+
+    Args:
+        name: The name to convert (must not be None or empty).
+
+    Returns:
+        str: The snake_case version of the name.
+
+    Raises:
+        ValueError: If `name` is None or empty.
+    """
     if not name:
         raise ValueError("Name should not be None")
     # Replace capital letters with _lowercase, except at the beginning
@@ -37,7 +59,18 @@ def to_snake_case(name: str | None) -> str:
 
 
 def to_var_name(name: str | None) -> str:
-    """Convert a name to snake_case while avoiding Python keywords."""
+    """Convert a name to snake_case while avoiding Python keywords.
+
+    Args:
+        name: The name to convert (must not be None).
+
+    Returns:
+        str: A snake_case identifier safe to use as a Python variable name,
+        with a trailing underscore appended if it would otherwise be a keyword.
+
+    Raises:
+        ValueError: If `name` is None.
+    """
     import keyword
     import re
 
@@ -58,13 +91,34 @@ def to_var_name(name: str | None) -> str:
 
 
 def to_type_name(name: str | None) -> str:
-    """Convert a name to snake_case while avoiding Python keywords."""
+    """Convert a name to a Python type/class name by capitalizing its first letter.
+
+    Args:
+        name: The name to convert (must not be None).
+
+    Returns:
+        str: The name with its first letter capitalized.
+
+    Raises:
+        ValueError: If `name` is None.
+    """
     if name is None:
         raise ValueError("Name should not be None")
     return name[0].upper() + name[1:]
 
 
 def getter_name(name: str | None) -> str:
+    """Compute the conventional getter method name (`get_<snake_case_name>`) for a feature name.
+
+    Args:
+        name: The feature name (must not be None).
+
+    Returns:
+        str: The getter method name.
+
+    Raises:
+        ValueError: If `name` is None.
+    """
     if name is None:
         raise ValueError("Name should not be None")
     return f"get_{to_snake_case(name)}"
