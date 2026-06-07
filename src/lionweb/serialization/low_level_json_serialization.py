@@ -50,44 +50,54 @@ class LowLevelJsonSerialization:
     def serialize_to_json_element(self, serialized_chunk: SerializationChunk) -> JsonObject:
         serialized_nodes = []
         for node in serialized_chunk.get_classifier_instances():
-            node_json = {
+            properties_json: list[JsonObject] = []
+            for property_value in node.properties:
+                properties_json.append(
+                    {
+                        "property": self._serialize_metapointer_to_json_element(
+                            cast(MetaPointer, property_value.get_meta_pointer())
+                        ),
+                        "value": property_value.get_value(),
+                    }
+                )
+
+            containments_json: list[JsonObject] = []
+            for children_value in node.get_containments():
+                containments_json.append(
+                    {
+                        "containment": self._serialize_metapointer_to_json_element(
+                            cast(MetaPointer, children_value.get_meta_pointer())
+                        ),
+                        "children": SerializationUtils.to_json_array(
+                            cast(list[str], children_value.get_children_ids())
+                        ),
+                    }
+                )
+
+            references_json: list[JsonObject] = []
+            for reference_value in node.references:
+                references_json.append(
+                    {
+                        "reference": self._serialize_metapointer_to_json_element(
+                            cast(MetaPointer, reference_value.get_meta_pointer())
+                        ),
+                        "targets": SerializationUtils.to_json_array_of_reference_values(
+                            reference_value.get_value()
+                        ),
+                    }
+                )
+
+            node_json: JsonObject = {
                 "id": node.id,
-                "classifier": self._serialize_metapointer_to_json_element(node.get_classifier()),
-                "properties": [],
-                "containments": [],
-                "references": [],
+                "classifier": self._serialize_metapointer_to_json_element(
+                    cast(MetaPointer, node.get_classifier())
+                ),
+                "properties": properties_json,
+                "containments": containments_json,
+                "references": references_json,
                 "annotations": [annotation_id for annotation_id in node.annotations],
                 "parent": node.get_parent_node_id(),
             }
-
-            for property_value in node.properties:
-                property_json = {
-                    "property": self._serialize_metapointer_to_json_element(
-                        property_value.get_meta_pointer()
-                    ),
-                    "value": property_value.get_value(),
-                }
-                node_json["properties"].append(property_json)
-
-            for children_value in node.get_containments():
-                children_json = {
-                    "containment": self._serialize_metapointer_to_json_element(
-                        children_value.get_meta_pointer()
-                    ),
-                    "children": SerializationUtils.to_json_array(children_value.get_children_ids()),
-                }
-                node_json["containments"].append(children_json)
-
-            for reference_value in node.references:
-                reference_json = {
-                    "reference": self._serialize_metapointer_to_json_element(
-                        reference_value.get_meta_pointer()
-                    ),
-                    "targets": SerializationUtils.to_json_array_of_reference_values(
-                        reference_value.get_value()
-                    ),
-                }
-                node_json["references"].append(reference_json)
 
             serialized_nodes.append(node_json)
 

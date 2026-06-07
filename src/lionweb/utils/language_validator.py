@@ -7,7 +7,9 @@ from lionweb.language.concept import Concept
 from lionweb.language.enumeration import Enumeration
 from lionweb.language.interface import Interface
 from lionweb.language.language import Language
+from lionweb.language.namespaced_entity import NamespacedEntity
 from lionweb.language.structured_data_type import StructuredDataType
+from lionweb.model.classifier_instance import ClassifierInstance
 from lionweb.model.node import Node
 from lionweb.utils.node_tree_validator import NodeTreeValidator
 from lionweb.utils.validation_result import ValidationResult
@@ -135,17 +137,20 @@ class LanguageValidator(Validator):
         return result
 
     def validate_names_are_unique(
-        self, elements: Sequence[object], result: ValidationResult
+        self, elements: Sequence[NamespacedEntity], result: ValidationResult
     ) -> None:
-        elements_by_name: dict[str, list[object]] = {}
+        elements_by_name: dict[str, list[NamespacedEntity]] = {}
         for el in elements:
-            if el.get_name():
-                elements_by_name.setdefault(el.get_name(), []).append(el)
+            name = el.get_name()
+            if name:
+                elements_by_name.setdefault(name, []).append(el)
 
         for name, entities in elements_by_name.items():
             if len(entities) > 1:
                 for el in entities:
-                    result.add_error(f"Duplicate name {el.get_name()}", el)
+                    result.add_error(
+                        f"Duplicate name {el.get_name()}", cast(ClassifierInstance, el)
+                    )
 
     def validate_keys_are_not_null(self, language: Language, result: ValidationResult):
         for n in language.this_and_all_descendants():

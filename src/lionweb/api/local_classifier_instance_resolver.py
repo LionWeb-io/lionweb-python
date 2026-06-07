@@ -24,7 +24,8 @@ class LocalClassifierInstanceResolver(ClassifierInstanceResolver):
         Returns:
             LocalClassifierInstanceResolver: This instance, to allow chaining.
         """
-        self.instances[instance.id] = instance
+        if instance.id is not None:
+            self.instances[instance.id] = instance
         return self
 
     def resolve(self, instance_id: str) -> Optional["ClassifierInstance"]:

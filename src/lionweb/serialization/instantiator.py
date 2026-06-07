@@ -1,5 +1,5 @@
 from collections.abc import Callable
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 from lionweb.language.enumeration import Enumeration
 from lionweb.language.enumeration_literal import EnumerationLiteral
@@ -48,8 +48,8 @@ class Instantiator:
             raise NotImplementedError
 
     def __init__(self) -> None:
-        self.custom_deserializers: dict[str, Callable] = {}
-        self.default_node_deserializer = (
+        self.custom_deserializers: dict[str | None, Callable[..., Any]] = {}
+        self.default_node_deserializer: Callable[..., Any] = (
             lambda classifier, serialized_node, deserialized_instances_by_id, properties_values: (
                 InstantiationError(classifier)
             )

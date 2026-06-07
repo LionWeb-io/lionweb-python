@@ -79,7 +79,7 @@ class AbstractSerialization:
         Returns:
             The resulting serialization chunk.
         """
-        classifier_instances = []
+        classifier_instances: list[ClassifierInstance] = []
         self.collect_self_and_descendants(root, True, classifier_instances)
         return self.serialize_nodes_to_serialization_chunk(classifier_instances)
 

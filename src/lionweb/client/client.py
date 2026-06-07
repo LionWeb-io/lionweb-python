@@ -1,4 +1,4 @@
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any, cast
 
 import requests
 from pydantic import BaseModel
@@ -157,8 +157,10 @@ class Client:
             "repository": self._repository_name,
             "clientId": self._client_id,
         }
-        data = self._serialization.serialize_trees_to_json_element(nodes)
-        response = requests.post(url, params=query_params, json=data, headers=headers)
+        data = self._serialization.serialize_trees_to_json_element(
+            cast("list[ClassifierInstance]", nodes)
+        )
+        response = requests.post(url, params=query_params, json=cast(Any, data), headers=headers)
         if response.status_code != 200:
             raise LionWebServerError(response.status_code, response.text)
 
@@ -198,7 +200,7 @@ class Client:
             "clientId": self._client_id,
         }
         data = self._serialization.serialize_trees_to_json_element(nodes)
-        response = requests.post(url, params=query_params, json=data, headers=headers)
+        response = requests.post(url, params=query_params, json=cast(Any, data), headers=headers)
         if response.status_code != 200:
             raise LionWebServerError(response.status_code, response.text)
 
@@ -269,7 +271,7 @@ class Client:
 
     def retrieve_partition(self, id: str, depth_limit: int | None = None) -> Node:
         res = self.retrieve([id], depth_limit=depth_limit)
-        roots = [n for n in res if res.get_parent() is None]
+        roots = [n for n in res if n.get_parent() is None]
         if len(roots) != 1:
             raise ValueError(f"Expected one root partition for id {id}, found {len(roots)}")
         return roots[0]
@@ -359,6 +361,6 @@ class Client:
         }
 
         url = f"{self._server_url}/additional/bulkImport"
-        response = requests.post(url, params=query_params, json=body, headers=headers)
+        response = requests.post(url, params=query_params, json=cast(Any, body), headers=headers)
         if response.status_code != 200:
             raise LionWebServerError(response.status_code, response.text)
