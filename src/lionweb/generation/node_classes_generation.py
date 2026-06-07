@@ -804,9 +804,7 @@ class NodeClassesGenerator(BaseGenerator, ASTBuilder):
                     feature_type = cast(Classifier, feature.get_type())
                     prop_type = cast(str, feature_type.get_name())
                     if feature.is_multiple():
-                        methods.append(
-                            self._generate_multiple_reference_getter(feature, prop_type)
-                        )
+                        methods.append(self._generate_multiple_reference_getter(feature, prop_type))
                         methods.append(self._generate_multiple_reference_adder(feature, prop_type))
                     else:
                         methods.append(self._generate_reference_getter(feature, prop_type))
