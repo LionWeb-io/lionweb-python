@@ -225,6 +225,8 @@ class ProtoBufSerialization(AbstractSerialization):
                     if rv.resolve_info is not None:
                         pbv.si_resolveInfo = self.string_indexer(rv.resolve_info)
                     pbr.values.append(pbv)
+                if r.meta_pointer is None:
+                    raise ValueError("The reference meta-pointer should not be null")
                 pbr.mpi_meta_pointer = self.meta_pointer_indexer(r.meta_pointer)
                 b.references.append(pbr)
 

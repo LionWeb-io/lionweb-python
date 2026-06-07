@@ -90,7 +90,8 @@ class SerializedClassifierInstance:
         self, reference_key: str
     ) -> list[SerializedReferenceValueEntry] | None:
         for rv in self.references:
-            if rv.get_meta_pointer().key == reference_key:
+            meta_pointer = rv.get_meta_pointer()
+            if meta_pointer is not None and meta_pointer.key == reference_key:
                 return rv.get_value()
         return None
 

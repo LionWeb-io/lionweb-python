@@ -1,4 +1,5 @@
 import json
+from collections.abc import Callable
 from enum import Enum
 from typing import cast
 
@@ -22,11 +23,11 @@ class PrimitiveValuesSerialization:
     """
 
     def __init__(self) -> None:
-        self.enumerations_by_id = {}
-        self.structures_data_types_by_id = {}
+        self.enumerations_by_id: dict[str | None, Enumeration] = {}
+        self.structures_data_types_by_id: dict[str | None, StructuredDataType] = {}
         self.dynamic_nodes_enabled = False
-        self.primitive_deserializers: dict[str, object] = {}
-        self.primitive_serializers: dict[str, object] = {}
+        self.primitive_deserializers: dict[str, Callable[..., object]] = {}
+        self.primitive_serializers: dict[str, Callable[..., object]] = {}
 
     def register_language(self, language) -> None:
         """Register a language's enumerations and structured data types for (de)serialization.

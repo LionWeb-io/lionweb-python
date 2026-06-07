@@ -41,8 +41,9 @@ class Field(M3Node, NamespacedEntity, IKeyed):
     def get_name(self) -> str | None:
         return cast(str | None, self.get_property_value(property="name"))
 
-    def set_name(self, name: str | None) -> None:
+    def set_name(self, name: str | None) -> "Field":
         self.set_property_value(property="name", value=name)
+        return self
 
     def get_container(self) -> NamespaceProvider | None:
         """

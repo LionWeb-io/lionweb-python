@@ -25,7 +25,8 @@ class SerializationChunk:
         Args:
             instance: The serialized classifier instance to add.
         """
-        self.classifier_instances_by_id[instance.id] = instance
+        if instance.id is not None:
+            self.classifier_instances_by_id[instance.id] = instance
         self.classifier_instances.append(instance)
 
     def get_instance_by_id(self, instance_id: str) -> SerializedClassifierInstance:

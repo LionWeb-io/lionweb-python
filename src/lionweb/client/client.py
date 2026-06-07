@@ -60,7 +60,7 @@ class Client:
         self._lionweb_version = lionweb_version
         self._server_url = server_url
         self._client_id = client_id
-        self._repository_name = repository_name
+        self._repository_name: str | None = repository_name
         if serialization is None:
             self._serialization = create_standard_json_serialization(self._lionweb_version)
         else:

@@ -37,6 +37,8 @@ dev = [
     "diff-cover",
     "testcontainers>=4.0",
     "types-requests",
+    "types-protobuf",
+    "types-click",
 ]
 
 [tool.ruff]

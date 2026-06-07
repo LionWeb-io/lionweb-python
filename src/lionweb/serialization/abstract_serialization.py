@@ -454,7 +454,8 @@ class AbstractSerialization:
                 if ci.get_parent_node_id() in unknown_parent_ids:
                     deserialization_status.place(ci)
             for id_ in unknown_parent_ids:
-                deserialization_status.create_proxy(id_)
+                if id_ is not None:
+                    deserialization_status.create_proxy(id_)
 
         # Place elements with no parent or already sorted parents
         while deserialization_status.how_many_sorted() < len(original_list):

@@ -104,6 +104,8 @@ class NodePopulator:
 
             deserialized_value = []
             for child_node_id in serialized_containment_value.children_ids:
+                if child_node_id is None:
+                    raise DeserializationException("A child id should not be null")
                 if (
                     self.serialization.unavailable_children_policy
                     == UnavailableNodePolicy.PROXY_NODES
@@ -137,9 +139,10 @@ class NodePopulator:
         """
         concept = node.get_classifier()
         for serialized_reference_value in serialized_classifier_instance.references:
-            reference = concept.get_reference_by_meta_pointer(
-                serialized_reference_value.meta_pointer
-            )
+            meta_pointer = serialized_reference_value.meta_pointer
+            if meta_pointer is None:
+                raise DeserializationException("The reference meta-pointer should not be null")
+            reference = concept.get_reference_by_meta_pointer(meta_pointer)
             if reference is None:
                 raise DeserializationException(
                     f"Unable to resolve reference {serialized_reference_value.meta_pointer}. Concept {concept}. SerializedNode {serialized_classifier_instance}"
