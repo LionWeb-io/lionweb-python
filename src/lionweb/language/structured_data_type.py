@@ -34,6 +34,17 @@ class StructuredDataType(DataType, NamespaceProvider):
             self.set_key(key)
 
     def add_field(self, field: "Field") -> "StructuredDataType":
+        """Add a field to this structured data type.
+
+        Args:
+            field: The field to add.
+
+        Returns:
+            StructuredDataType: This structured data type, to allow fluent chaining.
+
+        Raises:
+            ValueError: If ``field`` is ``None``.
+        """
         if field is None:
             raise ValueError("field should not be null")
         self.add_containment_multiple_value("fields", field)
@@ -41,6 +52,7 @@ class StructuredDataType(DataType, NamespaceProvider):
         return self
 
     def get_fields(self) -> list["Field"]:
+        """Return the fields declared on this structured data type."""
         return self.get_containment_multiple_value("fields")
 
     def namespace_qualifier(self) -> str:
@@ -52,6 +64,17 @@ class StructuredDataType(DataType, NamespaceProvider):
         return LionCore.get_structured_data_type(self.get_lionweb_version())
 
     def get_field_by_name(self, field_name: str) -> Optional["Field"]:
+        """Look up a field by its name.
+
+        Args:
+            field_name: The name of the field to find.
+
+        Returns:
+            Optional[Field]: The matching field, or ``None`` if none is found.
+
+        Raises:
+            ValueError: If ``field_name`` is ``None``.
+        """
         if field_name is None:
             raise ValueError("fieldName should not be null")
         return next((f for f in self.get_fields() if f.get_name() == field_name), None)

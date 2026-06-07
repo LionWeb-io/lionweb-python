@@ -4,7 +4,21 @@ from lionweb.client import BulkImport, Client
 from lionweb.serialization import LowLevelJsonSerialization
 
 
-def load_repository_archive(client: Client, archive_path: str, upload_threshold=250_000):
+def load_repository_archive(
+    client: Client, archive_path: str, upload_threshold: int = 250_000
+) -> None:
+    """Load a repository archive (a zip of JSON serialization chunks) into a server.
+
+    The archive is read entry by entry; nodes are accumulated into a BulkImport
+    and uploaded in batches once the number of pending nodes exceeds
+    `upload_threshold`, to limit memory usage and request size.
+
+    Args:
+        client: The client used to talk to the LionWeb repository server.
+        archive_path: Path to the zip archive containing `.json` serialization chunks.
+        upload_threshold: Maximum number of pending nodes to accumulate before
+            triggering an upload.
+    """
     import time
 
     def upload(bulk_import: BulkImport) -> int:

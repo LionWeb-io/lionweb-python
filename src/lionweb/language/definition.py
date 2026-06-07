@@ -243,37 +243,35 @@ class ClassifierFactory:
                     classifier.add_extended_interface(cast(Interface, extends))
 
     def build(self, language: Language) -> "Classifier":
-        if self.type == "Concept":
-            concept = Concept(
-                lion_web_version=language.lion_web_version,
-                language=language,
-                abstract=self.abstract,
-                partition=self.partition,
-                id=self.id,
-                key=self.key,
-                name=self.name,
-            )
-            return concept
-        elif self.type == "Interface":
-            interface = Interface(
-                lion_web_version=language.lion_web_version,
-                language=language,
-                id=self.id,
-                key=self.key,
-                name=self.name,
-            )
-            return interface
-        elif self.type == "Annotation":
-            annotation = Annotation(
-                lion_web_version=language.lion_web_version,
-                language=language,
-                id=self.id,
-                key=self.key,
-                name=self.name,
-            )
-            return annotation
-        else:
-            raise ValueError(f"Invalid classifier type: {self.type}")
+        match self.type:
+            case "Concept":
+                return Concept(
+                    lion_web_version=language.lion_web_version,
+                    language=language,
+                    abstract=self.abstract,
+                    partition=self.partition,
+                    id=self.id,
+                    key=self.key,
+                    name=self.name,
+                )
+            case "Interface":
+                return Interface(
+                    lion_web_version=language.lion_web_version,
+                    language=language,
+                    id=self.id,
+                    key=self.key,
+                    name=self.name,
+                )
+            case "Annotation":
+                return Annotation(
+                    lion_web_version=language.lion_web_version,
+                    language=language,
+                    id=self.id,
+                    key=self.key,
+                    name=self.name,
+                )
+            case _:
+                raise ValueError(f"Invalid classifier type: {self.type}")
 
     def set_extends(self, extends: "Classifier | ClassifierFactory") -> "ClassifierFactory":
         self.extends = [extends]
@@ -432,7 +430,7 @@ class LanguageFactory:
             lambda parent_id, name: name if parent_id is None else f"{parent_id}_{name}"
         )
         self.key_calculator = key_calculator or (
-            lambda parent_key, name: (name if parent_key is None else f"{parent_key}_{name}")
+            lambda parent_key, name: name if parent_key is None else f"{parent_key}_{name}"
         )
         self.id = id or self.id_calculator(None, name)
         self.key = key or self.key_calculator(None, name)

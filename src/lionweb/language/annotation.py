@@ -5,6 +5,8 @@ from lionweb.language.interface import Interface
 
 
 class Annotation(Classifier["Annotation"]):
+    """A classifier whose instances attach extra information to instances of another classifier."""
+
     if TYPE_CHECKING:
         from lionweb.language.concept import Concept
         from lionweb.language.feature import Feature
@@ -63,7 +65,15 @@ class Annotation(Classifier["Annotation"]):
     def implemented(self) -> list["Interface"]:
         return cast(list[Interface], self.get_reference_multiple_value("implements"))
 
-    def add_implemented_interface(self, iface: "Interface"):
+    def add_implemented_interface(self, iface: "Interface") -> None:
+        """Add an interface to the list of interfaces implemented by this annotation.
+
+        Args:
+            iface: The interface to implement.
+
+        Raises:
+            ValueError: If ``iface`` is ``None``.
+        """
         if iface is None:
             raise ValueError("iface should not be null")
         from lionweb.model.reference_value import ReferenceValue

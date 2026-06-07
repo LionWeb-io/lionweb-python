@@ -7,6 +7,10 @@ T = TypeVar("T")
 
 
 class AbstractClassifierInstance(Generic[T], ClassifierInstance[T], ABC):
+    """Base implementation of ClassifierInstance providing common annotation,
+    containment, and reference management logic shared by concrete instances.
+    """
+
     if TYPE_CHECKING:
         from lionweb.language.annotation import Annotation
         from lionweb.language.containment import Containment
@@ -16,7 +20,7 @@ class AbstractClassifierInstance(Generic[T], ClassifierInstance[T], ABC):
         from lionweb.model.impl.dynamic_annotation_instance import DynamicAnnotationInstance
         from lionweb.model.reference_value import ReferenceValue
 
-    def __init__(self):
+    def __init__(self) -> None:
         from lionweb.model.annotation_instance import AnnotationInstance
 
         self.annotations: list[AnnotationInstance] = []

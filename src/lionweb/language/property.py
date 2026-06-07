@@ -5,6 +5,8 @@ from lionweb.lionweb_version import LionWebVersion
 
 
 class Property(Feature["Property"]):
+    """A feature holding a single value of a given data type for instances of a classifier."""
+
     if TYPE_CHECKING:
         from lionweb.language.classifier import Classifier
         from lionweb.language.concept import Concept

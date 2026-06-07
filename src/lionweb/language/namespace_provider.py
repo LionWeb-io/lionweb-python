@@ -10,4 +10,9 @@ class NamespaceProvider(ABC):
 
     @abstractmethod
     def namespace_qualifier(self) -> str:
+        """Return the qualifier prefix to use to build qualified names of contained entities.
+
+        Returns:
+            str: The namespace qualifier string.
+        """
         pass

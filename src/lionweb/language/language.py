@@ -8,7 +8,19 @@ from lionweb.model.impl.m3node import M3Node
 T = TypeVar("T", bound=M3Node)
 
 
+class WrongElementTypeError(RuntimeError):
+    """Raised when a language element is found by name but has a different type than expected."""
+
+    def __init__(self, element_name: str, expected_type: type):
+        super().__init__(f"Element {element_name} is not a {expected_type.__name__}")
+        self.element_name = element_name
+        self.expected_type = expected_type
+
+
 class Language(M3Node["Language"], NamespaceProvider, IKeyed["Language"]):
+    """A LionWeb Language: a named, versioned collection of language entities
+    (concepts, interfaces, annotations, data types) and their dependencies."""
+
     if TYPE_CHECKING:
         from lionweb.language.annotation import Annotation
         from lionweb.language.classifier import Classifier
@@ -96,6 +108,14 @@ class Language(M3Node["Language"], NamespaceProvider, IKeyed["Language"]):
         return dependency
 
     def add_element(self, element: T) -> T:
+        """Add a language entity to this language and set its parent.
+
+        Args:
+            element: The language entity to add.
+
+        Returns:
+            T: The added element (for convenient chaining).
+        """
         self.add_containment_multiple_value("entities", element)
         element.set_parent(self)
         return element
@@ -193,7 +213,7 @@ class Language(M3Node["Language"], NamespaceProvider, IKeyed["Language"]):
         if isinstance(element, PrimitiveType):
             return element
         elif element:
-            raise RuntimeError(f"Element {name} is not a PrimitiveType")
+            raise WrongElementTypeError(name, PrimitiveType)
         return None
 
     def get_data_type_by_name(self, name: str) -> Optional["DataType"]:
@@ -203,7 +223,7 @@ class Language(M3Node["Language"], NamespaceProvider, IKeyed["Language"]):
         if isinstance(element, DataType):
             return element
         elif element:
-            raise RuntimeError(f"Element {name} is not a DataType")
+            raise WrongElementTypeError(name, DataType)
         return None
 
     def get_classifier(self) -> "Concept":

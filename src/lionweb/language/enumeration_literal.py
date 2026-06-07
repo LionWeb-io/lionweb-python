@@ -6,6 +6,8 @@ from lionweb.model.impl.m3node import M3Node
 
 
 class EnumerationLiteral(M3Node, NamespacedEntity, IKeyed):
+    """A single named literal value belonging to an Enumeration."""
+
     if TYPE_CHECKING:
         from lionweb.language.concept import Concept
         from lionweb.language.enumeration import Enumeration

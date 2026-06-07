@@ -16,7 +16,25 @@ from lionweb.serialization.serialization_utils import SerializationUtils
 
 
 class LowLevelJsonSerialization:
+    """Translates between raw JSON elements and :class:`SerializationChunk` instances.
+
+    This class operates purely at the level of generic JSON data structures
+    (dicts, lists, primitives) and the :class:`SerializationChunk` data model,
+    without any knowledge of the LionWeb metamodel.
+    """
+
     def deserialize_serialization_block(self, json_element: JsonElement) -> SerializationChunk:
+        """Deserialize a raw JSON element into a :class:`SerializationChunk`.
+
+        Args:
+            json_element: The JSON element to deserialize, expected to be a JSON object.
+
+        Returns:
+            The deserialized :class:`SerializationChunk`.
+
+        Raises:
+            ValueError: If ``json_element`` is not a JSON object.
+        """
         serialized_chunk = SerializationChunk()
         if isinstance(json_element, dict):
             self._check_no_extra_keys(
@@ -185,7 +203,7 @@ class LowLevelJsonSerialization:
                         raise ValueError(f"Language should be an object. Found: {element}")
                     serialized_chunk.add_language(language_key_version)
                 except Exception as e:
-                    raise RuntimeError(f"Issue while deserializing {element}") from e
+                    raise DeserializationException(f"Issue while deserializing {element}") from e
         else:
             raise ValueError(f"We expected a list, we got instead: {languages}")
 
@@ -244,7 +262,9 @@ class LowLevelJsonSerialization:
             elif "containments" in json_element:
                 containments = cast(JsonArray, json_element.get("containments", []))
             else:
-                raise RuntimeError(f"Node is missing containments entry: {json_element}")
+                raise DeserializationException(
+                    f"Node is missing containments entry: {json_element}"
+                )
 
             for containment_entry in containments:
                 containment_obj = cast(JsonObject, containment_entry)

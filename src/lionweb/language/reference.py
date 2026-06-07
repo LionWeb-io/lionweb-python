@@ -4,6 +4,8 @@ from lionweb.language.link import Link
 
 
 class Reference(Link["Reference"]):
+    """A link expressing a non-containing (cross) relationship between classifiers."""
+
     if TYPE_CHECKING:
         from lionweb.language.classifier import Classifier
         from lionweb.language.concept import Concept

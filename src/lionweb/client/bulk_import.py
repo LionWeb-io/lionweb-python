@@ -1,3 +1,5 @@
+from dataclasses import dataclass
+
 from lionweb import LionWebVersion
 from lionweb.language import Containment
 from lionweb.model import ClassifierInstance
@@ -10,6 +12,14 @@ from lionweb.serialization import (
 
 
 class BulkImport:
+    """Accumulates serialized nodes and attach points for a bulk-import request.
+
+    Nodes can be added either as already-serialized `SerializedClassifierInstance`
+    objects, or as live `ClassifierInstance` objects (which get serialized
+    immediately). Attach points describe where imported subtrees should be
+    grafted onto an existing repository.
+    """
+
     # Cache for JsonSerialization per LionWebVersion
     _json_serializations: dict[LionWebVersion, JsonSerialization] = {}
 
@@ -89,11 +99,20 @@ class BulkImport:
 
     # --- nested class ---
 
+    @dataclass
     class AttachPoint:
-        def __init__(self, container: str, containment: MetaPointer, root_id: str) -> None:
-            self.container: str = container
-            self.containment: MetaPointer = containment
-            self.root_id: str = root_id
+        """Describes where a set of imported nodes should be attached.
+
+        Attributes:
+            container: ID of the node that will contain the imported root.
+            containment: The containment feature (as a MetaPointer) under which
+                the imported root will be attached.
+            root_id: ID of the root node being attached.
+        """
+
+        container: str
+        containment: MetaPointer
+        root_id: str
 
         @classmethod
         def from_meta(

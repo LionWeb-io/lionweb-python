@@ -41,7 +41,7 @@ class Field(M3Node, NamespacedEntity, IKeyed):
     def get_name(self) -> str | None:
         return cast(str | None, self.get_property_value(property="name"))
 
-    def set_name(self, name: str | None):
+    def set_name(self, name: str | None) -> None:
         self.set_property_value(property="name", value=name)
 
     def get_container(self) -> NamespaceProvider | None:
@@ -64,7 +64,7 @@ class Field(M3Node, NamespacedEntity, IKeyed):
     def get_type(self) -> DataType | None:
         return cast(DataType | None, self.get_reference_single_value("type"))
 
-    def set_type(self, type: DataType | None):
+    def set_type(self, type: DataType | None) -> None:
         if type is None:
             self.set_reference_single_value("type", None)
         else:

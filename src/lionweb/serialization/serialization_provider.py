@@ -6,7 +6,19 @@ from lionweb.serialization.protobuf_serialization import ProtoBufSerialization
 
 def create_standard_json_serialization(
     lion_web_version: LionWebVersion = LionWebVersion.current_version(),
-):
+) -> JsonSerialization:
+    """Create a :class:`JsonSerialization` set up with the standard LionWeb languages.
+
+    Args:
+        lion_web_version: The LionWeb version to target.
+
+    Returns:
+        A :class:`JsonSerialization` instance, initialized with LionCore and
+        LionCoreBuiltins so that standard languages can be (de)serialized.
+
+    Raises:
+        ValueError: If ``lion_web_version`` is not a :class:`LionWebVersion`.
+    """
     if lion_web_version is None:
         lion_web_version = LionWebVersion.current_version
     if not isinstance(lion_web_version, LionWebVersion):
@@ -18,7 +30,19 @@ def create_standard_json_serialization(
 
 def create_standard_protobuf_serialization(
     lion_web_version: LionWebVersion = LionWebVersion.current_version(),
-):
+) -> ProtoBufSerialization:
+    """Create a :class:`ProtoBufSerialization` set up with the standard LionWeb languages.
+
+    Args:
+        lion_web_version: The LionWeb version to target.
+
+    Returns:
+        A :class:`ProtoBufSerialization` instance, initialized with LionCore and
+        LionCoreBuiltins so that standard languages can be (de)serialized.
+
+    Raises:
+        ValueError: If ``lion_web_version`` is not a :class:`LionWebVersion`.
+    """
     if lion_web_version is None:
         lion_web_version = LionWebVersion.current_version
     if not isinstance(lion_web_version, LionWebVersion):
@@ -28,7 +52,12 @@ def create_standard_protobuf_serialization(
     return serialization
 
 
-def setup_standard_initialization(serialization):
+def setup_standard_initialization(serialization) -> None:
+    """Register LionCore and LionCoreBuiltins languages and deserializers on a serialization.
+
+    Args:
+        serialization: The serialization instance (JSON or protobuf) to initialize.
+    """
     from lionweb.self.lioncore import LionCore
 
     serialization.classifier_resolver.register_language(
