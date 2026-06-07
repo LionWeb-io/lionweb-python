@@ -28,6 +28,16 @@ def _generate_color_for_text(text: str) -> str:
 
 
 def _html_for_node(node: Node, role: str = "root") -> str:
+    """Recursively render a node and its containment subtree as an HTML `<li>` fragment.
+
+    Args:
+        node: The node to render.
+        role: The name of the containment role under which `node` appears in
+            its parent (used as a label and to derive a consistent color).
+
+    Returns:
+        str: The HTML fragment representing the node and its descendants.
+    """
     role_color = _generate_color_for_text(role)
     classifier_color = _generate_color_for_text(node.get_classifier().qualified_name())
 
@@ -58,7 +68,16 @@ def _html_for_node(node: Node, role: str = "root") -> str:
     return html
 
 
-def display_node(node: Node):
+def display_node(node: Node) -> None:
+    """Render an interactive, collapsible HTML tree view of a node and display it.
+
+    Intended for use in Jupyter/IPython environments: builds an HTML/CSS/JS
+    snippet visualizing the node and its containment subtree, and displays it
+    via `IPython.display`.
+
+    Args:
+        node: The root node to display.
+    """
     html_code = """
     <style>
         /* Basic styling */

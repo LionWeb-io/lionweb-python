@@ -14,6 +14,14 @@ from lionweb.language import Concept, Language
 
 
 class DeserializerGenerator(BaseGenerator, ASTBuilder):
+    """Generates a `deserializer.py` module for a given LionWeb language.
+
+    The generated module defines, for each Concept in the language, a small
+    deserializer function that instantiates the corresponding generated Python
+    class, plus a `register_deserializers` function that registers all of them
+    on a serialization instance.
+    """
+
     def __init__(
         self,
         language_packages: tuple[LanguageMappingSpec, ...],
@@ -21,7 +29,15 @@ class DeserializerGenerator(BaseGenerator, ASTBuilder):
     ):
         super().__init__(language_packages, primitive_types)
 
-    def deserializer_generation(self, click, language: Language, output):
+    def deserializer_generation(self, click, language: Language, output: str) -> None:
+        """Generate and write `deserializer.py` for the given language.
+
+        Args:
+            click: The click module/context used to print progress messages.
+            language: The LionWeb language to generate a deserializer for.
+            output: Directory path where `deserializer.py` will be written
+                (created if it does not exist).
+        """
         module_body = []
 
         # Import statements

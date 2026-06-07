@@ -13,6 +13,13 @@ from lionweb.utils import clean_string_as_id
 
 
 class LionCore:
+    """Provides access to the LionCore M3 metamodel (the language describing languages).
+
+    Exposes, per `LionWebVersion`, a cached `Language` instance representing
+    LionCore-M3 along with convenience accessors for each of its concepts
+    (Concept, Interface, Property, Containment, Reference, etc.).
+    """
+
     _instances: dict[LionWebVersion, Language] = {}
     if TYPE_CHECKING:
         from lionweb.model.impl.m3node import M3Node
@@ -127,6 +134,23 @@ class LionCore:
     def get_instance(
         cls, lion_web_version: LionWebVersion = LionWebVersion.current_version()
     ) -> Language:
+        """Return the (cached) LionCore-M3 `Language` instance for the given version.
+
+        Builds and caches the LionCore-M3 metamodel the first time it is
+        requested for a given `LionWebVersion`: creates its concepts and
+        features, wires up inheritance/implementation relationships, assigns
+        any missing IDs/keys, and validates the resulting structure.
+
+        Args:
+            lion_web_version: The LionWeb version to build/retrieve the
+                metamodel for. Defaults to the current version.
+
+        Returns:
+            Language: The LionCore-M3 language instance for the given version.
+
+        Raises:
+            ValueError: If `lion_web_version` is not a `LionWebVersion`.
+        """
         from lionweb.language.concept import Concept
         from lionweb.language.lioncore_builtins import LionCoreBuiltins
 
@@ -389,7 +413,22 @@ class LionCore:
         return cls._instances[lion_web_version]
 
     @classmethod
-    def _check_ids(cls, node: "M3Node", version_id_suffix: str):
+    def _check_ids(cls, node: "M3Node", version_id_suffix: str) -> None:
+        """Recursively ensure that `node` and its descendants have IDs and keys.
+
+        Missing IDs are derived from the entity's name (with `version_id_suffix`
+        appended); missing keys on `IKeyed` entities and on classifier features
+        are derived similarly. Validates that every node without an ID is at
+        least a `NamespacedEntity` (otherwise an ID cannot be derived).
+
+        Args:
+            node: The node (and root of the subtree) to check/fix up.
+            version_id_suffix: Suffix appended to generated IDs to disambiguate
+                between LionWeb versions.
+
+        Raises:
+            ValueError: If a node has no ID and is not a `NamespacedEntity`.
+        """
         if node.get_id() is None:
             from lionweb.language.namespaced_entity import NamespacedEntity
 
@@ -418,14 +457,28 @@ class LionCore:
 
     @classmethod
     def _get_children_helper(cls, node: "M3Node") -> list["M3Node"]:
+        """Return the M3 children of a node, used while walking the metamodel tree.
+
+        Args:
+            node: The node whose children should be returned: a `Language`
+                yields its elements, a `Classifier` yields its features, and a
+                `Feature` has no children.
+
+        Returns:
+            list[M3Node]: The children of `node`.
+
+        Raises:
+            NotImplementedError: If `node` is of an unsupported type.
+        """
         from lionweb.language.classifier import Classifier
         from lionweb.language.feature import Feature
 
-        if isinstance(node, Language):
-            return cast(list[M3Node], node.get_elements())
-        elif isinstance(node, Classifier):
-            return cast(list[M3Node], node.get_features())
-        elif isinstance(node, Feature):
-            return []
-        else:
-            raise NotImplementedError(f"Unsupported node type: {node}")
+        match node:
+            case Language():
+                return cast(list[M3Node], node.get_elements())
+            case Classifier():
+                return cast(list[M3Node], node.get_features())
+            case Feature():
+                return []
+            case _:
+                raise NotImplementedError(f"Unsupported node type: {node}")

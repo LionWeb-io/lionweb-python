@@ -8,8 +8,11 @@ from lionweb.serialization.low_level_json_serialization import JsonObject
 
 
 class SerializationUtils:
+    """Helpers for extracting typed values from raw, low-level JSON structures
+    used in LionWeb serialization."""
+
     @staticmethod
-    def get_as_string_or_none(element) -> str | None:
+    def get_as_string_or_none(element: object) -> str | None:
         if element is None or element == "null":
             return None
         return str(element)

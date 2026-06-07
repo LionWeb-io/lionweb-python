@@ -26,6 +26,14 @@ from lionweb.language.reference import Reference
 
 
 class NodeClassesGenerator(BaseGenerator, ASTBuilder):
+    """Generates Python source files for the classes of a LionWeb language.
+
+    For each Concept, Interface and Enumeration in the language, a dedicated
+    module is written (one class per file), including generated getters/setters
+    for properties, containments and references. An `__init__.py` re-exporting
+    all generated classes is written as well.
+    """
+
     def __init__(
         self,
         language_packages: tuple[LanguageMappingSpec, ...],
@@ -185,15 +193,16 @@ class NodeClassesGenerator(BaseGenerator, ASTBuilder):
 
         if f_type == LionCoreBuiltins.get_boolean(concept.lion_web_version):
             return "bool"
-        elif f_type == LionCoreBuiltins.get_string(concept.lion_web_version):
+        if f_type == LionCoreBuiltins.get_string(concept.lion_web_version):
             return "str"
-        elif f_type == LionCoreBuiltins.get_integer(concept.lion_web_version):
+        if f_type == LionCoreBuiltins.get_integer(concept.lion_web_version):
             return "int"
-        elif f_type.language == concept.language:
-            if isinstance(f_type, Enumeration):
-                return to_type_name(f_type.name)
-            else:
-                raise ValueError("using type that we are generating")
+        if f_type.language == concept.language:
+            match f_type:
+                case Enumeration():
+                    return to_type_name(f_type.name)
+                case _:
+                    raise ValueError("using type that we are generating")
         else:
             qualified_name = self._data_type_lookup(f_type)
             if qualified_name is not None:
@@ -590,7 +599,19 @@ class NodeClassesGenerator(BaseGenerator, ASTBuilder):
             returns=None,
         )
 
-    def node_classes_generation(self, click, language: Language, output):
+    def node_classes_generation(self, click, language: Language, output: str) -> None:
+        """Generate and write one Python module per Concept/Interface/Enumeration.
+
+        Concepts are generated in topological (dependency-first) order so that
+        a concept's base classes are always defined before it. An `__init__.py`
+        re-exporting all generated classes is written last.
+
+        Args:
+            click: The click module/context used to print progress messages.
+            language: The LionWeb language to generate node classes for.
+            output: Directory path where the generated files will be written
+                (created if it does not exist).
+        """
         output_path = Path(output)
         output_path.mkdir(parents=True, exist_ok=True)
         click.echo(f"📂 Generating node classes to: {output}")
@@ -761,30 +782,37 @@ class NodeClassesGenerator(BaseGenerator, ASTBuilder):
         methods: list[stmt] = [init_func]
 
         for feature in self._relevant_features(concept):
-            if isinstance(feature, Property):
-                prop_type = self._resolve_property_type_for_node_class(feature, concept)
-                methods.append(self._generate_property_getter(feature, prop_type))
-                methods.append(self._generate_property_setter(feature, prop_type))
-            elif isinstance(feature, Containment):
-                feature_type = cast(Classifier, feature.get_type())
-                prop_type = cast(str, feature_type.get_name())
-                if feature.is_multiple():
-                    methods.append(self._generate_multiple_containment_getter(feature, prop_type))
-                    methods.append(self._generate_multiple_containment_adder(feature, prop_type))
-                else:
-                    methods.append(self._generate_containment_getter(feature, prop_type))
-                    methods.append(self._generate_containment_setter(feature, prop_type))
-            elif isinstance(feature, Reference):
-                feature_type = cast(Classifier, feature.get_type())
-                prop_type = cast(str, feature_type.get_name())
-                if feature.is_multiple():
-                    methods.append(self._generate_multiple_reference_getter(feature, prop_type))
-                    methods.append(self._generate_multiple_reference_adder(feature, prop_type))
-                else:
-                    methods.append(self._generate_reference_getter(feature, prop_type))
-                    methods.append(self._generate_reference_setter(feature, prop_type))
-            else:
-                raise ValueError(f"Unsupported feature type: {type(feature)}")
+            match feature:
+                case Property():
+                    prop_type = self._resolve_property_type_for_node_class(feature, concept)
+                    methods.append(self._generate_property_getter(feature, prop_type))
+                    methods.append(self._generate_property_setter(feature, prop_type))
+                case Containment():
+                    feature_type = cast(Classifier, feature.get_type())
+                    prop_type = cast(str, feature_type.get_name())
+                    if feature.is_multiple():
+                        methods.append(
+                            self._generate_multiple_containment_getter(feature, prop_type)
+                        )
+                        methods.append(
+                            self._generate_multiple_containment_adder(feature, prop_type)
+                        )
+                    else:
+                        methods.append(self._generate_containment_getter(feature, prop_type))
+                        methods.append(self._generate_containment_setter(feature, prop_type))
+                case Reference():
+                    feature_type = cast(Classifier, feature.get_type())
+                    prop_type = cast(str, feature_type.get_name())
+                    if feature.is_multiple():
+                        methods.append(
+                            self._generate_multiple_reference_getter(feature, prop_type)
+                        )
+                        methods.append(self._generate_multiple_reference_adder(feature, prop_type))
+                    else:
+                        methods.append(self._generate_reference_getter(feature, prop_type))
+                        methods.append(self._generate_reference_setter(feature, prop_type))
+                case _:
+                    raise ValueError(f"Unsupported feature type: {type(feature)}")
 
         # Determine base class
         extended_concept = concept.get_extended_concept()

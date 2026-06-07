@@ -13,27 +13,54 @@ from lionweb.model.structured_data_type_instance import StructuredDataTypeInstan
 
 
 class PrimitiveValuesSerialization:
-    def __init__(self):
+    """(De)serializes primitive, enumeration, and structured-data-type values.
+
+    Custom (de)serializers can be registered per data-type ID via
+    :meth:`register_serializer`/:meth:`register_deserializer`, while
+    enumerations and structured data types from registered languages are
+    handled automatically when dynamic nodes are enabled.
+    """
+
+    def __init__(self) -> None:
         self.enumerations_by_id = {}
         self.structures_data_types_by_id = {}
         self.dynamic_nodes_enabled = False
         self.primitive_deserializers: dict[str, object] = {}
         self.primitive_serializers: dict[str, object] = {}
 
-    def register_language(self, language):
+    def register_language(self, language) -> None:
+        """Register a language's enumerations and structured data types for (de)serialization.
+
+        Args:
+            language: The language whose enumerations and structured data types to register.
+        """
         for element in language.get_elements():
             if isinstance(element, Enumeration):
                 self.enumerations_by_id[element.id] = element
             elif isinstance(element, StructuredDataType):
                 self.structures_data_types_by_id[element.id] = element
 
-    def enable_dynamic_nodes(self):
+    def enable_dynamic_nodes(self) -> None:
+        """Enable automatic (de)serialization of enumerations and structured data types
+        as dynamic values (:class:`EnumerationValueImpl`/:class:`DynamicStructuredDataTypeInstance`)."""
         self.dynamic_nodes_enabled = True
 
-    def register_deserializer(self, data_type_id, deserializer):
+    def register_deserializer(self, data_type_id: str, deserializer) -> None:
+        """Register a custom deserializer for a primitive data type.
+
+        Args:
+            data_type_id: The ID of the data type the deserializer handles.
+            deserializer: A callable ``(serialized_value, is_required) -> value``.
+        """
         self.primitive_deserializers[data_type_id] = deserializer
 
-    def register_serializer(self, data_type_id, serializer):
+    def register_serializer(self, data_type_id: str, serializer) -> None:
+        """Register a custom serializer for a primitive data type.
+
+        Args:
+            data_type_id: The ID of the data type the serializer handles.
+            serializer: A callable ``(value) -> serialized_value``.
+        """
         self.primitive_serializers[data_type_id] = serializer
 
     def deserialize_sdt(self, data_type_id, json_obj):
@@ -56,7 +83,21 @@ class PrimitiveValuesSerialization:
                     )
         return sdt_instance
 
-    def deserialize(self, data_type, serialized_value, is_required=False):
+    def deserialize(self, data_type, serialized_value, is_required: bool = False) -> object:
+        """Deserialize a primitive, enumeration, or structured-data-type value.
+
+        Args:
+            data_type: The data type the value should be deserialized as.
+            serialized_value: The raw serialized value (typically a string or ``None``).
+            is_required: Whether the property is required (passed to custom deserializers).
+
+        Returns:
+            The deserialized value, or ``None`` for unset optional values.
+
+        Raises:
+            ValueError: If the value cannot be deserialized (unknown data type,
+                or invalid enumeration literal).
+        """
         data_type_id = data_type.id
         if data_type_id in self.primitive_deserializers:
             return self.primitive_deserializers[data_type_id](serialized_value, is_required)
@@ -88,7 +129,20 @@ class PrimitiveValuesSerialization:
                 json_obj[field.key] = self.serialize(field.type.id, field_value)
         return json_obj
 
-    def serialize(self, primitive_type_id, value):
+    def serialize(self, primitive_type_id, value: object) -> object:
+        """Serialize a primitive, enumeration, or structured-data-type value.
+
+        Args:
+            primitive_type_id: The ID of the data type the value belongs to.
+            value: The value to serialize.
+
+        Returns:
+            The serialized representation (typically a string or ``None``).
+
+        Raises:
+            ValueError: If the value cannot be serialized (unknown data type).
+            TypeError: If the value's runtime type doesn't match the data type's kind.
+        """
         if primitive_type_id in self.primitive_serializers:
             return self.primitive_serializers[primitive_type_id](value)
         elif self.is_enum(primitive_type_id):
@@ -114,10 +168,10 @@ class PrimitiveValuesSerialization:
         else:
             raise ValueError(f"Unable to serialize primitive values of type {primitive_type_id}")
 
-    def is_enum(self, primitive_type_id):
+    def is_enum(self, primitive_type_id: str) -> bool:
         return primitive_type_id in self.enumerations_by_id
 
-    def is_structured_data_type(self, primitive_type_id):
+    def is_structured_data_type(self, primitive_type_id: str) -> bool:
         return primitive_type_id in self.structures_data_types_by_id
 
     @staticmethod
@@ -160,17 +214,17 @@ class PrimitiveValuesSerialization:
 
         self.primitive_deserializers[
             cast(str, LionCoreBuiltins.get_boolean(lion_web_version).id)
-        ] = lambda s, r: (None if not r and s is None else s.lower() == "true")
+        ] = lambda s, r: None if not r and s is None else s.lower() == "true"
         self.primitive_deserializers[
             cast(str, LionCoreBuiltins.get_string(lion_web_version).id)
         ] = lambda s, r: s
         if lion_web_version == LionWebVersion.V2023_1:
             self.primitive_deserializers[
                 cast(str, LionCoreBuiltins.get_json(lion_web_version).id)
-            ] = lambda s, r: (None if s is None else json.loads(s))
+            ] = lambda s, r: None if s is None else json.loads(s)
         self.primitive_deserializers[
             cast(str, LionCoreBuiltins.get_integer(lion_web_version).id)
-        ] = lambda s, r: (None if s is None else int(s))
+        ] = lambda s, r: None if s is None else int(s)
 
         self.primitive_serializers[cast(str, LionCoreBuiltins.get_boolean(lion_web_version).id)] = (
             lambda v: str(v).lower()
