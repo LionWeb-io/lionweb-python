@@ -22,3 +22,30 @@ from .primitive_type import PrimitiveType as PrimitiveType
 from .property import Property as Property
 from .reference import Reference as Reference
 from .structured_data_type import StructuredDataType as StructuredDataType
+
+__all__ = [
+    "Annotation",
+    "Classifier",
+    "Concept",
+    "Containment",
+    "DataType",
+    "LanguageFactory",
+    "Multiplicity",
+    "Enumeration",
+    "EnumerationLiteral",
+    "Feature",
+    "Field",
+    "IKeyed",
+    "INamed",
+    "Interface",
+    "Language",
+    "LanguageEntity",
+    "Link",
+    "LionCoreBuiltins",
+    "NamespaceProvider",
+    "NamespacedEntity",
+    "PrimitiveType",
+    "Property",
+    "Reference",
+    "StructuredDataType",
+]
