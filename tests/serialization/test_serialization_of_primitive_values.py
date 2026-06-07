@@ -75,10 +75,9 @@ class TestSerializationOfPrimitiveValues(SerializationTest):
         json_serialization.classifier_resolver.register_language(MyNodeWithProperties.LANGUAGE)
         json_serialization.instantiator.register_custom_deserializer(
             MyNodeWithProperties.CONCEPT.id,
-            lambda concept,
-            serialized_node,
-            deserialized_nodes_by_id,
-            properties_value: MyNodeWithProperties(serialized_node.id),
+            lambda concept, serialized_node, deserialized_nodes_by_id, properties_value: (
+                MyNodeWithProperties(serialized_node.id)
+            ),
         )
         deserialized = json_serialization.deserialize_json_to_nodes(serialized)
         self.assertEqual([node], deserialized)
@@ -144,10 +143,9 @@ class TestSerializationOfPrimitiveValues(SerializationTest):
         json_serialization.classifier_resolver.register_language(MyNodeWithProperties.LANGUAGE)
         json_serialization.instantiator.register_custom_deserializer(
             MyNodeWithProperties.CONCEPT.id,
-            lambda concept,
-            serialized_node,
-            deserialized_nodes_by_id,
-            properties_value: MyNodeWithProperties(serialized_node.id),
+            lambda concept, serialized_node, deserialized_nodes_by_id, properties_value: (
+                MyNodeWithProperties(serialized_node.id)
+            ),
         )
         deserialized = json_serialization.deserialize_json_to_nodes(serialized)
         self.assertEqual([node], deserialized)

@@ -72,7 +72,7 @@ class Client:
         """Return the JsonSerialization used by this client."""
         return self._serialization
 
-    def set_repository_name(self, repository_name: str) -> None:
+    def set_repository_name(self, repository_name: str | None) -> None:
         """Change the repository this client operates against."""
         self._repository_name = repository_name
 

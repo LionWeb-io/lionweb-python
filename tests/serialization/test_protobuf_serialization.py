@@ -138,12 +138,11 @@ class ProtobufSerializationTest(SerializationTest):
         js.classifier_resolver.register_language(RefsLanguage.INSTANCE)
         js.instantiator.register_custom_deserializer(
             RefsLanguage.CONTAINER_NODE.id,
-            lambda concept,
-            serialized_node,
-            deserialized_nodes_by_id,
-            properties_values: ContainerNode(
-                properties_values.get(concept.get_containment_by_name("contained")),
-                serialized_node.id,
+            lambda concept, serialized_node, deserialized_nodes_by_id, properties_values: (
+                ContainerNode(
+                    properties_values.get(concept.get_containment_by_name("contained")),
+                    serialized_node.id,
+                )
             ),
         )
         js.instantiator.register_custom_deserializer(
