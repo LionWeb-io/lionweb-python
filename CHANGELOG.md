@@ -2,6 +2,32 @@
 
 All notable changes to this project will be documented in this file.
 
+## 0.4.6
+
+### Added
+
+- `LanguageFactory.concept` accepts `extends`, `implements`, `abstract` and `partition`;
+  `LanguageFactory.annotation` accepts `extends` and `implements`.
+- `LanguageFactory` accepts `dependencies`, added to the built language.
+- Types, extended and implemented classifiers passed to the factories can be elements of
+  other languages (for example `LionCoreBuiltins.get_node()` or a concept of a language
+  the new one depends on). Before, they were looked up by name in the language being
+  built. A factory of another `LanguageFactory` is rejected with a clear error.
+
+### Fixed
+
+- `LanguageFactory.build` creates the elements, and each classifier its features, in the
+  order in which they are declared. Before, it created all primitive types, then all
+  enumerations, then all classifiers; and in each classifier all properties, then all
+  references, then all containments.
+- `set_extends` on a concept factory was ignored.
+
+### Changed
+
+- `ClassifierFactory` keeps the declared features in a single `features` list instead of
+  `properties`, `references` and `containments`, and `ClassifierFactory.populate` takes
+  the map of the built elements.
+
 ## 0.4.5
 
 ### Fixed
