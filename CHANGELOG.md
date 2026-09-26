@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file.
 
+## 0.4.4
+
+### Fixed
+
+- `import lionweb.language` (and `lionweb.serialization`, `lionweb.self.lioncore`,
+  `lionweb.generation`) no longer fails with a circular import when it is the
+  first `lionweb` import in the process. The autoresolve prefix constants moved
+  to `lionweb.autoresolve`, so `lionweb.model` no longer imports the
+  `lionweb.utils` package. `lionweb.utils.autoresolve` has been removed.
+
 ## 0.4.3
 
 ### Changed

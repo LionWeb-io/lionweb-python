@@ -1,6 +1,10 @@
 from typing import TYPE_CHECKING, cast
 
 from lionweb.api.classifier_instance_resolver import ClassifierInstanceResolver
+from lionweb.autoresolve import (
+    LIONCORE_AUTORESOLVE_PREFIX,
+    LIONCOREBUILTINS_AUTORESOLVE_PREFIX,
+)
 from lionweb.language.lioncore_builtins import LionCoreBuiltins
 from lionweb.lionweb_version import LionWebVersion
 from lionweb.model import ClassifierInstance, Node
@@ -10,10 +14,6 @@ from lionweb.serialization.data.serialized_classifier_instance import Serialized
 from lionweb.serialization.deserialization_exception import DeserializationException
 from lionweb.serialization.deserialization_status import DeserializationStatus
 from lionweb.serialization.unavailable_node_policy import UnavailableNodePolicy
-from lionweb.utils.autoresolve import (
-    LIONCORE_AUTORESOLVE_PREFIX,
-    LIONCOREBUILTINS_AUTORESOLVE_PREFIX,
-)
 
 
 class NodePopulator:
