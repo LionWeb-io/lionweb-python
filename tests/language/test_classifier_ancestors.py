@@ -22,7 +22,9 @@ class ClassifierAncestorsTest(unittest.TestCase):
         k.add_extended_interface(myInterf)
 
         self.assertEqual(set([b, i, j]), set(a.direct_ancestors()))
-        self.assertEqual(set([b, i, j, k, myInterf]), set(a.all_ancestors()))
+        # myInterf is reachable both through b and through i -> k: it is listed once.
+        # Order: breadth-first, direct ancestors in declaration order.
+        self.assertEqual([b, i, j, myInterf, k], a.all_ancestors())
 
     def test_annotation(self):
         a = Annotation()
@@ -42,7 +44,9 @@ class ClassifierAncestorsTest(unittest.TestCase):
         k.add_extended_interface(myInterf)
 
         self.assertEqual(set([b, i, j]), set(a.direct_ancestors()))
-        self.assertEqual(set([b, i, j, k, myInterf]), set(a.all_ancestors()))
+        # myInterf is reachable both through b and through i -> k: it is listed once.
+        # Order: breadth-first, direct ancestors in declaration order.
+        self.assertEqual([b, i, j, myInterf, k], a.all_ancestors())
 
     def test_iface(self):
         i = Interface(name="i")
@@ -53,4 +57,8 @@ class ClassifierAncestorsTest(unittest.TestCase):
         i.add_extended_interface(j)
         i.add_extended_interface(k)
         k.add_extended_interface(myInterf)
-        k
+        j.add_extended_interface(myInterf)
+
+        self.assertEqual([j, k], i.direct_ancestors())
+        # myInterf is reachable both through j and through k: it is listed once.
+        self.assertEqual([j, k, myInterf], i.all_ancestors())
