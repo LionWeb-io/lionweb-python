@@ -2,6 +2,15 @@
 
 All notable changes to this project will be documented in this file.
 
+## Unreleased
+
+### Fixed
+
+- `import lionweb.language` (and `lionweb.serialization`, `lionweb.self.lioncore`,
+  `lionweb.generation`) no longer fails with a circular import when it is the
+  first `lionweb` import in the process. `lionweb.utils` now loads
+  `LanguageValidator` and `InvalidLanguageError` lazily.
+
 ## 0.4.3
 
 ### Changed
