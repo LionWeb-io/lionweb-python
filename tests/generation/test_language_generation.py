@@ -55,6 +55,7 @@ class LanguageGenerationTest(unittest.TestCase):
                     my_other_concept.abstract = False
                     my_other_concept.partition = False
                     language.add_element(my_other_concept)
+                    my_other_concept.set_extended_concept(my_concept)
                     return language
 
 

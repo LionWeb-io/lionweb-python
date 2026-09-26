@@ -299,6 +299,101 @@ class DefinitionTest(unittest.TestCase):
             print(diff.differences)
         self.assertTrue(diff.are_equivalent())
 
+    def test_elements_follow_declaration_order(self):
+        factory = LanguageFactory(name="L")
+        a = factory.concept("A")
+        factory.primitive_type("P")
+        factory.enumeration("E", ["X", "Y"])
+        factory.interface("I")
+        string = LionCoreBuiltins.get_string()
+        (
+            a.containment("c2", a)
+            .property("p2", string)
+            .reference("r2", a)
+            .containment("c1", a)
+            .property("p1", string)
+            .reference("r1", a)
+        )
+
+        language = factory.build()
+
+        self.assertEqual(["A", "P", "E", "I"], [e.name for e in language.elements])
+        concept = language.get_concept_by_name("A")
+        self.assertEqual(["p2", "p1"], [f.name for f in concept.all_properties()])
+        self.assertEqual(["r2", "r1"], [f.name for f in concept.all_references()])
+        self.assertEqual(["c2", "c1"], [f.name for f in concept.all_containments()])
+
+    def test_concept_extends_implements_abstract_partition(self):
+        factory = LanguageFactory(name="L")
+        base = factory.concept("Base", abstract=True)
+        named = factory.interface("Named")
+        factory.concept("Sub", extends=base, implements=[named], partition=True)
+
+        language = factory.build()
+
+        base_concept = language.get_concept_by_name("Base")
+        self.assertTrue(base_concept.abstract)
+        self.assertFalse(base_concept.partition)
+        sub = language.get_concept_by_name("Sub")
+        self.assertFalse(sub.abstract)
+        self.assertTrue(sub.partition)
+        self.assertIs(base_concept, sub.get_extended_concept())
+        self.assertEqual([language.get_interface_by_name("Named")], sub.get_implemented())
+
+    def test_annotation_extends_implements(self):
+        factory = LanguageFactory(name="L")
+        target = factory.concept("Target")
+        named = factory.interface("Named")
+        base = factory.annotation("Base", annotates=target)
+        factory.annotation("Sub", annotates=target, extends=base, implements=[named])
+
+        language = factory.build()
+
+        sub = language.get_annotation_by_name("Sub")
+        self.assertIs(language.get_concept_by_name("Target"), sub.annotates)
+        self.assertIs(language.get_annotation_by_name("Base"), sub.extended_annotation)
+        self.assertEqual([language.get_interface_by_name("Named")], sub.implemented)
+
+    def test_elements_of_other_languages(self):
+        other_factory = LanguageFactory(name="Other")
+        other_factory.concept("Node")
+        other_factory.interface("Named")
+        other_factory.primitive_type("Position")
+        other = other_factory.build()
+        node = other.get_concept_by_name("Node")
+        named = other.get_interface_by_name("Named")
+        position = other.get_primitive_type_by_name("Position")
+
+        factory = LanguageFactory(name="L", dependencies=[other])
+        (
+            factory.concept("C", extends=node, implements=[named])
+            .containment("child", node, Multiplicity.OPTIONAL)
+            .reference("ref", named, Multiplicity.OPTIONAL)
+            .property("position", position, Multiplicity.OPTIONAL)
+        )
+        factory.interface("I", extends=[named])
+        factory.annotation("A", annotates=node)
+
+        language = factory.build()
+
+        self.assertEqual([other], language.depends_on())
+        c = language.get_concept_by_name("C")
+        self.assertIs(node, c.get_extended_concept())
+        self.assertEqual([named], c.get_implemented())
+        self.assertIs(node, c.get_containment_by_name("child").type)
+        self.assertIs(named, c.get_reference_by_name("ref").type)
+        self.assertIs(position, c.get_property_by_name("position").type)
+        self.assertEqual([named], language.get_interface_by_name("I").extended_interfaces)
+        self.assertIs(node, language.get_annotation_by_name("A").annotates)
+
+    def test_factory_of_another_language_factory_is_rejected(self):
+        other_node = LanguageFactory(name="Other").concept("Node")
+        factory = LanguageFactory(name="L")
+        factory.concept("C").reference("ref", other_node)
+
+        with self.assertRaises(ValueError):
+            factory.build()
+
 
 if __name__ == "__main__":
     unittest.main()

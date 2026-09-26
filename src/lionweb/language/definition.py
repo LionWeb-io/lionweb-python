@@ -13,6 +13,7 @@ from .enumeration import Enumeration
 from .enumeration_literal import EnumerationLiteral
 from .interface import Interface
 from .language import Language
+from .language_entity import LanguageEntity
 from .primitive_type import PrimitiveType
 from .property import Property
 from .reference import Reference
@@ -79,14 +80,22 @@ class ClassifierFactory:
     and metadata through a fluent interface. The supported classifier types include
     Concept, Interface, and Annotation. The factory ensures proper linking between
     classifiers and their features, leveraging optional and multiple configurations for
-    flexibility.
+    flexibility. Properties, references and containments are each created in the order in
+    which they are declared.
+
+    Types, extended and implemented classifiers can be factories of the same
+    LanguageFactory or already built elements, including elements of other languages.
 
     Attributes:
         type: The type of the classifier (one of "Concept", "Interface", "Annotation").
         name: The name of the classifier.
         id: A unique identifier for the classifier.
         key: A unique key for identifying the classifier.
-        extends: A list of other ClassifierFactory or Classifier objects that this classifier extends.
+        extends: The classifiers this classifier extends: the extended interfaces of an
+            Interface, or at most one extended Concept or Annotation.
+        implements: The interfaces implemented by a Concept or an Annotation.
+        abstract: Whether a Concept is abstract.
+        partition: Whether a Concept is a partition.
     """
 
     def __init__(
@@ -95,19 +104,23 @@ class ClassifierFactory:
         name: str,
         id: str,
         key: str,
-        extends: list["ClassifierFactory | Classifier"] = [],
+        extends: list["ClassifierFactory | Classifier"] | None = None,
+        implements: list["ClassifierFactory | Interface"] | None = None,
+        abstract: bool = False,
+        partition: bool = False,
     ):
         self.type = type
         self.name = name
-        self.abstract = False
-        self.partition = False
+        self.abstract = abstract
+        self.partition = partition
         self.id = id
         self.key = key
         self.properties: list[PropertyData] = []
         self.references: list[LinkData] = []
         self.containments: list[LinkData] = []
         self.annotates: Classifier | ClassifierFactory | None = None
-        self.extends = extends
+        self.extends: list[ClassifierFactory | Classifier] = list(extends or [])
+        self.implements: list[ClassifierFactory | Interface] = list(implements or [])
 
     def property(
         self,
@@ -150,7 +163,7 @@ class ClassifierFactory:
     def containment(
         self,
         name: str,
-        type: "ClassifierFactory",
+        type: "ClassifierFactory | Classifier",
         multiplicity: Multiplicity = Multiplicity.REQUIRED,
         id: str | None = None,
         key: str | None = None,
@@ -171,30 +184,26 @@ class ClassifierFactory:
         classifier: Classifier,
         id_calculator: Callable[[str | None, str], str],
         key_calculator: Callable[[str | None, str], str],
+        built: "dict[EntityFactory, LanguageEntity]",
     ):
-        language = classifier.language
-        assert language is not None
+        """Add the features and the relations to other classifiers to `classifier`.
+
+        Args:
+            classifier: The classifier built from this factory.
+            id_calculator: Calculates the id of features without an explicit one.
+            key_calculator: Calculates the key of features without an explicit one.
+            built: The elements built so far, by the factory that defined them.
+        """
         for property_data in self.properties:
             property = Property(
                 lion_web_version=classifier.lion_web_version,
-                name=property_data.get("name"),
+                name=property_data["name"],
                 container=classifier,
                 id=property_data["id"] or id_calculator(classifier.id, property_data["name"]),
                 key=property_data["key"] or key_calculator(classifier.key, property_data["name"]),
             )
             property.set_optional(not property_data["multiplicity"].value["required"])
-            property_type = property_data["type"]
-            if isinstance(property_type, DataType):
-                type = property_type
-            else:
-                if isinstance(property_type, PrimitiveTypeFactory):
-                    type_name = property_type.name
-                elif isinstance(property_type, EnumerationTypeFactory):
-                    type_name = property_type.name
-                type = language.require_data_type_by_name(type_name)
-                if type is None:
-                    raise ValueError(f"Type {type_name} not found")
-            property.type = type
+            property.type = cast(DataType, _resolve(property_data["type"], built))
             classifier.add_feature(property)
         for data in self.references:
             reference = Reference(
@@ -206,11 +215,7 @@ class ClassifierFactory:
             )
             reference.set_optional(not data["multiplicity"].value["required"])
             reference.set_multiple(data["multiplicity"].value["many"])
-            type_name = cast(str, data["type"].name)
-            link_type = language.require_classifier_by_name(type_name)
-            if link_type is None:
-                raise ValueError(f"Type {type_name} not found")
-            reference.set_type(link_type)
+            reference.set_type(cast(Classifier, _resolve(data["type"], built)))
             classifier.add_feature(reference)
         for data in self.containments:
             containment = Containment(
@@ -222,25 +227,27 @@ class ClassifierFactory:
             )
             containment.set_optional(not data["multiplicity"].value["required"])
             containment.set_multiple(data["multiplicity"].value["many"])
-            type_name = cast(str, data["type"].name)
-            link_type = language.require_classifier_by_name(type_name)
-            if link_type is None:
-                raise ValueError(f"Type {type_name} not found")
-            containment.set_type(link_type)
+            containment.set_type(cast(Classifier, _resolve(data["type"], built)))
             classifier.add_feature(containment)
-        if isinstance(classifier, Annotation):
-            if isinstance(self.annotates, ClassifierFactory):
-                classifier.annotates = language.require_classifier_by_name(self.annotates.name)
-            elif isinstance(self.annotates, Classifier):
-                classifier.annotates = self.annotates
+        if isinstance(classifier, Concept):
+            if len(self.extends) > 1:
+                raise ValueError(f"Concept {self.name} can extend at most one concept")
+            for extended in self.extends:
+                classifier.set_extended_concept(cast(Concept, _resolve(extended, built)))
+            for implemented in self.implements:
+                classifier.add_implemented_interface(cast(Interface, _resolve(implemented, built)))
+        elif isinstance(classifier, Annotation):
+            if self.annotates is not None:
+                classifier.annotates = cast(Classifier, _resolve(self.annotates, built))
+            if len(self.extends) > 1:
+                raise ValueError(f"Annotation {self.name} can extend at most one annotation")
+            for extended in self.extends:
+                classifier.extended_annotation = cast(Annotation, _resolve(extended, built))
+            for implemented in self.implements:
+                classifier.add_implemented_interface(cast(Interface, _resolve(implemented, built)))
         elif isinstance(classifier, Interface):
-            for extends in self.extends:
-                if isinstance(extends, ClassifierFactory):
-                    classifier.add_extended_interface(
-                        language.require_interface_by_name(extends.name)
-                    )
-                elif isinstance(extends, Classifier):
-                    classifier.add_extended_interface(cast(Interface, extends))
+            for extended in self.extends:
+                classifier.add_extended_interface(cast(Interface, _resolve(extended, built)))
 
     def build(self, language: Language) -> "Classifier":
         match self.type:
@@ -343,6 +350,23 @@ class EnumerationTypeFactory:
         return enumeration
 
 
+EntityFactory = ClassifierFactory | PrimitiveTypeFactory | EnumerationTypeFactory
+
+
+def _resolve(
+    element: "EntityFactory | LanguageEntity", built: "dict[EntityFactory, LanguageEntity]"
+) -> LanguageEntity:
+    """Return the element built from a factory, or the element itself if already built."""
+    if isinstance(element, ClassifierFactory | PrimitiveTypeFactory | EnumerationTypeFactory):
+        if element not in built:
+            raise ValueError(
+                f"{element.name} is defined by another LanguageFactory: "
+                "use the element built by that factory instead"
+            )
+        return built[element]
+    return element
+
+
 class LanguageFactory:
     """
     Represents a factory for creating and managing languages and their components.
@@ -387,6 +411,7 @@ class LanguageFactory:
         key: str | None = None,
         id_calculator: Callable[[str | None, str], str] | None = None,
         key_calculator: Callable[[str | None, str], str] | None = None,
+        dependencies: list[Language] | None = None,
     ):
         """
         Initializes a new instance of the class with provided parameters and default values where
@@ -409,6 +434,7 @@ class LanguageFactory:
             key_calculator (Optional[Callable[[Optional[str], str], str]]): A function to calculate
                 the instance key. Defaults to a lambda function to generate key based on parent key
                 and name if not provided.
+            dependencies (Optional[list[Language]]): The languages this language depends on.
 
         Attributes:
             lw_version (LionWebVersion): The LionWeb version associated with the instance.
@@ -434,6 +460,8 @@ class LanguageFactory:
         )
         self.id = id or self.id_calculator(None, name)
         self.key = key or self.key_calculator(None, name)
+        self.dependencies: list[Language] = list(dependencies or [])
+        self.entities: list[EntityFactory] = []
         self.classifiers: list[ClassifierFactory] = []
         self.primitive_types: list[PrimitiveTypeFactory] = []
         self.enumerations: list[EnumerationTypeFactory] = []
@@ -445,8 +473,8 @@ class LanguageFactory:
         This function is responsible for creating a `Language` instance based on the
         attributes of the current object. It initializes the language with relevant
         details such as its name, id, key, version, and lion web version. Additionally,
-        it iterates over primitive types, enumerations, and classifiers to build and
-        populate their corresponding components in the language.
+        it builds the elements in the order in which they were declared, then populates
+        the classifiers.
 
         Returns:
             Language: The constructed `Language` object.
@@ -459,29 +487,43 @@ class LanguageFactory:
             lion_web_version=self.lw_version,
         )
 
-        for primitive_type in self.primitive_types:
-            primitive_type.build(language)
-        for enumeration in self.enumerations:
-            enumeration.build(language, self.id_calculator, self.key_calculator)
+        for dependency in self.dependencies:
+            language.add_dependency(dependency)
 
-        classifiers = {}
+        built: dict[EntityFactory, LanguageEntity] = {}
+        for entity in self.entities:
+            if isinstance(entity, EnumerationTypeFactory):
+                built[entity] = entity.build(language, self.id_calculator, self.key_calculator)
+            else:
+                built[entity] = entity.build(language)
         for classifier in self.classifiers:
-            classifiers[classifier] = classifier.build(language)
-        for classifier in self.classifiers:
-            classifier.populate(classifiers[classifier], self.id_calculator, self.key_calculator)
+            classifier.populate(
+                cast(Classifier, built[classifier]), self.id_calculator, self.key_calculator, built
+            )
 
         return language
 
     def concept(
-        self, name: str, id: str | None = None, key: str | None = None
+        self,
+        name: str,
+        id: str | None = None,
+        key: str | None = None,
+        extends: ClassifierFactory | Concept | None = None,
+        implements: list[ClassifierFactory | Interface] | None = None,
+        abstract: bool = False,
+        partition: bool = False,
     ) -> ClassifierFactory:
         sub = ClassifierFactory(
             "Concept",
             name,
             id=id or self.id_calculator(self.id, name),
             key=key or self.key_calculator(self.key, name),
+            extends=[extends] if extends is not None else None,
+            implements=implements,
+            abstract=abstract,
+            partition=partition,
         )
-        self.classifiers.append(sub)
+        self._add_classifier(sub)
         return sub
 
     def interface(
@@ -489,7 +531,7 @@ class LanguageFactory:
         name: str,
         id: str | None = None,
         key: str | None = None,
-        extends: list[ClassifierFactory | Classifier] = [],
+        extends: list[ClassifierFactory | Classifier] | None = None,
     ) -> ClassifierFactory:
         sub = ClassifierFactory(
             "Interface",
@@ -498,7 +540,7 @@ class LanguageFactory:
             key=key or self.key_calculator(self.key, name),
             extends=extends,
         )
-        self.classifiers.append(sub)
+        self._add_classifier(sub)
         return sub
 
     def annotation(
@@ -507,15 +549,19 @@ class LanguageFactory:
         annotates: ClassifierFactory | Classifier,
         id: str | None = None,
         key: str | None = None,
+        extends: ClassifierFactory | Annotation | None = None,
+        implements: list[ClassifierFactory | Interface] | None = None,
     ) -> ClassifierFactory:
         sub = ClassifierFactory(
             "Annotation",
             name,
             id=id or self.id_calculator(self.id, name),
             key=key or self.key_calculator(self.key, name),
+            extends=[extends] if extends is not None else None,
+            implements=implements,
         )
         sub.set_annotates(annotates)
-        self.classifiers.append(sub)
+        self._add_classifier(sub)
         return sub
 
     def primitive_type(
@@ -527,6 +573,7 @@ class LanguageFactory:
             key=key or self.key_calculator(self.key, name),
         )
         self.primitive_types.append(sub)
+        self.entities.append(sub)
         return sub
 
     def enumeration(
@@ -543,4 +590,9 @@ class LanguageFactory:
             literals=literals,
         )
         self.enumerations.append(sub)
+        self.entities.append(sub)
         return sub
+
+    def _add_classifier(self, classifier: ClassifierFactory) -> None:
+        self.classifiers.append(classifier)
+        self.entities.append(classifier)
