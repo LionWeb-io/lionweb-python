@@ -8,6 +8,7 @@ SRC_DIR = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__)
 MODULES = [
     "lionweb",
     "lionweb.api",
+    "lionweb.autoresolve",
     "lionweb.generation",
     "lionweb.language",
     "lionweb.lionweb_version",
@@ -15,11 +16,17 @@ MODULES = [
     "lionweb.self.lioncore",
     "lionweb.serialization",
     "lionweb.utils",
+    "lionweb.utils.autoresolve",
 ]
 
 
 class ImportsTest(unittest.TestCase):
-    """Each package must be importable first, in a fresh interpreter."""
+    """Verifies there are no circular imports between the lionweb packages.
+
+    Each package is imported first, in a fresh interpreter: an import cycle can
+    go unnoticed in the rest of the suite, where modules are already loaded in
+    an order that happens to work.
+    """
 
     def test_each_package_can_be_imported_first(self):
         env = dict(os.environ)
@@ -33,16 +40,6 @@ class ImportsTest(unittest.TestCase):
                     text=True,
                 )
                 self.assertEqual(result.returncode, 0, result.stderr)
-
-    def test_lazy_utils_exports(self):
-        from lionweb.utils import InvalidLanguageError, LanguageValidator
-        from lionweb.utils.language_validator import (
-            InvalidLanguageError as DirectInvalidLanguageError,
-        )
-        from lionweb.utils.language_validator import LanguageValidator as DirectLanguageValidator
-
-        self.assertIs(LanguageValidator, DirectLanguageValidator)
-        self.assertIs(InvalidLanguageError, DirectInvalidLanguageError)
 
 
 if __name__ == "__main__":

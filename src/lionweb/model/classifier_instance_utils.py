@@ -1,6 +1,6 @@
 from typing import TYPE_CHECKING, Optional
 
-from lionweb.utils.autoresolve import (
+from lionweb.autoresolve import (
     LIONCORE_AUTORESOLVE_PREFIX,
     LIONCOREBUILTINS_AUTORESOLVE_PREFIX,
 )
