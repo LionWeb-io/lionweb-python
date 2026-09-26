@@ -16,7 +16,6 @@ MODULES = [
     "lionweb.self.lioncore",
     "lionweb.serialization",
     "lionweb.utils",
-    "lionweb.utils.autoresolve",
 ]
 
 
