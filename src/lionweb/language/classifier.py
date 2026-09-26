@@ -1,4 +1,5 @@
 from abc import abstractmethod
+from collections import deque
 from typing import Optional, TypeVar
 
 from lionweb.language.language_entity import LanguageEntity
@@ -50,19 +51,24 @@ class Classifier(LanguageEntity[T], NamespaceProvider):
         """Return the classifiers this classifier directly extends or implements."""
         pass
 
-    def all_ancestors(self) -> set["Classifier"]:
+    def all_ancestors(self) -> list["Classifier"]:
         """Compute the transitive closure of all ancestor classifiers.
 
+        The order is deterministic: breadth-first, following ``direct_ancestors``
+        in declaration order, with each ancestor listed once.
+
         Returns:
-            set[Classifier]: All ancestors reachable through ``direct_ancestors``.
+            list[Classifier]: All ancestors reachable through ``direct_ancestors``.
         """
-        result = set()
-        ancestors = set(self.direct_ancestors())
-        while ancestors:
-            ancestor = ancestors.pop()
-            if ancestor not in result:
-                result.add(ancestor)
-                ancestors.update(ancestor.direct_ancestors())
+        result: list[Classifier] = []
+        seen: set[Classifier] = set()
+        to_visit = deque(self.direct_ancestors())
+        while to_visit:
+            ancestor = to_visit.popleft()
+            if ancestor not in seen:
+                seen.add(ancestor)
+                result.append(ancestor)
+                to_visit.extend(ancestor.direct_ancestors())
         return result
 
     def all_features(self) -> list[Feature]:
