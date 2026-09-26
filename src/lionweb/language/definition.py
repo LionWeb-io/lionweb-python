@@ -14,7 +14,6 @@ from .enumeration_literal import EnumerationLiteral
 from .interface import Interface
 from .language import Language
 from .language_entity import LanguageEntity
-from .link import Link
 from .primitive_type import PrimitiveType
 from .property import Property
 from .reference import Reference
@@ -72,10 +71,6 @@ class LiteralData(TypedDict):
     key: str | None
 
 
-# The class of each feature declared in a ClassifierFactory
-FeatureClass = type[Property] | type[Reference] | type[Containment]
-
-
 class ClassifierFactory:
     """
     A factory class for creating and managing different types of classifiers.
@@ -85,7 +80,8 @@ class ClassifierFactory:
     and metadata through a fluent interface. The supported classifier types include
     Concept, Interface, and Annotation. The factory ensures proper linking between
     classifiers and their features, leveraging optional and multiple configurations for
-    flexibility. Features are created in the order in which they are declared.
+    flexibility. Properties, references and containments are each created in the order in
+    which they are declared.
 
     Types, extended and implemented classifiers can be factories of the same
     LanguageFactory or already built elements, including elements of other languages.
@@ -119,7 +115,9 @@ class ClassifierFactory:
         self.partition = partition
         self.id = id
         self.key = key
-        self.features: list[tuple[FeatureClass, PropertyData | LinkData]] = []
+        self.properties: list[PropertyData] = []
+        self.references: list[LinkData] = []
+        self.containments: list[LinkData] = []
         self.annotates: Classifier | ClassifierFactory | None = None
         self.extends: list[ClassifierFactory | Classifier] = list(extends or [])
         self.implements: list[ClassifierFactory | Interface] = list(implements or [])
@@ -132,17 +130,14 @@ class ClassifierFactory:
         id: str | None = None,
         key: str | None = None,
     ) -> "ClassifierFactory":
-        self.features.append(
-            (
-                Property,
-                {
-                    "name": name,
-                    "type": type,
-                    "multiplicity": multiplicity,
-                    "id": id,
-                    "key": key,
-                },
-            )
+        self.properties.append(
+            {
+                "name": name,
+                "type": type,
+                "multiplicity": multiplicity,
+                "id": id,
+                "key": key,
+            }
         )
         return self
 
@@ -154,17 +149,14 @@ class ClassifierFactory:
         id: str | None = None,
         key: str | None = None,
     ) -> "ClassifierFactory":
-        self.features.append(
-            (
-                Reference,
-                {
-                    "name": name,
-                    "type": type,
-                    "multiplicity": multiplicity,
-                    "id": id,
-                    "key": key,
-                },
-            )
+        self.references.append(
+            {
+                "name": name,
+                "type": type,
+                "multiplicity": multiplicity,
+                "id": id,
+                "key": key,
+            }
         )
         return self
 
@@ -176,17 +168,14 @@ class ClassifierFactory:
         id: str | None = None,
         key: str | None = None,
     ) -> "ClassifierFactory":
-        self.features.append(
-            (
-                Containment,
-                {
-                    "name": name,
-                    "type": type,
-                    "multiplicity": multiplicity,
-                    "id": id,
-                    "key": key,
-                },
-            )
+        self.containments.append(
+            {
+                "name": name,
+                "type": type,
+                "multiplicity": multiplicity,
+                "id": id,
+                "key": key,
+            }
         )
         return self
 
@@ -205,22 +194,41 @@ class ClassifierFactory:
             key_calculator: Calculates the key of features without an explicit one.
             built: The elements built so far, by the factory that defined them.
         """
-        for feature_class, data in self.features:
-            feature = feature_class(
+        for property_data in self.properties:
+            property = Property(
+                lion_web_version=classifier.lion_web_version,
+                name=property_data["name"],
+                container=classifier,
+                id=property_data["id"] or id_calculator(classifier.id, property_data["name"]),
+                key=property_data["key"] or key_calculator(classifier.key, property_data["name"]),
+            )
+            property.set_optional(not property_data["multiplicity"].value["required"])
+            property.type = cast(DataType, _resolve(property_data["type"], built))
+            classifier.add_feature(property)
+        for data in self.references:
+            reference = Reference(
                 lion_web_version=classifier.lion_web_version,
                 name=data["name"],
                 container=classifier,
                 id=data["id"] or id_calculator(classifier.id, data["name"]),
                 key=data["key"] or key_calculator(classifier.key, data["name"]),
             )
-            feature.set_optional(not data["multiplicity"].value["required"])
-            feature_type = _resolve(data["type"], built)
-            if isinstance(feature, Link):
-                feature.set_multiple(data["multiplicity"].value["many"])
-                feature.set_type(cast(Classifier, feature_type))
-            else:
-                feature.type = cast(DataType, feature_type)
-            classifier.add_feature(feature)
+            reference.set_optional(not data["multiplicity"].value["required"])
+            reference.set_multiple(data["multiplicity"].value["many"])
+            reference.set_type(cast(Classifier, _resolve(data["type"], built)))
+            classifier.add_feature(reference)
+        for data in self.containments:
+            containment = Containment(
+                lion_web_version=classifier.lion_web_version,
+                name=data["name"],
+                container=classifier,
+                id=data["id"] or id_calculator(classifier.id, data["name"]),
+                key=data["key"] or key_calculator(classifier.key, data["name"]),
+            )
+            containment.set_optional(not data["multiplicity"].value["required"])
+            containment.set_multiple(data["multiplicity"].value["many"])
+            containment.set_type(cast(Classifier, _resolve(data["type"], built)))
+            classifier.add_feature(containment)
         if isinstance(classifier, Concept):
             if len(self.extends) > 1:
                 raise ValueError(f"Concept {self.name} can extend at most one concept")

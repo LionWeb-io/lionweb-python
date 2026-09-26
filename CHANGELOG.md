@@ -16,17 +16,13 @@ All notable changes to this project will be documented in this file.
 
 ### Fixed
 
-- `LanguageFactory.build` creates the elements, and each classifier its features, in the
-  order in which they are declared. Before, it created all primitive types, then all
-  enumerations, then all classifiers; and in each classifier all properties, then all
-  references, then all containments.
+- `LanguageFactory.build` creates the elements in the order in which they are declared.
+  Before, it created all primitive types, then all enumerations, then all classifiers.
 - `set_extends` on a concept factory was ignored.
 
 ### Changed
 
-- `ClassifierFactory` keeps the declared features in a single `features` list instead of
-  `properties`, `references` and `containments`, and `ClassifierFactory.populate` takes
-  the map of the built elements.
+- `ClassifierFactory.populate` takes the map of the built elements.
 
 ## 0.4.5
 

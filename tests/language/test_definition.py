@@ -299,21 +299,29 @@ class DefinitionTest(unittest.TestCase):
             print(diff.differences)
         self.assertTrue(diff.are_equivalent())
 
-    def test_elements_and_features_follow_declaration_order(self):
+    def test_elements_follow_declaration_order(self):
         factory = LanguageFactory(name="L")
         a = factory.concept("A")
         factory.primitive_type("P")
         factory.enumeration("E", ["X", "Y"])
         factory.interface("I")
         string = LionCoreBuiltins.get_string()
-        a.containment("c", a).property("p", string).reference("r", a).property("q", string)
+        (
+            a.containment("c2", a)
+            .property("p2", string)
+            .reference("r2", a)
+            .containment("c1", a)
+            .property("p1", string)
+            .reference("r1", a)
+        )
 
         language = factory.build()
 
         self.assertEqual(["A", "P", "E", "I"], [e.name for e in language.elements])
-        self.assertEqual(
-            ["c", "p", "r", "q"], [f.name for f in language.get_concept_by_name("A").features]
-        )
+        concept = language.get_concept_by_name("A")
+        self.assertEqual(["p2", "p1"], [f.name for f in concept.all_properties()])
+        self.assertEqual(["r2", "r1"], [f.name for f in concept.all_references()])
+        self.assertEqual(["c2", "c1"], [f.name for f in concept.all_containments()])
 
     def test_concept_extends_implements_abstract_partition(self):
         factory = LanguageFactory(name="L")
