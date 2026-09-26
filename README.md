@@ -44,13 +44,19 @@ python -m build
 
 ## Release process
 
-* Update version in `pyproject.toml` and `src/lionweb/__init__.py`
-* Create tag: `git tag -a v0.1.1 -m "Version 0.1.1"`
-* Release on PyPI:
+Releases are published to PyPI from a local machine with `release.sh`.
 
-```
-pip install setuptools wheel twine
-python setup.py sdist bdist_wheel
-twine upload dist/*
-```
-* Push tag
+1. Install the release tools: `pip install bump2version build twine`, and configure
+   your PyPI credentials in `~/.pypirc`.
+2. On `main`, move the entries of the upcoming version into their section in
+   `CHANGELOG.md`, commit and push.
+3. Run `./release.sh` (or `./release.sh minor` / `./release.sh major`).
+
+The script checks that you are on a clean `main` in sync with `origin/main`, then:
+
+* bumps the version in `src/lionweb/__init__.py` (the only place it is written;
+  `pyproject.toml` reads it from there) and in `.bumpversion.cfg`, committing the
+  change and creating the `vX.Y.Z` tag
+* builds the sdist and wheel into `dist/`
+* pushes `main` and the tag
+* uploads the package to PyPI
