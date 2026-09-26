@@ -2,6 +2,22 @@
 
 All notable changes to this project will be documented in this file.
 
+## 0.4.5
+
+### Fixed
+
+- Serialization output is now deterministic: serializing the same tree gives the
+  same result in every process. Before, both the order of the nodes
+  (`serialize_tree_to_json_element`, protobuf `serialize_tree`) and the order of the
+  properties within a node depended on Python's hash randomization. Nodes are now
+  serialized in tree order.
+
+### Changed
+
+- `Classifier.all_ancestors()` returns a `list` instead of a `set`, in a
+  deterministic order: breadth-first, following the direct ancestors in declaration
+  order.
+
 ## 0.4.4
 
 ### Fixed

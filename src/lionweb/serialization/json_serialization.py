@@ -68,7 +68,7 @@ class JsonSerialization(AbstractSerialization):
         if isinstance(classifier_instance, ProxyNode):
             raise ValueError("Proxy nodes cannot be serialized")
 
-        classifier_instances = set[ClassifierInstance]()
+        classifier_instances: list[ClassifierInstance] = []
         ClassifierInstance.collect_self_and_descendants(
             classifier_instance, True, classifier_instances
         )

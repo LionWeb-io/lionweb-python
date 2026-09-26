@@ -239,7 +239,7 @@ class ProtoBufSerialization(AbstractSerialization):
     def serialize_tree(self, classifier_instance: ClassifierInstance) -> PBChunk:
         if isinstance(classifier_instance, ProxyNode):
             raise ValueError("Proxy nodes cannot be serialized")
-        classifier_instances: set[ClassifierInstance] = set()
+        classifier_instances: list[ClassifierInstance] = []
         ClassifierInstance.collect_self_and_descendants(
             classifier_instance, True, classifier_instances
         )
