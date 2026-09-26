@@ -11,9 +11,12 @@ package-dir = {"" = "src"}
 [tool.setuptools.package-data]
 "*" = ["py.typed", "*.pyi"]
 
+[tool.setuptools.dynamic]
+version = { attr = "lionweb.__version__" }
+
 [project]
 name = "lionweb"
-version = "0.4.2"
+dynamic = ["version"]
 description = "A Python package for working with LionWeb"
 readme = "README.md"
 authors = [{ name = "Federico Tomassetti", email = "federico@strumenta.com" }]
